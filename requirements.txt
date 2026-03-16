@@ -1,0 +1,4 @@
+anthropic>=0.51.0
+python-dotenv>=1.0.1
+requests>=2.32.3
+watchdog>=6.0.0

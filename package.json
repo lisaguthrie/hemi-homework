@@ -1,0 +1,20 @@
+{
+  "name": "worksheet-accessibility",
+  "version": "0.1.0",
+  "description": "Accessible homework app builder for children with learning or physical barriers",
+  "type": "module",
+  "scripts": {
+    "build": "python runners/cli.py",
+    "watch": "python runners/watcher.py",
+    "propagate": "python runners/propagate.py"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@octokit/rest": "^21.0.0",
+    "chokidar": "^4.0.0",
+    "dotenv": "^17.3.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
