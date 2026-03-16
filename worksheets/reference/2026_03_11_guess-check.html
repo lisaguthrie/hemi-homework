@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess and Check — Skating Rink</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #e0f4ff 0%, #f0e8ff 100%);
+    min-height: 100vh;
+    padding: 20px 16px 80px;
+    color: #333;
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: #1a6fa8;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .container { max-width: 700px; margin: 0 auto; }
+
+  /* Problem card */
+  .card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    border: 2.5px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .card-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: #1a6fa8;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Tappable sentences */
+  .tap-sentence {
+    display: inline;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+    line-height: 1.8;
+    font-size: 1rem;
+    font-weight: 600;
+    user-select: none;
+  }
+  .tap-sentence:hover { background: #e8f4ff; }
+
+  .clue-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff3c4;
+    border: 2px solid #e6c800;
+    border-radius: 8px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-weight: 700;
+    color: #5a3a00;
+    white-space: nowrap;
+    user-select: none;
+    font-size: 0.95rem;
+    transition: background 0.15s, transform 0.1s;
+    margin: 1px 2px;
+  }
+  .clue-pill:hover { background: #ffe88a; }
+  .clue-pill:active { transform: scale(0.95); }
+
+  /* Input area */
+  .skaters-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .skater-box {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    border: 2.5px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .skater-box.correct { border-color: #5dca7e; background: #f0fff5; }
+  .skater-box.wrong { border-color: #ff9966; background: #fff5f0; }
+
+  .skater-icon { font-size: 2rem; }
+  .skater-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: #1a6fa8;
+  }
+  .skater-transport {
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: 600;
+  }
+
+  .num-input-wrap {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .num-input {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: #1a6fa8;
+    background: #e8f4ff;
+    border: 2.5px solid #3b9ede;
+    border-radius: 12px;
+    padding: 6px 8px;
+    width: 100%;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  .num-input::-webkit-outer-spin-button,
+  .num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .num-input:focus { border-color: #1a6fa8; }
+
+  .mins-label {
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: 700;
+  }
+
+  .intermediates-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .autocalc-row {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+  }
+  .autocalc-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #555;
+    cursor: pointer;
+    background: white;
+    border: 2px solid #d0d8e8;
+    border-radius: 22px;
+    padding: 7px 16px;
+    user-select: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .autocalc-label:hover { border-color: #3b9ede; background: #f0f8ff; }
+  .autocalc-label input[type=checkbox] {
+    width: 18px; height: 18px; cursor: pointer; accent-color: #3b9ede;
+  }
+
+  .num-input:disabled {
+    background: #f0f0f0;
+    border-color: #ccc;
+    color: #888;
+    cursor: default;
+  }
+
+  /* Check buttons */
+  .checks-col { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+  .check-row {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    border: 2.5px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .check-row.passed { border-color: #5dca7e; background: #f0fff5; }
+
+  .check-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #444;
+    flex: 1;
+    min-width: 180px;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .check-label:hover { background: #e8f4ff; }
+
+  .check-btn {
+    background: #5dca7e;
+    border: none;
+    border-radius: 22px;
+    padding: 8px 20px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: white;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .check-btn:hover { background: #3aaa5a; }
+  .check-btn:active { transform: scale(0.96); }
+  .check-btn:disabled { background: #aaa; cursor: default; }
+
+  .check-feedback {
+    width: 100%;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 12px;
+    margin-top: 4px;
+  }
+  .check-feedback.show { display: flex; }
+  .check-feedback.good { background: #d0f5e0; color: #1d7a40; }
+  .check-feedback.hint { background: #ffeedd; color: #c05000; }
+
+  .fb-play-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.75;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+
+  /* Guess history table */
+  .history-card { overflow-x: auto; }
+  .guess-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .guess-table th {
+    font-family: 'Fredoka One', cursive;
+    color: #1a6fa8;
+    text-align: center;
+    padding: 6px 10px;
+    border-bottom: 2px solid #e0eeff;
+    font-size: 0.85rem;
+  }
+  .guess-table td {
+    text-align: center;
+    padding: 6px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-weight: 700;
+  }
+  .guess-table tr:last-child td { border-bottom: none; }
+  .cell-pass { color: #1d7a40; }
+  .cell-fail { color: #c05000; }
+  .cell-blank { color: #aaa; font-style: italic; }
+  .no-guesses { text-align: center; color: #aaa; font-weight: 700; padding: 12px; font-size: 0.9rem; }
+
+  /* Play button */
+  .play-btn {
+    background: #5dca7e;
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+    border: none;
+  }
+  .play-btn:hover { background: #3aaa5a; }
+  .play-btn.playing { background: #ff7eb3; animation: pulse 0.7s infinite alternate; }
+
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.12); }
+  }
+
+  /* Speaking toast */
+  .speaking-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a6fa8;
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px 24px;
+    border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, background 0.2s;
+    z-index: 100;
+    pointer-events: none;
+    cursor: pointer;
+    user-select: none;
+  }
+  .speaking-toast.visible {
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  .speaking-toast.visible:hover { background: #c0392b; }
+  .speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+
+  /* Win banner */
+  .win-banner {
+    display: none;
+    background: linear-gradient(135deg, #d0f5e0, #b8f0d0);
+    border: 3px solid #5dca7e;
+    border-radius: 18px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .win-banner.show { display: block; }
+  .win-banner h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    color: #1d7a40;
+    margin-bottom: 8px;
+  }
+  .win-banner p { font-weight: 700; color: #1d7a40; font-size: 1rem; }
+
+  .export-btn {
+    background: #1a6fa8;
+    color: white;
+    border: none;
+    border-radius: 22px;
+    padding: 11px 28px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(26,111,168,0.3);
+    transition: background 0.15s, transform 0.1s;
+  }
+  .export-btn:hover { background: #155a8a; }
+  .export-btn:active { transform: scale(0.97); }
+
+  .clear-btn {
+    background: #f0f0f0;
+    color: #888;
+    border: 2px solid #ccc;
+    border-radius: 18px;
+    padding: 5px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+
+  @media (max-width: 480px) {
+    .skaters-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 1.5rem; }
+    .num-input { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>⛸️ Guess and Check</h1>
+  <p class="subtitle">Tap any sentence to hear it · Enter your guesses · Check each clue</p>
+
+  <!-- Problem card -->
+  <div class="card">
+    <div class="card-title">
+      <button class="play-btn" id="problemPlayBtn" onclick="speakProblem()" title="Read whole problem">▶</button>
+      📋 The Problem
+    </div>
+    <div id="problemText" style="line-height:2;">
+      <span class="tap-sentence" onclick="speak(this.dataset.text)" data-text="How many minutes did Heidi, Saul, and Joy each travel to get to the skating rink on Saturday?">How many minutes did Heidi, Saul, and Joy each travel to get to the skating rink on Saturday?</span>
+      <span class="tap-sentence" onclick="speak(this.dataset.text)" data-text="Joy came by skateboard, Heidi came by bike, and Saul came on the bus.">Joy came by skateboard, Heidi came by bike, and Saul came on the bus.</span>
+      <span class="clue-pill" onclick="speak(this.dataset.text)" data-text="Clue 1: It took Heidi twice as long as Joy to get there.">🔊 Clue 1: Heidi = 2 × Joy</span>
+      <span class="clue-pill" onclick="speak(this.dataset.text)" data-text="Clue 2: It took Saul 10 minutes more than it took both the girls together.">🔊 Clue 2: Saul = Girls + 10</span>
+      <span class="clue-pill" onclick="speak(this.dataset.text)" data-text="Clue 3: All three skaters together took 64 minutes to get to the rink.">🔊 Clue 3: Total = 64 minutes</span>
+    </div>
+  </div>
+
+  <!-- Input boxes -->
+  <div class="skaters-grid">
+    <div class="skater-box" id="boxJoy">
+      <div class="skater-icon">🛹</div>
+      <div class="skater-name">Joy</div>
+      <div class="skater-transport">skateboard</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputJoy" min="1" max="64" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="mins-label">minutes</div>
+    </div>
+    <div class="skater-box" id="boxHeidi">
+      <div class="skater-icon">🚲</div>
+      <div class="skater-name">Heidi</div>
+      <div class="skater-transport">bike</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputHeidi" min="1" max="64" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="mins-label">minutes</div>
+    </div>
+    <div class="skater-box" id="boxSaul">
+      <div class="skater-icon">🚌</div>
+      <div class="skater-name">Saul</div>
+      <div class="skater-transport">bus</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputSaul" min="1" max="64" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="mins-label">minutes</div>
+    </div>
+  </div>
+
+  <!-- Auto-calc toggle -->
+  <div class="autocalc-row">
+    <label class="autocalc-label">
+      <input type="checkbox" id="autoCalc" onchange="onAutoCalcChange()">
+      Calculate intermediate steps automatically
+    </label>
+  </div>
+
+  <!-- Intermediate step fields -->
+  <div class="intermediates-grid">
+    <div class="skater-box" id="boxJoyHeidi">
+      <div class="skater-icon">➕</div>
+      <div class="skater-name" style="font-size:0.95rem;">Joy + Heidi</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputJoyHeidi" min="1" max="64" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="mins-label">minutes</div>
+    </div>
+    <div class="skater-box" id="boxTotal">
+      <div class="skater-icon">🏁</div>
+      <div class="skater-name" style="font-size:0.95rem;">Joy + Heidi + Saul</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputTotal" min="1" max="128" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="mins-label">minutes total</div>
+    </div>
+  </div>
+
+  <!-- Check buttons -->
+  <div class="checks-col">
+
+    <div class="check-row" id="checkRow1">
+      <span class="check-label" onclick="speak('Check: Heidi should take twice as long as Joy. If Joy takes 9 minutes, Heidi takes 18.')">
+        🔍 Check Heidi: <em>Heidi = 2 × Joy?</em>
+      </span>
+      <button class="check-btn" id="checkBtn1" onclick="doCheck1()">Check ✓</button>
+      <div class="check-feedback" id="checkFb1"></div>
+    </div>
+
+    <div class="check-row" id="checkRow2">
+      <span class="check-label" onclick="speak('Check: Saul should take 10 more minutes than both girls combined. Add Joy and Heidi, then add 10.')">
+        🔍 Check Saul: <em>Saul = Joy + Heidi + 10?</em>
+      </span>
+      <button class="check-btn" id="checkBtn2" onclick="doCheck2()">Check ✓</button>
+      <div class="check-feedback" id="checkFb2"></div>
+    </div>
+
+    <div class="check-row" id="checkRow3">
+      <span class="check-label" onclick="speak('Check the total: all three skaters together should equal 64 minutes.')">
+        🔍 Check Total: <em>Joy + Heidi + Saul = 64?</em>
+      </span>
+      <button class="check-btn" id="checkBtn3" onclick="doCheck3()">Check ✓</button>
+      <div class="check-feedback" id="checkFb3"></div>
+    </div>
+
+  </div>
+
+  <!-- Win banner -->
+  <div class="win-banner" id="winBanner">
+    <h2>🎉 All three clues check out!</h2>
+    <p>Joy: <span id="winJoy"></span> min · Heidi: <span id="winHeidi"></span> min · Saul: <span id="winSaul"></span> min</p>
+  </div>
+
+  <!-- Export button -->
+  <div style="text-align:center; margin-bottom: 16px;">
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print Worksheet</button>
+  </div>
+
+  <!-- Guess history -->
+  <div class="card history-card">
+    <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <span style="cursor:pointer" onclick="speak('This table shows all your guesses so far. Use it to adjust your next guess.')">📊 My Guesses So Far</span>
+      <button class="clear-btn" onclick="clearGuesses()">🗑️ Clear Guess Table</button>
+    </div>
+    <table class="guess-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>🛹 Joy</th>
+          <th>🚲 Heidi</th>
+          <th>🚌 Saul</th>
+          <th>Heidi=2×Joy</th>
+          <th>Saul=Girls+10</th>
+          <th>Total=64</th>
+        </tr>
+      </thead>
+      <tbody id="historyBody">
+        <tr><td colspan="7" class="no-guesses">No guesses yet — enter numbers above!</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- /container -->
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">🔊 <span class="toast-label">Reading aloud…</span></div>
+
+<script>
+// ── TTS ──────────────────────────────────────────────────────────────────────
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88;
+  utter.pitch = 1.05;
+  utter.onstart = showToast;
+  utter.onend = hideToast;
+  utter.onerror = hideToast;
+  window.speechSynthesis.speak(utter);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+
+function speakProblem() {
+  speak("How many minutes did Heidi, Saul, and Joy each travel to get to the skating rink on Saturday? Joy came by skateboard, Heidi came by bike, and Saul came on the bus. Clue 1: It took Heidi twice as long as Joy. Clue 2: It took Saul 10 minutes more than both girls together. Clue 3: All three together took 64 minutes.");
+}
+
+// ── Input helpers ────────────────────────────────────────────────────────────
+function getVals() {
+  return {
+    joy:      parseInt(document.getElementById('inputJoy').value)      || null,
+    heidi:    parseInt(document.getElementById('inputHeidi').value)    || null,
+    saul:     parseInt(document.getElementById('inputSaul').value)     || null,
+    joyHeidi: parseInt(document.getElementById('inputJoyHeidi').value) || null,
+    total:    parseInt(document.getElementById('inputTotal').value)    || null,
+  };
+}
+
+function onAutoCalcChange() {
+  const auto = document.getElementById('autoCalc').checked;
+  const jhInput = document.getElementById('inputJoyHeidi');
+  const totInput = document.getElementById('inputTotal');
+  jhInput.disabled  = auto;
+  totInput.disabled = auto;
+  if (auto) updateIntermediates();
+  saveState();
+}
+
+function updateIntermediates() {
+  if (!document.getElementById('autoCalc').checked) return;
+  const {joy, heidi, saul} = getVals();
+  const jhInput  = document.getElementById('inputJoyHeidi');
+  const totInput = document.getElementById('inputTotal');
+  jhInput.value  = (joy !== null && heidi !== null) ? joy + heidi : '';
+  totInput.value = (joy !== null && heidi !== null && saul !== null) ? joy + heidi + saul : '';
+}
+
+function onInputChange() {
+  updateIntermediates();
+  // clear all check feedback when values change
+  ['checkFb1','checkFb2','checkFb3'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'check-feedback';
+    el.textContent = '';
+  });
+  ['checkRow1','checkRow2','checkRow3'].forEach(id => {
+    document.getElementById(id).classList.remove('passed');
+  });
+  ['boxJoy','boxHeidi','boxSaul','boxJoyHeidi','boxTotal'].forEach(id => {
+    document.getElementById(id).classList.remove('correct','wrong');
+  });
+  document.getElementById('winBanner').classList.remove('show');
+  saveState();
+}
+
+// ── Check logic ──────────────────────────────────────────────────────────────
+let check1Pass = false, check2Pass = false, check3Pass = false;
+
+const feedbackTexts = {};
+
+function showFeedback(fbId, pass, text) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  el.className = 'check-feedback show ' + (pass ? 'good' : 'hint');
+  el.innerHTML = (pass ? '✅ ' : '💡 Hint: ') + text +
+    ` <button class="fb-play-btn" onclick="speak(feedbackTexts['${fbId}'])" title="Read aloud">🔊</button>`;
+}
+
+function doCheck1() {
+  const {joy, heidi} = getVals();
+  if (joy === null || heidi === null) {
+    showFeedback('checkFb1', false, 'Enter numbers for Joy and Heidi first.'); return;
+  }
+  const pass = heidi === 2 * joy;
+  check1Pass = pass;
+  document.getElementById('checkRow1').classList.toggle('passed', pass);
+  document.getElementById('boxJoy').classList.toggle('correct', pass);
+  document.getElementById('boxJoy').classList.toggle('wrong', !pass);
+  document.getElementById('boxHeidi').classList.toggle('correct', pass);
+  document.getElementById('boxHeidi').classList.toggle('wrong', !pass);
+
+  if (pass) {
+    showFeedback('checkFb1', true, `Yes! ${heidi} is exactly twice ${joy}. Clue 1 checks out.`);
+  } else {
+    const expected = 2 * joy;
+    if (heidi > expected) {
+      showFeedback('checkFb1', false, `Heidi is ${heidi} but 2 times ${joy} is ${expected}. Heidi is too high — try a smaller number.`);
+    } else {
+      showFeedback('checkFb1', false, `Heidi is ${heidi} but 2 times ${joy} is ${expected}. Heidi needs to be bigger — double Joy's number.`);
+    }
+  }
+  logGuess();
+}
+
+function doCheck2() {
+  const {joy, heidi, saul} = getVals();
+  if (joy === null || heidi === null || saul === null) {
+    showFeedback('checkFb2', false, 'Enter numbers for all three skaters first.'); return;
+  }
+  const expected = joy + heidi + 10;
+  const pass = saul === expected;
+  check2Pass = pass;
+  document.getElementById('checkRow2').classList.toggle('passed', pass);
+  document.getElementById('boxSaul').classList.toggle('correct', pass);
+  document.getElementById('boxSaul').classList.toggle('wrong', !pass);
+
+  if (pass) {
+    showFeedback('checkFb2', true, `Yes! ${joy} plus ${heidi} plus 10 equals ${saul}. Clue 2 checks out.`);
+  } else {
+    if (saul > expected) {
+      showFeedback('checkFb2', false, `Saul is ${saul} but Joy plus Heidi plus 10 is ${expected}. Saul is too high.`);
+    } else {
+      showFeedback('checkFb2', false, `Saul is ${saul} but Joy plus Heidi plus 10 is ${expected}. Saul needs to be bigger.`);
+    }
+  }
+  logGuess();
+}
+
+function doCheck3() {
+  const {joy, heidi, saul} = getVals();
+  if (joy === null || heidi === null || saul === null) {
+    showFeedback('checkFb3', false, 'Enter numbers for all three skaters first.'); return;
+  }
+  const total = joy + heidi + saul;
+  const pass = total === 64;
+  check3Pass = pass;
+  document.getElementById('checkRow3').classList.toggle('passed', pass);
+
+  if (pass) {
+    showFeedback('checkFb3', true, `${joy} plus ${heidi} plus ${saul} equals 64. Clue 3 checks out!`);
+    if (check1Pass && check2Pass && check3Pass) showWin(joy, heidi, saul);
+  } else {
+    if (total > 64) {
+      showFeedback('checkFb3', false, `${joy} plus ${heidi} plus ${saul} equals ${total}. That's ${total - 64} too many minutes. Try smaller numbers.`);
+    } else {
+      showFeedback('checkFb3', false, `${joy} plus ${heidi} plus ${saul} equals ${total}. That's ${64 - total} minutes short of 64. Try larger numbers.`);
+    }
+  }
+  logGuess();
+}
+
+function showWin(joy, heidi, saul) {
+  document.getElementById('winJoy').textContent = joy;
+  document.getElementById('winHeidi').textContent = heidi;
+  document.getElementById('winSaul').textContent = saul;
+  const banner = document.getElementById('winBanner');
+  banner.classList.add('show');
+  setTimeout(() => speak(`Amazing! You solved it! Joy took ${joy} minutes, Heidi took ${heidi} minutes, and Saul took ${saul} minutes. All three clues check out!`), 400);
+}
+
+// ── Guess history ─────────────────────────────────────────────────────────────
+const guesses = [];
+
+function logGuess() {
+  const {joy, heidi, saul} = getVals();
+  if (joy === null || heidi === null || saul === null) return;
+
+  // Skip if identical to most recent guess
+  if (guesses.length > 0) {
+    const last = guesses[guesses.length - 1];
+    if (last.joy === joy && last.heidi === heidi && last.saul === saul) return;
+  }
+
+  const c1 = (heidi === 2 * joy)  ? 'pass' : 'fail';
+  const c2 = (saul === joy + heidi + 10) ? 'pass' : 'fail';
+  const c3 = (joy + heidi + saul === 64) ? 'pass' : 'fail';
+
+  guesses.push({joy, heidi, saul, c1, c2, c3});
+  renderHistory();
+  saveState();
+}
+
+function clearGuesses() {
+  guesses.length = 0;
+  renderHistory();
+  saveState();
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('historyBody');
+  if (guesses.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="no-guesses">No guesses yet — enter numbers above!</td></tr>';
+    return;
+  }
+  tbody.innerHTML = guesses.map((g, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${g.joy}</td>
+      <td>${g.heidi}</td>
+      <td>${g.saul}</td>
+      <td class="cell-${g.c1}">${g.c1 === 'pass' ? '✅' : g.c1 === 'fail' ? '✗' : '—'}</td>
+      <td class="cell-${g.c2}">${g.c2 === 'pass' ? '✅' : g.c2 === 'fail' ? '✗' : '—'}</td>
+      <td class="cell-${g.c3}">${g.c3 === 'pass' ? '✅' : '✗'}</td>
+    </tr>
+  `).join('');
+}
+
+// ── Load saved state ──────────────────────────────────────────────────────────
+const STORAGE_KEY = 'worksheet_guess_check_skating_2026_03_11';
+function saveState() {
+  const {joy, heidi, saul, joyHeidi, total} = getVals();
+  const autoCalc = document.getElementById('autoCalc').checked;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({joy, heidi, saul, joyHeidi, total, autoCalc, guesses}));
+}
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (!saved) return;
+    if (saved.joy)   document.getElementById('inputJoy').value   = saved.joy;
+    if (saved.heidi) document.getElementById('inputHeidi').value = saved.heidi;
+    if (saved.saul)  document.getElementById('inputSaul').value  = saved.saul;
+    if (saved.autoCalc) {
+      document.getElementById('autoCalc').checked = true;
+      document.getElementById('inputJoyHeidi').disabled = true;
+      document.getElementById('inputTotal').disabled    = true;
+      updateIntermediates();
+    } else {
+      if (saved.joyHeidi) document.getElementById('inputJoyHeidi').value = saved.joyHeidi;
+      if (saved.total)    document.getElementById('inputTotal').value    = saved.total;
+    }
+    if (saved.guesses) { guesses.push(...saved.guesses); renderHistory(); }
+  } catch(e) {}
+}
+loadState();
+
+// Auto-save on any primary input change
+['inputJoy','inputHeidi','inputSaul','inputJoyHeidi','inputTotal'].forEach(id => {
+  document.getElementById(id).addEventListener('input', saveState);
+});
+
+// ── Export / Print ────────────────────────────────────────────────────────────
+function exportPrint() {
+  const {joy, heidi, saul} = getVals();
+
+  // Build guess table rows
+  let tableRows = '';
+  if (guesses.length === 0) {
+    tableRows = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:10px;font-style:italic;">No guesses recorded yet.</td></tr>';
+  } else {
+    guesses.forEach((g, i) => {
+      const sym = v => v === 'pass' ? '✓' : v === 'fail' ? '✗' : '—';
+      const col = v => v === 'pass' ? 'color:#1d7a40;font-weight:800' : v === 'fail' ? 'color:#c05000;font-weight:800' : 'color:#aaa';
+      tableRows += `<tr>
+        <td style="text-align:center">${i + 1}</td>
+        <td style="text-align:center">${g.joy}</td>
+        <td style="text-align:center">${g.heidi}</td>
+        <td style="text-align:center">${g.saul}</td>
+        <td style="text-align:center;${col(g.c1)}">${sym(g.c1)}</td>
+        <td style="text-align:center;${col(g.c2)}">${sym(g.c2)}</td>
+        <td style="text-align:center;${col(g.c3)}">${sym(g.c3)}</td>
+      </tr>`;
+    });
+  }
+
+  const answerLine = (joy && heidi && saul)
+    ? `<p style="margin-top:12px"><strong>My answer:</strong> Joy = ${joy} min &nbsp;|&nbsp; Heidi = ${heidi} min &nbsp;|&nbsp; Saul = ${saul} min</p>`
+    : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Guess and Check #15 — Skating Rink</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 12pt; margin: 1in; color: #000; }
+  .header-bar { display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 16px; }
+  .badge { border: 3px solid #000; border-radius: 4px; padding: 4px 10px; font-size: 1.4rem; font-weight: 900; }
+  .title { font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; flex: 1; }
+  .name-line { font-size: 1rem; }
+  .problem-num { font-size: 2rem; font-weight: 900; float: left; margin-right: 14px; line-height: 1; }
+  .problem-text { font-size: 11.5pt; line-height: 1.7; margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 16px; overflow: hidden; }
+  .clues { margin-top: 10px; }
+  .clue { display: inline-block; border: 1.5px solid #999; border-radius: 4px; padding: 2px 10px; margin: 3px 4px; font-weight: 700; font-size: 10.5pt; background: #f9f9f9; }
+  h2 { font-size: 12pt; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 11pt; }
+  th { background: #eee; border: 1px solid #999; padding: 6px 8px; text-align: center; font-weight: 700; }
+  td { border: 1px solid #bbb; padding: 6px 8px; }
+  .answer-box { margin-top: 24px; border: 2px solid #000; border-radius: 4px; padding: 12px 16px; }
+  @media print {
+    body { margin: 0.75in; }
+    button { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="header-bar">
+  <div class="badge">?✓</div>
+  <div class="title">GUESS AND CHECK</div>
+  <div class="name-line">Name <u>Tina #18</u></div>
+</div>
+
+<div class="problem-text">
+  <span class="problem-num">15</span>
+  How many minutes did Heidi, Saul, and Joy each travel to get to the skating rink on Saturday?
+  Joy came by skateboard, Heidi came by bike, and Saul came on the bus.
+  It took Heidi twice as long as Joy to get there.
+  It took Saul 10 minutes more than it took both the girls together.
+  All three skaters together took 64 minutes to get to the rink.
+  <div class="clues">
+    <span class="clue">Clue 1: Heidi = 2 × Joy</span>
+    <span class="clue">Clue 2: Saul = Joy + Heidi + 10</span>
+    <span class="clue">Clue 3: Joy + Heidi + Saul = 64</span>
+  </div>
+</div>
+
+<h2>📊 My Guesses</h2>
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Joy (🛹)</th>
+      <th>Heidi (🚲)</th>
+      <th>Saul (🚌)</th>
+      <th>Heidi = 2×Joy?</th>
+      <th>Saul = Girls+10?</th>
+      <th>Total = 64?</th>
+    </tr>
+  </thead>
+  <tbody>${tableRows}</tbody>
+</table>
+
+${answerLine ? `<div class="answer-box">${answerLine}</div>` : ''}
+
+<p style="margin-top:32px;font-size:9pt;color:#999;text-align:right">The Problem Solver 6 &nbsp;·&nbsp; T•29 &nbsp;·&nbsp; © 1987 Creative Publications</p>
+
+<p style="text-align:center;margin-top:20px"><button onclick="window.print()" style="padding:10px 28px;font-size:12pt;cursor:pointer;border:2px solid #000;border-radius:4px;background:#f0f0f0;font-weight:700">🖨️ Print</button></p>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+</script>
+</body>
+</html>

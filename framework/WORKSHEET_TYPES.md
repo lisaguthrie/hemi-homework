@@ -31,7 +31,7 @@ function buildFullSentence(q, answer) {
 
 **Answer evaluation:** `q.answers.map(a => a.toLowerCase()).includes(val.toLowerCase())`
 
-**Reference:** `worksheets/christina/2026-03-10-pronouns.html` — 14 questions, talent show theme. First implementation; treat as gold standard for this type.
+**Reference:** `worksheets/reference/2026-03-10-pronouns.html` — 14 questions, talent show theme. First implementation; treat as gold standard for this type.
 
 ---
 
@@ -84,41 +84,7 @@ Call `updateIntermediates()` at the top of `onInputChange()`. Checkbox defaults 
 
 **Export / Print button:** Required. See Export / Print section in INTERACTION_PATTERNS.md.
 
-**Reference implementation:** Skating rink problem, March 2026 (Joy/Heidi/Saul, 3 constraints, total = 64 min).
-
----
-
-## Type 4: Proofreading - Error Identification and Correction
-
-*A passage contains errors (spelling, grammar, punctuation, capitalization). Each error is presented as a fill-in-the-blank where the student selects the corrected form.*
-
-**Sentence structure:** `[before text] [ERROR PHRASE] [after text]`
-
-**Data shape:**
-```javascript
-{
-  before:  "However, ",               // text before the error
-  phrase:  "their",                   // incorrect text as it appears in the source
-  after:   " are many animals...",    // text after the error
-  answers: ["there"],                 // accepted corrections (may include alternatives)
-  hint:    "homophones - their vs. there"
-}
-
-function buildFullSentence(q, answer) {
-  return q.before + answer + q.after;
-}
-```
-
-**Answer control:** Dropdown (`<select>`). Populate with all unique correct answers from across all questions in the worksheet, sorted alphabetically, so the student must decide which correction belongs in each sentence.
-
-**Answer evaluation:** `q.answers.some(a => a.toLowerCase() === val.toLowerCase())`
-
-**Special considerations:**
-- Show the full original passage at the top as read-only context, preserving worksheet text exactly (including original errors, capitalization, and punctuation)
-- Include a proofreading marks legend box (tappable/read-aloud) when provided on the worksheet
-- Hint text should name the error type (homophones, capitalization, punctuation, spelling, etc.) instead of generic negative feedback
-
-**Reference:** `worksheets/christina/2026-03-15-arctic-animals.html` - Arctic Animals passage with proofreading corrections.
+**Reference implementation:** `worksheets/reference/2026_03_11_guess-check` - skating rink problem, Joy/Heidi/Saul, 3 constraints, total = 64 min
 
 ---
 
@@ -127,7 +93,7 @@ function buildFullSentence(q, answer) {
 When you implement a worksheet that doesn't match an existing type:
 
 1. Build it
-2. At the end of your response, include a **📋 Baseline Spec Update Suggested** block with:
+2. At the end of your response, include a **📋 Framework Update Suggested** block with:
    - The type name and one-sentence description
    - The data shape
    - The answer control used
