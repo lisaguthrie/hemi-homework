@@ -119,6 +119,38 @@ Sentence 2: [sentence with pronoun highlighted]
 - Feedback: correct → `Yes! "[pronoun]" replaces [noun].` / incorrect → hint naming the pronoun type and number
 - **Print rendering:** Pronoun in S2 is underlined+bold. Answered noun is highlighted inline in S1 using a colored span (green `#d0f5e0`/`#5dca7e` if correct, orange `#ffeedd`/`#ff9966` if incorrect); match the noun case-insensitively. Unanswered items show sentences plain with no label row. Do not include a "replaces →" label — the visual relationship between highlighted noun and underlined pronoun is self-evident.
 
+**Passage panel + one-card navigation (for proofreading worksheets):**
+
+The full-stack-of-cards layout is visually cluttered for proofreading worksheets. Use a passage panel + one active card at a time instead.
+
+**Passage panel** (always visible at top of page): Full passage text rendered as inline tappable sentence `<span>` elements. Tapping any sentence navigates to that sentence's work card.
+
+Passage sentence CSS states:
+- `.ps-active` — bold, yellow background, gold outline ring (currently active)
+- `.ps-done` — muted gray text (correctly completed)
+- `.ps-second-pass` — soft yellow background (needs revisiting)
+
+**One work card at a time:** All sentence cards are `display:none` by default. Only the active card gets the `.visible` class (`display:block`). `navigateTo(i)` hides the current card, shows card `i`, auto-reads the sentence, and scrolls into view.
+
+**Next button:** Appears inside the correct-answer feedback. Calls `goToNext()`, which finds the next unsubmitted sentence (wraps around; respects second-pass mode). Hidden when all sentences are submitted.
+
+**Navigation function:**
+```javascript
+function navigateTo(i) {
+  if (currentCard) currentCard.classList.remove('visible');
+  state.activeIndex = i;
+  saveState();
+  currentCard = document.getElementById(`card-${i}`);
+  currentCard.classList.add('visible');
+  updatePassageHighlights();
+  updateProgress();
+  setTimeout(() => speak(sentences[i].text), 200);
+  setTimeout(() => currentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+```
+
+**Collapsible marks legend:** Proofreading marks panel starts collapsed. Tap the header to expand. Reduces visual noise on load.
+
 **Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-a.html`
 
 ## Type 5: Label Pronouns Subject or Object (S/O Classification)
@@ -187,6 +219,96 @@ Sentence 2: [sentence with pronoun highlighted]
 - **Print rendering:** Both choices are always kept in parentheses — never collapse to just the answer. The selected choice is highlighted inline with a colored span (green if correct, orange if incorrect); the other choice renders as plain text. Unanswered items show the plain parenthetical with no highlight. This mirrors the original worksheet's "circle the correct word" format.
 
 **Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-c.html`
+
+---
+
+## Type 7: Proofreading / Error Correction
+
+*A paragraph or passage contains seeded errors. The student reads sentence by sentence, decides if each sentence has an error, identifies the word and error type using proofreading marks, and receives feedback. A second-pass mode re-presents any missed sentences.*
+
+**Layout:** Passage panel (always visible) + one work card at a time — see Passage Panel pattern below.
+
+**For each work card:**
+1. Two large decision buttons: ✅ Looks good / 🔍 Fix it
+   - "Looks good" on a no-error sentence → finalizes immediately (correct)
+   - "Looks good" on an error sentence → shows hint, keeps card open so student can switch to "Fix it"
+   - "Fix it" → reveals the mark panel
+2. Word chips — each word in the sentence is a tappable chip; tapping selects it as the error target. Any word can be selected at any time, including already-found ones (visual only — re-submitting a found word gives a gentle nudge: "You already found that one!")
+3. Mark type grid — 8 buttons: Capitalize, Lowercase, Delete, Add comma, Fix spelling, Add apostrophe, Add punctuation, Fix verb
+4. Confirm button — enabled only when both a word chip and a mark type are selected
+5. Wrong attempts show feedback but do NOT lock the card — student can re-tap and resubmit
+6. Card only finalizes (locks, turns green) on a fully correct answer
+
+**Multi-error sentences:** The `errors` array supports multiple errors per sentence. Finding one error shows positive feedback + "There are N more errors — keep looking!" and highlights the found word. Card finalizes only when all errors are found.
+
+**Alternative mark types:** Some errors can reasonably be marked with either of two mark types (e.g. "Add punctuation" or "Add comma" for a missing comma). Use `altErrorType` on the error object and check both in the match logic:
+```javascript
+const matchedError = s.errors.find(e =>
+  e.wordIndex === wi && (e.errorType === mark || e.altErrorType === mark)
+);
+```
+
+**Second-pass mode:** After all sentences are submitted, sentences with errors the student missed are re-presented with a yellow highlight and a spoken prompt. Cards reset fully (decisions, selections, foundErrors) to allow re-answering. Win state fires only when all error sentences are correctly identified.
+
+**Data shape:**
+```javascript
+// Error sentence (single error)
+{
+  text: "Exact sentence text as it appears in the original, errors preserved.",
+  hasError: true,
+  errors: [
+    {
+      wordIndex: 1,              // 0-based index in text.split(' ') — verify programmatically
+      errorType: "capitalize",   // mark type id (see list below)
+      altErrorType: null,        // optional second accepted mark type, or null
+      feedbackCorrect: "Yes! 'Arctic' is a proper noun and should be capitalized.",
+      correctSpelling: null      // corrected word, only for spelling errors
+    }
+  ],
+  errorNote: "Arctic is a proper noun — capitalize it",   // shown in wrong-mark-type hint
+  feedbackHint: "Is there a proper noun that needs a capital letter?"
+}
+
+// Multi-error sentence
+{
+  text: "They huddle toogether in large groups to keep warm and to protect each other form predators.",
+  hasError: true,
+  errors: [
+    { wordIndex: 2,  errorType: "spelling", altErrorType: null, feedbackCorrect: "...", correctSpelling: "together" },
+    { wordIndex: 14, errorType: "spelling", altErrorType: null, feedbackCorrect: "...", correctSpelling: "from" }
+  ],
+  errorNote: "Two spelling errors in this sentence",
+  feedbackHint: "There are two misspelled words in this sentence."
+}
+
+// No-error sentence
+{
+  text: "In the winter, the fur is white to camouflage it.",
+  hasError: false,
+  noError: true,
+  feedbackOk: "Correct — this sentence has no errors!"
+}
+```
+
+**Mark type IDs:** `capitalize` | `lowercase` | `delete` | `comma` | `spelling` | `apostrophe` | `punctuation` | `verb`
+
+**State shape (additions over base):**
+```javascript
+foundErrors: new Array(sentences.length).fill(null),
+// Per sentence: array of wordIndexes already correctly identified
+// e.g. foundErrors[2] = [8] means word at index 8 found, index 11 still needed
+
+activeIndex: 0,
+// Persists last-viewed sentence across reloads
+```
+
+**Partial-find feedback grammar:**
+```javascript
+const remaining = s.errors.length - state.foundErrors[i].length;
+partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining} more errors`} in this sentence — keep looking!`;
+```
+
+**Reference implementation:** `worksheets/christina/2026-03-16-proofreading-arctic-animals.html`
 
 ---
 

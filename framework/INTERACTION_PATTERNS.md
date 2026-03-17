@@ -194,6 +194,36 @@ function updateFeedback(i, val) {
 }
 ```
 
+### Retry-Until-Correct Pattern
+
+For worksheet types where a correct answer requires multiple selections (e.g. word chip + mark type), do NOT finalize the card on a wrong attempt. Show feedback and keep all controls live:
+
+```javascript
+if (pass) {
+  state.submitted[i] = true;
+  saveState();
+  // lock card, update progress, check phase complete
+} else {
+  showFeedback(fbId, false, hintText);
+  card.classList.add('missed');
+  const confirmBtn = document.getElementById(`confirm-${i}`);
+  if (confirmBtn) confirmBtn.disabled = false;
+  updateProgress(); // pips don't advance until submitted[i] is true
+}
+```
+
+`updateProgress()` must key off `state.submitted[i]`, not off whether a decision has been made — in-progress wrong attempts should not prematurely advance the pip count.
+
+**Already-found word guard:** When a sentence has multiple errors and the student re-taps a word they already found, give a gentle nudge rather than counting it as a new submission:
+```javascript
+if (state.foundErrors[i].includes(wi)) {
+  showFeedback(`fb-${i}`, true, "You already found that one! Look for another error in this sentence.", false);
+  return;
+}
+```
+
+Do NOT block the visual `.selected` highlight from appearing on already-found words — removing that guard caused taps to appear to do nothing, making the interface feel broken.
+
 ---
 
 ## Progress Tracking
@@ -246,15 +276,48 @@ if (saved && saved.length === questions.length) {
 
 ---
 
+## Destructive Actions
+
+`confirm()` is silently blocked in `file://` contexts and some sandboxed browsers — it returns `false` without showing any dialog. **Never use it.** Use a double-tap inline confirmation instead:
+
+```javascript
+function clearAllResponses() {
+  const btn = document.querySelector('.clear-btn');
+  if (btn.dataset.confirming === 'true') {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    location.reload();
+  } else {
+    btn.dataset.confirming = 'true';
+    btn.textContent = '⚠️ Tap again to confirm';
+    btn.style.background = '#ffeedd';
+    btn.style.color = '#c05000';
+    btn.style.borderColor = '#c05000';
+    setTimeout(() => {
+      if (btn.dataset.confirming === 'true') {
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
+    }, 3000);
+  }
+}
+```
+
+First tap relabels to "⚠️ Tap again to confirm" with a 3-second revert timeout. Second tap within that window executes the action.
+
+---
+
 ## Clear All Responses Button
 
-Every worksheet page should include a "Clear all responses" button below the progress bar. It resets all answers, clears localStorage, and restores all UI elements to their initial state. A `confirm()` dialog prevents accidental clears.
+Every worksheet page should include a "Clear all responses" button below the progress bar. It resets all answers, clears localStorage, and restores all UI elements to their initial state. **Use the double-tap confirmation pattern from the Destructive Actions section — never `confirm()`.**
 
 **Placement:** Centered `div` immediately after the progress bar, before the closing `</div>` of the main container.
 
 ```html
 <div style="text-align:center">
-  <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+  <button class="clear-btn" onclick="clearAllResponses()">🗑️ Clear all responses</button>
 </div>
 ```
 
@@ -276,39 +339,83 @@ Every worksheet page should include a "Clear all responses" button below the pro
 
 **JS pattern for Type 1 / Type 4 (flat `userAnswers` array):**
 ```javascript
-function clearAll() {
-  if (!confirm('Clear all your answers and start over?')) return;
-  userAnswers.fill('');
-  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-  questions.forEach((q, i) => {
-    const sel = document.getElementById('sel-' + i);
-    if (sel) sel.value = '';
-    const fb = document.getElementById('fb-' + i);
-    if (fb) fb.className = 'feedback';
-    const card = document.getElementById('card-' + i);
-    if (card) card.classList.remove('correct');
-  });
-  updateProgress();
+function clearAllResponses() {
+  const btn = document.querySelector('.clear-btn');
+  if (btn.dataset.confirming === 'true') {
+    userAnswers.fill('');
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    questions.forEach((q, i) => {
+      const sel = document.getElementById('sel-' + i);
+      if (sel) sel.value = '';
+      const fb = document.getElementById('fb-' + i);
+      if (fb) fb.className = 'feedback';
+      const card = document.getElementById('card-' + i);
+      if (card) card.classList.remove('correct');
+    });
+    updateProgress();
+    btn.dataset.confirming = 'false';
+    btn.textContent = '🗑️ Clear all responses';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  } else {
+    btn.dataset.confirming = 'true';
+    btn.textContent = '⚠️ Tap again to confirm';
+    btn.style.background = '#ffeedd';
+    btn.style.color = '#c05000';
+    btn.style.borderColor = '#c05000';
+    setTimeout(() => {
+      if (btn.dataset.confirming === 'true') {
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
+    }, 3000);
+  }
 }
 ```
 
 **JS pattern for Type 5 (nested `userAnswers`, click-to-identify):**
 ```javascript
-function clearAll() {
-  if (!confirm('Clear all your answers and start over?')) return;
-  questions.forEach((q, qi) => { userAnswers[qi] = q.pronouns.map(() => ''); });
-  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-  questions.forEach((q, qi) => {
-    const card = document.getElementById('card-' + qi);
-    if (!card) return;
-    card.querySelectorAll('.word-token').forEach(span => {
-      span.classList.remove('pronoun-found', 'answered');
+function clearAllResponses() {
+  const btn = document.querySelector('.clear-btn');
+  if (btn.dataset.confirming === 'true') {
+    questions.forEach((q, qi) => { userAnswers[qi] = q.pronouns.map(() => ''); });
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    questions.forEach((q, qi) => {
+      const card = document.getElementById('card-' + qi);
+      if (!card) return;
+      card.querySelectorAll('.word-token').forEach(span => {
+        span.classList.remove('pronoun-found', 'answered');
+      });
+      const area = document.getElementById('pronouns-area-' + qi);
+      if (area) area.innerHTML = '';
+      card.classList.remove('all-correct');
     });
-    const area = document.getElementById('pronouns-area-' + qi);
-    if (area) area.innerHTML = '';
-    card.classList.remove('all-correct');
-  });
-  updateProgress();
+    updateProgress();
+    btn.dataset.confirming = 'false';
+    btn.textContent = '🗑️ Clear all responses';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  } else {
+    btn.dataset.confirming = 'true';
+    btn.textContent = '⚠️ Tap again to confirm';
+    btn.style.background = '#ffeedd';
+    btn.style.color = '#c05000';
+    btn.style.borderColor = '#c05000';
+    setTimeout(() => {
+      if (btn.dataset.confirming === 'true') {
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
+    }, 3000);
+  }
 }
 ```
 
@@ -348,7 +455,7 @@ Standard section order for every worksheet:
 
 <!-- 6. Clear + Export buttons (both required on every worksheet) -->
 <div style="text-align:center">
-  <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+  <button class="clear-btn" onclick="clearAllResponses()">🗑️ Clear all responses</button>
   &nbsp;
   <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
 </div>
