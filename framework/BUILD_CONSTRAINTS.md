@@ -61,6 +61,20 @@ Where `{section}` is a lowercase letter (a, b, c) or a short descriptor (e.g. `-
 
 Correct answers live in the JavaScript data object, not hardcoded in HTML. This makes answer keys easy to correct without touching markup.
 
+### String Quoting in feedbackCorrect
+
+When a `feedbackCorrect` string needs to show a word that contains an apostrophe (e.g. `change's`), do not escape the apostrophe with a backslash inside a double-quoted JS string — the backslash will be visible to the user. Instead, wrap the word in double quotes within the string:
+
+```javascript
+// Wrong — backslash visible to user:
+feedbackCorrect: "Good catch! 'change\\'s' has a wrong apostrophe — it should be 'changes.'"
+
+// Correct — double-quotes around the word:
+feedbackCorrect: "Good catch! \"change's\" has a wrong apostrophe — it should be 'changes.'"
+```
+
+*Trigger: Backslash appeared literally in feedback text shown to user.*
+
 ---
 
 ## Build Behavior
