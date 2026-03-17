@@ -114,11 +114,11 @@ For the watcher's auto-commit to trigger a Pages deploy, set `AUTO_COMMIT=true` 
 | Variable | Required | Description |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
-| `GITHUB_TOKEN` | For propagate.js | Personal access token with repo scope |
-| `GITHUB_REPO` | For propagate.js | `owner/repo-name` |
+| `GITHUB_TOKEN` | For propagate.py | Personal access token with R/W permissions for Contents and Pull Requests |
+| `GITHUB_REPO` | For propagate.py | `owner/repo-name` |
 | `INCOMING_DIR` | No | Folder to watch (default: `./incoming`) |
 | `OUTPUT_DIR` | No | Output folder (default: `./worksheets`) |
-| `CHILD` | No | Child profile to use (default: `christina`) |
+| `CHILD` | No | Child profile to use (default: `maya`) |
 | `AUTO_COMMIT` | No | `true` to auto-commit watcher output |
 
 ---

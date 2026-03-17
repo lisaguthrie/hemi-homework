@@ -148,9 +148,11 @@ Sentence 2: [sentence with pronoun highlighted]
 **Card state:** Card border turns green only when all pronouns in that card are answered correctly (`all-correct` class).
 
 **Interaction decisions:**
-- Sentence is tappable (reads full text)
-- Pronoun chips in the sentence are decorative only (not separately tappable); the per-pronoun answer rows below the sentence carry the interaction
-- Answer rows are indented below the sentence with `padding-left: 40px` to visually connect them
+- Every word in each sentence is a tappable span (speaks the word aloud on tap).
+- Tapping a word that **is** a pronoun (per the answer key) highlights it yellow and reveals a labeled S/O answer row below the sentence.
+- Tapping a word that **is not** a pronoun flashes it red briefly — no dropdown appears.
+- Answer rows appear in a `.pronoun-answers-below` container beneath the sentence, indented to connect visually. Each row shows a yellow chip with the word, the S/O dropdown, and (after selection) the feedback badge.
+- The word span gains `.answered` (green) when the S/O selection is correct.
 
 **Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-b.html`
 

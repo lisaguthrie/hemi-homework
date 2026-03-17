@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arctic Animals — Proofreading</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(160deg, #e0f4ff 0%, #f0e8ff 100%);
+  min-height: 100vh;
+  color: #1a2a3a;
+  padding: 20px 16px 80px;
+}
+
+.container { max-width: 700px; margin: 0 auto; }
+
+h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  color: #1a6fa8;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.subtitle {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #6a8299;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.instructions {
+  background: #3b9ede;
+  color: white;
+  border-radius: 18px;
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 14px;
+  user-select: none;
+  transition: transform 0.1s;
+}
+.instructions:active { transform: scale(0.98); }
+
+/* Proofreading marks — collapsible */
+.marks-legend {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.marks-legend-title {
+  font-family: 'Fredoka One', cursive;
+  color: #1a6fa8;
+  font-size: 0.95rem;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+.marks-legend-title .toggle-arrow { font-size: 0.8rem; color: #6a8299; transition: transform 0.2s; }
+.marks-legend.open .toggle-arrow { transform: rotate(180deg); }
+.marks-body { display: none; padding: 0 16px 14px; }
+.marks-legend.open .marks-body { display: block; }
+.marks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mark-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: #f0f8ff; border: 2px solid #3b9ede;
+  border-radius: 10px; padding: 6px 10px;
+  font-size: 0.85rem; font-weight: 700; color: #1a2a3a;
+}
+.mark-symbol { font-family: 'Fredoka One', cursive; color: #1a6fa8; min-width: 22px; text-align: center; }
+
+/* Passage panel */
+.passage-card {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.passage-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.passage-title { font-family: 'Fredoka One', cursive; color: #1a6fa8; font-size: 1rem; flex: 1; }
+.play-btn {
+  background: #5dca7e; border: none; border-radius: 50%;
+  width: 40px; height: 40px; font-size: 1.1rem;
+  cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.play-btn:hover { background: #3aaa5a; }
+
+.passage-text { font-size: 1rem; font-weight: 600; line-height: 2.1; }
+
+.passage-sentence {
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 1px 3px;
+  transition: background 0.12s;
+  user-select: none;
+}
+.passage-sentence:hover { background: #e8f4ff; }
+.passage-sentence.ps-active {
+  background: #fff3c4;
+  font-weight: 800;
+  color: #3a2000;
+  box-shadow: 0 0 0 2px #e6c800;
+  border-radius: 5px;
+}
+.passage-sentence.ps-done { color: #b0bec8; }
+.passage-sentence.ps-done:hover { background: #f0f4f8; }
+.passage-sentence.ps-second-pass { background: #fffbec; box-shadow: 0 0 0 2px #e6c800; }
+
+/* Progress */
+.progress-bar {
+  background: white; border-radius: 18px;
+  padding: 10px 18px; text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; flex-wrap: wrap;
+}
+.pip { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #dde0e8; transition: background 0.3s; }
+.pip.done       { background: #5dca7e; }
+.pip.missed-pip { background: #ff9966; }
+.pip.active-pip { background: #3b9ede; }
+#progressCount  { font-weight: 700; color: #1a6fa8; font-size: 0.88rem; }
+
+/* Phase badge */
+.phase-badge {
+  background: white; border-radius: 14px; padding: 8px 14px;
+  margin-bottom: 12px; text-align: center;
+  font-weight: 800; font-size: 0.85rem; color: #1a6fa8;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.phase-badge.second-pass { background: #fff8e0; color: #b07800; border: 2px solid #e6c800; }
+
+/* Second pass intro */
+.second-pass-intro {
+  display: none; background: #fff8e0; border: 2.5px solid #e6c800;
+  border-radius: 18px; padding: 14px 18px; margin-bottom: 14px;
+  text-align: center; font-weight: 700; font-size: 0.95rem; color: #7a5800; cursor: pointer;
+}
+.second-pass-intro.show { display: block; }
+
+/* Win banner */
+.win-banner {
+  display: none; background: linear-gradient(135deg, #d0f5e0, #b8f0d0);
+  border: 3px solid #5dca7e; border-radius: 18px;
+  padding: 20px; text-align: center; margin-bottom: 14px;
+}
+.win-banner.show { display: block; }
+.win-banner h2 { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: #1d7a40; margin-bottom: 6px; }
+.win-banner p  { font-weight: 700; color: #1d7a40; font-size: 0.95rem; }
+
+/* Work card */
+.sentence-card {
+  background: white; border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  padding: 16px 18px; margin-bottom: 14px;
+  border: 2.5px solid #3b9ede;
+  display: none;
+}
+.sentence-card.visible      { display: block; }
+.sentence-card.correct      { border-color: #5dca7e; background: #f0fff5; }
+.sentence-card.missed       { border-color: #ff9966; background: #fff5f0; }
+.sentence-card.second-pass-focus { border-color: #e6c800; background: #fffbec; }
+
+.card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sentence-num { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #1a6fa8; min-width: 28px; }
+
+/* Word chips */
+.sentence-display {
+  line-height: 2.2; font-size: 1.05rem; font-weight: 600;
+  margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 2px; align-items: baseline;
+}
+.word-chip {
+  display: inline-flex; align-items: center;
+  padding: 2px 5px; border-radius: 6px; cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  border: 2px solid transparent;
+  user-select: none; font-weight: 600; white-space: nowrap; min-height: 32px;
+}
+.word-chip:hover        { background: #e8f4ff; }
+.word-chip.selected     { background: #fff3c4; border-color: #e6c800; color: #5a3a00; font-weight: 800; }
+.word-chip.error-marked { background: #ffeedd; border-color: #ff9966; color: #7a2000; text-decoration: underline wavy #ff6600; }
+
+/* Decision buttons */
+.decision-row { display: flex; gap: 10px; margin-bottom: 12px; }
+.decision-btn {
+  flex: 1; padding: 12px 10px; border-radius: 14px;
+  border: 2.5px solid transparent;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; user-select: none; min-height: 44px;
+}
+.decision-btn:active { transform: scale(0.96); }
+.btn-good { background: #e8fff2; border-color: #5dca7e; color: #1d7a40; }
+.btn-good:hover { background: #d0f5e0; }
+.btn-good.selected-btn { background: #5dca7e; color: white; }
+.btn-fix  { background: #fff3e0; border-color: #ff9966; color: #7a3a00; }
+.btn-fix:hover { background: #ffeedd; }
+.btn-fix.selected-btn { background: #ff9966; color: white; }
+
+/* Mark panel */
+.mark-panel { display: none; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.mark-panel.visible { display: flex; }
+.mark-instruction { font-size: 0.88rem; font-weight: 700; color: #6a8299; text-align: center; }
+.word-instruction  { font-size: 0.88rem; font-weight: 700; color: #6a8299; text-align: center; }
+.mark-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mark-type-btn {
+  padding: 9px 8px; border-radius: 12px; border: 2.5px solid #d0d8e8;
+  background: white; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.85rem; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  color: #1a2a3a; text-align: center; user-select: none; min-height: 44px;
+}
+.mark-type-btn:hover { border-color: #3b9ede; background: #f0f8ff; }
+.mark-type-btn:active { transform: scale(0.96); }
+.mark-type-btn.selected-mark { background: #3b9ede; border-color: #1a6fa8; color: white; }
+
+.confirm-btn {
+  background: #1a6fa8; color: white; border: none;
+  border-radius: 14px; padding: 11px 20px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; width: 100%; min-height: 44px;
+}
+.confirm-btn:hover { background: #155a8a; }
+.confirm-btn:active { transform: scale(0.97); }
+.confirm-btn:disabled { background: #aaa; cursor: default; }
+
+/* Feedback */
+.feedback {
+  display: none; align-items: center; gap: 6px;
+  font-size: 0.9rem; font-weight: 700;
+  padding: 8px 14px; border-radius: 14px; margin-top: 6px; flex-wrap: wrap;
+}
+.feedback.show    { display: flex; }
+.feedback.correct { background: #d0f5e0; color: #1d7a40; }
+.feedback.hint    { background: #ffeedd; color: #c05000; }
+.fb-text { flex: 1; }
+.fb-play-btn {
+  background: none; border: none; font-size: 1rem;
+  cursor: pointer; padding: 0 2px; opacity: 0.75;
+  transition: opacity 0.15s, transform 0.1s; flex-shrink: 0;
+}
+.fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+.next-btn {
+  background: #1a6fa8; color: white; border: none;
+  border-radius: 20px; padding: 6px 18px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; min-height: 36px; flex-shrink: 0;
+}
+.next-btn:hover { background: #155a8a; }
+.next-btn:active { transform: scale(0.96); }
+
+/* Clear button */
+.clear-btn {
+  background: #f0f0f0; color: #888; border: 2px solid #ccc;
+  border-radius: 18px; padding: 8px 18px;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.85rem;
+  cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s;
+  display: block; margin: 0 auto 20px; min-height: 44px;
+}
+.clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+
+/* Speaking toast */
+.speaking-toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a6fa8; color: white;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem;
+  padding: 10px 24px; border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, background 0.2s;
+  z-index: 100; cursor: pointer; user-select: none; pointer-events: none;
+}
+.speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.speaking-toast.visible:hover { background: #c0392b; }
+.speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.5rem; }
+  .mark-type-grid { grid-template-columns: 1fr; }
+  .marks-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🐻‍❄️ Arctic Animals</h1>
+  <p class="subtitle">Proofreading Practice</p>
+
+  <div class="instructions" onclick="speak('Listen to each sentence. Decide if there is an error or if it looks good. If there is an error, tap the word and choose what kind of fix it needs.')">
+    🔊 Listen to each sentence. Decide if there's an error or if it looks good.
+  </div>
+
+  <!-- Proofreading marks (collapsible) -->
+  <div class="marks-legend" id="marksLegend">
+    <div class="marks-legend-title" onclick="toggleMarks()">
+      <span>📋 Proofreading Marks (tap to show)</span>
+      <span class="toggle-arrow">▼</span>
+    </div>
+    <div class="marks-body">
+      <div class="marks-grid">
+        <div class="mark-pill"><span class="mark-symbol">≡</span> Capitalize</div>
+        <div class="mark-pill"><span class="mark-symbol">lc</span> Lowercase</div>
+        <div class="mark-pill"><span class="mark-symbol">✗</span> Delete</div>
+        <div class="mark-pill"><span class="mark-symbol">,</span> Add comma</div>
+        <div class="mark-pill"><span class="mark-symbol">sp</span> Fix spelling</div>
+        <div class="mark-pill"><span class="mark-symbol">'</span> Add apostrophe</div>
+        <div class="mark-pill"><span class="mark-symbol">.</span> Add punctuation</div>
+        <div class="mark-pill"><span class="mark-symbol">vb</span> Fix verb</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full passage -->
+  <div class="passage-card">
+    <div class="passage-header">
+      <span class="passage-title">📄 The Passage</span>
+      <button class="play-btn" onclick="speakPassage()" title="Read entire passage">▶</button>
+    </div>
+    <div class="passage-text" id="passageText"></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar">
+    <span id="progressPips"></span>
+    <span id="progressCount">0 / 15 reviewed</span>
+  </div>
+
+  <!-- Phase badge -->
+  <div class="phase-badge" id="phaseBadge">📖 First Pass — work through each sentence</div>
+
+  <!-- Second pass intro -->
+  <div class="second-pass-intro" id="secondPassIntro"
+       onclick="speak('Great first pass! A few sentences need another look. Tap to hear them again.')">
+    🔊 Great first pass! A few sentences need another look.
+  </div>
+
+  <!-- Win banner -->
+  <div class="win-banner" id="winBanner">
+    <h2>🎉 Amazing work!</h2>
+    <p>You found all the errors in this passage. Great proofreading!</p>
+  </div>
+
+  <!-- Work cards (one shown at a time) -->
+  <div id="sentenceList"></div>
+
+  <button class="clear-btn" onclick="clearAllResponses()">🗑️ Clear all responses</button>
+
+</div>
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+  🔊 <span class="toast-label">Reading aloud…</span>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const sentences = [
+  {
+    text: "The Arctic is the most northern part of the Earth.",
+    hasError: false, noError: true,
+    feedbackOk: "You're right — this sentence looks good!"
+  },
+  {
+    text: "The average temperature in the Winter is −40 °F (−40 °C).",
+    hasError: true,
+    errors: [{ wordIndex: 5, errorType: "lowercase", feedbackCorrect: "Yes! 'Winter' should be lowercase — season names aren't proper nouns.", correctSpelling: null }],
+    errorNote: "Season names are not capitalized",
+    feedbackHint: "Look at the season name. Should it be capitalized?"
+  },
+  {
+    text: "The ground is covered with ice and snow witch makes it dificult for animals to find food.",
+    hasError: true,
+    errors: [
+      { wordIndex: 8,  errorType: "spelling", feedbackCorrect: "Yes! 'witch' is the wrong word here — the correct word is 'which.' It's a connecting word.", correctSpelling: "which" },
+      { wordIndex: 11, errorType: "spelling", feedbackCorrect: "Right! 'dificult' is misspelled — the correct spelling is 'difficult.'", correctSpelling: "difficult" }
+    ],
+    errorNote: "Two spelling errors in this sentence",
+    feedbackHint: "There are two words with errors in this sentence. Try tapping each word you think looks wrong."
+  },
+  {
+    text: "However, their are many animals who have learned to adapt, or survive, here.",
+    hasError: true,
+    errors: [{ wordIndex: 1, errorType: "spelling", feedbackCorrect: "Yes! 'their' should be 'there' — the location word, not the ownership word.", correctSpelling: "there" }],
+    errorNote: "Spelling: 'their' should be 'there'",
+    feedbackHint: "One word is used incorrectly here — it sounds like another word."
+  },
+  {
+    text: "The arctic fox has a thick coat of fur to protect it from the cold this thick fur also covers its paws and tale.",
+    hasError: true,
+    errors: [
+      { wordIndex: 14, errorType: "punctuation", feedbackCorrect: "Right! There should be a period after 'cold' — that's where the first sentence ends.", correctSpelling: null },
+      { wordIndex: 15, errorType: "capitalize",  feedbackCorrect: "Yes! 'this' starts a new sentence here, so it should be capitalized.", correctSpelling: null },
+      { wordIndex: 23, errorType: "spelling",    feedbackCorrect: "Good catch! 'tale' (a story) should be 'tail' — the body part.", correctSpelling: "tail" }
+    ],
+    errorNote: "Missing period, missing capital, and a spelling error",
+    feedbackHint: "There are three errors in this sentence. Listen carefully — does something feel like it should be two sentences?"
+  },
+  {
+    text: "The fur even change's color in the winter and summer.",
+    hasError: true,
+    errors: [{ wordIndex: 3, errorType: "verb", feedbackCorrect: "Good catch! \"change's\" has a wrong apostrophe — it should be 'changes.'", correctSpelling: null }],
+    errorNote: "Verb form: 'change's' should be 'changes'",
+    feedbackHint: "Look at the verb in this sentence — is it formed correctly?"
+  },
+  {
+    text: "In the winter, the fur is white to camouflage it.",
+    hasError: false, noError: true,
+    feedbackOk: "Correct — this sentence has no errors!"
+  },
+  {
+    text: "In the summer, when the snow has melted, the fur changes to brown so that it blends in with the land.",
+    hasError: false, noError: true,
+    feedbackOk: "Right! This sentence is correct."
+  },
+  {
+    text: "Like the arctic fox. The arctic hare also changes color according to the season.",
+    hasError: true,
+    errors: [
+      { wordIndex: 3, errorType: "punctuation", altErrorType: "comma", feedbackCorrect: "Yes! The period after 'fox' should be a comma — the two parts belong in one sentence.", correctSpelling: null },
+      { wordIndex: 4, errorType: "lowercase",   feedbackCorrect: "Right! Since the period becomes a comma, 'The' should be lowercase 'the'.", correctSpelling: null }
+    ],
+    errorNote: "Period should be a comma; 'The' should be lowercase",
+    feedbackHint: "This should be one sentence, not two. What punctuation connects two parts of a sentence?"
+  },
+  {
+    text: "Arctic hares have thick claws and a excellent sense of smell to help them find food in the snow.",
+    hasError: true,
+    errors: [{ wordIndex: 6, errorType: "spelling", feedbackCorrect: "Yes! Before a vowel sound, use 'an' not 'a.' It should say 'an excellent.'", correctSpelling: "an" }],
+    errorNote: "Grammar: 'a excellent' should be 'an excellent'",
+    feedbackHint: "Look at the article before 'excellent' — is it the right one?"
+  },
+  {
+    text: "They huddle toogether in large groups to keep warm and to protect each other form predators.",
+    hasError: true,
+    errors: [
+      { wordIndex: 2,  errorType: "spelling", feedbackCorrect: "Good eye! 'toogether' is misspelled — it should be 'together.'", correctSpelling: "together" },
+      { wordIndex: 14, errorType: "spelling", feedbackCorrect: "Right! 'form' should be 'from' — the word meaning away from something.", correctSpelling: "from" }
+    ],
+    errorNote: "Two spelling errors in this sentence",
+    feedbackHint: "There are two misspelled words in this sentence — look carefully at each word."
+  },
+  {
+    text: "The polar bear has tow coats of fur to help it survive.",
+    hasError: true,
+    errors: [{ wordIndex: 4, errorType: "spelling", feedbackCorrect: "Right! 'tow' should be 'two' — the number.", correctSpelling: "two" }],
+    errorNote: "Spelling: 'tow' should be 'two'",
+    feedbackHint: "One word here is a number but spelled incorrectly."
+  },
+  {
+    text: "Under the fur is another layer of heavy fat called blubber.",
+    hasError: false, noError: true,
+    feedbackOk: "Correct — no errors here!"
+  },
+  {
+    text: "This keeps the polar bare warm while swiming in the cold arctic Ocean.",
+    hasError: true,
+    errors: [
+      { wordIndex: 4,  errorType: "spelling",   feedbackCorrect: "Yes! 'bare' should be 'bear' — the animal, not the adjective meaning uncovered.", correctSpelling: "bear" },
+      { wordIndex: 7,  errorType: "spelling",   feedbackCorrect: "Right! 'swiming' is misspelled — it should be 'swimming' (double m).", correctSpelling: "swimming" },
+      { wordIndex: 11, errorType: "capitalize", feedbackCorrect: "Good catch! 'Arctic Ocean' is a proper noun — 'arctic' should be capitalized.", correctSpelling: null }
+    ],
+    errorNote: "Two spelling errors and one capitalization error",
+    feedbackHint: "There are three errors in this sentence — a wrong word, a misspelling, and a proper noun that needs a capital letter."
+  },
+  {
+    text: "Its paws are large and furry, while the bottom of its feat are padded to help walk on snow and ice.",
+    hasError: true,
+    errors: [
+      { wordIndex: 11, errorType: "spelling", feedbackCorrect: "Yes! 'feat' (an achievement) should be 'feet' — the body part.", correctSpelling: "feet" },
+      { wordIndex: 12, errorType: "verb",     feedbackCorrect: "Right! 'are padded' should be 'is padded' — 'the bottom' is singular.", correctSpelling: null }
+    ],
+    errorNote: "Spelling error and subject-verb agreement error",
+    feedbackHint: "There are two errors in this sentence — a misspelled word and a verb that doesn't match its subject."
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'worksheet_proofreading_arctic_2026_03_16_v4';
+let state = {
+  decisions:     new Array(sentences.length).fill(null),
+  selectedWords: new Array(sentences.length).fill(null),
+  selectedMarks: new Array(sentences.length).fill(null),
+  submitted:     new Array(sentences.length).fill(false),
+  foundErrors:   new Array(sentences.length).fill(null),
+  activeIndex:   0,
+  phase:         'first',
+  secondPassIds: []
+};
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = { ...state, ...JSON.parse(raw) };
+  } catch(e) {}
+}
+
+function clearAllResponses() {
+  const btn = document.querySelector('.clear-btn');
+  if (btn.dataset.confirming === 'true') {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    location.reload();
+  } else {
+    btn.dataset.confirming = 'true';
+    btn.textContent = '⚠️ Tap again to confirm';
+    btn.style.cssText = 'background:#ffeedd;color:#c05000;border-color:#c05000;display:block;margin:0 auto 20px;min-height:44px;';
+    setTimeout(() => {
+      if (btn.dataset.confirming === 'true') {
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.cssText = '';
+      }
+    }, 3000);
+  }
+}
+
+// ── TTS ───────────────────────────────────────────────────────────────────────
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88; utter.pitch = 1.05;
+  utter.onstart = showToast; utter.onend = hideToast; utter.onerror = hideToast;
+  window.speechSynthesis.speak(utter);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+function speakPassage() { speak(sentences.map(s => s.text).join(' ')); }
+
+// ── Marks legend ──────────────────────────────────────────────────────────────
+function toggleMarks() {
+  document.getElementById('marksLegend').classList.toggle('open');
+}
+
+// ── Passage panel ─────────────────────────────────────────────────────────────
+function buildPassage() {
+  const container = document.getElementById('passageText');
+  container.innerHTML = '';
+  sentences.forEach((s, i) => {
+    const span = document.createElement('span');
+    span.className = 'passage-sentence';
+    span.id = `ps-${i}`;
+    span.textContent = s.text;
+    span.onclick = () => navigateTo(i);
+    container.appendChild(span);
+    if (i < sentences.length - 1) container.appendChild(document.createTextNode(' '));
+  });
+}
+
+function updatePassageHighlights() {
+  sentences.forEach((_, i) => {
+    const span = document.getElementById(`ps-${i}`);
+    if (!span) return;
+    span.className = 'passage-sentence';
+    if (i === state.activeIndex) {
+      span.classList.add('ps-active');
+    } else if (state.submitted[i]) {
+      span.classList.add('ps-done');
+    } else if (state.phase === 'second' && state.secondPassIds.includes(i) && !state.submitted[i]) {
+      span.classList.add('ps-second-pass');
+    }
+  });
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+let currentCard = null;
+
+function navigateTo(i) {
+  if (currentCard) currentCard.classList.remove('visible');
+  state.activeIndex = i;
+  saveState();
+  currentCard = document.getElementById(`card-${i}`);
+  currentCard.classList.add('visible');
+  updatePassageHighlights();
+  updateProgress();
+  setTimeout(() => speak(sentences[i].text), 200);
+  setTimeout(() => currentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+function goToNext() {
+  let next = -1;
+  if (state.phase === 'second') {
+    const found = state.secondPassIds.find(id => !state.submitted[id]);
+    next = found !== undefined ? found : -1;
+  } else {
+    for (let j = state.activeIndex + 1; j < sentences.length; j++) {
+      if (!state.submitted[j]) { next = j; break; }
+    }
+    if (next === -1) {
+      for (let j = 0; j < state.activeIndex; j++) {
+        if (!state.submitted[j]) { next = j; break; }
+      }
+    }
+  }
+  if (next !== -1) navigateTo(next);
+}
+
+// ── Build cards ───────────────────────────────────────────────────────────────
+const feedbackTexts = {};
+
+function buildCard(i) {
+  const s = sentences[i];
+  const words = s.text.split(' ');
+  const card = document.createElement('div');
+  card.className = 'sentence-card';
+  card.id = `card-${i}`;
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  const num = document.createElement('span');
+  num.className = 'sentence-num';
+  num.textContent = `${i + 1}.`;
+  const playBtn = document.createElement('button');
+  playBtn.className = 'play-btn';
+  playBtn.title = 'Hear this sentence';
+  playBtn.innerHTML = '▶';
+  playBtn.onclick = () => speak(s.text);
+  header.appendChild(num);
+  header.appendChild(playBtn);
+  card.appendChild(header);
+
+  // Word chips
+  const display = document.createElement('div');
+  display.className = 'sentence-display';
+  display.id = `display-${i}`;
+  words.forEach((word, wi) => {
+    const chip = document.createElement('span');
+    chip.className = 'word-chip';
+    chip.id = `word-${i}-${wi}`;
+    chip.textContent = word;
+    chip.onclick = () => onWordTap(i, wi);
+    display.appendChild(chip);
+  });
+  card.appendChild(display);
+
+  // Decision row
+  const decisionRow = document.createElement('div');
+  decisionRow.className = 'decision-row';
+  const btnGood = document.createElement('button');
+  btnGood.className = 'decision-btn btn-good';
+  btnGood.id = `btn-good-${i}`;
+  btnGood.innerHTML = '✅ Looks good!';
+  btnGood.onclick = () => onDecision(i, 'good');
+  const btnFix = document.createElement('button');
+  btnFix.className = 'decision-btn btn-fix';
+  btnFix.id = `btn-fix-${i}`;
+  btnFix.innerHTML = '🔍 Fix it!';
+  btnFix.onclick = () => onDecision(i, 'fix');
+  decisionRow.appendChild(btnGood);
+  decisionRow.appendChild(btnFix);
+  card.appendChild(decisionRow);
+
+  // Mark panel
+  const markPanel = document.createElement('div');
+  markPanel.className = 'mark-panel';
+  markPanel.id = `mark-panel-${i}`;
+  const wordInstruction = document.createElement('div');
+  wordInstruction.className = 'word-instruction';
+  wordInstruction.textContent = '👆 Tap the word that needs fixing';
+  const markInstruction = document.createElement('div');
+  markInstruction.className = 'mark-instruction';
+  markInstruction.textContent = '🖊️ Choose the type of fix:';
+  const markGrid = document.createElement('div');
+  markGrid.className = 'mark-type-grid';
+  const markTypes = [
+    { id: 'capitalize', label: '≡ Capitalize' },
+    { id: 'lowercase',  label: 'lc Lowercase'  },
+    { id: 'delete',     label: '✗ Delete'       },
+    { id: 'comma',      label: ', Add comma'    },
+    { id: 'spelling',   label: 'sp Fix spelling'},
+    { id: 'apostrophe', label: "' Add apostrophe"},
+    { id: 'punctuation',label: '. Add punctuation'},
+    { id: 'verb',       label: 'vb Fix verb'    },
+  ];
+  markTypes.forEach(mt => {
+    const btn = document.createElement('button');
+    btn.className = 'mark-type-btn';
+    btn.id = `mark-${i}-${mt.id}`;
+    btn.textContent = mt.label;
+    btn.onclick = () => onMarkType(i, mt.id);
+    markGrid.appendChild(btn);
+  });
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'confirm-btn';
+  confirmBtn.id = `confirm-${i}`;
+  confirmBtn.textContent = '✓ Submit my answer';
+  confirmBtn.disabled = true;
+  confirmBtn.onclick = () => submitAnswer(i);
+  markPanel.appendChild(wordInstruction);
+  markPanel.appendChild(markInstruction);
+  markPanel.appendChild(markGrid);
+  markPanel.appendChild(confirmBtn);
+  card.appendChild(markPanel);
+
+  // Feedback
+  const fb = document.createElement('div');
+  fb.className = 'feedback';
+  fb.id = `fb-${i}`;
+  card.appendChild(fb);
+
+  return card;
+}
+
+// ── Handlers ──────────────────────────────────────────────────────────────────
+function onDecision(i, val) {
+  if (state.submitted[i]) return;
+  state.decisions[i] = val;
+  saveState();
+  document.getElementById(`btn-good-${i}`).classList.toggle('selected-btn', val === 'good');
+  document.getElementById(`btn-fix-${i}`).classList.toggle('selected-btn', val === 'fix');
+  const panel = document.getElementById(`mark-panel-${i}`);
+  const s = sentences[i];
+  if (val === 'fix') {
+    panel.classList.add('visible');
+    document.getElementById(`fb-${i}`).className = 'feedback';
+    document.getElementById(`card-${i}`).classList.remove('missed');
+  } else {
+    panel.classList.remove('visible');
+    if (!s.hasError) {
+      submitAnswer(i);
+    } else {
+      showFeedback(`fb-${i}`, false, s.feedbackHint, false);
+      document.getElementById(`card-${i}`).classList.add('missed');
+      updateProgress();
+    }
+  }
+}
+
+function onWordTap(i, wi) {
+  if (state.submitted[i]) return;
+  if (state.decisions[i] !== 'fix') return;
+  state.selectedWords[i] = wi;
+  saveState();
+  sentences[i].text.split(' ').forEach((_, wj) => {
+    const chip = document.getElementById(`word-${i}-${wj}`);
+    if (chip) chip.classList.toggle('selected', wj === wi);
+  });
+  checkConfirmReady(i);
+}
+
+function onMarkType(i, markId) {
+  if (state.submitted[i]) return;
+  state.selectedMarks[i] = markId;
+  saveState();
+  ['capitalize','lowercase','delete','comma','spelling','apostrophe','punctuation','verb'].forEach(mt => {
+    const btn = document.getElementById(`mark-${i}-${mt}`);
+    if (btn) btn.classList.toggle('selected-mark', mt === markId);
+  });
+  checkConfirmReady(i);
+}
+
+function checkConfirmReady(i) {
+  const btn = document.getElementById(`confirm-${i}`);
+  if (btn) btn.disabled = !(state.selectedWords[i] !== null && state.selectedMarks[i] !== null);
+}
+
+function submitAnswer(i) {
+  if (state.submitted[i]) return;
+  const s = sentences[i];
+  const dec = state.decisions[i];
+  let pass = false, fbText = '';
+
+  if (s.hasError) {
+    if (dec === 'good') {
+      fbText = s.feedbackHint;
+    } else {
+      const wi = state.selectedWords[i];
+      const mark = state.selectedMarks[i];
+      const matchedError = s.errors.find(e => e.wordIndex === wi && (e.errorType === mark || e.altErrorType === mark));
+      const matchedWord  = s.errors.find(e => e.wordIndex === wi);
+
+      if (matchedError) {
+        if (!state.foundErrors[i]) state.foundErrors[i] = [];
+        // Already found this word — nudge her toward the remaining error
+        if (state.foundErrors[i].includes(wi)) {
+          fbText = `You already found that one! Look for another error in this sentence.`;
+          showFeedback(`fb-${i}`, true, fbText, false);
+          updateProgress();
+          return;
+        }
+        state.foundErrors[i].push(wi);
+        const allFound = s.errors.every(e => state.foundErrors[i].includes(e.wordIndex));
+
+        if (allFound) {
+          pass = true;
+          fbText = matchedError.feedbackCorrect;
+          if (matchedError.correctSpelling) fbText += ` Correct spelling: "${matchedError.correctSpelling}"`;
+        } else {
+          const remaining = s.errors.length - state.foundErrors[i].length;
+          let partialText = matchedError.feedbackCorrect;
+          if (matchedError.correctSpelling) partialText += ` Correct spelling: "${matchedError.correctSpelling}"`;
+          partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining} more errors`} in this sentence — keep looking!`;
+          showFeedback(`fb-${i}`, true, partialText, false);
+          const chip = document.getElementById(`word-${i}-${wi}`);
+          if (chip) chip.classList.add('error-marked');
+          state.selectedWords[i] = null;
+          state.selectedMarks[i] = null;
+          saveState();
+          sentences[i].text.split(' ').forEach((_, wj) => {
+            const c = document.getElementById(`word-${i}-${wj}`);
+            if (c && !(state.foundErrors[i] || []).includes(wj)) c.classList.remove('selected');
+          });
+          ['capitalize','lowercase','delete','comma','spelling','apostrophe','punctuation','verb'].forEach(mt => {
+            const b = document.getElementById(`mark-${i}-${mt}`);
+            if (b) b.classList.remove('selected-mark');
+          });
+          document.getElementById(`confirm-${i}`).disabled = true;
+          updateProgress();
+          return;
+        }
+      } else if (matchedWord) {
+        fbText = `Good — you found the right word! But the fix type needs to be different. Hint: ${s.errorNote}.`;
+      } else {
+        fbText = s.feedbackHint;
+      }
+    }
+  } else {
+    pass = true;
+    fbText = s.feedbackOk;
+  }
+
+  showFeedback(`fb-${i}`, pass, fbText, pass);
+  const card = document.getElementById(`card-${i}`);
+
+  if (pass) {
+    state.submitted[i] = true;
+    saveState();
+    card.classList.remove('missed', 'second-pass-focus');
+    card.classList.add(s.hasError ? 'correct' : 'no-error-correct');
+    if (s.hasError) {
+      s.errors.forEach(e => {
+        const chip = document.getElementById(`word-${i}-${e.wordIndex}`);
+        if (chip) chip.classList.add('error-marked');
+      });
+    }
+    document.getElementById(`btn-good-${i}`).disabled = true;
+    document.getElementById(`btn-fix-${i}`).disabled = true;
+    updateProgress();
+    updatePassageHighlights();
+    checkPhaseComplete();
+  } else {
+    card.classList.add('missed');
+    const cb = document.getElementById(`confirm-${i}`);
+    if (cb) cb.disabled = false;
+    updateProgress();
+  }
+}
+
+function showFeedback(fbId, pass, text, showNext) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  if (!el) return;
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = '';
+
+  const textSpan = document.createElement('span');
+  textSpan.className = 'fb-text';
+  textSpan.textContent = (pass ? '✅ ' : '💡 Hint: ') + text.replace(/^💡\s*/, '');
+  el.appendChild(textSpan);
+
+  const playBtn = document.createElement('button');
+  playBtn.className = 'fb-play-btn';
+  playBtn.title = 'Read aloud';
+  playBtn.textContent = '🔊';
+  playBtn.onclick = () => speak(feedbackTexts[fbId]);
+  el.appendChild(playBtn);
+
+  if (showNext) {
+    const i = parseInt(fbId.replace('fb-', ''));
+    const hasMore = sentences.some((_, j) => j !== i && !state.submitted[j]);
+    if (hasMore) {
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'next-btn';
+      nextBtn.textContent = 'Next →';
+      nextBtn.onclick = () => goToNext();
+      el.appendChild(nextBtn);
+    }
+  }
+}
+
+function updateProgress() {
+  const done = state.submitted.filter(Boolean).length;
+  const pips = sentences.map((s, i) => {
+    if (i === state.activeIndex && !state.submitted[i]) return `<span class="pip active-pip"></span>`;
+    if (!state.submitted[i]) return `<span class="pip"></span>`;
+    const correct = s.hasError
+      ? (state.decisions[i] === 'fix' && s.errors.every(e => (state.foundErrors[i] || []).includes(e.wordIndex)))
+      : (state.decisions[i] === 'good');
+    return `<span class="pip ${correct ? 'done' : 'missed-pip'}"></span>`;
+  }).join('');
+  document.getElementById('progressPips').innerHTML = pips;
+  document.getElementById('progressCount').textContent = `${done} / ${sentences.length} reviewed`;
+}
+
+function checkPhaseComplete() {
+  if (!state.submitted.every(Boolean)) return;
+  const missed = sentences.map((s, i) => {
+    if (!s.hasError) return null;
+    const correct = state.decisions[i] === 'fix'
+      && s.errors.every(e => (state.foundErrors[i] || []).includes(e.wordIndex));
+    return correct ? null : i;
+  }).filter(x => x !== null);
+
+  if (missed.length === 0) {
+    if (currentCard) currentCard.classList.remove('visible');
+    document.getElementById('winBanner').classList.add('show');
+    speak("Amazing work! You found every error in the passage. Great proofreading, Christina!");
+    return;
+  }
+  if (state.phase === 'first') {
+    state.phase = 'second';
+    state.secondPassIds = missed;
+    saveState();
+    enterSecondPass(missed);
+  }
+}
+
+function enterSecondPass(missedIds) {
+  document.getElementById('phaseBadge').textContent =
+    `🔁 Second Pass — ${missedIds.length} sentence${missedIds.length > 1 ? 's' : ''} to revisit`;
+  document.getElementById('phaseBadge').classList.add('second-pass');
+  document.getElementById('secondPassIntro').classList.add('show');
+  setTimeout(() => speak(`Great first pass! Let's go back and look at ${missedIds.length} more sentence${missedIds.length > 1 ? 's' : ''}. There's an error hiding in there.`), 400);
+
+  missedIds.forEach(i => {
+    const card = document.getElementById(`card-${i}`);
+    card.classList.remove('missed', 'correct', 'no-error-correct', 'visible');
+    card.classList.add('second-pass-focus');
+    state.submitted[i] = false;
+    state.decisions[i] = null;
+    state.selectedWords[i] = null;
+    state.selectedMarks[i] = null;
+    state.foundErrors[i] = null;
+
+    document.getElementById(`btn-good-${i}`).classList.remove('selected-btn');
+    document.getElementById(`btn-good-${i}`).disabled = false;
+    document.getElementById(`btn-fix-${i}`).classList.remove('selected-btn');
+    document.getElementById(`btn-fix-${i}`).disabled = false;
+    document.getElementById(`mark-panel-${i}`).classList.remove('visible');
+    document.getElementById(`fb-${i}`).className = 'feedback';
+    const cb = document.getElementById(`confirm-${i}`);
+    if (cb) cb.disabled = true;
+    sentences[i].text.split(' ').forEach((_, wi) => {
+      const c = document.getElementById(`word-${i}-${wi}`);
+      if (c) c.classList.remove('selected', 'error-marked');
+    });
+    ['capitalize','lowercase','delete','comma','spelling','apostrophe','punctuation','verb'].forEach(mt => {
+      const b = document.getElementById(`mark-${i}-${mt}`);
+      if (b) b.classList.remove('selected-mark');
+    });
+  });
+  saveState();
+  updatePassageHighlights();
+  navigateTo(missedIds[0]);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadState();
+buildPassage();
+const list = document.getElementById('sentenceList');
+sentences.forEach((_, i) => list.appendChild(buildCard(i)));
+
+// Restore submitted cards
+state.submitted.forEach((sub, i) => {
+  if (!sub) return;
+  const s = sentences[i];
+  const dec = state.decisions[i];
+  document.getElementById(`btn-good-${i}`).classList.toggle('selected-btn', dec === 'good');
+  document.getElementById(`btn-fix-${i}`).classList.toggle('selected-btn', dec === 'fix');
+  document.getElementById(`btn-good-${i}`).disabled = true;
+  document.getElementById(`btn-fix-${i}`).disabled = true;
+  if (dec === 'fix') {
+    document.getElementById(`mark-panel-${i}`).classList.add('visible');
+    if (state.selectedWords[i] !== null) {
+      const chip = document.getElementById(`word-${i}-${state.selectedWords[i]}`);
+      if (chip) chip.classList.add('selected');
+    }
+    if (state.selectedMarks[i]) {
+      const btn = document.getElementById(`mark-${i}-${state.selectedMarks[i]}`);
+      if (btn) btn.classList.add('selected-mark');
+    }
+  }
+  const correct = s.hasError
+    ? (dec === 'fix' && s.errors && s.errors.every(e => (state.foundErrors[i] || []).includes(e.wordIndex)))
+    : dec === 'good';
+  document.getElementById(`card-${i}`).classList.add(correct ? (s.hasError ? 'correct' : 'no-error-correct') : 'missed');
+  if (s.hasError && s.errors) {
+    s.errors.forEach(e => {
+      if ((state.foundErrors[i] || []).includes(e.wordIndex)) {
+        const chip = document.getElementById(`word-${i}-${e.wordIndex}`);
+        if (chip) chip.classList.add('error-marked');
+      }
+    });
+  }
+  let fbText = s.hasError ? (correct ? s.errors[s.errors.length - 1].feedbackCorrect : s.feedbackHint) : s.feedbackOk;
+  showFeedback(`fb-${i}`, correct, fbText, false);
+});
+
+// Restore phase badge
+if (state.phase === 'second' && state.secondPassIds.length > 0) {
+  document.getElementById('phaseBadge').textContent =
+    `🔁 Second Pass — ${state.secondPassIds.length} sentence${state.secondPassIds.length > 1 ? 's' : ''} to revisit`;
+  document.getElementById('phaseBadge').classList.add('second-pass');
+  document.getElementById('secondPassIntro').classList.add('show');
+  state.secondPassIds.forEach(i => {
+    if (!state.submitted[i]) document.getElementById(`card-${i}`).classList.add('second-pass-focus');
+  });
+}
+
+// Start
+navigateTo(state.activeIndex);
+</script>
+</body>
+</html>

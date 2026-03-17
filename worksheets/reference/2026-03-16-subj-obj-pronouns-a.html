@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject & Object Pronouns — Part A</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #e0f4ff 0%, #f0e8ff 100%);
+    min-height: 100vh;
+    color: #1a2a3a;
+    padding: 20px 16px 80px;
+  }
+  .container { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    color: #1a6fa8;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+  .subtitle { text-align: center; font-size: 0.95rem; color: #6a8299; font-weight: 600; }
+  .concept-box {
+    background: #ffe566;
+    border: 3px solid #e6c800;
+    border-radius: 16px;
+    padding: 14px 18px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: #5a4000;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s;
+  }
+  .concept-box:active { transform: scale(0.98); }
+  .instructions {
+    background: #3b9ede;
+    color: white;
+    border-radius: 16px;
+    padding: 13px 18px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+    transition: transform 0.1s;
+  }
+  .instructions:active { transform: scale(0.98); }
+  .question-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    padding: 16px 18px;
+    border: 2.5px solid transparent;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .question-card.correct { border-color: #5dca7e; background: #f0fff5; }
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .q-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: #3b9ede;
+    min-width: 28px;
+    flex-shrink: 0;
+  }
+  .sentences { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .tap-sentence {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 3px 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.6;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .tap-sentence:hover { background: #e8f4ff; }
+  .pronoun-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: #e8f0ff;
+    border: 2px solid #3b9ede;
+    border-radius: 7px;
+    padding: 1px 7px;
+    font-weight: 800;
+    color: #1a6fa8;
+    white-space: nowrap;
+    font-size: 0.95rem;
+  }
+  .card-bottom {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .answer-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #6a8299;
+  }
+  .answer-select {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a6fa8;
+    background: #e8f4ff;
+    border: 2.5px solid #3b9ede;
+    border-radius: 10px;
+    padding: 6px 10px;
+    min-width: 160px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .answer-select:focus { border-color: #1a6fa8; }
+  .play-btn {
+    background: #5dca7e;
+    border: none;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+    transition: background 0.15s;
+  }
+  .play-btn:hover { background: #3aaa5a; }
+  .feedback {
+    display: none; align-items: center; gap: 5px;
+    font-size: 0.9rem; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px; flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .feedback.show { display: flex; }
+  .feedback.correct { background: #d0f5e0; color: #1d7a40; }
+  .feedback.hint { background: #ffeedd; color: #c05000; }
+  .fb-play-btn {
+    background: none; border: none; font-size: 1rem;
+    cursor: pointer; padding: 0 2px; line-height: 1;
+    flex-shrink: 0; opacity: 0.75;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+  .progress-bar {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pip { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: #dde0e8; transition: background 0.3s; }
+  .pip.done { background: #5dca7e; }
+  .progress-count { font-weight: 700; color: #1a6fa8; font-size: 0.95rem; }
+  .speaking-toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a6fa8; color: white;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem;
+    padding: 10px 24px; border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, background 0.2s;
+    z-index: 100; cursor: pointer; user-select: none;
+    pointer-events: none;
+  }
+  .speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .speaking-toast.visible:hover { background: #c0392b; }
+  .speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+  .clear-btn {
+    background: #f0f0f0;
+    color: #888;
+    border: 2px solid #ccc;
+    border-radius: 18px;
+    padding: 7px 18px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+  @media (max-width: 480px) {
+    .question-card { padding: 12px; }
+    .tap-sentence { font-size: 0.95rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📖 Subject &amp; Object Pronouns</h1>
+    <p class="subtitle">Part A — Tap any sentence to hear it</p>
+  </header>
+
+  <div class="concept-box" onclick="speak('Reteaching. A subject pronoun indicates who or what performs the action of a sentence. I, you, he, she, it, we, and they are subject pronouns. An object pronoun indicates who or what receives the action. Me, you, him, her, it, us, and them are object pronouns.')">
+    🔊 <strong>RETEACHING:</strong> A <strong>subject pronoun</strong> indicates who or what <em>performs</em> the action. <em>I, you, he, she, it, we, they</em> are subject pronouns. An <strong>object pronoun</strong> indicates who or what <em>receives</em> the action. <em>Me, you, him, her, it, us, them</em> are object pronouns.
+  </div>
+
+  <div class="instructions" onclick="speak('Read each pair of sentences. The pronoun in the second sentence is highlighted in blue. Use the drop-down to pick the noun from the first sentence that the pronoun replaces.')">
+    🔊 Read each sentence pair. The pronoun is highlighted. Pick the noun it replaces from the first sentence.
+  </div>
+
+  <div id="questionsList"></div>
+
+  <div class="progress-bar">
+    <span id="progressPips"></span>
+    <span class="progress-count" id="progressCount">0 / 6 answered</span>
+  </div>
+  <div style="text-align:center">
+    <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+  </div>
+</div>
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()">🔊 <span class="toast-label">Reading aloud…</span></div>
+
+<script>
+// Data: sentence1, sentence2, pronoun in s2, correct antecedent, all noun options, hint
+const questions = [
+  {
+    s1: "The woodcutter saw a neighbor working in the garden.",
+    s2: "The woodcutter approached him.",
+    pronoun: "him",
+    answer: "a neighbor",
+    options: ["The woodcutter", "a neighbor", "the garden"],
+    hint: "him = one man receiving the action"
+  },
+  {
+    s1: '"Those roses are beautiful," said the woodcutter.',
+    s2: '"They have a wonderful scent."',
+    pronoun: "They",
+    answer: "Those roses",
+    options: ["Those roses", "the woodcutter", "a wonderful scent"],
+    hint: "They = more than one thing"
+  },
+  {
+    s1: '"This garden is a joy," said the woodcutter\'s neighbor.',
+    s2: '"It gets a lot of sun."',
+    pronoun: "It",
+    answer: "This garden",
+    options: ["This garden", "a joy", "the woodcutter's neighbor"],
+    hint: "It = one thing"
+  },
+  {
+    s1: '"There\'s an easier way to dig holes," said the woodcutter.',
+    s2: '"A shovel could dig them in half the time."',
+    pronoun: "them",
+    answer: "holes",
+    options: ["holes", "the woodcutter", "a shovel", "half the time"],
+    hint: "them = more than one thing receiving the action"
+  },
+  {
+    s1: "",
+    s2: "The neighbor just smiled at the woodcutter and said, \"Good day to you, sir.\"",
+    pronoun: "you",
+    answer: "the woodcutter",
+    options: ["The neighbor", "the woodcutter", "sir"],
+    hint: "you = the person being spoken to — the woodcutter"
+  },
+  {
+    s1: "The woodcutter shrugged.",
+    s2: "Then he walked away.",
+    pronoun: "he",
+    answer: "The woodcutter",
+    options: ["The woodcutter", "shrugged"],
+    hint: "he = one man performing the action"
+  }
+];
+
+const STORAGE_KEY = 'worksheet_pronouns_a_2026_03_16';
+const userAnswers = new Array(questions.length).fill('');
+const feedbackTexts = {};
+
+// TTS
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88; utter.pitch = 1.05;
+  utter.onstart = showToast; utter.onend = hideToast; utter.onerror = hideToast;
+  window.speechSynthesis.speak(utter);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+
+function showFeedback(fbId, pass, text) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = (pass ? '✅ ' : '💡 Hint: ') + text +
+    ` <button class="fb-play-btn" onclick="speak(feedbackTexts['${fbId}'])" title="Read aloud">🔊</button>`;
+}
+
+function updateProgress() {
+  const done = userAnswers.filter(a => a !== '').length;
+  document.getElementById('progressPips').innerHTML =
+    userAnswers.map(a => `<span class="pip ${a ? 'done' : ''}"></span>`).join('');
+  document.getElementById('progressCount').textContent = `${done} / ${questions.length} answered`;
+}
+
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(userAnswers)); } catch(e) {}
+}
+function loadProgress() {
+  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; } catch(e) { return null; }
+}
+
+// Build UI
+const list = document.getElementById('questionsList');
+questions.forEach((q, i) => {
+  const card = document.createElement('div');
+  card.className = 'question-card';
+  card.id = `card-${i}`;
+
+  // Sentences section
+  const cardTop = document.createElement('div');
+  cardTop.className = 'card-top';
+
+  const num = document.createElement('div');
+  num.className = 'q-num';
+  num.textContent = `${i + 1}.`;
+
+  const sents = document.createElement('div');
+  sents.className = 'sentences';
+
+  // Sentence 1 - tappable (skip if empty, e.g. single-sentence items)
+  const s1el = q.s1 ? document.createElement('div') : null;
+  if (s1el) {
+    s1el.className = 'tap-sentence';
+    s1el.textContent = q.s1;
+    s1el.onclick = () => speak(q.s1);
+  }
+
+  // Sentence 2 - with pronoun chip
+  const s2el = document.createElement('div');
+  s2el.className = 'tap-sentence';
+  s2el.onclick = () => speak(q.s2);
+  // Split sentence 2 around the pronoun
+  const parts = q.s2.split(new RegExp(`\\b(${q.pronoun})\\b`));
+  parts.forEach(part => {
+    if (part === q.pronoun) {
+      const chip = document.createElement('span');
+      chip.className = 'pronoun-chip';
+      chip.innerHTML = `🔵 ${part}`;
+      s2el.appendChild(chip);
+    } else if (part) {
+      s2el.appendChild(document.createTextNode(part));
+    }
+  });
+
+  if (s1el) sents.appendChild(s1el);
+  sents.appendChild(s2el);
+  cardTop.appendChild(num);
+  cardTop.appendChild(sents);
+
+  // Play button
+  const playBtn = document.createElement('button');
+  playBtn.className = 'play-btn';
+  playBtn.title = 'Hear both sentences';
+  playBtn.textContent = '▶';
+  playBtn.onclick = () => speak(q.s1 + ' ' + q.s2);
+  cardTop.appendChild(playBtn);
+
+  // Bottom row: label + dropdown + feedback
+  const cardBottom = document.createElement('div');
+  cardBottom.className = 'card-bottom';
+
+  const label = document.createElement('span');
+  label.className = 'answer-label';
+  label.textContent = `"${q.pronoun}" replaces →`;
+
+  const sel = document.createElement('select');
+  sel.className = 'answer-select';
+  sel.id = `sel-${i}`;
+  const defaultOpt = document.createElement('option');
+  defaultOpt.value = ''; defaultOpt.textContent = '— pick noun —';
+  sel.appendChild(defaultOpt);
+  q.options.forEach(opt => {
+    const o = document.createElement('option');
+    o.value = opt; o.textContent = opt;
+    sel.appendChild(o);
+  });
+
+  sel.onchange = () => {
+    const val = sel.value;
+    userAnswers[i] = val;
+    saveProgress();
+    updateProgress();
+    if (val) setTimeout(() => speak(`"${q.pronoun}" replaces ${val}.`), 300);
+    updateFeedback(i, val);
+  };
+
+  const fb = document.createElement('div');
+  fb.className = 'feedback';
+  fb.id = `fb-${i}`;
+
+  cardBottom.appendChild(label);
+  cardBottom.appendChild(sel);
+  cardBottom.appendChild(fb);
+
+  card.appendChild(cardTop);
+  card.appendChild(cardBottom);
+  list.appendChild(card);
+});
+
+function updateFeedback(i, val) {
+  const q = questions[i];
+  const fbId = `fb-${i}`;
+  if (!val) { document.getElementById(fbId).className = 'feedback'; return; }
+  const correct = val.toLowerCase() === q.answer.toLowerCase();
+  const text = correct ? `Yes! "${q.pronoun}" replaces ${q.answer}.` : q.hint;
+  showFeedback(fbId, correct, text);
+  document.getElementById(`card-${i}`).classList.toggle('correct', correct);
+}
+
+// Load saved
+const saved = loadProgress();
+if (saved && saved.length === questions.length) {
+  saved.forEach((val, i) => {
+    if (val) {
+      userAnswers[i] = val;
+      const sel = document.getElementById(`sel-${i}`);
+      if (sel) sel.value = val;
+      updateFeedback(i, val);
+    }
+  });
+}
+updateProgress();
+
+function clearAll() {
+  if (!confirm('Clear all your answers and start over?')) return;
+  userAnswers.fill('');
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  questions.forEach((q, i) => {
+    const sel = document.getElementById('sel-' + i);
+    if (sel) sel.value = '';
+    const fb = document.getElementById('fb-' + i);
+    if (fb) fb.className = 'feedback';
+    const card = document.getElementById('card-' + i);
+    if (card) card.classList.remove('correct');
+  });
+  updateProgress();
+}
+</script>
+</body>
+</html>

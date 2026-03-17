@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject & Object Pronouns — Part B</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #e8f0ff 0%, #f5e8ff 100%);
+    min-height: 100vh;
+    color: #1a2a3a;
+    padding: 20px 16px 80px;
+  }
+  .container { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    color: #1a6fa8;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+  .subtitle { text-align: center; font-size: 0.95rem; color: #6a8299; font-weight: 600; }
+  .concept-box {
+    background: #ffe566;
+    border: 3px solid #e6c800;
+    border-radius: 16px;
+    padding: 14px 18px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    color: #5a4000;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s;
+  }
+  .concept-box:active { transform: scale(0.98); }
+  .instructions {
+    background: #3b9ede;
+    color: white;
+    border-radius: 16px;
+    padding: 13px 18px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+    transition: transform 0.1s;
+  }
+  .instructions:active { transform: scale(0.98); }
+  .question-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    padding: 16px 18px;
+    border: 2.5px solid transparent;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .question-card.all-correct { border-color: #5dca7e; background: #f0fff5; }
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .q-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: #3b9ede;
+    min-width: 28px;
+    flex-shrink: 0;
+  }
+  .sentence-wrap {
+    flex: 1;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 3px 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.8;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .sentence-wrap:hover { background: #e8f4ff; }
+  .pronoun-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: #fff3c4;
+    border: 2px solid #e6c800;
+    border-radius: 7px;
+    padding: 1px 8px;
+    font-weight: 800;
+    color: #5a3a00;
+    white-space: nowrap;
+    font-size: 0.93rem;
+    cursor: default;
+    margin: 0 2px;
+  }
+  .play-btn {
+    background: #5dca7e;
+    border: none;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+    transition: background 0.15s;
+  }
+  .play-btn:hover { background: #3aaa5a; }
+  /* Pronoun answer rows */
+  .pronoun-answers { display: flex; flex-direction: column; gap: 8px; padding-left: 40px; }
+  .pronoun-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pronoun-label {
+    font-weight: 800;
+    color: #5a3a00;
+    background: #fff3c4;
+    border: 2px solid #e6c800;
+    border-radius: 7px;
+    padding: 2px 10px;
+    font-size: 0.95rem;
+    min-width: 60px;
+    text-align: center;
+  }
+  .so-select {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1a6fa8;
+    background: #e8f4ff;
+    border: 2.5px solid #3b9ede;
+    border-radius: 10px;
+    padding: 6px 10px;
+    min-width: 90px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .so-select:focus { border-color: #1a6fa8; }
+  .so-select.correct-val { background: #d0f5e0; border-color: #5dca7e; }
+  .so-select.wrong-val { background: #ffeedd; border-color: #ff9966; }
+  .feedback {
+    display: none; align-items: center; gap: 5px;
+    font-size: 0.88rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px; flex-shrink: 0;
+  }
+  .feedback.show { display: flex; }
+  .feedback.correct { background: #d0f5e0; color: #1d7a40; }
+  .feedback.hint { background: #ffeedd; color: #c05000; }
+  .fb-play-btn {
+    background: none; border: none; font-size: 1rem;
+    cursor: pointer; padding: 0 2px; opacity: 0.75;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+  .progress-bar {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .pip { display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: #dde0e8; transition: background 0.3s; }
+  .pip.done { background: #5dca7e; }
+  .progress-count { font-weight: 700; color: #1a6fa8; font-size: 0.95rem; }
+  .speaking-toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a6fa8; color: white;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem;
+    padding: 10px 24px; border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, background 0.2s;
+    z-index: 100; cursor: pointer; user-select: none; pointer-events: none;
+  }
+  .speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .speaking-toast.visible:hover { background: #c0392b; }
+  .speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+
+  /* Word token — every word is tappable */
+  .word-token {
+    display: inline;
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 1px 3px;
+    transition: background 0.12s;
+    user-select: none;
+  }
+  .word-token:hover { background: #e8f4ff; }
+  /* Pronoun token states */
+  .word-token.pronoun-found {
+    background: #fff3c4;
+    border: 2px solid #e6c800;
+    border-radius: 7px;
+    padding: 1px 7px;
+    font-weight: 800;
+    color: #5a3a00;
+  }
+  .word-token.pronoun-found.answered { background: #d0f5e0; border-color: #5dca7e; color: #1d7a40; }
+  /* Not-a-pronoun flash */
+  .word-token.not-pronoun { animation: notPronoun 0.4s ease; }
+  @keyframes notPronoun {
+    0%   { background: #ffe0e0; }
+    100% { background: transparent; }
+  }
+  /* Per-pronoun answer rows below the sentence */
+  .pronoun-answers-below {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+    padding-left: 40px;
+  }
+  .pronoun-answer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .pronoun-answer-row .pronoun-label {
+    font-weight: 800;
+    color: #5a3a00;
+    background: #fff3c4;
+    border: 2px solid #e6c800;
+    border-radius: 7px;
+    padding: 2px 10px;
+    font-size: 0.92rem;
+    min-width: 50px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .so-select {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #1a6fa8;
+    background: #e8f4ff;
+    border: 2.5px solid #3b9ede;
+    border-radius: 10px;
+    padding: 4px 8px;
+    min-width: 120px;
+    cursor: pointer;
+    outline: none;
+  }
+  .so-select:focus { border-color: #1a6fa8; }
+  .clear-btn {
+    background: #f0f0f0;
+    color: #888;
+    border: 2px solid #ccc;
+    border-radius: 18px;
+    padding: 7px 18px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+  @media (max-width: 480px) {
+    .question-card { padding: 12px; }
+    .pronoun-answers { padding-left: 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>📖 Subject &amp; Object Pronouns</h1>
+    <p class="subtitle">Part B — Tap a word to identify it as a pronoun</p>
+  </header>
+
+  <div class="concept-box" onclick="speak('Reteaching. A subject pronoun indicates who or what performs the action of a sentence. I, you, he, she, it, we, and they are subject pronouns. An object pronoun indicates who or what receives the action. Me, you, him, her, it, us, and them are object pronouns.')">
+    🔊 <strong>RETEACHING:</strong> A <strong>subject pronoun</strong> performs the action (<em>I, you, he, she, it, we, they</em>). An <strong>object pronoun</strong> receives the action (<em>me, you, him, her, it, us, them</em>).
+  </div>
+
+  <div class="instructions" onclick="speak('Read each sentence. Tap any word that you think is a pronoun. If it is, you will see a drop-down to label it as a subject pronoun or an object pronoun.')">
+    🔊 Read each sentence. Tap any word you think is a pronoun — a drop-down will appear to label it S or O.
+  </div>
+
+  <div id="questionsList"></div>
+
+  <div class="progress-bar">
+    <span id="progressPips"></span>
+    <span class="progress-count" id="progressCount">0 / 11 answered</span>
+  </div>
+  <div style="text-align:center">
+    <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+  </div>
+</div>
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()">🔊 <span class="toast-label">Reading aloud…</span></div>
+
+<script>
+// Each question: sentence text, array of {pronoun, answer, hint}
+// answer: 'S' or 'O'
+const questions = [
+  {
+    sentence: "The woodcutter's wife asked him to go to the woods.",
+    pronouns: [
+      { word: "him", answer: "O", hint: "him receives the action — object pronoun" }
+    ]
+  },
+  {
+    sentence: '"I want you to chop some wood," she said.',
+    pronouns: [
+      { word: "I", answer: "S", hint: "I performs the action — subject pronoun" },
+      { word: "you", answer: "O", hint: "you receives the action here — object pronoun" },
+      { word: "she", answer: "S", hint: "she performs the action of saying — subject pronoun" }
+    ]
+  },
+  {
+    sentence: '"We have guests coming to visit us," said the woodcutter\'s wife.',
+    pronouns: [
+      { word: "We", answer: "S", hint: "We performs the action — subject pronoun" },
+      { word: "us", answer: "O", hint: "us receives the action of visiting — object pronoun" }
+    ]
+  },
+  {
+    sentence: '"They will be here soon. Let\'s serve them dinner," his wife continued.',
+    pronouns: [
+      { word: "They", answer: "S", hint: "They performs the action — subject pronoun" },
+      { word: "them", answer: "O", hint: "them receives the action of being served — object pronoun" }
+    ]
+  },
+  {
+    sentence: "The woodcutter found an ax, and he picked it up.",
+    pronouns: [
+      { word: "he", answer: "S", hint: "he performs the action of picking — subject pronoun" },
+      { word: "it", answer: "O", hint: "it receives the action of being picked up — object pronoun" }
+    ]
+  },
+  {
+    sentence: '"I will be back in a jiffy," the woodcutter told her.',
+    pronouns: [
+      { word: "I", answer: "S", hint: "I performs the action — subject pronoun" },
+      { word: "her", answer: "O", hint: "her receives the telling — object pronoun" }
+    ]
+  },
+  {
+    sentence: '"I will be here," the wife answered. "Don\'t make me wait too long."',
+    pronouns: [
+      { word: "I", answer: "S", hint: "I performs the action — subject pronoun" },
+      { word: "me", answer: "O", hint: "me receives the action of waiting — object pronoun" }
+    ]
+  }
+];
+
+// Flatten to track total pronoun answers
+const STORAGE_KEY = 'worksheet_pronouns_b_2026_03_16';
+// userAnswers: array of arrays, one per question, one value per pronoun
+const userAnswers = questions.map(q => q.pronouns.map(() => ''));
+const feedbackTexts = {};
+
+function totalPronouns() { return questions.reduce((s, q) => s + q.pronouns.length, 0); }
+function totalAnswered() { return userAnswers.reduce((s, arr) => s + arr.filter(a => a !== '').length, 0); }
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88; utter.pitch = 1.05;
+  utter.onstart = showToast; utter.onend = hideToast; utter.onerror = hideToast;
+  window.speechSynthesis.speak(utter);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+
+function showFeedback(fbId, pass, text) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  if (!el) return;
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = (pass ? '✅ ' : '💡 Hint: ') + text +
+    ` <button class="fb-play-btn" onclick="speak(feedbackTexts['${fbId}'])" title="Read aloud">🔊</button>`;
+}
+
+function updateProgress() {
+  const done = totalAnswered();
+  const total = totalPronouns();
+  const allAnswers = userAnswers.flat();
+  document.getElementById('progressPips').innerHTML =
+    allAnswers.map(a => `<span class="pip ${a ? 'done' : ''}"></span>`).join('');
+  document.getElementById('progressCount').textContent = `${done} / ${total} answered`;
+}
+
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(userAnswers)); } catch(e) {}
+}
+function loadProgress() {
+  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; } catch(e) { return null; }
+}
+
+function checkCardComplete(qi) {
+  const allDone = userAnswers[qi].every(a => a !== '');
+  const allCorrect = questions[qi].pronouns.every((p, pi) =>
+    userAnswers[qi][pi] === p.answer
+  );
+  document.getElementById(`card-${qi}`).classList.toggle('all-correct', allDone && allCorrect);
+}
+
+// ── Tokenise sentence into word spans ────────────────────────────────────────
+// Each token is either a "word" (letters/apostrophes) or "punct" (everything else).
+function tokenise(sentence) {
+  const tokens = [];
+  const re = /([A-Za-z'\u2019]+)|([^A-Za-z'\u2019]+)/g;
+  let m;
+  while ((m = re.exec(sentence)) !== null) {
+    if (m[1]) tokens.push({ type: 'word', text: m[1] });
+    else       tokens.push({ type: 'punct', text: m[2] });
+  }
+  return tokens;
+}
+
+// Build UI
+const list = document.getElementById('questionsList');
+questions.forEach((q, qi) => {
+  // Track which pronouns have been found (by index in q.pronouns)
+  const foundState = q.pronouns.map(() => false);
+
+  const card = document.createElement('div');
+  card.className = 'question-card';
+  card.id = `card-${qi}`;
+
+  // Top row: number + sentence + play
+  const cardTop = document.createElement('div');
+  cardTop.className = 'card-top';
+
+  const num = document.createElement('div');
+  num.className = 'q-num';
+  num.textContent = `${qi + 1}.`;
+
+  // Sentence wrap — plain click reads full sentence
+  const sentWrap = document.createElement('div');
+  sentWrap.className = 'sentence-wrap';
+
+  // Tokenise and build word spans
+  const tokens = tokenise(q.sentence);
+  tokens.forEach(tok => {
+    if (tok.type === 'punct') {
+      sentWrap.appendChild(document.createTextNode(tok.text));
+      return;
+    }
+    // It's a word — make it a tappable span
+    const span = document.createElement('span');
+    span.className = 'word-token';
+    span.textContent = tok.text;
+
+    // Check if this word matches a pronoun (case-sensitive first match not yet found)
+    const pi = q.pronouns.findIndex((p, idx) =>
+      !foundState[idx] && p.word === tok.text
+    );
+
+    if (pi !== -1) {
+      // This span is a pronoun token
+      span.onclick = (e) => {
+        e.stopPropagation();
+        speak(tok.text);
+        if (span.classList.contains('pronoun-found')) return; // already revealed
+        foundState[pi] = true;
+        span.classList.add('pronoun-found');
+        // Insert inline S/O selector right after this span
+        revealSO(span, q, qi, pi);
+      };
+    } else {
+      // Not a pronoun — tap reads the word, flashes "not a pronoun"
+      span.onclick = (e) => {
+        e.stopPropagation();
+        speak(tok.text);
+        span.classList.add('not-pronoun');
+        span.addEventListener('animationend', () => span.classList.remove('not-pronoun'), { once: true });
+      };
+    }
+    sentWrap.appendChild(span);
+  });
+
+  const playBtn = document.createElement('button');
+  playBtn.className = 'play-btn';
+  playBtn.title = 'Hear full sentence';
+  playBtn.textContent = '▶';
+  playBtn.onclick = () => speak(q.sentence);
+
+  cardTop.appendChild(num);
+  cardTop.appendChild(sentWrap);
+  cardTop.appendChild(playBtn);
+  card.appendChild(cardTop);
+
+  // Container for per-pronoun S/O rows — revealed as pronouns are clicked
+  const pronounsArea = document.createElement('div');
+  pronounsArea.className = 'pronoun-answers-below';
+  pronounsArea.id = `pronouns-area-${qi}`;
+  card.appendChild(pronounsArea);
+
+  list.appendChild(card);
+
+  // Re-render saved state (pronouns already found)
+  // Done after DOM insertion so span lookups work
+});
+
+// Reveal the S/O row beneath the sentence after a pronoun span is clicked
+function revealSO(span, q, qi, pi) {
+  const p = q.pronouns[pi];
+
+  // Don't add a second row if already present
+  if (document.getElementById(`sel-${qi}-${pi}`)) return;
+
+  const area = document.getElementById(`pronouns-area-${qi}`);
+  if (!area) return;
+
+  const row = document.createElement('div');
+  row.className = 'pronoun-answer-row';
+  row.id = `so-wrap-${qi}-${pi}`;
+
+  // Label showing which word this row is for
+  const lbl = document.createElement('span');
+  lbl.className = 'pronoun-label';
+  lbl.textContent = p.word;
+
+  const sel = document.createElement('select');
+  sel.className = 'so-select';
+  sel.id = `sel-${qi}-${pi}`;
+  ['', 'S', 'O'].forEach(v => {
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = v === '' ? '— S or O —' : (v === 'S' ? 'S — subject' : 'O — object');
+    sel.appendChild(o);
+  });
+
+  const fb = document.createElement('div');
+  fb.className = 'feedback';
+  fb.id = `fb-${qi}-${pi}`;
+
+  sel.onchange = () => {
+    const val = sel.value;
+    userAnswers[qi][pi] = val;
+    saveProgress();
+    updateProgress();
+    updateFeedback(qi, pi, val);
+    checkCardComplete(qi);
+    if (val) {
+      span.classList.toggle('answered', val === p.answer);
+      const readback = val === 'S'
+        ? `${p.word} is a subject pronoun. It performs the action.`
+        : `${p.word} is an object pronoun. It receives the action.`;
+      setTimeout(() => speak(readback), 300);
+    }
+  };
+
+  // Restore saved value if any
+  if (userAnswers[qi][pi]) {
+    sel.value = userAnswers[qi][pi];
+    span.classList.toggle('answered', userAnswers[qi][pi] === p.answer);
+    updateFeedback(qi, pi, userAnswers[qi][pi]);
+  }
+
+  row.appendChild(lbl);
+  row.appendChild(sel);
+  row.appendChild(fb);
+  area.appendChild(row);
+}
+
+function updateFeedback(qi, pi, val) {
+  const p = questions[qi].pronouns[pi];
+  const fbId = `fb-${qi}-${pi}`;
+  const el = document.getElementById(fbId);
+  if (!el) return;
+  if (!val) { el.className = 'feedback'; return; }
+  const correct = val === p.answer;
+  const text = correct
+    ? `Yes! "${p.word}" is a ${val === 'S' ? 'subject' : 'object'} pronoun.`
+    : p.hint;
+  feedbackTexts[fbId] = text;
+  el.className = 'feedback show ' + (correct ? 'correct' : 'hint');
+  el.innerHTML = (correct ? '✅ ' : '💡 Hint: ') + text +
+    ` <button class="fb-play-btn" onclick="speak(feedbackTexts['${fbId}'])" title="Read aloud">🔊</button>`;
+}
+
+// Load saved — re-reveal pronoun spans for any previously answered question
+const saved = loadProgress();
+if (saved && saved.length === questions.length) {
+  saved.forEach((arr, qi) => {
+    arr.forEach((val, pi) => {
+      if (val) {
+        userAnswers[qi][pi] = val;
+        // Find the pronoun span in the sentence and reveal it
+        const q = questions[qi];
+        const card = document.getElementById(`card-${qi}`);
+        if (card) {
+          const spans = card.querySelectorAll('.word-token');
+          let found = 0;
+          for (const span of spans) {
+            if (span.textContent === q.pronouns[pi].word && !span.classList.contains('pronoun-found')) {
+              // Count occurrences to match the right one (for repeated words like "I")
+              span.classList.add('pronoun-found');
+              revealSO(span, q, qi, pi);
+              break;
+            }
+          }
+        }
+      }
+    });
+    checkCardComplete(qi);
+  });
+}
+updateProgress();
+
+function clearAll() {
+  if (!confirm('Clear all your answers and start over?')) return;
+  // Reset userAnswers
+  questions.forEach((q, qi) => { userAnswers[qi] = q.pronouns.map(() => ''); });
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  // Remove all revealed pronoun rows and reset word-token states
+  questions.forEach((q, qi) => {
+    const card = document.getElementById('card-' + qi);
+    if (!card) return;
+    // Reset word token styles
+    card.querySelectorAll('.word-token').forEach(span => {
+      span.classList.remove('pronoun-found', 'answered');
+    });
+    // Clear the pronouns-area
+    const area = document.getElementById('pronouns-area-' + qi);
+    if (area) area.innerHTML = '';
+    card.classList.remove('all-correct');
+  });
+  updateProgress();
+}
+</script>
+</body>
+</html>

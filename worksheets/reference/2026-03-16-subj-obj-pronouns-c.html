@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject &amp; Object Pronouns — Part C</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: linear-gradient(160deg, #e0f4ff 0%, #f0e8ff 100%); min-height: 100vh; color: #1a2a3a; padding: 20px 16px 80px; }
+.container { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.6rem, 5vw, 2.2rem); color: #1a6fa8; text-align: center; margin-bottom: 2px; }
+.subtitle { text-align: center; font-size: 0.95rem; color: #6a8299; font-weight: 600; }
+.concept-box { background: #ffe566; border: 3px solid #e6c800; border-radius: 16px; padding: 14px 18px; font-size: 0.97rem; font-weight: 700; color: #5a4000; cursor: pointer; user-select: none; transition: transform 0.1s; }
+.concept-box:active { transform: scale(0.98); }
+.instructions { background: #3b9ede; color: white; border-radius: 16px; padding: 13px 18px; font-size: 0.97rem; font-weight: 700; cursor: pointer; user-select: none; text-align: center; transition: transform 0.1s; }
+.instructions:active { transform: scale(0.98); }
+.question-card { background: #fff; border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); padding: 16px 18px; border: 2.5px solid transparent; transition: border-color 0.2s, background 0.2s; }
+.question-card.correct { border-color: #5dca7e; background: #f0fff5; }
+.card-inner { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.q-num { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #3b9ede; min-width: 28px; flex-shrink: 0; }
+.sentence-area { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; font-size: 1rem; font-weight: 600; line-height: 1.8; }
+.plain-text { cursor: pointer; border-radius: 6px; padding: 2px 4px; user-select: none; transition: background 0.15s; }
+.plain-text:hover { background: #e8f4ff; }
+.pronoun-pair-chip { display: inline-flex; align-items: center; gap: 3px; background: #fff3c4; border: 2px solid #e6c800; border-radius: 8px; padding: 2px 8px; cursor: pointer; font-weight: 800; color: #5a3a00; white-space: nowrap; user-select: none; font-size: 0.93rem; transition: background 0.15s, transform 0.1s; }
+.pronoun-pair-chip:hover { background: #ffe88a; }
+.pronoun-pair-chip:active { transform: scale(0.95); }
+.answer-select { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700; color: #1a6fa8; background: #e8f4ff; border: 2.5px solid #3b9ede; border-radius: 10px; padding: 6px 10px; min-width: 90px; cursor: pointer; outline: none; transition: border-color 0.2s; }
+.answer-select:focus { border-color: #1a6fa8; }
+.play-btn { background: #5dca7e; border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.2rem; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 8px rgba(93,202,126,0.4); transition: background 0.15s; }
+.play-btn:hover { background: #3aaa5a; }
+.feedback { width: 100%; display: none; align-items: center; gap: 5px; font-size: 0.9rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-top: 4px; }
+.feedback.show { display: flex; }
+.feedback.correct { background: #d0f5e0; color: #1d7a40; }
+.feedback.hint { background: #ffeedd; color: #c05000; }
+.fb-play-btn { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0 2px; opacity: 0.75; transition: opacity 0.15s, transform 0.1s; }
+.fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+.progress-bar { background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 14px 20px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.pip { display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: #dde0e8; transition: background 0.3s; }
+.pip.done { background: #5dca7e; }
+.progress-count { font-weight: 700; color: #1a6fa8; font-size: 0.95rem; }
+.bonus-section { background: linear-gradient(135deg, #fff0fa, #f0eaff); border: 3px solid #a78bfa; border-radius: 18px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.bonus-section h2 { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #7c3aed; }
+.bonus-prompt { font-size: 0.97rem; font-weight: 700; color: #4a3060; line-height: 1.6; cursor: pointer; border-radius: 8px; padding: 4px 6px; transition: background 0.15s; user-select: none; }
+.bonus-prompt:hover { background: rgba(167,139,250,0.15); }
+.bonus-textarea { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600; color: #1a2a3a; background: #f8fbff; border: 2.5px solid #3b9ede; border-radius: 12px; padding: 10px 14px; width: 100%; min-height: 120px; resize: vertical; outline: none; transition: border-color 0.2s; }
+.bonus-textarea:focus { border-color: #1a6fa8; }
+.bonus-btns { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.mic-btn { background: #3b9ede; border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.2rem; color: white; cursor: pointer; flex-shrink: 0; transition: background 0.15s; }
+.mic-btn.listening { background: #ff7eb3; animation: pulse 0.7s infinite alternate; }
+.mic-btn:disabled { opacity: 0.4; cursor: default; }
+.readback-btn { background: #5dca7e; border: none; border-radius: 22px; padding: 10px 20px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.97rem; color: white; cursor: pointer; transition: background 0.15s; }
+.readback-btn:hover { background: #3aaa5a; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+.speaking-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a6fa8; color: white; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem; padding: 10px 24px; border-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); transition: transform 0.3s ease, background 0.2s; z-index: 100; cursor: pointer; user-select: none; pointer-events: none; }
+.speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.speaking-toast.visible:hover { background: #c0392b; }
+.speaking-toast.visible:hover .toast-label::after { content: ' \2014 tap to stop'; }
+@media (max-width: 480px) { .question-card { padding: 12px; } .sentence-area { font-size: 0.95rem; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>&#128216; Subject &amp; Object Pronouns</h1>
+    <p class="subtitle">Part C &mdash; Tap any part of a sentence to hear just that part</p>
+  </header>
+  <div class="concept-box" onclick="speak('Reteaching. A subject pronoun indicates who or what performs the action of a sentence. The pronouns I, you, he, she, it, we, and they are subject pronouns. An object pronoun receives the action and may follow an action verb. The pronouns me, you, him, her, it, us, and them are object pronouns.')">
+    &#128266; <strong>RETEACHING:</strong> A <strong>subject pronoun</strong> performs the action (<em>I, you, he, she, it, we, they</em>). An <strong>object pronoun</strong> receives the action (<em>me, you, him, her, it, us, them</em>).
+  </div>
+  <div class="instructions" onclick="speak('In each sentence, the pronoun choices are highlighted in yellow. Tap any part of the sentence to hear just that part. Choose the correct pronoun from the drop-down menu.')">
+    &#128266; In each sentence, the pronoun choices are highlighted. Tap any part to hear it. Choose the correct pronoun from the drop-down.
+  </div>
+  <div id="questionsList"></div>
+  <div class="progress-bar">
+    <span id="progressPips"></span>
+    <span class="progress-count" id="progressCount">0 / 15 answered</span>
+  </div>
+  <div style="text-align:center">
+    <button class="clear-btn" onclick="clearAll()">&#128465;&#65039; Clear all responses</button>
+  </div>
+  <div class="bonus-section">
+    <h2>&#10024; Think &amp; Write</h2>
+    <div class="bonus-prompt" onclick="speak('Why do not some people listen to good advice? Write two or three sentences explaining why this might be so. Use as many subject and object pronouns as possible.')">
+      &#128266; Why don&rsquo;t some people listen to good advice? Write two or three sentences explaining why this might be so. Use as many subject and object pronouns as possible.
+    </div>
+    <textarea class="bonus-textarea" id="bonusTextarea" placeholder="Tap the mic or type your answer here&hellip;"></textarea>
+    <div class="bonus-btns">
+      <button class="mic-btn" id="micBtn" title="Speak your answer">&#127908;</button>
+      <button class="readback-btn" onclick="speak(document.getElementById('bonusTextarea').value || 'Nothing written yet.')">&#128266; Read back</button>
+    </div>
+  </div>
+</div>
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()">&#128266; <span class="toast-label">Reading aloud&hellip;</span></div>
+<script>
+const questions = [
+  { before: "The woodcutter's wife warns ", choices: ["he","him"], after: ".", answer: "him", hint: "the woodcutter receives the warning — object pronoun" },
+  { before: "The woodcutter does not hear ", choices: ["she","her"], after: ".", answer: "her", hint: "the wife receives the action of being heard — object pronoun" },
+  { before: "The woodcutter and ", choices: ["she","her"], after: " often ignore each other.", answer: "she", hint: "the woodcutter and she do the ignoring together — subject pronoun" },
+  { before: "", choices: ["They","Them"], after: " do not see eye to eye.", answer: "They", hint: "they perform the action — subject pronoun" },
+  { before: "The woodcutter just watched ", choices: ["them","they"], after: ".", answer: "them", hint: "them receives the watching — object pronoun" },
+  { before: "Amy and ", choices: ["I","me"], after: " felt sorry for the woodcutter.", answer: "I", hint: "Amy and I do the feeling — subject pronoun" },
+  { before: "", choices: ["Us","We"], after: " might have done the same thing.", answer: "We", hint: "We performs the action — subject pronoun" },
+  { before: "", choices: ["He","Him"], after: " did not seem like such an unlikeable character.", answer: "He", hint: "He performs the action of seeming — subject pronoun" },
+  { before: "We told Katie and ", choices: ["she","her"], after: " about this story.", answer: "her", hint: "Katie and her receive the telling — object pronoun" },
+  { before: "", choices: ["They","Them"], after: " had different ideas about the story.", answer: "They", hint: "They perform the action of having ideas — subject pronoun" },
+  { before: "Matt wanted Katie and ", choices: ["I","me"], after: " to agree with him.", answer: "me", hint: "Katie and me receive what Matt wanted — object pronoun" },
+  { before: "We asked ", choices: ["he","him"], after: " to explain his ideas.", answer: "him", hint: "him receives the asking — object pronoun" },
+  { before: "Then he told Katie and ", choices: ["I","me"], after: " his opinion.", answer: "me", hint: "Katie and me receive the telling — object pronoun" },
+  { before: "The opinions were different. We couldn't change ", choices: ["they","them"], after: "!", answer: "them", hint: "them receives the action of being changed — object pronoun" },
+  { before: "", choices: ["He","Him"], after: ", Katie, and I will have to read it again.", answer: "He", hint: "He, Katie, and I all perform the action — subject pronoun" }
+];
+
+const STORAGE_KEY = 'worksheet_pronouns_c_2026_03_16';
+const userAnswers = new Array(questions.length).fill('');
+const feedbackTexts = {};
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88; utter.pitch = 1.05;
+  utter.onstart = showToast; utter.onend = hideToast; utter.onerror = hideToast;
+  window.speechSynthesis.speak(utter);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+
+function showFeedback(fbId, pass, text) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = (pass ? '\u2705 ' : '\ud83d\udca1 Hint: ') + text +
+    ' <button class="fb-play-btn" onclick="speak(feedbackTexts[\'' + fbId + '\'])" title="Read aloud">\ud83d\udd0a</button>';
+}
+
+function buildSentence(q, val) {
+  return q.before + val + q.after;
+}
+
+function updateProgress() {
+  const done = userAnswers.filter(a => a !== '').length;
+  document.getElementById('progressPips').innerHTML =
+    userAnswers.map(a => '<span class="pip ' + (a ? 'done' : '') + '"></span>').join('');
+  document.getElementById('progressCount').textContent = done + ' / ' + questions.length + ' answered';
+}
+
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ answers: userAnswers, bonus: document.getElementById('bonusTextarea').value })); } catch(e) {}
+}
+function loadProgress() {
+  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; } catch(e) { return null; }
+}
+
+function updateFeedback(i, val) {
+  const q = questions[i];
+  const fbId = 'fb-' + i;
+  if (!val) { document.getElementById(fbId).className = 'feedback'; return; }
+  const correct = val === q.answer;
+  const text = correct
+    ? 'Yes! "' + val + '" is correct. ' + buildSentence(q, val)
+    : q.hint;
+  showFeedback(fbId, correct, text);
+  document.getElementById('card-' + i).classList.toggle('correct', correct);
+}
+
+// Build UI
+const list = document.getElementById('questionsList');
+questions.forEach(function(q, i) {
+  const card = document.createElement('div');
+  card.className = 'question-card';
+  card.id = 'card-' + i;
+
+  const inner = document.createElement('div');
+  inner.className = 'card-inner';
+
+  const num = document.createElement('div');
+  num.className = 'q-num';
+  num.textContent = (i + 1) + '.';
+
+  const sentArea = document.createElement('div');
+  sentArea.className = 'sentence-area';
+
+  function speakFull(val) { speak(buildSentence(q, val || q.choices.join(' or '))); }
+
+  if (q.before) {
+    const sp = document.createElement('span');
+    sp.className = 'plain-text';
+    sp.textContent = q.before;
+    sp.title = 'Tap to hear just this part';
+    sp.onclick = function() { speak(q.before.trim()); };
+    sentArea.appendChild(sp);
+  }
+
+  // Chip showing both choices
+  const chip = document.createElement('span');
+  chip.className = 'pronoun-pair-chip';
+  chip.innerHTML = '\ud83d\udd0a (' + q.choices[0] + ', ' + q.choices[1] + ')';
+  chip.onclick = function(e) { e.stopPropagation(); speak(q.choices[0] + ' or ' + q.choices[1] + '?'); };
+  sentArea.appendChild(chip);
+
+  // Dropdown
+  const sel = document.createElement('select');
+  sel.className = 'answer-select';
+  sel.id = 'sel-' + i;
+  const defOpt = document.createElement('option');
+  defOpt.value = ''; defOpt.textContent = '\u2014 pick \u2014';
+  sel.appendChild(defOpt);
+  q.choices.forEach(function(c) {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+  sel.onchange = function() {
+    const val = sel.value;
+    userAnswers[i] = val;
+    saveProgress();
+    updateProgress();
+    if (val) setTimeout(function() { speak(buildSentence(q, val)); }, 300);
+    updateFeedback(i, val);
+  };
+  sentArea.appendChild(sel);
+
+  if (q.after) {
+    const sp2 = document.createElement('span');
+    sp2.className = 'plain-text';
+    sp2.textContent = q.after;
+    sp2.title = 'Tap to hear just this part';
+    sp2.onclick = function() { speak(q.after.trim()); };
+    sentArea.appendChild(sp2);
+  }
+
+  const playBtn = document.createElement('button');
+  playBtn.className = 'play-btn';
+  playBtn.title = 'Hear full sentence';
+  playBtn.textContent = '\u25b6';
+  playBtn.onclick = function() { speakFull(userAnswers[i]); };
+
+  const fb = document.createElement('div');
+  fb.className = 'feedback';
+  fb.id = 'fb-' + i;
+
+  inner.appendChild(num);
+  inner.appendChild(sentArea);
+  inner.appendChild(playBtn);
+  card.appendChild(inner);
+  card.appendChild(fb);
+  list.appendChild(card);
+});
+
+// STT mic
+(function() {
+  var ta = document.getElementById('bonusTextarea');
+  var btn = document.getElementById('micBtn');
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { btn.disabled = true; btn.title = 'Speech input not available in this browser'; return; }
+  var rec = new SR();
+  rec.continuous = false; rec.interimResults = false; rec.lang = 'en-US';
+  var listening = false;
+  btn.onclick = function() { if (listening) { rec.stop(); return; } rec.start(); };
+  rec.onstart = function() { listening = true; btn.textContent = '\u23f9'; btn.classList.add('listening'); };
+  rec.onresult = function(e) { var t = e.results[0][0].transcript; ta.value += (ta.value ? ' ' : '') + t; saveProgress(); };
+  rec.onend = function() { listening = false; btn.textContent = '\ud83c\udfa4'; btn.classList.remove('listening'); };
+  rec.onerror = function(e) { console.warn('STT error:', e.error); rec.onend(); };
+})();
+
+// Load saved
+var saved = loadProgress();
+if (saved) {
+  if (saved.answers && saved.answers.length === questions.length) {
+    saved.answers.forEach(function(val, i) {
+      if (val) {
+        userAnswers[i] = val;
+        var sel = document.getElementById('sel-' + i);
+        if (sel) sel.value = val;
+        updateFeedback(i, val);
+      }
+    });
+  }
+  if (saved.bonus) document.getElementById('bonusTextarea').value = saved.bonus;
+}
+document.getElementById('bonusTextarea').addEventListener('input', saveProgress);
+updateProgress();
+
+function clearAll() {
+  if (!confirm('Clear all your answers and start over?')) return;
+  userAnswers.fill('');
+  document.getElementById('bonusTextarea').value = '';
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  questions.forEach(function(q, i) {
+    var sel = document.getElementById('sel-' + i);
+    if (sel) sel.value = '';
+    var fb = document.getElementById('fb-' + i);
+    if (fb) fb.className = 'feedback';
+    var card = document.getElementById('card-' + i);
+    if (card) card.classList.remove('correct');
+  });
+  updateProgress();
+}
+</script>
+</body>
+</html>
