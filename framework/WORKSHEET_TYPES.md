@@ -88,6 +88,39 @@ Call `updateIntermediates()` at the top of `onInputChange()`. Checkbox defaults 
 
 ---
 
+## Type 5: Click-to-Identify Pronouns (Subject or Object)
+
+*Every word in a sentence is tappable. The student clicks words to identify which are pronouns, then classifies each pronoun as subject or object.*
+
+**Interaction model:** 
+- Every word in each sentence is a tappable span (speaks the word aloud on tap).
+- Tapping a word that **is** a pronoun (per the answer key) highlights it yellow and reveals a labeled S/O answer row below the sentence.
+- Tapping a word that **is not** a pronoun flashes it red briefly — no dropdown appears.
+- Answer rows appear in a `.pronoun-answers-below` container beneath the sentence, indented to connect visually. Each row shows a yellow chip with the word, the S/O dropdown, and (after selection) the feedback badge.
+- The word span gains `.answered` (green) when the S/O selection is correct.
+- Pre-identification removed — the act of finding pronouns is part of the task.
+- Inline dropdowns are NOT used; all answer rows live below the sentence in a dedicated area.
+- Feedback is displayed in the below-sentence rows, not inline.
+
+**Data shape:**
+```javascript
+{
+  text: "The full sentence text",
+  pronouns: [
+    { word: "I", type: "subject" },
+    { word: "her", type: "object" }
+  ]
+}
+```
+
+**Answer control:** Dropdown (`<select>`) with options "subject" and "object", displayed in the answer row below the sentence after a pronoun is identified.
+
+**Answer evaluation:** Compare selected type against the pronoun's `type` property in the answer key.
+
+**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-b.html` (post-iteration)
+
+---
+
 ## Adding a New Type
 
 When you implement a worksheet that doesn't match an existing type:
