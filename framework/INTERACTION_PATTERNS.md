@@ -194,6 +194,36 @@ function updateFeedback(i, val) {
 }
 ```
 
+### Retry-Until-Correct Pattern
+
+For worksheet types where a correct answer requires multiple selections (e.g. word chip + mark type), do NOT finalize the card on a wrong attempt. Show feedback and keep all controls live:
+
+```javascript
+if (pass) {
+  state.submitted[i] = true;
+  saveState();
+  // lock card, update progress, check phase complete
+} else {
+  showFeedback(fbId, false, hintText);
+  card.classList.add('missed');
+  const confirmBtn = document.getElementById(`confirm-${i}`);
+  if (confirmBtn) confirmBtn.disabled = false;
+  updateProgress(); // pips don't advance until submitted[i] is true
+}
+```
+
+`updateProgress()` must key off `state.submitted[i]`, not off whether a decision has been made — in-progress wrong attempts should not prematurely advance the pip count.
+
+**Already-found word guard:** When a sentence has multiple errors and the student re-taps a word they already found, give a gentle nudge rather than counting it as a new submission:
+```javascript
+if (state.foundErrors[i].includes(wi)) {
+  showFeedback(`fb-${i}`, true, "You already found that one! Look for another error in this sentence.", false);
+  return;
+}
+```
+
+Do NOT block the visual `.selected` highlight from appearing on already-found words — removing that guard caused taps to appear to do nothing, making the interface feel broken.
+
 ---
 
 ## Progress Tracking
