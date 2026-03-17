@@ -269,6 +269,20 @@
     transition: background 0.15s, color 0.15s, border-color 0.15s;
   }
   .clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+  .export-btn {
+    background: #7c5cbf;
+    color: white;
+    border: none;
+    border-radius: 18px;
+    padding: 9px 22px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    box-shadow: 0 2px 8px rgba(124,92,191,0.25);
+  }
+  .export-btn:hover { background: #5a3fa0; }
   @media (max-width: 480px) {
     .question-card { padding: 12px; }
     .pronoun-answers { padding-left: 8px; }
@@ -298,6 +312,8 @@
   </div>
   <div style="text-align:center">
     <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+    &nbsp;
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
   </div>
 </div>
 
@@ -617,12 +633,99 @@ if (saved && saved.length === questions.length) {
 }
 updateProgress();
 
+function exportPrint() {
+  const rows = questions.map((q, qi) => {
+    // Build sentence with pronouns annotated inline
+    // We'll mark each pronoun with its S/O label (or blank if unanswered)
+    let annotated = q.sentence;
+    // Replace each pronoun word (in order) with an annotated version
+    // Use a placeholder approach to avoid double-replacing
+    let result = q.sentence;
+    // Work backwards through pronoun positions to preserve indices
+    // Simpler: split on known pronoun words and rebuild
+    const pronounMap = {};
+    q.pronouns.forEach((p, pi) => {
+      const label = userAnswers[qi][pi];
+      pronounMap[p.word] = pronounMap[p.word] || [];
+      pronounMap[p.word].push({ label, answer: p.answer });
+    });
+
+    // Rebuild sentence annotating each pronoun occurrence in order
+    const tokens = q.sentence.split(/(\b[A-Za-z']+\b)/);
+    const usedCounts = {};
+    const annotatedParts = tokens.map(tok => {
+      if (pronounMap[tok]) {
+        usedCounts[tok] = (usedCounts[tok] || 0);
+        const entry = pronounMap[tok][usedCounts[tok]];
+        usedCounts[tok]++;
+        if (entry) {
+          const lbl = entry.label || '_';
+          const correct = entry.label && entry.label === entry.answer;
+          const color = !entry.label ? '#333' : correct ? '#1d7a40' : '#c05000';
+          const bg = !entry.label ? '#f0f0f0' : correct ? '#d0f5e0' : '#ffeedd';
+          return `<u><strong>${tok}</strong></u><sup style="background:${bg};color:${color};border:1px solid ${color};border-radius:3px;padding:0 3px;font-size:0.75em;font-weight:800;">${lbl}</sup>`;
+        }
+      }
+      return tok;
+    });
+
+    return `<div style="margin-bottom:14px;">
+      <span style="font-weight:700;margin-right:6px;">${qi+1}.</span>${annotatedParts.join('')}
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Subject & Object Pronouns — Part B</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 680px; margin: 0 auto; padding: 24px 28px; color: #111; font-size: 14px; }
+  h1 { font-size: 1.5rem; margin-bottom: 2px; }
+  .name-line { display: flex; gap: 20px; margin: 12px 0 18px; font-size: 0.95rem; }
+  .name-line span { display: flex; align-items: flex-end; gap: 6px; }
+  .name-line .line { display: inline-block; width: 180px; border-bottom: 1.5px solid #333; }
+  .reteach { border: 2px solid #333; padding: 10px 14px; margin-bottom: 18px; font-size: 0.88rem; line-height: 1.6; }
+  .instructions { font-weight: bold; margin-bottom: 16px; font-size: 0.95rem; }
+  .legend { font-size: 0.83rem; color: #444; margin-bottom: 14px; }
+  .footer { margin-top: 32px; font-size: 0.78rem; color: #666; text-align: right; border-top: 1px solid #ccc; padding-top: 8px; }
+  .print-btn { background: #333; color: white; border: none; padding: 8px 20px; font-size: 0.9rem; border-radius: 4px; cursor: pointer; margin-bottom: 20px; }
+  @media print { .print-btn { display: none; } }
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨️ Print this page</button>
+<h1>Subject and Object Pronouns — Part B</h1>
+<div class="name-line">
+  <span>Name: <span class="line"></span></span>
+  <span>Date: <span class="line" style="width:100px"></span></span>
+</div>
+<div class="reteach">
+  <strong>RETEACHING:</strong> A <strong>subject pronoun</strong> indicates who or what <em>performs</em> the action.
+  <em>I, you, he, she, it, we, they</em> are subject pronouns.
+  An <strong>object pronoun</strong> indicates who or what <em>receives</em> the action.
+  <em>Me, you, him, her, it, us, them</em> are object pronouns.
+</div>
+<p class="instructions">Underline all pronouns in each sentence. Then, above each one, write <strong>S</strong> if it is a subject pronoun, or <strong>O</strong> if it is an object pronoun.</p>
+<p class="legend">Pronouns are underlined below. Superscript shows your label (S or O). Blank = not yet answered.</p>
+${rows}
+<div class="footer">Scholastic Success With Grammar • Grade 5 &nbsp;|&nbsp; Part B</div>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
 function clearAll() {
   if (!confirm('Clear all your answers and start over?')) return;
   // Reset userAnswers
   questions.forEach((q, qi) => { userAnswers[qi] = q.pronouns.map(() => ''); });
   try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-  // Remove all revealed pronoun rows and reset word-token states
   questions.forEach((q, qi) => {
     const card = document.getElementById('card-' + qi);
     if (!card) return;

@@ -192,6 +192,20 @@
     transition: background 0.15s, color 0.15s, border-color 0.15s;
   }
   .clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+  .export-btn {
+    background: #7c5cbf;
+    color: white;
+    border: none;
+    border-radius: 18px;
+    padding: 9px 22px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    box-shadow: 0 2px 8px rgba(124,92,191,0.25);
+  }
+  .export-btn:hover { background: #5a3fa0; }
   @media (max-width: 480px) {
     .question-card { padding: 12px; }
     .tap-sentence { font-size: 0.95rem; }
@@ -221,6 +235,8 @@
   </div>
   <div style="text-align:center">
     <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+    &nbsp;
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
   </div>
 </div>
 
@@ -439,6 +455,75 @@ if (saved && saved.length === questions.length) {
   });
 }
 updateProgress();
+
+function exportPrint() {
+  const rows = questions.map((q, i) => {
+    const val = userAnswers[i];
+    const correct = val && val.toLowerCase() === q.answer.toLowerCase();
+    const bg     = correct ? '#d0f5e0' : '#ffeedd';
+    const border = correct ? '#5dca7e' : '#ff9966';
+    const hlStyle = 'background:' + bg + ';border:1.5px solid ' + border + ';border-radius:4px;padding:0 5px;font-weight:800;';
+
+    let s1Html = '';
+    if (q.s1) {
+      let s1 = q.s1;
+      if (val) {
+        const escaped = val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        s1 = s1.replace(new RegExp(escaped, 'i'), function(m) { return '<span style="' + hlStyle + '">' + m + '</span>'; });
+      }
+      s1Html = '<div style="margin-bottom:4px;">' + s1 + '</div>';
+    }
+
+    const s2Html = q.s2.replace(new RegExp('\\b(' + q.pronoun + ')\\b'), '<u><strong>$1</strong></u>');
+
+    return '<div style="margin-bottom:18px;"><span style="font-weight:700;margin-right:6px;">' + (i+1) + '.</span>' + s1Html + '<div>' + s2Html + '</div></div>';
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Subject & Object Pronouns — Part A</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 680px; margin: 0 auto; padding: 24px 28px; color: #111; font-size: 14px; }
+  h1 { font-size: 1.5rem; margin-bottom: 2px; }
+  .name-line { display: flex; gap: 20px; margin: 12px 0 18px; font-size: 0.95rem; }
+  .name-line span { display: flex; align-items: flex-end; gap: 6px; }
+  .name-line .line { display: inline-block; width: 180px; border-bottom: 1.5px solid #333; }
+  .reteach { border: 2px solid #333; padding: 10px 14px; margin-bottom: 18px; font-size: 0.88rem; line-height: 1.6; }
+  .reteach strong { font-size: 0.9rem; }
+  .instructions { font-weight: bold; margin-bottom: 16px; font-size: 0.95rem; }
+  .footer { margin-top: 32px; font-size: 0.78rem; color: #666; text-align: right; border-top: 1px solid #ccc; padding-top: 8px; }
+  .print-btn { background: #333; color: white; border: none; padding: 8px 20px; font-size: 0.9rem; border-radius: 4px; cursor: pointer; margin-bottom: 20px; }
+  @media print { .print-btn { display: none; } }
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨️ Print this page</button>
+<h1>Subject and Object Pronouns — Part A</h1>
+<div class="name-line">
+  <span>Name: <span class="line"></span></span>
+  <span>Date: <span class="line" style="width:100px"></span></span>
+</div>
+<div class="reteach">
+  <strong>RETEACHING:</strong> A <strong>subject pronoun</strong> indicates who or what <em>performs</em> the action.
+  <em>I, you, he, she, it, we, they</em> are subject pronouns.
+  An <strong>object pronoun</strong> indicates who or what <em>receives</em> the action.
+  <em>Me, you, him, her, it, us, them</em> are object pronouns.
+</div>
+<p class="instructions">Read each sentence pair. The pronoun is underlined. Write or circle the noun it replaces from the first sentence.</p>
+${rows}
+<div class="footer">Scholastic Success With Grammar • Grade 5 &nbsp;|&nbsp; Part A</div>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
 
 function clearAll() {
   if (!confirm('Clear all your answers and start over?')) return;

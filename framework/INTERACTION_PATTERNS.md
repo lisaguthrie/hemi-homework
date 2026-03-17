@@ -346,9 +346,11 @@ Standard section order for every worksheet:
   <span id="progressCount"></span>
 </div>
 
-<!-- 6. Clear button -->
+<!-- 6. Clear + Export buttons (both required on every worksheet) -->
 <div style="text-align:center">
   <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+  &nbsp;
+  <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
 </div>
 
 <!-- 7. Bonus / extension activity — if present on original worksheet -->
@@ -380,4 +382,29 @@ function exportPrint() {
 }
 ```
 
-The print HTML should: reproduce the original worksheet layout (problem text, clues, any work including guess tables), include `@media print { button { display: none } }`, provide an explicit Print button for non-Ctrl+P users, pre-fill the student's name on the name line, and include a footer with source attribution if known.
+The print HTML should: reproduce the original worksheet layout (problem text, clues, any work including guess tables), include `@media print { button { display: none } }`, provide an explicit Print button for non-Ctrl+P users, pre-fill the student's name on the name line, and include a footer with source attribution if known. Name/date header lines must use `align-items: flex-end` on their flex container so label text sits at the baseline of the underline, not floating in the middle.
+
+```css
+/* Name/date header — used in every print page */
+.name-line { display: flex; gap: 20px; margin: 12px 0 18px; font-size: 0.95rem; }
+.name-line span { display: flex; align-items: flex-end; gap: 6px; }  /* flex-end keeps label at baseline */
+.name-line .line { display: inline-block; width: 180px; border-bottom: 1.5px solid #333; }
+```
+
+```css
+/* Export / Print button */
+.export-btn {
+  background: #7c5cbf;
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 9px 22px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  box-shadow: 0 2px 8px rgba(124,92,191,0.25);
+}
+.export-btn:hover { background: #5a3fa0; }
+```

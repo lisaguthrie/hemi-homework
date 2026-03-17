@@ -117,10 +117,11 @@ Sentence 2: [sentence with pronoun highlighted]
 - Pronoun in s2 is highlighted with a blue chip (`background: #e8f0ff; border: 2px solid #3b9ede`) to distinguish it from the yellow phrase chips used for tappable noun phrases in Type 1
 - Per-card play button reads both sentences together
 - Feedback: correct → `Yes! "[pronoun]" replaces [noun].` / incorrect → hint naming the pronoun type and number
+- **Print rendering:** Pronoun in S2 is underlined+bold. Answered noun is highlighted inline in S1 using a colored span (green `#d0f5e0`/`#5dca7e` if correct, orange `#ffeedd`/`#ff9966` if incorrect); match the noun case-insensitively. Unanswered items show sentences plain with no label row. Do not include a "replaces →" label — the visual relationship between highlighted noun and underlined pronoun is self-evident.
 
 **Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-a.html`
 
-### Type 5: Label Pronouns Subject or Object (S/O Classification)
+## Type 5: Label Pronouns Subject or Object (S/O Classification)
  
 *Each sentence contains one or more pronouns, each highlighted in yellow. The student classifies each pronoun as S (subject pronoun) or O (object pronoun) using a per-pronoun dropdown.*
  
@@ -153,8 +154,39 @@ Sentence 2: [sentence with pronoun highlighted]
 - Tapping a word that **is not** a pronoun flashes it red briefly — no dropdown appears.
 - Answer rows appear in a `.pronoun-answers-below` container beneath the sentence, indented to connect visually. Each row shows a yellow chip with the word, the S/O dropdown, and (after selection) the feedback badge.
 - The word span gains `.answered` (green) when the S/O selection is correct.
+- **Print rendering:** Each pronoun is underlined+bold with its S/O label as a superscript badge (colored span: green if correct, orange if incorrect, grey `_` if unanswered). Sentence text is reconstructed by tokenising on word boundaries and replacing pronoun occurrences in order — handle repeated words (e.g. "I" appearing twice) by tracking a per-word usage count.
 
 **Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-b.html`
+
+---
+
+## Type 6: Choose the Correct Pronoun (Binary Parenthetical)
+
+*A sentence contains a parenthetical pair of pronoun choices, e.g. `(he, him)`. The student selects the grammatically correct one.*
+
+**Sentence structure:** `[before text?] (choice1, choice2) [after text?]`
+
+**Data shape:**
+```javascript
+{
+  before:  "The woodcutter's wife warns ",
+  choices: ["he", "him"],
+  after:   ".",
+  answer:  "him",
+  hint:    "the woodcutter receives the warning — object pronoun"
+}
+```
+
+**Answer control:** Dropdown showing both choices. A tappable yellow chip displays the choices inline in the sentence (`(he, him)`); tapping it reads both options aloud. Part-of-sentence tap-to-speak applies to `before` and `after` segments.
+
+**Interaction decisions:**
+- Yellow chip reads `"choice1 or choice2?"` on tap
+- After selection, auto-reads the full sentence with the chosen word substituted (300ms delay)
+- Feedback: correct → full sentence read aloud / incorrect → hint naming subject vs. object role
+- If a bonus free-text section is present, pair with mic button (STT) and read-back button
+- **Print rendering:** Both choices are always kept in parentheses — never collapse to just the answer. The selected choice is highlighted inline with a colored span (green if correct, orange if incorrect); the other choice renders as plain text. Unanswered items show the plain parenthetical with no highlight. This mirrors the original worksheet's "circle the correct word" format.
+
+**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-c.html`
 
 ---
 
