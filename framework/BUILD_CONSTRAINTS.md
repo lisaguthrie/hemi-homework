@@ -26,6 +26,25 @@ Examples:
 
 Subject slug: lowercase, hyphens, no special characters.
 
+### Multi-Section / Multi-Page Splitting Rule
+
+When a worksheet contains multiple distinct exercise sections (e.g. Part A and Part B on one page, or multiple pages), default to **one file per distinct exercise section**, not one file per physical worksheet page.
+
+**Rationale:** Each section typically has a different interaction model, progress tracking scope, and cognitive demand. Combining them in one file creates a longer scroll and conflates progress across different skills. Separate files allow each section to be assigned, completed, and reviewed independently.
+
+**Naming convention:**
+```
+worksheets/{child}/YYYY-MM-DD-{subject-slug}-{section}.html
+```
+Where `{section}` is a lowercase letter (a, b, c) or a short descriptor (e.g. `-pairs`, `-label`, `-choose`).
+
+**Example:** A worksheet with Part A (identify antecedent), Part B (label S/O), and a second page (choose correct pronoun) becomes three files:
+- `2026-03-16-subj-obj-pronouns-a.html`
+- `2026-03-16-subj-obj-pronouns-b.html`
+- `2026-03-16-subj-obj-pronouns-c.html`
+
+**Override:** If the user explicitly requests a single file, or if the sections are closely interdependent (e.g. Part B refers to answers from Part A), combine them and use section headers within the page.
+
 ---
 
 ## Touch / Accessibility
@@ -50,6 +69,7 @@ Correct answers live in the JavaScript data object, not hardcoded in HTML. This 
 - Note your interpretation of ambiguous content at the top of your response, then proceed
 - Do not include setup instructions, "open in browser" notes, or other operational guidance in responses
 - Parse worksheet content from the uploaded image/PDF directly — do not ask the user to transcribe it
+- When a worksheet contains multiple distinct exercise sections, default to creating one file per section (see Multi-Section / Multi-Page Splitting Rule above)
 
 ---
 
