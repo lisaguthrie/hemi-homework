@@ -88,6 +88,48 @@ Call `updateIntermediates()` at the top of `onInputChange()`. Checkbox defaults 
 
 ---
 
+## Type 4: [To be added]
+
+*Add new types here as they are implemented. Include: description, data shape, answer control type, any special interaction considerations, and a reference to the first implementation.*
+
+---
+
+## Type 5: Label Pronouns Subject or Object (S/O Classification)
+
+*Each sentence contains one or more pronouns, each highlighted in yellow. The student classifies each pronoun as S (subject pronoun) or O (object pronoun) using a per-pronoun dropdown.*
+
+**Sentence structure:**
+```
+[sentence with one or more pronouns highlighted]
+```
+
+**Data shape:**
+```javascript
+{
+  sentence: '"I want you to chop some wood," she said.',
+  pronouns: [
+    { word: "I",   answer: "S", hint: "I performs the action — subject pronoun" },
+    { word: "you", answer: "O", hint: "you receives the action here — object pronoun" },
+    { word: "she", answer: "S", hint: "she performs the action of saying — subject pronoun" }
+  ]
+}
+```
+
+**Answer control:** One `S — subject / O — object` dropdown per pronoun. Pronouns are tokenized from the sentence text and highlighted as yellow phrase chips. After selection, auto-reads `"[pronoun] is a subject/object pronoun. It performs/receives the action."` (300ms delay).
+
+**Progress tracking:** Flatten all per-pronoun answers across all questions into a single array for pip counting and answered/total display.
+
+**Card state:** Card border turns green only when all pronouns in that card are answered correctly (`all-correct` class).
+
+**Interaction decisions:**
+- Sentence is tappable (reads full text)
+- Pronoun chips in the sentence are decorative only (not separately tappable); the per-pronoun answer rows below the sentence carry the interaction
+- Answer rows are indented below the sentence with `padding-left: 40px` to visually connect them
+
+**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-b.html`
+
+---
+
 ## Adding a New Type
 
 When you implement a worksheet that doesn't match an existing type:
