@@ -109,6 +109,28 @@ Always prepend `🔊` inside the chip. Wire: `chip.onclick = (e) => { e.stopProp
 
 Plain-text spans adjacent to chips are also tappable and speak the full sentence (current answer substituted if selected).
 
+### Pronoun Highlight Chip (blue variant)
+
+Used when a specific word in a sentence needs to be marked as "the target" for an interaction (e.g. the pronoun being labeled or identified), as distinct from a tappable noun phrase the student is replacing.
+
+```css
+.pronoun-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #e8f0ff;
+  border: 2px solid #3b9ede;
+  border-radius: 7px;
+  padding: 1px 8px;
+  font-weight: 800;
+  color: #1a6fa8;
+  white-space: nowrap;
+  font-size: 0.93rem;
+}
+```
+
+Use the yellow `.phrase-chip` when the chip is independently tappable and reads itself aloud. Use the blue `.pronoun-chip` when the chip is a visual marker only and the surrounding sentence element handles the tap-to-speak.
+
 ---
 
 ## Buttons
