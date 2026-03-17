@@ -37,21 +37,44 @@ If a change spans multiple files, list each one separately in the update block.
 
 ## The `📋 Update Suggested` Block
 
-Whenever the model identifies a confirmed improvement, it appends this block at the end of its response:
+Whenever the model identifies a confirmed improvement, it appends a `📋` update block at the end of its response.
+
+Preferred rich format:
 
 ```
 ---
-📋 **[Constitution / Baseline Spec / Profile] Update Suggested**
+## 📋 Framework Update — New Worksheet Type 7
+
+**File:** `framework/WORKSHEET_TYPES.md`
+**Section:** Add after Type 6
+
+### Type 7: Proofreading / Error Correction
+
+Describe the change in normal markdown. Include examples, snippets, constraints, and any optional
+`*Trigger:*` note if useful.
+```
+
+Legacy compact format is also accepted:
+
+```
+---
+📋 Framework Update Suggested
 
 **File:** `framework/INTERACTION_PATTERNS.md`
 **Change:** Add cancel-on-tap behavior to the Speaking Toast pattern. The toast's `onclick` handler should call `window.speechSynthesis.cancel()` followed by `hideToast()`. Without this, speech cannot be interrupted once started.
 **Trigger:** Discovered during iteration on `worksheets/maya/2026-03-11-pronouns-2.html`.
 ```
 
-The label should be one of:
-- `📋 Framework Update Suggested` — changes to any file in `/framework/`
-- `📋 Profile Update Suggested` — changes to a child's `PROFILE.md`
-- `📋 Baseline Spec Update Suggested` — alias for Framework Update (both are acceptable)
+Parser requirements:
+- Every block must contain a `📋` marker.
+- Every block must contain `**File:**`.
+- Use either `**Change:**` or a heading plus `**Section:**` and markdown body.
+- If a change spans multiple files, emit one block per file.
+
+Preferred labels:
+- `## 📋 Framework Update — ...` for changes to any file in `/framework/`
+- `## 📋 Profile Update — ...` for changes to a child's `PROFILE.md`
+- `## 📋 Baseline Spec Update — ...` is also acceptable for framework-level changes
 
 ---
 
@@ -59,13 +82,13 @@ The label should be one of:
 
 The `runners/propagate.py` script handles Phase 2 when run explicitly. It:
 
-1. Reads the `📋 Update Suggested` block from the model's last response (passed as stdin or a file argument)
+1. Reads `📋` update blocks from stdin, a file argument, or `pending-updates.md`
 2. Identifies the target file(s)
-3. Generates an updated version of each file by calling the Claude API with the current file content + the described change
+3. Generates an updated version of each file by calling the Claude API with the current file content + the described change block
 4. Commits each change to a new branch: `update/{slug}-{date}`
 5. Opens a GitHub PR with:
-   - Title: the change description (first sentence)
-   - Body: full update block content + link to the worksheet that triggered it
+   - Title: the parsed change summary
+   - Body: full update block content
    - Label: `framework-update` or `profile-update`
 
 You review and merge (or close) the PR. The main branch stays clean until you approve.

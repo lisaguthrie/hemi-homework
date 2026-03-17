@@ -28,6 +28,46 @@ class UpdateBlock:
     raw: str
 
 
+def extract_heading(chunk: str) -> str:
+    for line in chunk.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("**File:**"):
+            break
+        stripped = stripped.lstrip("#*- ").strip()
+        if stripped:
+            return stripped
+    return ""
+
+
+def summarize_change(chunk: str, file_path: str) -> str:
+    change_match = re.search(
+        r"\*\*Change:\*\*\s*([^\n]+(?:\n(?!\*\*)[^\n]+)*)",
+        chunk,
+        flags=re.IGNORECASE,
+    )
+    if change_match:
+        return change_match.group(1).strip()
+
+    heading = extract_heading(chunk)
+    if heading:
+        heading = re.sub(
+            r"^(?:Framework|Profile|Baseline Spec|Constitution) Update\s*[—-]\s*",
+            "",
+            heading,
+            flags=re.IGNORECASE,
+        ).strip()
+        if heading:
+            return heading
+
+    section_match = re.search(r"\*\*Section:\*\*\s*([^\n]+)", chunk, flags=re.IGNORECASE)
+    if section_match:
+        return section_match.group(1).strip()
+
+    return f"Update {file_path}"
+
+
 def today_iso() -> str:
     return date.today().isoformat()
 
@@ -59,16 +99,11 @@ def parse_update_blocks(text: str) -> List[UpdateBlock]:
     blocks: List[UpdateBlock] = []
     for chunk in [part for part in text.split("📋") if part.strip()]:
         file_match = re.search(r"\*\*File:\*\*\s*`?([^\n`]+)`?", chunk, flags=re.IGNORECASE)
-        change_match = re.search(
-            r"\*\*Change:\*\*\s*([^\n]+(?:\n(?!\*\*)[^\n]+)*)",
-            chunk,
-            flags=re.IGNORECASE,
-        )
-        if file_match and change_match:
+        if file_match:
             blocks.append(
                 UpdateBlock(
                     file=file_match.group(1).strip(),
-                    change=change_match.group(1).strip(),
+                    change=summarize_change(chunk, file_match.group(1).strip()),
                     raw="📋" + chunk.strip(),
                 )
             )
