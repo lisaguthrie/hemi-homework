@@ -221,6 +221,80 @@ if (saved && saved.length === questions.length) {
 
 ---
 
+## Clear All Responses Button
+
+Every worksheet page should include a "Clear all responses" button below the progress bar. It resets all answers, clears localStorage, and restores all UI elements to their initial state. A `confirm()` dialog prevents accidental clears.
+
+**Placement:** Centered `div` immediately after the progress bar, before the closing `</div>` of the main container.
+
+```html
+<div style="text-align:center">
+  <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+</div>
+```
+
+```css
+.clear-btn {
+  background: #f0f0f0;
+  color: #888;
+  border: 2px solid #ccc;
+  border-radius: 18px;
+  padding: 7px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+```
+
+**JS pattern for Type 1 / Type 4 (flat `userAnswers` array):**
+```javascript
+function clearAll() {
+  if (!confirm('Clear all your answers and start over?')) return;
+  userAnswers.fill('');
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  questions.forEach((q, i) => {
+    const sel = document.getElementById('sel-' + i);
+    if (sel) sel.value = '';
+    const fb = document.getElementById('fb-' + i);
+    if (fb) fb.className = 'feedback';
+    const card = document.getElementById('card-' + i);
+    if (card) card.classList.remove('correct');
+  });
+  updateProgress();
+}
+```
+
+**JS pattern for Type 5 (nested `userAnswers`, click-to-identify):**
+```javascript
+function clearAll() {
+  if (!confirm('Clear all your answers and start over?')) return;
+  questions.forEach((q, qi) => { userAnswers[qi] = q.pronouns.map(() => ''); });
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  questions.forEach((q, qi) => {
+    const card = document.getElementById('card-' + qi);
+    if (!card) return;
+    card.querySelectorAll('.word-token').forEach(span => {
+      span.classList.remove('pronoun-found', 'answered');
+    });
+    const area = document.getElementById('pronouns-area-' + qi);
+    if (area) area.innerHTML = '';
+    card.classList.remove('all-correct');
+  });
+  updateProgress();
+}
+```
+
+**Note:** If the page includes a bonus free-text area, also clear it:
+```javascript
+const ta = document.getElementById('bonusTextarea');
+if (ta) ta.value = '';
+```
+
+---
+
 ## Page Layout Template
 
 Standard section order for every worksheet:
@@ -247,10 +321,15 @@ Standard section order for every worksheet:
   <span id="progressCount"></span>
 </div>
 
-<!-- 6. Bonus / extension activity — if present on original worksheet -->
+<!-- 6. Clear button -->
+<div style="text-align:center">
+  <button class="clear-btn" onclick="clearAll()">🗑️ Clear all responses</button>
+</div>
+
+<!-- 7. Bonus / extension activity — if present on original worksheet -->
 <div class="bonus-section">...</div>
 
-<!-- 7. Speaking toast (always last, fixed position) -->
+<!-- 8. Speaking toast (always last, fixed position) -->
 <div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
   🔊 <span class="toast-label">Reading aloud…</span>
 </div>
