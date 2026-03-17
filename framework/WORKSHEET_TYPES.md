@@ -45,15 +45,33 @@ function buildFullSentence(q, answer) {
 
 *A multi-constraint word problem where the student guesses values for variables and checks each relationship against the clues.*
 
-**Interaction model:** Problem text broken into tappable sentences and highlighted clue pills. One numeric input per variable — **no mic buttons on number fields**. A second row of **intermediate step fields** shows derived values (e.g. Joy + Heidi, Joy + Heidi + Saul). An **auto-calculate checkbox** (unchecked by default) drives whether those fields compute automatically from primary inputs or accept manual entry — when checked, intermediate inputs become disabled and update live; when unchecked they are free-entry so the student works them out herself. A sequence of relationship-check buttons verifies each constraint and gives a directional hint. A guess history table logs every checked attempt, **skipping duplicates**. Win state fires only when all checks pass simultaneously.
+**Interaction model:** Problem text broken into tappable sentences and highlighted clue pills. One numeric input per variable — **no mic buttons on number fields**. A second row of **intermediate step fields** shows derived values (e.g. Joy + Heidi, Joy + Heidi + Saul). An **auto-calculate checkbox** (unchecked by default) drives whether those fields compute automatically from primary inputs or accept manual entry — when checked, intermediate inputs become disabled and update live; when unchecked they are free-entry so the student works them out herself. A sequence of relationship-check buttons verifies each constraint and gives a directional hint. A guess history table logs every checked attempt, **upserting rows by input values to avoid duplicates**. Win state fires only when all checks pass simultaneously.
 
-**Duplicate suppression in `logGuess`:**
+**Duplicate suppression in `logGuess` — upsert pattern:**
 ```javascript
-if (guesses.length > 0) {
-  const last = guesses[guesses.length - 1];
-  if (last.joy === joy && last.heidi === heidi && last.saul === saul) return;
+function logGuess() {
+  const {joy, heidi, saul} = getVals();  // adapt variable names per problem
+  if (joy === null && heidi === null && saul === null) return;
+  // Upsert: find existing row with same input values and update pass flags,
+  // or append a new row. This ensures each check press on the same guess
+  // updates the single row rather than being suppressed or duplicated.
+  const existing = state.guesses.findIndex(
+    g => g.joy === joy && g.heidi === heidi && g.saul === saul
+  );
+  const entry = {
+    joy, heidi, saul,
+    c1: state.passed[0], c2: state.passed[1], c3: state.passed[2]
+  };
+  if (existing >= 0) {
+    state.guesses[existing] = entry;
+  } else {
+    state.guesses.push(entry);
+  }
+  saveState();
+  renderHistory();
 }
 ```
+Adapt variable names and the number of `c` fields to match the problem's variables and constraint count.
 
 **Intermediate fields pattern:**
 ```javascript
