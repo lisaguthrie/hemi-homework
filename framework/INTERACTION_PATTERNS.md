@@ -73,6 +73,31 @@ if (val) setTimeout(() => speak(buildFullSentence(q, val)), 300);
 
 The 300ms delay makes the read-back feel intentional rather than immediate/jarring.
 
+### Part-of-Sentence Tap-to-Speak
+
+Used when a sentence is rendered in segments (e.g. `before` text + choice chip + `after` text). Each segment speaks **only its own text** on tap, rather than the full sentence. The full sentence is still accessible via the green ▶ play button.
+
+```javascript
+// Before-text span
+sp.title = 'Tap to hear just this part';
+sp.onclick = function() { speak(q.before.trim()); };
+
+// After-text span
+sp2.title = 'Tap to hear just this part';
+sp2.onclick = function() { speak(q.after.trim()); };
+
+// Choice chip speaks the options
+chip.onclick = function(e) {
+  e.stopPropagation();
+  speak(q.choices[0] + ' or ' + q.choices[1] + '?');
+};
+
+// Play button reads the full sentence with current answer substituted
+playBtn.onclick = function() { speak(buildSentence(q, userAnswers[i])); };
+```
+
+**When to use:** Any worksheet where a sentence contains an inline widget (dropdown, input) that breaks the sentence into segments. Prefer this over tapping-reads-full-sentence when the segments are long enough to be independently meaningful.
+
 ---
 
 ## Speech Recognition (STT)
