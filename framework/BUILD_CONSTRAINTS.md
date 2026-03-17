@@ -61,6 +61,47 @@ Where `{section}` is a lowercase letter (a, b, c) or a short descriptor (e.g. `-
 
 Correct answers live in the JavaScript data object, not hardcoded in HTML. This makes answer keys easy to correct without touching markup.
 
+### Transcribe the original text exactly — do not silently correct errors
+
+When building a Type 4 proofreading worksheet, transcribe the passage **exactly as it appears in the original scan**, including all seeded errors and all structural problems. The student's job is to find these problems.
+
+**Run-on sentences (missing period):** Represent as one card with the full run-on text. Example: `"The arctic fox has a thick coat of fur to protect it from the cold this thick fur also covers its paws and tale."` — the missing period after "cold" and the un-capitalized "this" are both errors on the same card. Do not split into two clean sentences.
+
+**Wrongly split sentences (period where comma belongs):** Also represent as one card. Example: `"Like the arctic fox. The arctic hare also changes color according to the season."` — the period after "fox" should be a comma and "The" should be lowercase.
+
+**Species names are not proper nouns.** "arctic fox" and "arctic hare" are NOT capitalization errors — they are common noun phrases used generically. Only flag "Arctic" as a capitalization error when used as a place name ("Arctic Ocean", "the Arctic").
+
+**Bump the storage key when sentence count changes.** Use `_v2`, `_v3`, etc. to prevent stale localStorage (keyed to the old sentence array length) from corrupting the new layout on reload.
+
+### Verify all word indices programmatically before writing data
+
+Never assign `wordIndex` by reading the sentence by eye. Always verify:
+
+```javascript
+const text = "The sentence text exactly as it appears in the data.";
+text.split(' ').forEach((w, i) => console.log(i, w));
+```
+
+Incorrect indices are silent failures — the submit logic never matches and every attempt shows the generic hint regardless of what the student selects.
+
+### Validate the full sentences array before building the UI
+
+After writing the data, run a validation pass to confirm each `wordIndex` resolves to the expected word:
+
+```javascript
+sentences.forEach((s, si) => {
+  if (!s.hasError) return;
+  s.errors.forEach(e => {
+    const word = s.text.split(' ')[e.wordIndex];
+    console.log(`S${si+1} wi=${e.wordIndex}:`, JSON.stringify(word), e.errorType);
+  });
+});
+```
+
+Review the output before proceeding. Any mismatch must be corrected in the data, not guessed at.
+
+*Trigger: Multiple word index errors and missed/reordered sentences discovered during iteration on the Arctic Animals worksheet. All of the above patterns were confirmed working in the reference implementation.*
+
 ---
 
 ## Build Behavior
