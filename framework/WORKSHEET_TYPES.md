@@ -119,6 +119,38 @@ Sentence 2: [sentence with pronoun highlighted]
 - Feedback: correct → `Yes! "[pronoun]" replaces [noun].` / incorrect → hint naming the pronoun type and number
 - **Print rendering:** Pronoun in S2 is underlined+bold. Answered noun is highlighted inline in S1 using a colored span (green `#d0f5e0`/`#5dca7e` if correct, orange `#ffeedd`/`#ff9966` if incorrect); match the noun case-insensitively. Unanswered items show sentences plain with no label row. Do not include a "replaces →" label — the visual relationship between highlighted noun and underlined pronoun is self-evident.
 
+**Passage panel + one-card navigation (for proofreading worksheets):**
+
+The full-stack-of-cards layout is visually cluttered for proofreading worksheets. Use a passage panel + one active card at a time instead.
+
+**Passage panel** (always visible at top of page): Full passage text rendered as inline tappable sentence `<span>` elements. Tapping any sentence navigates to that sentence's work card.
+
+Passage sentence CSS states:
+- `.ps-active` — bold, yellow background, gold outline ring (currently active)
+- `.ps-done` — muted gray text (correctly completed)
+- `.ps-second-pass` — soft yellow background (needs revisiting)
+
+**One work card at a time:** All sentence cards are `display:none` by default. Only the active card gets the `.visible` class (`display:block`). `navigateTo(i)` hides the current card, shows card `i`, auto-reads the sentence, and scrolls into view.
+
+**Next button:** Appears inside the correct-answer feedback. Calls `goToNext()`, which finds the next unsubmitted sentence (wraps around; respects second-pass mode). Hidden when all sentences are submitted.
+
+**Navigation function:**
+```javascript
+function navigateTo(i) {
+  if (currentCard) currentCard.classList.remove('visible');
+  state.activeIndex = i;
+  saveState();
+  currentCard = document.getElementById(`card-${i}`);
+  currentCard.classList.add('visible');
+  updatePassageHighlights();
+  updateProgress();
+  setTimeout(() => speak(sentences[i].text), 200);
+  setTimeout(() => currentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+```
+
+**Collapsible marks legend:** Proofreading marks panel starts collapsed. Tap the header to expand. Reduces visual noise on load.
+
 **Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-a.html`
 
 ## Type 5: Label Pronouns Subject or Object (S/O Classification)
