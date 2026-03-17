@@ -88,6 +88,40 @@ Call `updateIntermediates()` at the top of `onInputChange()`. Checkbox defaults 
 
 ---
 
+## Type 4: Identify the Antecedent (Sentence Pair)
+
+*Two related sentences are shown together as a pair. A pronoun in the second sentence is highlighted. The student identifies which noun from the first sentence the pronoun replaces.*
+
+**Sentence structure:**
+```
+Sentence 1: [full sentence containing the antecedent noun]
+Sentence 2: [sentence with pronoun highlighted]
+```
+
+**Data shape:**
+```javascript
+{
+  s1:      "The woodcutter saw a neighbor working in the garden.",
+  s2:      "The woodcutter approached him.",
+  pronoun: "him",           // the highlighted pronoun in s2
+  answer:  "a neighbor",   // the correct antecedent from s1
+  options: ["The woodcutter", "a neighbor", "the garden"],  // dropdown choices
+  hint:    "him = one man receiving the action"
+}
+```
+
+**Answer control:** Dropdown listing the candidate nouns from s1. Label reads: `"[pronoun]" replaces →`. Auto-reads `"[pronoun]" replaces [selected noun].` after selection (300ms delay).
+
+**Interaction decisions:**
+- Both sentences are tappable (read full text on tap)
+- Pronoun in s2 is highlighted with a blue chip (`background: #e8f0ff; border: 2px solid #3b9ede`) to distinguish it from the yellow phrase chips used for tappable noun phrases in Type 1
+- Per-card play button reads both sentences together
+- Feedback: correct → `Yes! "[pronoun]" replaces [noun].` / incorrect → hint naming the pronoun type and number
+
+**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-a.html`
+
+---
+
 ## Adding a New Type
 
 When you implement a worksheet that doesn't match an existing type:
