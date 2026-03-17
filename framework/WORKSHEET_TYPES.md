@@ -190,6 +190,96 @@ Sentence 2: [sentence with pronoun highlighted]
 
 ---
 
+## Type 7: Proofreading / Error Correction
+
+*A paragraph or passage contains seeded errors. The student reads sentence by sentence, decides if each sentence has an error, identifies the word and error type using proofreading marks, and receives feedback. A second-pass mode re-presents any missed sentences.*
+
+**Layout:** Passage panel (always visible) + one work card at a time — see Passage Panel pattern below.
+
+**For each work card:**
+1. Two large decision buttons: ✅ Looks good / 🔍 Fix it
+   - "Looks good" on a no-error sentence → finalizes immediately (correct)
+   - "Looks good" on an error sentence → shows hint, keeps card open so student can switch to "Fix it"
+   - "Fix it" → reveals the mark panel
+2. Word chips — each word in the sentence is a tappable chip; tapping selects it as the error target. Any word can be selected at any time, including already-found ones (visual only — re-submitting a found word gives a gentle nudge: "You already found that one!")
+3. Mark type grid — 8 buttons: Capitalize, Lowercase, Delete, Add comma, Fix spelling, Add apostrophe, Add punctuation, Fix verb
+4. Confirm button — enabled only when both a word chip and a mark type are selected
+5. Wrong attempts show feedback but do NOT lock the card — student can re-tap and resubmit
+6. Card only finalizes (locks, turns green) on a fully correct answer
+
+**Multi-error sentences:** The `errors` array supports multiple errors per sentence. Finding one error shows positive feedback + "There are N more errors — keep looking!" and highlights the found word. Card finalizes only when all errors are found.
+
+**Alternative mark types:** Some errors can reasonably be marked with either of two mark types (e.g. "Add punctuation" or "Add comma" for a missing comma). Use `altErrorType` on the error object and check both in the match logic:
+```javascript
+const matchedError = s.errors.find(e =>
+  e.wordIndex === wi && (e.errorType === mark || e.altErrorType === mark)
+);
+```
+
+**Second-pass mode:** After all sentences are submitted, sentences with errors the student missed are re-presented with a yellow highlight and a spoken prompt. Cards reset fully (decisions, selections, foundErrors) to allow re-answering. Win state fires only when all error sentences are correctly identified.
+
+**Data shape:**
+```javascript
+// Error sentence (single error)
+{
+  text: "Exact sentence text as it appears in the original, errors preserved.",
+  hasError: true,
+  errors: [
+    {
+      wordIndex: 1,              // 0-based index in text.split(' ') — verify programmatically
+      errorType: "capitalize",   // mark type id (see list below)
+      altErrorType: null,        // optional second accepted mark type, or null
+      feedbackCorrect: "Yes! 'Arctic' is a proper noun and should be capitalized.",
+      correctSpelling: null      // corrected word, only for spelling errors
+    }
+  ],
+  errorNote: "Arctic is a proper noun — capitalize it",   // shown in wrong-mark-type hint
+  feedbackHint: "Is there a proper noun that needs a capital letter?"
+}
+
+// Multi-error sentence
+{
+  text: "They huddle toogether in large groups to keep warm and to protect each other form predators.",
+  hasError: true,
+  errors: [
+    { wordIndex: 2,  errorType: "spelling", altErrorType: null, feedbackCorrect: "...", correctSpelling: "together" },
+    { wordIndex: 14, errorType: "spelling", altErrorType: null, feedbackCorrect: "...", correctSpelling: "from" }
+  ],
+  errorNote: "Two spelling errors in this sentence",
+  feedbackHint: "There are two misspelled words in this sentence."
+}
+
+// No-error sentence
+{
+  text: "In the winter, the fur is white to camouflage it.",
+  hasError: false,
+  noError: true,
+  feedbackOk: "Correct — this sentence has no errors!"
+}
+```
+
+**Mark type IDs:** `capitalize` | `lowercase` | `delete` | `comma` | `spelling` | `apostrophe` | `punctuation` | `verb`
+
+**State shape (additions over base):**
+```javascript
+foundErrors: new Array(sentences.length).fill(null),
+// Per sentence: array of wordIndexes already correctly identified
+// e.g. foundErrors[2] = [8] means word at index 8 found, index 11 still needed
+
+activeIndex: 0,
+// Persists last-viewed sentence across reloads
+```
+
+**Partial-find feedback grammar:**
+```javascript
+const remaining = s.errors.length - state.foundErrors[i].length;
+partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining} more errors`} in this sentence — keep looking!`;
+```
+
+**Reference implementation:** `worksheets/christina/2026-03-16-proofreading-arctic-animals.html`
+
+---
+
 ## Adding a New Type
 
 When you implement a worksheet that doesn't match an existing type:
