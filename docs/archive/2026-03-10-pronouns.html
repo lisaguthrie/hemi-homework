@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pronouns Worksheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #e0f4ff;
+    --blue: #3b9ede;
+    --deep-blue: #1a6fa8;
+    --yellow: #ffe566;
+    --yellow-dark: #e6c800;
+    --green: #5dca7e;
+    --green-dark: #3aaa5a;
+    --pink: #ff7eb3;
+    --pink-dark: #e0568f;
+    --purple: #a78bfa;
+    --card: #ffffff;
+    --text: #1a2a3a;
+    --muted: #6a8299;
+    --radius: 18px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, #dff0ff 0%, #f0e8ff 100%);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 20px 16px 60px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3rem);
+    color: var(--deep-blue);
+    letter-spacing: 1px;
+    text-shadow: 3px 3px 0 rgba(59,158,222,0.18);
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--muted);
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  .definition-box {
+    background: var(--yellow);
+    border: 3px solid var(--yellow-dark);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    max-width: 500px;
+    margin: 0 auto 28px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #5a4000;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(230,200,0,0.3);
+    cursor: pointer;
+    transition: transform 0.1s;
+    user-select: none;
+    position: relative;
+  }
+  .definition-box:active { transform: scale(0.98); }
+  .definition-box .speak-icon {
+    font-size: 1.3rem;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .instructions {
+    background: var(--blue);
+    color: white;
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    max-width: 600px;
+    margin: 0 auto 28px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(59,158,222,0.35);
+    user-select: none;
+    transition: transform 0.1s;
+  }
+  .instructions:active { transform: scale(0.98); }
+
+  .questions-list {
+    max-width: 700px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .question-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    border: 2.5px solid transparent;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .question-card.answered {
+    border-color: var(--green);
+    box-shadow: 0 4px 20px rgba(93,202,126,0.2);
+  }
+  .question-card.correct {
+    border-color: var(--green);
+    background: #f0fff5;
+  }
+
+  .q-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--blue);
+    min-width: 30px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .sentence-area {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  /* Clickable underlined noun phrase */
+  .noun-phrase {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff3c4;
+    border: 2px solid var(--yellow-dark);
+    border-radius: 8px;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    user-select: none;
+    font-weight: 700;
+    color: #5a3a00;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .noun-phrase:active { transform: scale(0.95); }
+  .noun-phrase:hover { background: #ffe88a; }
+  .noun-phrase .noun-icon { font-size: 0.85rem; }
+
+  /* Plain text segments — also clickable to read the full sentence */
+  .plain-text {
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .plain-text:hover { background: #e8f4ff; }
+
+  /* Pronoun dropdown */
+  .pronoun-select {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--deep-blue);
+    background: #e8f4ff;
+    border: 2.5px solid var(--blue);
+    border-radius: 10px;
+    padding: 6px 10px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    min-width: 110px;
+    flex-shrink: 0;
+  }
+  .pronoun-select:focus { border-color: var(--deep-blue); background: #d0eaff; }
+
+  /* Feedback badge */
+  .feedback {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .feedback.show { display: flex; }
+  .feedback.good { background: #d0f5e0; color: #1d7a40; }
+  .feedback.check { background: #ffeedd; color: #c05000; }
+
+  /* Play sentence button */
+  .play-btn {
+    background: var(--green);
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    transition: background 0.15s, transform 0.1s;
+    box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+  }
+  .play-btn:hover { background: var(--green-dark); }
+  .play-btn:active { transform: scale(0.9); }
+  .play-btn.playing { background: var(--pink); box-shadow: 0 2px 8px rgba(255,126,179,0.4); animation: pulse 0.7s infinite alternate; }
+
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.12); }
+  }
+
+  /* Score area */
+  .score-bar {
+    max-width: 700px;
+    margin: 28px auto 0;
+    background: white;
+    border-radius: var(--radius);
+    padding: 18px 24px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--deep-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .score-pip {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #dde;
+    transition: background 0.3s;
+  }
+  .score-pip.done { background: var(--green); }
+
+  /* Bonus activity */
+  .bonus-section {
+    max-width: 700px;
+    margin: 28px auto 0;
+    background: linear-gradient(135deg, #fff0fa, #f0eaff);
+    border: 3px solid var(--purple);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .bonus-section h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: #7c3aed;
+    margin-bottom: 10px;
+  }
+  .bonus-section p {
+    font-size: 0.95rem;
+    color: #4a3060;
+    font-weight: 600;
+    line-height: 1.6;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 4px 6px;
+    transition: background 0.15s;
+  }
+  .bonus-section p:hover { background: rgba(167,139,250,0.15); }
+
+  /* Speaking indicator */
+  .speaking-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--deep-blue);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px 24px;
+    border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .speaking-toast.visible {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 480px) {
+    .question-card { padding: 12px 12px; gap: 10px; }
+    .sentence-area { font-size: 0.97rem; }
+    .pronoun-select { min-width: 90px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌟 Pronouns Practice</h1>
+  <p class="subtitle">Tap any highlighted phrase to hear it read aloud!</p>
+</header>
+
+<div class="definition-box" onclick="speak('A pronoun is a word that takes the place of a noun or nouns. Pronouns show number. They indicate one or more than one.')">
+  <span class="speak-icon">🔊</span>
+  <strong>RETEACHING:</strong> A pronoun is a word that takes the place of a noun or nouns. Pronouns show number. They indicate one or more than one.
+</div>
+
+<div class="instructions" onclick="speak('Read the sentences. Choose a pronoun from the drop-down menu that could take the place of the underlined words. Then press the play button to hear the whole sentence with your pronoun!')">
+  🔊 Read the sentences. Choose a pronoun from the drop-down menu that could take the place of the highlighted words. Press ▶ to hear the full sentence!
+</div>
+
+<div class="questions-list" id="questionsList"></div>
+
+<div class="score-bar" id="scoreBar">
+  <span>Progress: </span>
+  <span id="scorePips"></span>
+  <span id="scoreText">0 / 14 answered</span>
+</div>
+
+<div class="bonus-section">
+  <h2>✨ Bonus Activity</h2>
+  <p onclick="speak('Imagine that you are dancing or singing in a talent show and the music suddenly stops or begins to skip. Write two or three sentences telling how you feel and how others react. Underline all the pronouns that you use.')">
+    🔊 Imagine that you are dancing or singing in a talent show and the music suddenly stops or begins to skip. Write two or three sentences telling how you feel and how others react. Underline all the pronouns that you use.
+  </p>
+</div>
+
+<div class="speaking-toast" id="speakingToast">🔊 Reading aloud…</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+const questions = [
+  {
+    before: "",
+    noun: "Talent shows",
+    after: " can make people nervous.",
+    answers: ["They"],
+    hint: "more than one show"
+  },
+  {
+    before: "",
+    noun: "A talent show",
+    after: " gives people a chance to show off.",
+    answers: ["It"],
+    hint: "one show"
+  },
+  {
+    before: "",
+    noun: "My younger brother",
+    after: " was in the talent show at my school.",
+    answers: ["He"],
+    hint: "one boy"
+  },
+  {
+    before: "Lots of people clapped loudly for ",
+    noun: "my brother",
+    after: ".",
+    answers: ["him"],
+    hint: "one boy, object"
+  },
+  {
+    before: "",
+    noun: "My older sister",
+    after: " did not want to be in the show.",
+    answers: ["She"],
+    hint: "one girl"
+  },
+  {
+    before: "I did not blame ",
+    noun: "my older sister",
+    after: ".",
+    answers: ["her"],
+    hint: "one girl, object"
+  },
+  {
+    before: "I was nervous about being in ",
+    noun: "the talent show",
+    after: ", too.",
+    answers: ["it"],
+    hint: "one thing, object"
+  },
+  {
+    before: "",
+    noun: "Pam, Alicia, and I",
+    after: " decided to sing a round.",
+    answers: ["We"],
+    hint: "more than one person including yourself"
+  },
+  {
+    before: "People clapped politely for ",
+    noun: "Pam, Alicia, and me",
+    after: ".",
+    answers: ["us"],
+    hint: "more than one person, object"
+  },
+  {
+    before: "We thanked ",
+    noun: "the audience members",
+    after: " for applauding.",
+    answers: ["them"],
+    hint: "more than one person, object"
+  },
+  {
+    before: "You can ask ",
+    noun: "Mrs. Renko",
+    after: " about how well we did!",
+    answers: ["her"],
+    hint: "one woman, object"
+  },
+  {
+    before: "Now ",
+    noun: "my sister",
+    after: " is thinking about being in a show.",
+    answers: ["she"],
+    hint: "one girl"
+  },
+  {
+    before: "I asked ",
+    noun: "my parents",
+    after: " if my brother, sister, and I could practice at home.",
+    answers: ["them"],
+    hint: "more than one person, object"
+  },
+  {
+    before: "Next year, ",
+    noun: "the talent show",
+    after: " will be even better!",
+    answers: ["it"],
+    hint: "one thing"
+  }
+];
+
+// All pronouns that might appear as options
+const pronounOptions = ["He","She","It","They","We","him","her","it","them","us","we","they","she","he"];
+
+// ── TTS helpers ───────────────────────────────────────────────────────────────
+let currentUtterance = null;
+const toast = document.getElementById('speakingToast');
+
+function showToast() {
+  toast.classList.add('visible');
+}
+function hideToast() {
+  toast.classList.remove('visible');
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) {
+    alert('Sorry, your browser does not support text-to-speech.');
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88;
+  utter.pitch = 1.05;
+  utter.onstart = showToast;
+  utter.onend = hideToast;
+  utter.onerror = hideToast;
+  currentUtterance = utter;
+  window.speechSynthesis.speak(utter);
+}
+
+function buildSentence(q, pronoun) {
+  return q.before + pronoun + q.after;
+}
+
+// ── Build UI ──────────────────────────────────────────────────────────────────
+const list = document.getElementById('questionsList');
+const scorePips = document.getElementById('scorePips');
+const scoreText = document.getElementById('scoreText');
+const userAnswers = new Array(questions.length).fill("");
+
+function updateScore() {
+  const done = userAnswers.filter(a => a !== "").length;
+  scorePips.innerHTML = userAnswers.map(a =>
+    `<span class="score-pip ${a ? 'done' : ''}"></span>`
+  ).join('');
+  scoreText.textContent = `${done} / ${questions.length} answered`;
+}
+
+questions.forEach((q, i) => {
+  const card = document.createElement('div');
+  card.className = 'question-card';
+  card.id = `card-${i}`;
+
+  const num = document.createElement('div');
+  num.className = 'q-num';
+  num.textContent = `${i + 1}.`;
+
+  const sentArea = document.createElement('div');
+  sentArea.className = 'sentence-area';
+
+  // Build sentence parts
+  function makeSentenceParts(selectedPronoun) {
+    sentArea.innerHTML = '';
+
+    // Helper to add plain text span
+    function addPlain(txt) {
+      if (!txt) return;
+      const sp = document.createElement('span');
+      sp.className = 'plain-text';
+      sp.textContent = txt;
+      sp.title = 'Tap to hear the full sentence';
+      sp.onclick = () => {
+        const pronoun = userAnswers[i] || '___';
+        speak(buildSentence(q, pronoun));
+      };
+      sentArea.appendChild(sp);
+    }
+
+    // Before text
+    addPlain(q.before || '');
+
+    // Noun phrase (highlighted, tappable)
+    const nounSpan = document.createElement('span');
+    nounSpan.className = 'noun-phrase';
+    nounSpan.innerHTML = `<span class="noun-icon">🔊</span>${q.noun}`;
+    nounSpan.title = 'Tap to hear just this phrase';
+    nounSpan.onclick = (e) => {
+      e.stopPropagation();
+      speak(q.noun);
+    };
+    sentArea.appendChild(nounSpan);
+
+    // After text (before the dropdown)
+    // We'll put the select inline if the noun is the subject,
+    // or append at end if it's an object
+    addPlain(q.after.replace(/\.$/, ''));
+    addPlain('→');
+
+    // Dropdown
+    const sel = document.createElement('select');
+    sel.className = 'pronoun-select';
+    sel.id = `sel-${i}`;
+
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = '— pick —';
+    sel.appendChild(defaultOpt);
+
+    pronounOptions.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p;
+      opt.textContent = p;
+      if (p === selectedPronoun) opt.selected = true;
+      sel.appendChild(opt);
+    });
+
+    sel.onchange = () => {
+      const val = sel.value;
+      userAnswers[i] = val;
+      updateScore();
+      card.classList.toggle('answered', val !== '');
+      // Auto-read the full sentence with chosen pronoun
+      if (val) {
+        setTimeout(() => speak(buildSentence(q, val)), 300);
+      }
+      // Update feedback
+      const fb = document.getElementById(`fb-${i}`);
+      if (val && q.answers.map(a => a.toLowerCase()).includes(val.toLowerCase())) {
+        fb.textContent = '✅ Great!';
+        fb.className = 'feedback show good';
+        card.classList.add('correct');
+      } else if (val) {
+        fb.textContent = `💡 Hint: ${q.hint}`;
+        fb.className = 'feedback show check';
+        card.classList.remove('correct');
+      } else {
+        fb.className = 'feedback';
+        card.classList.remove('correct');
+      }
+    };
+
+    sentArea.appendChild(sel);
+  }
+
+  makeSentenceParts(userAnswers[i]);
+
+  // Play full sentence button
+  const playBtn = document.createElement('button');
+  playBtn.className = 'play-btn';
+  playBtn.title = 'Hear the full sentence with your pronoun';
+  playBtn.innerHTML = '▶';
+  playBtn.onclick = () => {
+    const pronoun = userAnswers[i] || '___';
+    const full = buildSentence(q, pronoun !== '___' ? pronoun : q.noun);
+    playBtn.classList.add('playing');
+    speak(full);
+    setTimeout(() => playBtn.classList.remove('playing'), 2500);
+  };
+
+  // Feedback
+  const fb = document.createElement('div');
+  fb.className = 'feedback';
+  fb.id = `fb-${i}`;
+
+  card.appendChild(num);
+  card.appendChild(sentArea);
+  card.appendChild(playBtn);
+  card.appendChild(fb);
+  list.appendChild(card);
+});
+
+updateScore();
+</script>
+</body>
+</html>

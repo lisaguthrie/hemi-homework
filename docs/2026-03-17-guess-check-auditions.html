@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess and Check — Auditions</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-start:         #e0f4ff;
+    --bg-end:           #f0e8ff;
+    --card-bg:          #ffffff;
+    --text-primary:     #1a2a3a;
+    --text-muted:       #6a8299;
+    --accent-blue:      #3b9ede;
+    --accent-blue-dk:   #1a6fa8;
+    --phrase-bg:        #fff3c4;
+    --phrase-border:    #e6c800;
+    --phrase-text:      #5a3a00;
+    --btn-play:         #5dca7e;
+    --btn-play-dk:      #3aaa5a;
+    --feedback-ok-bg:   #d0f5e0;
+    --feedback-ok-txt:  #1d7a40;
+    --feedback-hint-bg: #ffeedd;
+    --feedback-hint-txt:#c05000;
+    --pip-empty:        #dde0e8;
+    --pip-done:         #5dca7e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    min-height: 100vh;
+    color: var(--text-primary);
+    padding: 20px 16px 60px;
+  }
+
+  .container { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+  header { text-align: center; margin-bottom: 8px; }
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+    color: var(--accent-blue-dk);
+    letter-spacing: 1px;
+    text-shadow: 3px 3px 0 rgba(59,158,222,0.15);
+  }
+  .subtitle { font-size: 1rem; color: var(--text-muted); margin-top: 6px; font-weight: 600; }
+
+  /* Instructions */
+  .instructions {
+    background: var(--accent-blue);
+    color: white;
+    border-radius: 16px;
+    padding: 13px 18px;
+    font-size: 0.97rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .instructions:hover { background: var(--accent-blue-dk); }
+
+  /* Problem card */
+  .problem-card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .problem-card-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: var(--accent-blue-dk);
+    margin-bottom: 2px;
+  }
+
+  .problem-sentence {
+    font-size: 0.97rem;
+    font-weight: 600;
+    line-height: 1.55;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 4px 6px;
+    transition: background 0.15s;
+    user-select: none;
+  }
+  .problem-sentence:hover { background: #e8f4ff; }
+
+  .clue-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--phrase-bg);
+    border: 2px solid var(--phrase-border);
+    border-radius: 8px;
+    padding: 1px 7px;
+    font-weight: 800;
+    color: var(--phrase-text);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.1s;
+    font-size: 0.93em;
+    min-height: 28px;
+  }
+  .clue-pill:hover { background: #ffe88a; }
+  .clue-pill:active { transform: scale(0.95); }
+
+  /* Actor input grid */
+  .actor-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 480px) { .actor-grid { grid-template-columns: 1fr 1fr; gap: 8px; } }
+
+  .actor-box {
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    border: 2.5px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .actor-box.derived { background: #f8f8ff; }
+
+  .actor-icon { font-size: 1.8rem; }
+  .actor-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: var(--accent-blue-dk);
+    text-align: center;
+  }
+  .actor-role {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: center;
+    min-height: 14px;
+  }
+
+  .num-input-wrap { display: flex; align-items: center; gap: 4px; }
+  .num-input {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--accent-blue-dk);
+    background: #e8f4ff;
+    border: 2.5px solid var(--accent-blue);
+    border-radius: 10px;
+    padding: 6px 8px;
+    width: 72px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    -moz-appearance: textfield;
+  }
+  .num-input::-webkit-outer-spin-button,
+  .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .num-input:focus { border-color: var(--accent-blue-dk); background: #d0eaff; }
+  .num-input:disabled { background: #f0f0f0; border-color: #ccc; color: #888; cursor: default; }
+  .lines-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+
+  /* Auto-calc toggle */
+  .autocalc-row {
+    background: #f0f8ff;
+    border: 2px solid #c5dff5;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-blue-dk);
+  }
+  .autocalc-row input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent-blue); flex-shrink: 0; }
+
+  /* Check rows */
+  .checks-col { display: flex; flex-direction: column; gap: 10px; }
+
+  .check-row {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    border: 2.5px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .check-row.passed { border-color: #5dca7e; background: #f0fff5; }
+
+  .check-label {
+    font-weight: 700;
+    font-size: 0.93rem;
+    color: #444;
+    flex: 1;
+    min-width: 180px;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 4px;
+    transition: background 0.15s;
+    user-select: none;
+    line-height: 1.4;
+  }
+  .check-label:hover { background: #e8f4ff; }
+  .check-label em { font-style: normal; color: var(--accent-blue-dk); }
+
+  .check-btn {
+    background: #5dca7e;
+    border: none;
+    border-radius: 22px;
+    padding: 8px 18px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.93rem;
+    cursor: pointer;
+    color: white;
+    transition: background 0.15s, transform 0.1s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 44px;
+  }
+  .check-btn:hover { background: var(--btn-play-dk); }
+  .check-btn:active { transform: scale(0.96); }
+  .check-btn:disabled { background: #aaa; cursor: default; }
+
+  /* Feedback */
+  .feedback {
+    display: none; align-items: center; gap: 6px;
+    font-size: 0.9rem; font-weight: 700;
+    padding: 6px 12px; border-radius: 12px; margin-top: 4px;
+    flex-wrap: wrap; width: 100%;
+  }
+  .feedback.show { display: flex; }
+  .feedback.correct { background: var(--feedback-ok-bg); color: var(--feedback-ok-txt); }
+  .feedback.hint    { background: var(--feedback-hint-bg); color: var(--feedback-hint-txt); }
+  .fb-play-btn {
+    background: none; border: none; font-size: 1rem; cursor: pointer;
+    padding: 0 2px; line-height: 1; flex-shrink: 0; opacity: 0.75;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+
+  /* Win banner */
+  .win-banner {
+    display: none;
+    background: linear-gradient(135deg, #d0f5e0, #e8f4ff);
+    border: 3px solid #5dca7e;
+    border-radius: 18px;
+    padding: 22px 24px;
+    text-align: center;
+    box-shadow: 0 6px 24px rgba(93,202,126,0.3);
+  }
+  .win-banner.show { display: block; }
+  .win-banner h2 { font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: #1d7a40; margin-bottom: 8px; }
+  .win-banner p  { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; line-height: 1.6; }
+  .win-play-btn {
+    background: var(--btn-play); color: white; border: none; border-radius: 22px;
+    padding: 10px 24px; font-family: 'Nunito', sans-serif; font-weight: 800;
+    font-size: 1rem; cursor: pointer; transition: background 0.15s;
+  }
+  .win-play-btn:hover { background: var(--btn-play-dk); }
+
+  /* Progress */
+  .progress-row {
+    display: flex; align-items: center; gap: 10px;
+    justify-content: center; flex-wrap: wrap;
+  }
+  .pip {
+    display: inline-block; width: 18px; height: 18px;
+    border-radius: 50%; background: var(--pip-empty); transition: background 0.3s;
+  }
+  .pip.done { background: var(--pip-done); }
+  .progress-label { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); }
+
+  /* Guess history */
+  .history-card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+    padding: 16px 18px;
+  }
+  .history-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: var(--accent-blue-dk);
+    margin-bottom: 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .history-title:hover { color: var(--accent-blue); }
+
+  .history-table-wrap { overflow-x: auto; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.85rem; font-weight: 600;
+  }
+  th {
+    background: #e8f4ff; color: var(--accent-blue-dk);
+    padding: 7px 8px; text-align: center; font-weight: 800;
+    border-radius: 6px; white-space: nowrap;
+  }
+  td { padding: 6px 8px; text-align: center; border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fbff; }
+  .no-guesses { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; text-align: center; padding: 12px; }
+
+  /* Buttons row */
+  .btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  .clear-btn {
+    background: #f0f0f0; color: #555; border: 2px solid #ccc;
+    border-radius: 18px; padding: 9px 22px;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.92rem;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s;
+  }
+  .clear-btn:hover { background: #ffeedd; border-color: #c05000; color: #c05000; }
+
+  .export-btn {
+    background: #7c5cbf; color: white; border: none;
+    border-radius: 18px; padding: 9px 22px;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.92rem;
+    cursor: pointer; transition: background 0.15s;
+    box-shadow: 0 2px 8px rgba(124,92,191,0.25);
+  }
+  .export-btn:hover { background: #5a3fa0; }
+
+  /* Speaking toast */
+  .speaking-toast {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent-blue-dk); color: white;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem;
+    padding: 10px 24px; border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease, background 0.2s;
+    z-index: 100; cursor: pointer; user-select: none;
+    pointer-events: none;
+  }
+  .speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .speaking-toast.visible:hover { background: #c0392b; }
+  .speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+
+  @media (max-width: 480px) {
+    .problem-card, .history-card { padding: 12px 14px; }
+    .check-row { padding: 10px 12px; }
+    .actor-box { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>🎭 Guess and Check</h1>
+    <p class="subtitle">Tap any sentence or yellow clue to hear it read aloud</p>
+  </header>
+
+  <div class="instructions" onclick="speak('Try different numbers for Betty\'s lines. Use the clues to figure out Hilda, Adam, and Renee\'s lines. Then check each clue and the total. When all four checks pass at the same time, you found the answer!')">
+    🔊 Try numbers for Betty. Use the clues to find everyone else. Check all four clues at once!
+  </div>
+
+  <!-- Problem card -->
+  <div class="problem-card">
+    <div class="problem-card-title">📋 Problem #16</div>
+
+    <div class="problem-sentence" onclick="speak('This notice was posted: Auditions Next Week for the School Play.')">
+      This notice was posted: <em>Auditions Next Week for the School Play.</em>
+    </div>
+
+    <div class="problem-sentence" onclick="speak('After reading a copy of the play, Betty, Hilda, Adam, and Renee have decided which parts to try out for.')">
+      After reading a copy of the play, Betty, Hilda, Adam, and Renee have decided which parts to try out for.
+    </div>
+
+    <div class="problem-sentence" onclick="speak('Hilda wants a part that has twice as many lines as the part that Betty wants.')">
+      Hilda wants a part that has <span class="clue-pill" onclick="event.stopPropagation(); speak('twice as many lines as Betty')">🔊 twice as many lines</span> as the part that Betty wants.
+    </div>
+
+    <div class="problem-sentence" onclick="speak('Adam has chosen a part with three more than twice as many lines as the part that Hilda wants.')">
+      Adam has chosen a part with <span class="clue-pill" onclick="event.stopPropagation(); speak('three more than twice as many lines as Hilda')">🔊 three more than twice</span> as many lines as the part that Hilda wants.
+    </div>
+
+    <div class="problem-sentence" onclick="speak('Renee is going to try out for a part with four more lines than Betty\'s part.')">
+      Renee is going to try out for a part with <span class="clue-pill" onclick="event.stopPropagation(); speak('four more lines than Betty')">🔊 four more lines</span> than Betty's part.
+    </div>
+
+    <div class="problem-sentence" onclick="speak('If they get the parts they want, together they will have a total of 47 speaking lines.')">
+      If they get the parts they want, together they will have a <span class="clue-pill" onclick="event.stopPropagation(); speak('total of 47 speaking lines')">🔊 total of 47</span> speaking lines.
+    </div>
+
+    <div class="problem-sentence" style="font-weight:800; color: var(--accent-blue-dk);" onclick="speak('How many lines would each actor have in the play?')">
+      ❓ How many lines would each actor have in the play?
+    </div>
+  </div>
+
+  <!-- Actor input grid -->
+  <div class="actor-grid">
+    <!-- Betty — primary variable -->
+    <div class="actor-box" id="boxBetty">
+      <div class="actor-icon">🌟</div>
+      <div class="actor-name">Betty</div>
+      <div class="actor-role" id="roleBetty">Start here!</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputBetty" min="1" max="47" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="lines-label">lines</div>
+    </div>
+
+    <!-- Hilda — derived from Betty -->
+    <div class="actor-box derived" id="boxHilda">
+      <div class="actor-icon">🎀</div>
+      <div class="actor-name">Hilda</div>
+      <div class="actor-role" id="roleHilda">= 2 × Betty</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputHilda" min="1" max="47" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="lines-label">lines</div>
+    </div>
+
+    <!-- Adam — derived from Hilda -->
+    <div class="actor-box derived" id="boxAdam">
+      <div class="actor-icon">🎩</div>
+      <div class="actor-name">Adam</div>
+      <div class="actor-role" id="roleAdam">= 2 × Hilda + 3</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputAdam" min="1" max="47" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="lines-label">lines</div>
+    </div>
+
+    <!-- Renee — derived from Betty -->
+    <div class="actor-box derived" id="boxRenee">
+      <div class="actor-icon">🌸</div>
+      <div class="actor-name">Renee</div>
+      <div class="actor-role" id="roleRenee">= Betty + 4</div>
+      <div class="num-input-wrap">
+        <input class="num-input" type="number" id="inputRenee" min="1" max="47" placeholder="?" oninput="onInputChange()">
+      </div>
+      <div class="lines-label">lines</div>
+    </div>
+  </div>
+
+  <!-- Auto-calc toggle -->
+  <label class="autocalc-row" onclick="">
+    <input type="checkbox" id="autoCalc" onchange="onAutoCalcChange()">
+    <span>🤖 Auto-calculate Hilda, Adam, and Renee from Betty's number</span>
+  </label>
+
+  <!-- Check buttons -->
+  <div class="checks-col">
+
+    <div class="check-row" id="checkRow1">
+      <span class="check-label" onclick="speak('Check Hilda: Hilda should have exactly twice as many lines as Betty. Multiply Betty by 2. Does it match Hilda?')">
+        🔍 Check Hilda: <em>Hilda = 2 × Betty?</em>
+      </span>
+      <button class="check-btn" id="checkBtn1" onclick="doCheck1()">Check ✓</button>
+      <div class="feedback" id="checkFb1"></div>
+    </div>
+
+    <div class="check-row" id="checkRow2">
+      <span class="check-label" onclick="speak('Check Adam: Adam should have 3 more than twice Hilda\'s lines. Multiply Hilda by 2, then add 3. Does it match Adam?')">
+        🔍 Check Adam: <em>Adam = 2 × Hilda + 3?</em>
+      </span>
+      <button class="check-btn" id="checkBtn2" onclick="doCheck2()">Check ✓</button>
+      <div class="feedback" id="checkFb2"></div>
+    </div>
+
+    <div class="check-row" id="checkRow3">
+      <span class="check-label" onclick="speak('Check Renee: Renee should have 4 more lines than Betty. Add 4 to Betty\'s number. Does it match Renee?')">
+        🔍 Check Renee: <em>Renee = Betty + 4?</em>
+      </span>
+      <button class="check-btn" id="checkBtn3" onclick="doCheck3()">Check ✓</button>
+      <div class="feedback" id="checkFb3"></div>
+    </div>
+
+    <div class="check-row" id="checkRow4">
+      <span class="check-label" onclick="speak('Check the total: All four actors together should equal 47 lines. Add Betty plus Hilda plus Adam plus Renee. Does it equal 47?')">
+        🔍 Check Total: <em>Betty + Hilda + Adam + Renee = 47?</em>
+      </span>
+      <button class="check-btn" id="checkBtn4" onclick="doCheck4()">Check ✓</button>
+      <div class="feedback" id="checkFb4"></div>
+    </div>
+
+  </div>
+
+  <!-- Win banner -->
+  <div class="win-banner" id="winBanner">
+    <h2>🎉 All four clues check out!</h2>
+    <p id="winText"></p>
+    <button class="win-play-btn" onclick="speakWin()">🔊 Hear the answer</button>
+  </div>
+
+  <!-- Progress pips -->
+  <div class="progress-row">
+    <span id="progressPips"></span>
+    <span class="progress-label" id="progressCount">0 of 4 checks passed</span>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button class="clear-btn" id="clearBtn" onclick="clearAllResponses()">🗑️ Clear all responses</button>
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
+  </div>
+
+  <!-- Guess history -->
+  <div class="history-card">
+    <div class="history-title" onclick="speak('This table shows all your guesses so far. Use it to adjust your next guess.')">
+      📊 Guess History — tap to hear tip
+    </div>
+    <div class="history-table-wrap">
+      <div id="historyContent"><p class="no-guesses">No guesses yet — check a clue to record one!</p></div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+  🔊 <span class="toast-label">Reading aloud…</span>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'gc-auditions-2026-03-17';
+
+const defaultState = {
+  betty: '', hilda: '', adam: '', renee: '',
+  passed: [false, false, false, false],
+  guesses: [],
+  clearConfirming: false
+};
+
+let state = loadState();
+let clearConfirmTimer = null;
+const feedbackTexts = {};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? Object.assign({}, defaultState, JSON.parse(raw)) : Object.assign({}, defaultState);
+  } catch(e) { return Object.assign({}, defaultState); }
+}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// ─── TTS ──────────────────────────────────────────────────────────────────────
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.88; u.pitch = 1.05;
+  u.onstart = showToast; u.onend = hideToast; u.onerror = hideToast;
+  window.speechSynthesis.speak(u);
+}
+function showToast()   { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast()   { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+
+// ─── Inputs ───────────────────────────────────────────────────────────────────
+function getVals() {
+  const betty = parseInt(document.getElementById('inputBetty').value);
+  const hilda = parseInt(document.getElementById('inputHilda').value);
+  const adam  = parseInt(document.getElementById('inputAdam').value);
+  const renee = parseInt(document.getElementById('inputRenee').value);
+  return {
+    betty: isNaN(betty) ? null : betty,
+    hilda: isNaN(hilda) ? null : hilda,
+    adam:  isNaN(adam)  ? null : adam,
+    renee: isNaN(renee) ? null : renee
+  };
+}
+
+function onInputChange() {
+  const vals = getVals();
+  state.betty = document.getElementById('inputBetty').value;
+  state.hilda = document.getElementById('inputHilda').value;
+  state.adam  = document.getElementById('inputAdam').value;
+  state.renee = document.getElementById('inputRenee').value;
+  saveState();
+  if (document.getElementById('autoCalc').checked) updateIntermediates();
+  // reset check feedback when inputs change
+  state.passed = [false, false, false, false];
+  for (let i = 1; i <= 4; i++) {
+    const fb = document.getElementById('checkFb' + i);
+    fb.className = 'feedback';
+    document.getElementById('checkRow' + i).classList.remove('passed');
+  }
+  updateProgress();
+  document.getElementById('winBanner').classList.remove('show');
+}
+
+function onAutoCalcChange() {
+  const auto = document.getElementById('autoCalc').checked;
+  ['inputHilda','inputAdam','inputRenee'].forEach(id => {
+    document.getElementById(id).disabled = auto;
+  });
+  if (auto) updateIntermediates();
+  saveState();
+}
+
+function updateIntermediates() {
+  if (!document.getElementById('autoCalc').checked) return;
+  const betty = parseInt(document.getElementById('inputBetty').value);
+  const hilda = isNaN(betty) ? null : betty * 2;
+  const adam  = hilda !== null ? hilda * 2 + 3 : null;
+  const renee = isNaN(betty) ? null : betty + 4;
+
+  document.getElementById('inputHilda').value = hilda !== null ? hilda : '';
+  document.getElementById('inputAdam').value  = adam  !== null ? adam  : '';
+  document.getElementById('inputRenee').value = renee !== null ? renee : '';
+
+  state.hilda = hilda !== null ? String(hilda) : '';
+  state.adam  = adam  !== null ? String(adam)  : '';
+  state.renee = renee !== null ? String(renee) : '';
+}
+
+// ─── Feedback helper ─────────────────────────────────────────────────────────
+function showFeedback(fbId, pass, text) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = (pass ? '✅ ' : '💡 Hint: ') + text +
+    ` <button class="fb-play-btn" onclick="speak(feedbackTexts['${fbId}'])" title="Read aloud">🔊</button>`;
+}
+
+// ─── Check functions ──────────────────────────────────────────────────────────
+function logGuess() {
+  const {betty, hilda, adam, renee} = getVals();
+  if (betty === null && hilda === null && adam === null && renee === null) return;
+  // Upsert: find existing row with same input values and update pass flags,
+  // or append a new row. This ensures each check press on the same guess
+  // updates the single row rather than being suppressed or duplicated.
+  const existing = state.guesses.findIndex(
+    g => g.betty === betty && g.hilda === hilda && g.adam === adam && g.renee === renee
+  );
+  const entry = {
+    betty, hilda, adam, renee,
+    c1: state.passed[0], c2: state.passed[1], c3: state.passed[2], c4: state.passed[3]
+  };
+  if (existing >= 0) {
+    state.guesses[existing] = entry;
+  } else {
+    state.guesses.push(entry);
+  }
+  saveState();
+  renderHistory();
+}
+
+function doCheck1() {
+  const {betty, hilda} = getVals();
+  if (betty === null || hilda === null) { speak('Enter numbers for Betty and Hilda first.'); return; }
+  const expected = betty * 2;
+  const pass = hilda === expected;
+  state.passed[0] = pass;
+  document.getElementById('checkRow1').classList.toggle('passed', pass);
+  if (pass) {
+    showFeedback('checkFb1', true, 'Yes! Hilda has exactly twice Betty\'s lines.');
+  } else if (hilda < expected) {
+    showFeedback('checkFb1', false, 'Hilda\'s number is too low — it should be twice Betty\'s lines. Try a bigger number for Hilda.');
+  } else {
+    showFeedback('checkFb1', false, 'Hilda\'s number is too high — it should be twice Betty\'s lines. Try a smaller number for Hilda.');
+  }
+  logGuess();
+  updateProgress();
+  checkWin();
+}
+
+function doCheck2() {
+  const {hilda, adam} = getVals();
+  if (hilda === null || adam === null) { speak('Enter numbers for Hilda and Adam first.'); return; }
+  const expected = hilda * 2 + 3;
+  const pass = adam === expected;
+  state.passed[1] = pass;
+  document.getElementById('checkRow2').classList.toggle('passed', pass);
+  if (pass) {
+    showFeedback('checkFb2', true, 'Correct! Adam has 3 more than twice Hilda\'s lines.');
+  } else if (adam < expected) {
+    showFeedback('checkFb2', false, 'Adam\'s number is too low. Try: 2 times Hilda, then add 3.');
+  } else {
+    showFeedback('checkFb2', false, 'Adam\'s number is too high. Try: 2 times Hilda, then add 3.');
+  }
+  logGuess();
+  updateProgress();
+  checkWin();
+}
+
+function doCheck3() {
+  const {betty, renee} = getVals();
+  if (betty === null || renee === null) { speak('Enter numbers for Betty and Renee first.'); return; }
+  const expected = betty + 4;
+  const pass = renee === expected;
+  state.passed[2] = pass;
+  document.getElementById('checkRow3').classList.toggle('passed', pass);
+  if (pass) {
+    showFeedback('checkFb3', true, 'Right! Renee has exactly 4 more lines than Betty.');
+  } else if (renee < expected) {
+    showFeedback('checkFb3', false, 'Renee\'s number is too low. Renee needs 4 more than Betty.');
+  } else {
+    showFeedback('checkFb3', false, 'Renee\'s number is too high. Renee needs exactly 4 more than Betty.');
+  }
+  logGuess();
+  updateProgress();
+  checkWin();
+}
+
+function doCheck4() {
+  const {betty, hilda, adam, renee} = getVals();
+  if ([betty, hilda, adam, renee].includes(null)) { speak('Fill in all four actors first.'); return; }
+  const total = betty + hilda + adam + renee;
+  const pass  = total === 47;
+  state.passed[3] = pass;
+  document.getElementById('checkRow4').classList.toggle('passed', pass);
+  if (pass) {
+    showFeedback('checkFb4', true, 'The total is exactly 47!');
+  } else if (total < 47) {
+    showFeedback('checkFb4', false, `Total is ${total} — that's ${47 - total} too few. Try a higher number for Betty.`);
+  } else {
+    showFeedback('checkFb4', false, `Total is ${total} — that's ${total - 47} too many. Try a lower number for Betty.`);
+  }
+  logGuess();
+  updateProgress();
+  checkWin();
+}
+
+// ─── Win check ────────────────────────────────────────────────────────────────
+function checkWin() {
+  if (state.passed.every(Boolean)) {
+    const {betty, hilda, adam, renee} = getVals();
+    const banner = document.getElementById('winBanner');
+    banner.classList.add('show');
+    document.getElementById('winText').textContent =
+      `Betty: ${betty} lines · Hilda: ${hilda} lines · Adam: ${adam} lines · Renee: ${renee} lines`;
+    setTimeout(speakWin, 400);
+  }
+}
+
+function speakWin() {
+  const {betty, hilda, adam, renee} = getVals();
+  speak(`You solved it! Betty has ${betty} lines, Hilda has ${hilda} lines, Adam has ${adam} lines, and Renee has ${renee} lines. Together they have 47 lines. Great work!`);
+}
+
+// ─── Progress ─────────────────────────────────────────────────────────────────
+function updateProgress() {
+  const count = state.passed.filter(Boolean).length;
+  const pips  = document.getElementById('progressPips');
+  pips.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const pip = document.createElement('span');
+    pip.className = 'pip' + (state.passed[i] ? ' done' : '');
+    pip.style.marginRight = '4px';
+    pips.appendChild(pip);
+  }
+  document.getElementById('progressCount').textContent = `${count} of 4 checks passed`;
+}
+
+// ─── History ──────────────────────────────────────────────────────────────────
+function renderHistory() {
+  const container = document.getElementById('historyContent');
+  if (!state.guesses || state.guesses.length === 0) {
+    container.innerHTML = '<p class="no-guesses">No guesses yet — check a clue to record one!</p>';
+    return;
+  }
+  let html = `<div class="history-table-wrap"><table>
+    <thead><tr>
+      <th>#</th>
+      <th>🌟 Betty</th>
+      <th>🎀 Hilda</th>
+      <th>🎩 Adam</th>
+      <th>🌸 Renee</th>
+      <th>H=2B?</th>
+      <th>A=2H+3?</th>
+      <th>R=B+4?</th>
+      <th>Total=47?</th>
+    </tr></thead><tbody>`;
+  state.guesses.forEach((g, idx) => {
+    const fmt = v => v !== null ? v : '—';
+    const chk = b => b ? '✅' : '✗';
+    html += `<tr>
+      <td>${idx+1}</td>
+      <td>${fmt(g.betty)}</td>
+      <td>${fmt(g.hilda)}</td>
+      <td>${fmt(g.adam)}</td>
+      <td>${fmt(g.renee)}</td>
+      <td>${chk(g.c1)}</td>
+      <td>${chk(g.c2)}</td>
+      <td>${chk(g.c3)}</td>
+      <td>${chk(g.c4)}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  container.innerHTML = html;
+}
+
+// ─── Clear ────────────────────────────────────────────────────────────────────
+function clearAllResponses() {
+  const btn = document.getElementById('clearBtn');
+  if (btn.dataset.confirming === 'true') {
+    // Confirmed — clear everything
+    state = Object.assign({}, defaultState, { guesses: [] });
+    saveState();
+    // Reset inputs
+    ['inputBetty','inputHilda','inputAdam','inputRenee'].forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+      el.disabled = false;
+    });
+    document.getElementById('autoCalc').checked = false;
+    // Reset feedback
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById('checkFb' + i).className = 'feedback';
+      document.getElementById('checkRow' + i).classList.remove('passed');
+    }
+    document.getElementById('winBanner').classList.remove('show');
+    renderHistory();
+    updateProgress();
+    btn.dataset.confirming = 'false';
+    btn.textContent = '🗑️ Clear all responses';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    if (clearConfirmTimer) clearTimeout(clearConfirmTimer);
+  } else {
+    btn.dataset.confirming = 'true';
+    btn.textContent = '⚠️ Tap again to confirm';
+    btn.style.background = '#ffeedd';
+    btn.style.color = '#c05000';
+    btn.style.borderColor = '#c05000';
+    clearConfirmTimer = setTimeout(() => {
+      if (btn.dataset.confirming === 'true') {
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }
+    }, 3000);
+  }
+}
+
+// ─── Export / Print ───────────────────────────────────────────────────────────
+function exportPrint() {
+  const {betty, hilda, adam, renee} = getVals();
+  const guessRows = (state.guesses || []).map((g, idx) => {
+    const fmt = v => v !== null ? v : '—';
+    const chk = b => b ? '✓' : '✗';
+    return `<tr>
+      <td>${idx+1}</td><td>${fmt(g.betty)}</td><td>${fmt(g.hilda)}</td>
+      <td>${fmt(g.adam)}</td><td>${fmt(g.renee)}</td>
+      <td>${chk(g.c1)}</td><td>${chk(g.c2)}</td><td>${chk(g.c3)}</td><td>${chk(g.c4)}</td>
+    </tr>`;
+  }).join('');
+
+  const ansLine = (state.passed.every(Boolean) && betty !== null)
+    ? `<p><strong>Answer:</strong> Betty = ${betty}, Hilda = ${hilda}, Adam = ${adam}, Renee = ${renee}</p>`
+    : '';
+
+  const html = `<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><title>Guess and Check — Auditions</title>
+<style>
+  body { font-family: Arial, sans-serif; font-size: 11pt; color: #000; padding: 24px 32px; max-width: 720px; margin: 0 auto; }
+  h1 { font-size: 16pt; margin-bottom: 4px; }
+  .name-line { display: flex; gap: 24px; margin: 12px 0 18px; font-size: 10pt; }
+  .name-line span { display: flex; align-items: flex-end; gap: 6px; }
+  .name-line .line { display: inline-block; width: 180px; border-bottom: 1.5px solid #333; }
+  .problem { border: 1.5px solid #333; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; font-size: 10.5pt; line-height: 1.6; }
+  .problem strong { display: block; font-size: 11pt; margin-bottom: 6px; }
+  .inputs-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; text-align: center; }
+  .input-cell { border: 1.5px solid #333; border-radius: 6px; padding: 10px 6px; }
+  .input-cell .name { font-weight: bold; font-size: 11pt; margin-bottom: 6px; }
+  .input-cell .rule { font-size: 8.5pt; color: #555; margin-bottom: 8px; }
+  .input-cell .blank { border-bottom: 2px solid #333; width: 48px; height: 22px; display: inline-block; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; margin-top: 8px; }
+  th, td { border: 1px solid #aaa; padding: 5px 6px; text-align: center; }
+  th { background: #eee; font-weight: bold; }
+  .answer { margin-top: 14px; padding: 10px 14px; border: 2px solid #333; border-radius: 6px; font-size: 11pt; }
+  .print-btn { margin-bottom: 16px; padding: 8px 20px; font-size: 11pt; cursor: pointer; }
+  @media print { .print-btn { display: none; } }
+</style></head><body>
+<button class="print-btn" onclick="window.print()">🖨️ Print</button>
+<h1>Guess and Check — Auditions #16</h1>
+<div class="name-line">
+  <span>Name <span class="line"></span></span>
+  <span>Date <span class="line"></span></span>
+</div>
+<div class="problem">
+  <strong>Problem:</strong>
+  This notice was posted: <em>Auditions Next Week for the School Play.</em> After reading a copy of the play, Betty, Hilda, Adam, and Renee have decided which parts to try out for.
+  Hilda wants a part that has <u>twice as many lines</u> as the part that Betty wants.
+  Adam has chosen a part with <u>three more than twice</u> as many lines as the part that Hilda wants.
+  Renee is going to try out for a part with <u>four more lines</u> than Betty's part.
+  If they get the parts they want, together they will have a <u>total of 47 speaking lines</u>.
+  <br><strong>How many lines would each actor have in the play?</strong>
+</div>
+<div class="inputs-grid">
+  <div class="input-cell"><div class="name">🌟 Betty</div><div class="rule">Start here</div><div class="blank">${betty !== null ? betty : ''}</div><br><small>lines</small></div>
+  <div class="input-cell"><div class="name">🎀 Hilda</div><div class="rule">= 2 × Betty</div><div class="blank">${hilda !== null ? hilda : ''}</div><br><small>lines</small></div>
+  <div class="input-cell"><div class="name">🎩 Adam</div><div class="rule">= 2×Hilda + 3</div><div class="blank">${adam !== null ? adam : ''}</div><br><small>lines</small></div>
+  <div class="input-cell"><div class="name">🌸 Renee</div><div class="rule">= Betty + 4</div><div class="blank">${renee !== null ? renee : ''}</div><br><small>lines</small></div>
+</div>
+${ansLine ? '<div class="answer">' + ansLine.replace(/<\/?p>/g,'') + '</div>' : ''}
+<h3 style="margin-top:16px">Guess History</h3>
+${guessRows ? `<table><thead><tr><th>#</th><th>Betty</th><th>Hilda</th><th>Adam</th><th>Renee</th><th>H=2B?</th><th>A=2H+3?</th><th>R=B+4?</th><th>Total=47?</th></tr></thead><tbody>${guessRows}</tbody></table>` : '<p>No guesses recorded.</p>'}
+<p style="margin-top:20px; font-size:8.5pt; color:#666;">Source: Guess and Check worksheet #16 · Generated 2026-03-17</p>
+</body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+function init() {
+  // Restore inputs
+  if (state.betty) document.getElementById('inputBetty').value = state.betty;
+  if (state.hilda) document.getElementById('inputHilda').value = state.hilda;
+  if (state.adam)  document.getElementById('inputAdam').value  = state.adam;
+  if (state.renee) document.getElementById('inputRenee').value = state.renee;
+
+  // Restore auto-calc state — don't re-derive, just re-apply disabled state
+  // (auto-calc defaults unchecked)
+
+  updateProgress();
+  renderHistory();
+}
+
+init();
+</script>
+</body>
+</html>

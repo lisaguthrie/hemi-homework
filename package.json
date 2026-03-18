@@ -6,7 +6,8 @@
   "scripts": {
     "build": "python runners/cli.py",
     "watch": "python runners/watcher.py",
-    "propagate": "python runners/propagate.py"
+    "propagate": "python runners/propagate.py",
+    "publish": "python runners/publish.py"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
