@@ -135,7 +135,8 @@ def apply_update(client: Anthropic, model_name: str, current_content: str, block
                     "- Output only the complete updated file content — no explanation, no markdown fences\n"
                     "- Preserve all existing content that is not affected by this change\n"
                     "- Integrate the change naturally into the existing structure\n"
-                    "- Do not add new sections unless the change explicitly requires it"
+                    "- Do not add new sections unless the change explicitly requires it\n"
+                    "- Copy reference implementations to the profiles/reference/ subdirectory and reference from there, rather than a child-specific subdirectory"
                 ),
             }
         ],
