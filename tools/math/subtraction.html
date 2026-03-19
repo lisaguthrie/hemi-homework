@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Subtraction Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --border: #d0d8f0;
+    --text: #1a2a3a;
+    --muted: #8a9ab0;
+    --accent: #3b7dd8;
+    --accent-light: #e8f0ff;
+    --borrow-color: #f59e0b;
+    --borrow-light: #fef3c7;
+    --borrow-border: #fcd34d;
+    --correct: #22c55e;
+    --correct-light: #dcfce7;
+    --wrong: #ef4444;
+    --wrong-light: #fee2e2;
+    --cell: 52px;
+    --gap: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px 80px;
+    color: var(--text);
+  }
+
+  /* ── Header ── */
+  header {
+    width: 100%; max-width: 420px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .header-title h1 { font-family: 'Fredoka One', cursive; font-size: 1.9rem; color: var(--accent); }
+  .header-title p { font-size: 0.82rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+  .settings-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid var(--border); background: var(--card);
+    font-size: 1.25rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .15s, background .15s;
+  }
+  .settings-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+
+  /* ── Setup card ── */
+  .setup-card {
+    background: var(--card); border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(59,125,216,.10);
+    padding: 28px 24px; width: 100%; max-width: 420px;
+    border: 2px solid var(--border);
+  }
+  .setup-label { font-size: .82rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .setup-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .setup-op { font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--accent); }
+  .setup-input {
+    font-family: 'Fredoka One', cursive; font-size: 2rem;
+    width: 150px; padding: 10px 14px;
+    border: 2.5px solid var(--border); border-radius: 12px;
+    background: var(--bg); color: var(--text); text-align: center; outline: none;
+    transition: border-color .2s;
+  }
+  .setup-input:focus { border-color: var(--accent); }
+  .setup-input::placeholder { color: #c0cce0; }
+  .build-btn {
+    width: 100%; padding: 14px; background: var(--accent); color: white; border: none;
+    border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    cursor: pointer; transition: background .15s, transform .1s;
+  }
+  .build-btn:hover { background: #2a5fb0; }
+  .build-btn:active { transform: scale(.97); }
+
+  /* ── Problem card ── */
+  .problem-card {
+    display: none; background: var(--card); border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(59,125,216,.10);
+    padding: 28px 24px 24px; width: 100%; max-width: 420px;
+    border: 2px solid var(--border);
+    flex-direction: column; align-items: center;
+  }
+  .problem-card.visible { display: flex; }
+  .problem-expr { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--muted); margin-bottom: 22px; }
+
+  /* ── Vertical arithmetic ── */
+  .vertical-problem { display: flex; flex-direction: column; align-items: flex-end; gap: 0; user-select: none; }
+  .v-row { display: flex; flex-direction: row; align-items: flex-end; gap: var(--gap); }
+  .op-spacer { width: 36px; flex-shrink: 0; }
+  .op-cell {
+    width: 36px; height: var(--cell);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--accent); flex-shrink: 0;
+  }
+
+  /* Column wrapper */
+  .col-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    width: var(--cell);
+  }
+
+  /* Borrow box — wider to fit 2 digits */
+  .borrow-box {
+    display: none;
+    min-width: 44px; width: auto; padding: 0 6px;
+    height: 36px;
+    border: 2px solid var(--borrow-border); border-radius: 8px;
+    background: var(--borrow-light);
+    align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--borrow-color);
+    cursor: pointer; transition: background .12s, border-color .12s;
+    flex-shrink: 0; white-space: nowrap;
+  }
+  .borrow-box.visible { display: flex; }
+  .borrow-box.filled { border-style: solid; border-color: var(--borrow-color); }
+  .borrow-box:active { transform: scale(.93); }
+
+  /* Top digit — tappable */
+  .digit-top {
+    width: var(--cell); height: var(--cell);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--text);
+    border-radius: 10px; transition: background .15s; position: relative;
+  }
+  .digit-top.tappable { cursor: pointer; }
+  .digit-top.tappable:hover { background: #e8eeff; }
+  .digit-top.tappable:active { background: var(--accent-light); }
+  .digit-top.crossed { color: #b0bcd0; }
+  .digit-top.crossed::after {
+    content: ''; position: absolute; left: 6px; right: 6px;
+    top: 50%; height: 3px; background: var(--wrong); border-radius: 2px;
+    transform: translateY(-50%);
+  }
+
+  /* Static digit */
+  .digit-static {
+    width: var(--cell); height: var(--cell);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--text);
+  }
+
+  /* Rule */
+  .rule-wrap { width: 100%; padding-left: 42px; margin: 6px 0 8px; }
+  .rule-line { width: 100%; height: 3px; background: var(--text); border-radius: 2px; }
+
+  /* Answer cells */
+  .answer-cell {
+    width: var(--cell); height: var(--cell);
+    border: 2.5px solid var(--border); border-radius: 10px; background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--text);
+    cursor: pointer; transition: border-color .15s, background .15s;
+  }
+  .answer-cell:hover { border-color: var(--accent); background: var(--accent-light); }
+  .answer-cell.active-cell { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(59,125,216,.2); }
+  .answer-cell.correct-cell { border-color: var(--correct); background: var(--correct-light); color: #166534; }
+  .answer-cell.wrong-cell { border-color: var(--wrong); background: var(--wrong-light); animation: shake .3s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+  /* Confirm */
+  .confirm-btn {
+    margin-top: 22px; padding: 14px 36px; background: var(--accent); color: white; border: none;
+    border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    cursor: pointer; transition: background .15s, transform .1s;
+  }
+  .confirm-btn:hover { background: #2a5fb0; }
+  .confirm-btn:active { transform: scale(.97); }
+
+  .feedback-msg {
+    display: none; margin-top: 12px; padding: 10px 16px; border-radius: 12px;
+    font-size: .95rem; font-weight: 700; text-align: center;
+  }
+  .feedback-msg.show { display: block; background: var(--borrow-light); color: #92400e; border: 2px solid var(--borrow-border); }
+
+  .result-chip {
+    display: none; align-items: center; gap: 10px;
+    background: var(--correct-light); border: 2.5px solid var(--correct);
+    border-radius: 16px; padding: 14px 22px;
+    font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: #166534;
+    margin-top: 16px;
+  }
+  .result-chip.visible { display: flex; }
+
+  .reset-btn {
+    margin-top: 14px; padding: 10px 24px; background: transparent;
+    color: var(--muted); border: 2px solid var(--border); border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 700;
+    cursor: pointer; transition: border-color .15s, color .15s;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Overlays ── */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(10,20,40,.35); z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .bottom-sheet {
+    background: #f8faff; border-radius: 24px 24px 0 0;
+    padding: 16px 16px 36px; width: 100%; max-width: 420px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,.18);
+    animation: slideUp .2s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+  /* Numpad */
+  .sheet-hint { text-align: center; font-size: .8rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+  /* Preview of current borrow value being built */
+  .borrow-preview {
+    display: none;
+    text-align: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    color: var(--borrow-color);
+    background: var(--borrow-light);
+    border: 2px solid var(--borrow-border);
+    border-radius: 10px;
+    padding: 6px 12px;
+    margin-bottom: 12px;
+    min-height: 48px;
+    letter-spacing: 2px;
+  }
+  .borrow-preview.active { display: block; }
+  .borrow-preview.empty { color: #d0b878; }
+
+  .numpad-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .numpad-key {
+    height: 64px; border: none; border-radius: 14px; background: #fff;
+    box-shadow: 0 2px 8px rgba(59,125,216,.10);
+    font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--text);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .12s, transform .1s;
+  }
+  .numpad-key:active { background: var(--accent-light); transform: scale(.94); }
+  .numpad-key.zero { grid-column: span 2; }
+  .numpad-key.clr { background: #fee2e2; color: var(--wrong); font-size: 1rem; font-family: 'Nunito', sans-serif; font-weight: 800; }
+
+  /* Settings sheet */
+  .settings-title { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--accent); margin-bottom: 18px; text-align: center; }
+  .setting-row { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-top: 1.5px solid var(--border); }
+  .setting-row:last-of-type { border-bottom: 1.5px solid var(--border); }
+  .setting-info { flex: 1; }
+  .setting-info strong { font-size: 1rem; font-weight: 800; display: block; margin-bottom: 4px; }
+  .setting-info p { font-size: .85rem; color: var(--muted); font-weight: 600; line-height: 1.4; }
+  .toggle-wrap { flex-shrink: 0; padding-top: 2px; }
+  .toggle { position: relative; display: inline-block; width: 52px; height: 28px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; inset: 0; background: #d0d8f0; border-radius: 28px; cursor: pointer; transition: background .2s; }
+  .toggle-slider::before { content: ''; position: absolute; width: 22px; height: 22px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(24px); }
+  .done-btn { width: 100%; margin-top: 18px; padding: 13px; background: var(--accent); color: white; border: none; border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.2rem; cursor: pointer; transition: background .15s; }
+  .done-btn:hover { background: #2a5fb0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>− Subtraction</h1>
+    <p>Tap a top digit to cross it out &amp; borrow</p>
+  </div>
+  <button class="settings-btn" onclick="openSettings()">⚙️</button>
+</header>
+
+<!-- Setup -->
+<div class="setup-card" id="setupCard">
+  <div class="setup-label">Top number</div>
+  <div class="setup-row">
+    <input class="setup-input" id="inputTop" type="number" inputmode="numeric" placeholder="123">
+  </div>
+  <div class="setup-label">Subtract</div>
+  <div class="setup-row">
+    <span class="setup-op">−</span>
+    <input class="setup-input" id="inputBot" type="number" inputmode="numeric" placeholder="47">
+  </div>
+  <button class="build-btn" onclick="buildProblem()">Set Up ↓</button>
+</div>
+
+<!-- Problem -->
+<div class="problem-card" id="problemCard">
+  <div class="problem-expr" id="problemExpr"></div>
+  <div class="vertical-problem" id="verticalProblem"></div>
+  <button class="confirm-btn" id="confirmBtn" onclick="checkAnswer()">Check ✓</button>
+  <div class="feedback-msg" id="feedbackMsg"></div>
+  <div class="result-chip" id="resultChip"></div>
+  <button class="reset-btn" onclick="resetTool()">← New problem</button>
+</div>
+
+<!-- Numpad overlay — shared for both answer and borrow cells -->
+<div class="overlay" id="numpadOverlay" onclick="closeNumpad()">
+  <div class="bottom-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-hint" id="numpadHint">Enter digit</div>
+    <!-- Borrow preview row — only shown when editing a borrow box -->
+    <div class="borrow-preview" id="borrowPreview"></div>
+    <div class="numpad-grid">
+      <button class="numpad-key" onclick="numpadTap('7')">7</button>
+      <button class="numpad-key" onclick="numpadTap('8')">8</button>
+      <button class="numpad-key" onclick="numpadTap('9')">9</button>
+      <button class="numpad-key" onclick="numpadTap('4')">4</button>
+      <button class="numpad-key" onclick="numpadTap('5')">5</button>
+      <button class="numpad-key" onclick="numpadTap('6')">6</button>
+      <button class="numpad-key" onclick="numpadTap('1')">1</button>
+      <button class="numpad-key" onclick="numpadTap('2')">2</button>
+      <button class="numpad-key" onclick="numpadTap('3')">3</button>
+      <button class="numpad-key zero" onclick="numpadTap('0')">0</button>
+      <button class="numpad-key clr" onclick="numpadTap('clear')">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- Settings overlay -->
+<div class="overlay" id="settingsOverlay" onclick="closeSettings()">
+  <div class="bottom-sheet" onclick="event.stopPropagation()">
+    <div class="settings-title">⚙️ Settings</div>
+    <div class="setting-row">
+      <div class="setting-info">
+        <strong>Borrowing helper</strong>
+        <p>When on: crossing out a digit also shows a borrow box on the column to its right.</p>
+      </div>
+      <div class="toggle-wrap">
+        <label class="toggle">
+          <input type="checkbox" id="helperToggle" onchange="saveSetting()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <button class="done-btn" onclick="closeSettings()">Done</button>
+  </div>
+</div>
+
+<script>
+  // ── Settings ──────────────────────────────────────────────────────────────
+  const SETTINGS_KEY = 'subtraction-tool-v1-settings';
+
+  function loadSettings() {
+    try {
+      const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+      document.getElementById('helperToggle').checked = !!s.borrowHelper;
+    } catch(e) {}
+  }
+  function saveSetting() {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+      borrowHelper: document.getElementById('helperToggle').checked
+    }));
+  }
+  function isHelperOn() { return document.getElementById('helperToggle').checked; }
+  function openSettings() { document.getElementById('settingsOverlay').classList.add('open'); }
+  function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let topNum = 0, botNum = 0, cols = 0;
+  let answerDigits = [];   // [col] = single char '0'-'9' or ''  (col 0 = ones)
+  let borrowDigits = [];   // [col] = string like '', '1', '13'  (multi-digit allowed)
+  let crossedCols = new Set();
+  let activeCell = null;   // { type: 'answer'|'borrow', col }
+  let solved = false;
+
+  // ── Build ─────────────────────────────────────────────────────────────────
+  function buildProblem() {
+    const tv = document.getElementById('inputTop').value.trim();
+    const bv = document.getElementById('inputBot').value.trim();
+    if (!tv || !bv) { alert('Enter both numbers first.'); return; }
+    topNum = parseInt(tv, 10);
+    botNum = parseInt(bv, 10);
+    if (isNaN(topNum) || isNaN(botNum) || topNum < 0 || botNum < 0) { alert('Positive numbers only.'); return; }
+    if (botNum > topNum) { alert('The bottom number is bigger than the top — check your numbers.'); return; }
+
+    cols = Math.max(String(topNum).length, String(botNum).length);
+    answerDigits = Array(cols).fill('');
+    borrowDigits = Array(cols).fill('');
+    crossedCols = new Set();
+    solved = false;
+
+    document.getElementById('problemExpr').textContent = topNum + ' − ' + botNum;
+    document.getElementById('confirmBtn').style.display = '';
+    document.getElementById('feedbackMsg').className = 'feedback-msg';
+    document.getElementById('resultChip').className = 'result-chip';
+
+    renderProblem();
+    document.getElementById('setupCard').style.display = 'none';
+    document.getElementById('problemCard').classList.add('visible');
+  }
+
+  function renderProblem() {
+    const container = document.getElementById('verticalProblem');
+    container.innerHTML = '';
+
+    const topStr = String(topNum).padStart(cols, ' ');
+    const botStr = String(botNum).padStart(cols, ' ');
+
+    // ── Top row ──
+    const topRow = document.createElement('div');
+    topRow.className = 'v-row';
+    topRow.appendChild(makeEl('div', 'op-spacer'));
+
+    for (let i = 0; i < cols; i++) {
+      const colR = cols - 1 - i;
+      const ch = topStr[i];
+      const isEmpty = ch === ' ';
+
+      const wrap = document.createElement('div');
+      wrap.className = 'col-wrap';
+      wrap.id = 'col-wrap-' + colR;
+
+      const bb = document.createElement('div');
+      bb.className = 'borrow-box';
+      bb.id = 'borrow-box-' + colR;
+      bb.textContent = borrowDigits[colR] || '';
+      if (borrowDigits[colR]) bb.classList.add('filled');
+      bb.onclick = (e) => { e.stopPropagation(); if (!solved) openNumpad('borrow', colR); };
+      wrap.appendChild(bb);
+
+      const dt = document.createElement('div');
+      dt.className = 'digit-top' + (isEmpty ? '' : ' tappable');
+      dt.id = 'top-digit-' + colR;
+      dt.textContent = isEmpty ? '' : ch;
+      if (!isEmpty) {
+        dt.onclick = () => { if (!solved) toggleCross(colR); };
+        if (crossedCols.has(colR)) {
+          dt.classList.add('crossed');
+          bb.classList.add('visible');
+        }
+      }
+      wrap.appendChild(dt);
+      topRow.appendChild(wrap);
+    }
+    container.appendChild(topRow);
+
+    // ── Bottom row ──
+    const botRow = document.createElement('div');
+    botRow.className = 'v-row';
+    botRow.appendChild(makeOpCell('−'));
+    for (let i = 0; i < cols; i++) {
+      const ch = botStr[i];
+      const cell = makeEl('div', 'digit-static');
+      cell.textContent = ch === ' ' ? '' : ch;
+      botRow.appendChild(cell);
+    }
+    container.appendChild(botRow);
+
+    // ── Rule ──
+    const ruleWrap = makeEl('div', 'rule-wrap');
+    ruleWrap.appendChild(makeEl('div', 'rule-line'));
+    container.appendChild(ruleWrap);
+
+    // ── Answer row ──
+    const ansRow = document.createElement('div');
+    ansRow.className = 'v-row';
+    ansRow.appendChild(makeEl('div', 'op-spacer'));
+    for (let i = 0; i < cols; i++) {
+      const colR = cols - 1 - i;
+      const cell = makeEl('div', 'answer-cell');
+      cell.id = 'answer-' + colR;
+      cell.textContent = answerDigits[colR] || '';
+      cell.onclick = () => { if (!solved) openNumpad('answer', colR); };
+      ansRow.appendChild(cell);
+    }
+    container.appendChild(ansRow);
+  }
+
+  function makeEl(tag, cls) {
+    const el = document.createElement(tag);
+    if (cls) el.className = cls;
+    return el;
+  }
+  function makeOpCell(sym) {
+    const el = makeEl('div', 'op-cell'); el.textContent = sym; return el;
+  }
+
+  // ── Toggle cross ──────────────────────────────────────────────────────────
+  function toggleCross(colR) {
+    const dt = document.getElementById('top-digit-' + colR);
+    const bb = document.getElementById('borrow-box-' + colR);
+
+    if (crossedCols.has(colR)) {
+      crossedCols.delete(colR);
+      dt.classList.remove('crossed');
+      bb.classList.remove('visible', 'filled');
+      bb.textContent = '';
+      borrowDigits[colR] = '';
+
+      if (isHelperOn() && colR - 1 >= 0) {
+        const rbb = document.getElementById('borrow-box-' + (colR - 1));
+        const rdt = document.getElementById('top-digit-' + (colR - 1));
+        if (rbb) { rbb.classList.remove('visible', 'filled'); rbb.textContent = ''; borrowDigits[colR - 1] = ''; }
+        if (rdt) { crossedCols.delete(colR - 1); rdt.classList.remove('crossed'); }
+      }
+    } else {
+      crossedCols.add(colR);
+      dt.classList.add('crossed');
+      bb.classList.add('visible');
+      if (borrowDigits[colR]) bb.classList.add('filled');
+
+      if (isHelperOn() && colR - 1 >= 0) {
+        const rbb = document.getElementById('borrow-box-' + (colR - 1));
+        const rdt = document.getElementById('top-digit-' + (colR - 1));
+        if (rbb) rbb.classList.add('visible');
+        if (rdt && rdt.classList.contains('tappable')) {
+          crossedCols.add(colR - 1);
+          rdt.classList.add('crossed');
+        }
+      }
+    }
+  }
+
+  // ── Numpad ────────────────────────────────────────────────────────────────
+  function openNumpad(type, col) {
+    activeCell = { type, col };
+
+    const preview = document.getElementById('borrowPreview');
+    if (type === 'borrow') {
+      document.getElementById('numpadHint').textContent = 'Borrow box — tap digits to build number';
+      preview.classList.add('active');
+      const cur = borrowDigits[col];
+      preview.textContent = cur || '—';
+      preview.classList.toggle('empty', !cur);
+    } else {
+      document.getElementById('numpadHint').textContent = 'Answer digit';
+      preview.classList.remove('active');
+    }
+
+    clearActiveHighlights();
+    const el = document.getElementById((type === 'borrow' ? 'borrow-box-' : 'answer-') + col);
+    if (el) el.classList.add('active-cell');
+    document.getElementById('numpadOverlay').classList.add('open');
+  }
+
+  function closeNumpad() {
+    document.getElementById('numpadOverlay').classList.remove('open');
+    document.getElementById('borrowPreview').classList.remove('active');
+    clearActiveHighlights();
+    activeCell = null;
+  }
+
+  function clearActiveHighlights() {
+    document.querySelectorAll('.active-cell').forEach(e => e.classList.remove('active-cell'));
+  }
+
+  function numpadTap(val) {
+    if (!activeCell) return;
+    const { type, col } = activeCell;
+
+    if (type === 'answer') {
+      // Answer cells: single digit, replace on each tap
+      const el = document.getElementById('answer-' + col);
+      if (!el) return;
+      if (val === 'clear') {
+        answerDigits[col] = '';
+        el.textContent = '';
+        el.classList.remove('correct-cell', 'wrong-cell');
+      } else {
+        answerDigits[col] = val;
+        el.textContent = val;
+        el.classList.remove('wrong-cell');
+      }
+      closeNumpad();
+
+    } else {
+      // Borrow boxes: append digits (up to 2), Clear wipes all
+      const el = document.getElementById('borrow-box-' + col);
+      if (!el) return;
+      const preview = document.getElementById('borrowPreview');
+
+      if (val === 'clear') {
+        borrowDigits[col] = '';
+      } else {
+        const cur = borrowDigits[col] || '';
+        if (cur.length < 2) {
+          borrowDigits[col] = cur + val;
+        }
+        // If already 2 digits, ignore additional taps (silently cap)
+      }
+
+      const newVal = borrowDigits[col];
+      el.textContent = newVal;
+      el.classList.toggle('filled', newVal.length > 0);
+
+      // Update preview
+      preview.textContent = newVal || '—';
+      preview.classList.toggle('empty', !newVal);
+
+      // Don't auto-close for borrow — let her keep building the number
+      // She taps outside or a non-borrow area to dismiss
+    }
+  }
+
+  // ── Check ─────────────────────────────────────────────────────────────────
+  function checkAnswer() {
+    // Find the rightmost filled cell — everything to its left that's empty counts as 0.
+    // Everything to its right (ones side) that's empty blocks submission.
+    let rightmostFilled = -1;
+    for (let col = 0; col < cols; col++) {
+      if (answerDigits[col]) rightmostFilled = col;
+    }
+    if (rightmostFilled === -1) { showFeedback('Fill in at least one answer box.'); return; }
+
+    // Check that all cells from 0 up to rightmostFilled are filled
+    for (let col = 0; col <= rightmostFilled; col++) {
+      if (!answerDigits[col]) { showFeedback('Fill in all the answer boxes first.'); return; }
+    }
+
+    // Build answer string: cols-1 (leftmost) down to 0 (ones), treating cells
+    // above rightmostFilled as '0' if empty
+    let ansStr = '';
+    for (let col = cols - 1; col >= 0; col--) {
+      ansStr += answerDigits[col] || '0';
+    }
+
+    const userAnswer = parseInt(ansStr, 10);
+    const correct = topNum - botNum;
+
+    if (userAnswer === correct) {
+      for (let col = 0; col < cols; col++) {
+        const el = document.getElementById('answer-' + col);
+        if (el) { el.classList.remove('wrong-cell'); el.classList.add('correct-cell'); }
+      }
+      document.getElementById('feedbackMsg').className = 'feedback-msg';
+      document.getElementById('confirmBtn').style.display = 'none';
+      const chip = document.getElementById('resultChip');
+      chip.innerHTML = '✅ &nbsp;' + topNum + ' − ' + botNum + ' = <strong style="margin-left:6px">' + correct + '</strong>';
+      chip.classList.add('visible');
+      solved = true;
+    } else {
+      for (let col = 0; col < cols; col++) {
+        const el = document.getElementById('answer-' + col);
+        if (el) {
+          el.classList.remove('correct-cell');
+          el.classList.add('wrong-cell');
+          setTimeout(() => el.classList.remove('wrong-cell'), 400);
+        }
+      }
+      const diff = userAnswer - correct;
+      const hint = Math.abs(diff) > 10
+        ? (userAnswer > correct ? 'Too high — check your borrowing.' : 'Too low — check your borrowing.')
+        : (userAnswer > correct ? 'A little too high.' : 'A little too low.');
+      showFeedback('💡 ' + hint);
+    }
+  }
+
+  function showFeedback(msg) {
+    const el = document.getElementById('feedbackMsg');
+    el.className = 'feedback-msg show';
+    el.textContent = msg;
+  }
+
+  // ── Reset ─────────────────────────────────────────────────────────────────
+  function resetTool() {
+    document.getElementById('problemCard').classList.remove('visible');
+    document.getElementById('setupCard').style.display = '';
+    document.getElementById('inputTop').value = '';
+    document.getElementById('inputBot').value = '';
+    document.getElementById('verticalProblem').innerHTML = '';
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  loadSettings();
+</script>
+</body>
+</html>

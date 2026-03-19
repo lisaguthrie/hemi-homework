@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Publish worksheets to docs/ for GitHub Pages.
+"""Publish worksheets and tools to docs/ for GitHub Pages.
 
 Scans worksheets/<child>/ for HTML files (regardless of how they were
 created), copies them flat into docs/, copies any archive/ subfolder into
 docs/archive/, and regenerates docs/index.html and docs/archive/index.html.
+
+Also mirrors tools/ → docs/tools/ (all files, preserving subdirectory
+structure). No index is generated for tools/.
 
 Usage:
     python runners/publish.py            # copy + regenerate index
@@ -251,6 +254,24 @@ def main() -> int:
     skipped_note = f", {skipped} unchanged" if args.preserve else ""
     archive_note = f", {len(archive_docs_files)} archived" if has_archive else ""
     print(f"\n✅ Done — {copied} copied{skipped_note}{archive_note}, {len(docs_files)} total")
+
+    # Sync tools/ → docs/tools/
+    tools_source = ROOT / "tools"
+    if tools_source.exists():
+        tools_dest = DOCS_DIR / "tools"
+        tools_copied = 0
+        for src in sorted(tools_source.rglob("*")):
+            if src.is_dir():
+                continue
+            dest = tools_dest / src.relative_to(tools_source)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
+                continue
+            dest.write_bytes(src.read_bytes())
+            print(f"  🔧 Tools:    {src.relative_to(tools_source).as_posix()}")
+            tools_copied += 1
+        if tools_copied:
+            print(f"  🔧 {tools_copied} tool file(s) synced to docs/tools/")
 
     if should_push:
         commit_and_push(ROOT)

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Math Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-start: #e0f4ff;
+    --bg-end: #f0e8ff;
+    --card: #ffffff;
+    --border: #d0d8f0;
+    --text: #1a2a3a;
+    --muted: #8a9ab0;
+    --accent: #3b7dd8;
+    --accent-light: #e8f0ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    min-height: 100vh;
+    padding: 28px 16px 60px;
+    color: var(--text);
+  }
+
+  header {
+    max-width: 500px; margin: 0 auto 10px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .back-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid var(--border); background: var(--card);
+    font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; color: var(--text);
+    transition: border-color .15s, background .15s;
+  }
+  .back-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+
+  .page-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem; color: var(--accent);
+  }
+
+  .subtitle {
+    max-width: 500px; margin: 0 auto 28px;
+    font-size: 1rem; color: var(--muted); font-weight: 600;
+    padding-left: 56px; /* align with title after back button */
+  }
+
+  .tools-grid {
+    max-width: 500px; margin: 0 auto;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+
+  .tool-card {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(59,125,216,0.10);
+    border: 2.5px solid var(--border);
+    padding: 20px 20px 20px 22px;
+    display: flex; align-items: center; gap: 18px;
+    text-decoration: none; color: var(--text);
+    transition: border-color .15s, box-shadow .15s, transform .1s;
+    cursor: pointer;
+  }
+  .tool-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 6px 28px rgba(59,125,216,0.18);
+    transform: translateY(-2px);
+  }
+  .tool-card:active { transform: scale(.98); }
+
+  .tool-icon {
+    font-size: 2.4rem;
+    width: 60px; height: 60px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .tool-info { flex: 1; }
+  .tool-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem; color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .tool-desc {
+    font-size: 0.92rem; font-weight: 600; color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .tool-arrow {
+    font-size: 1.4rem; color: var(--border); flex-shrink: 0;
+  }
+
+  /* Per-tool accent colors */
+  .icon-subtract { background: #fee2e2; }
+  .icon-add      { background: #dcfce7; }
+  .icon-multiply { background: #fef3c7; }
+  .icon-divide   { background: #e0e7ff; }
+  .icon-fraction { background: #fce7f3; }
+  .icon-place    { background: #e0f2fe; }
+
+  /* Coming soon badge */
+  .tool-card.coming-soon {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .soon-badge {
+    font-size: 0.72rem; font-weight: 800;
+    background: #f1f5f9; color: var(--muted);
+    border-radius: 20px; padding: 3px 10px;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-top: 6px; display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-btn" href="../index.html" title="All tools">←</a>
+  <h1 class="page-title">🔢 Math Tools</h1>
+</header>
+<p class="subtitle">Tap a tool to open it</p>
+
+<div class="tools-grid">
+
+  <a class="tool-card" href="subtraction.html">
+    <div class="tool-icon icon-subtract">−</div>
+    <div class="tool-info">
+      <div class="tool-name">Subtraction</div>
+      <div class="tool-desc">Set up any subtraction problem. Cross out digits to borrow, fill in the answer step by step.</div>
+    </div>
+    <div class="tool-arrow">›</div>
+  </a>
+
+  <div class="tool-card coming-soon">
+    <div class="tool-icon icon-add">+</div>
+    <div class="tool-info">
+      <div class="tool-name">Addition</div>
+      <div class="tool-desc">Stack two numbers and add them up, with a carry row at the top.</div>
+      <span class="soon-badge">Coming soon</span>
+    </div>
+    <div class="tool-arrow">›</div>
+  </div>
+
+  <div class="tool-card coming-soon">
+    <div class="tool-icon icon-multiply">×</div>
+    <div class="tool-info">
+      <div class="tool-name">Multiplication</div>
+      <div class="tool-desc">Multi-digit multiplication with partial products, laid out vertically.</div>
+      <span class="soon-badge">Coming soon</span>
+    </div>
+    <div class="tool-arrow">›</div>
+  </div>
+
+  <div class="tool-card coming-soon">
+    <div class="tool-icon icon-divide">÷</div>
+    <div class="tool-info">
+      <div class="tool-name">Division</div>
+      <div class="tool-desc">Long division with scaffolded steps — divide, multiply, subtract, bring down.</div>
+      <span class="soon-badge">Coming soon</span>
+    </div>
+    <div class="tool-arrow">›</div>
+  </div>
+
+  <div class="tool-card coming-soon">
+    <div class="tool-icon icon-fraction">½</div>
+    <div class="tool-info">
+      <div class="tool-name">Fraction Addition &amp; Subtraction</div>
+      <div class="tool-desc">Add or subtract fractions and mixed numbers, with a common denominator helper.</div>
+      <span class="soon-badge">Coming soon</span>
+    </div>
+    <div class="tool-arrow">›</div>
+  </div>
+
+  <div class="tool-card coming-soon">
+    <div class="tool-icon icon-place">.</div>
+    <div class="tool-info">
+      <div class="tool-name">Place Value</div>
+      <div class="tool-desc">Type any number and see each digit labeled with its place value name.</div>
+      <span class="soon-badge">Coming soon</span>
+    </div>
+    <div class="tool-arrow">›</div>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tools</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-start: #e0f4ff;
+    --bg-end: #f0e8ff;
+    --card: #ffffff;
+    --border: #d0d8f0;
+    --text: #1a2a3a;
+    --muted: #8a9ab0;
+    --accent: #3b7dd8;
+    --accent-light: #e8f0ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+    min-height: 100vh;
+    padding: 36px 16px 60px;
+    color: var(--text);
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  header { text-align: center; margin-bottom: 8px; }
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.4rem; color: var(--accent);
+  }
+  .subtitle {
+    font-size: 1rem; color: var(--muted); font-weight: 600;
+    margin-bottom: 36px; margin-top: 6px;
+  }
+
+  .categories {
+    width: 100%; max-width: 500px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .category-card {
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: 0 4px 24px rgba(59,125,216,0.10);
+    border: 2.5px solid var(--border);
+    padding: 24px 24px 24px 26px;
+    display: flex; align-items: center; gap: 20px;
+    text-decoration: none; color: var(--text);
+    transition: border-color .15s, box-shadow .15s, transform .1s;
+  }
+  .category-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 8px 32px rgba(59,125,216,0.18);
+    transform: translateY(-2px);
+  }
+  .category-card:active { transform: scale(.98); }
+
+  .cat-icon {
+    font-size: 2.8rem;
+    width: 68px; height: 68px;
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-math    { background: #dbeafe; }
+  .icon-reading { background: #dcfce7; }
+  .icon-writing { background: #fef9c3; }
+
+  .cat-info { flex: 1; }
+  .cat-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem; color: var(--accent); margin-bottom: 4px;
+  }
+  .cat-desc {
+    font-size: 0.92rem; font-weight: 600; color: var(--muted); line-height: 1.4;
+  }
+  .cat-count {
+    font-size: 0.8rem; font-weight: 800; color: var(--accent);
+    background: var(--accent-light); border-radius: 20px;
+    padding: 3px 10px; display: inline-block; margin-top: 6px;
+  }
+
+  .cat-arrow { font-size: 1.6rem; color: var(--border); flex-shrink: 0; }
+
+  .category-card.coming-soon { opacity: 0.5; pointer-events: none; }
+  .soon-badge {
+    font-size: 0.72rem; font-weight: 800;
+    background: #f1f5f9; color: var(--muted);
+    border-radius: 20px; padding: 3px 10px;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-top: 6px; display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧰 My Tools</h1>
+</header>
+<p class="subtitle">Pick a subject to find a tool</p>
+
+<div class="categories">
+
+  <a class="category-card" href="math/index.html">
+    <div class="cat-icon icon-math">🔢</div>
+    <div class="cat-info">
+      <div class="cat-name">Math</div>
+      <div class="cat-desc">Addition, subtraction, multiplication, division, fractions, place value</div>
+      <span class="cat-count">1 tool ready · 5 coming soon</span>
+    </div>
+    <div class="cat-arrow">›</div>
+  </a>
+
+  <div class="category-card coming-soon">
+    <div class="cat-icon icon-reading">📖</div>
+    <div class="cat-info">
+      <div class="cat-name">Reading</div>
+      <div class="cat-desc">Tools for working through reading passages and comprehension questions</div>
+      <span class="soon-badge">Coming soon</span>
+    </div>
+    <div class="cat-arrow">›</div>
+  </div>
+
+  <div class="category-card coming-soon">
+    <div class="cat-icon icon-writing">✏️</div>
+    <div class="cat-info">
+      <div class="cat-name">Writing</div>
+      <div class="cat-desc">Sentence building, spelling, grammar helpers</div>
+      <span class="soon-badge">Coming soon</span>
+    </div>
+    <div class="cat-arrow">›</div>
+  </div>
+
+</div>
+
+</body>
+</html>

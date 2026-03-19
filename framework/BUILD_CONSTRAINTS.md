@@ -1,6 +1,6 @@
 # Build Constraints
 
-Rules that apply to every generated worksheet app, regardless of profile or worksheet type.
+Rules that apply to every generated worksheet app and tool, regardless of profile or worksheet type.
 
 ---
 
@@ -16,6 +16,7 @@ Rules that apply to every generated worksheet app, regardless of profile or work
 
 ## File Naming
 
+### Worksheets
 ```
 worksheets/{child-name}/YYYY-MM-DD-{subject-slug}.html
 ```
@@ -25,6 +26,19 @@ Examples:
 - `worksheets/christina/2026-03-12-fractions.html`
 
 Subject slug: lowercase, hyphens, no special characters.
+
+### Tools
+```
+tools/{subject}/_{tool-name}.html
+```
+
+Examples:
+- `tools/math/subtraction.html`
+- `tools/math/place-value.html`
+
+Tools are not date-stamped — they are versioned by content, not by assignment date.
+
+Each subject folder contains an `index.html` (child-friendly launcher listing all tools in that subject). The top-level `tools/index.html` lists all subject folders.
 
 ### Multi-Section / Multi-Page Splitting Rule
 
@@ -74,6 +88,7 @@ feedbackCorrect: "Good catch! \"change's\" has a wrong apostrophe — it should 
 ```
 
 *Trigger: Backslash appeared literally in feedback text shown to user.*
+
 ### Transcribe the original text exactly — do not silently correct errors
 
 When building a Type 4 proofreading worksheet, transcribe the passage **exactly as it appears in the original scan**, including all seeded errors and all structural problems. The student's job is to find these problems.
