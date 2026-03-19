@@ -31,7 +31,7 @@ When a user provides a file path (PDF or image) together with a child name — w
 - `profiles/{child}/PROFILE.md` contains child-specific constraints and preferences.
 - `runners/cli.py` builds one worksheet, `runners/watcher.py` automates folder processing, and `runners/propagate.py` turns suggested framework/profile updates into PRs.
 - `worksheets/{child}/` stores generated outputs as dated HTML files. `worksheets/reference/` holds canonical reference implementations for each worksheet type — check here first.
-- `docs/` is the GitHub Pages publish target. Run `python runners/publish.py` to sync `worksheets/{child}/` → `docs/` and regenerate `docs/index.html`. It is not edited directly.
+- `docs/` is the GitHub Pages publish target. Run `python runners/publish.py` to sync `worksheets/{child}/` → `docs/worksheets/` and `tools/` → `docs/tools/`, and regenerate `docs/worksheets/index.html`. It is not edited directly.
 - `incoming/` is the watcher's drop folder. Files placed here are auto-built then moved to `incoming/done/`.
 - `pending-updates.md` accumulates `📋` update blocks extracted from CLI builds. `runners/propagate.py` reads this file to open PRs.
 - `tmp/debug-response.txt` captures the raw Claude API response from the last CLI build (created on demand; not committed).

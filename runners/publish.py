@@ -29,6 +29,7 @@ from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = ROOT / "docs"
+WORKSHEETS_DOCS_DIR = DOCS_DIR / "worksheets"
 
 
 # ---------------------------------------------------------------------------
@@ -91,7 +92,7 @@ def regenerate_index(docs_files: list[Path], has_archive: bool = False) -> None:
   </ul>{archive_footer}
 </body>
 </html>"""
-    index_path = DOCS_DIR / "index.html"
+    index_path = WORKSHEETS_DOCS_DIR / "index.html"
     index_path.write_text(html, encoding="utf8")
     print(f"📄 Index written: {index_path.relative_to(ROOT).as_posix()}")
 
@@ -126,7 +127,7 @@ def regenerate_archive_index(archive_files: list[Path]) -> None:
   <p style="font-size:.9rem;"><a href="../index.html">&larr; Back</a></p>
 </body>
 </html>"""
-    archive_index = DOCS_DIR / "archive" / "index.html"
+    archive_index = WORKSHEETS_DOCS_DIR / "archive" / "index.html"
     archive_index.write_text(html, encoding="utf8")
     print(f"📄 Archive index written: {archive_index.relative_to(ROOT).as_posix()}")
 
@@ -193,19 +194,19 @@ def main() -> int:
         print(f"⚠️  No HTML files found in {source_dir.relative_to(ROOT).as_posix()}/", file=sys.stderr)
         return 0
 
-    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    WORKSHEETS_DOCS_DIR.mkdir(parents=True, exist_ok=True)
 
     if not args.preserve:
         removed = 0
-        for stale in DOCS_DIR.glob("*.html"):
+        for stale in WORKSHEETS_DOCS_DIR.glob("*.html"):
             stale.unlink()
             removed += 1
-        if (DOCS_DIR / "archive").exists():
-            for stale in (DOCS_DIR / "archive").glob("*.html"):
+        if (WORKSHEETS_DOCS_DIR / "archive").exists():
+            for stale in (WORKSHEETS_DOCS_DIR / "archive").glob("*.html"):
                 stale.unlink()
                 removed += 1
         if removed:
-            print(f"  🗑️  Removed {removed} stale file(s) from docs/")
+            print(f"  🗑️  Removed {removed} stale file(s) from docs/worksheets/")
 
     # Copy main worksheets
     copied = 0
@@ -213,7 +214,7 @@ def main() -> int:
     docs_files: list[Path] = []
 
     for src in source_files:
-        dest = DOCS_DIR / src.name
+        dest = WORKSHEETS_DOCS_DIR / src.name
         docs_files.append(dest)
 
         if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
@@ -234,7 +235,7 @@ def main() -> int:
         archive_files = sorted(archive_source.glob("*.html"))
         if archive_files:
             has_archive = True
-            archive_dest_dir = DOCS_DIR / "archive"
+            archive_dest_dir = WORKSHEETS_DOCS_DIR / "archive"
             archive_dest_dir.mkdir(parents=True, exist_ok=True)
             print(f"  📦 Archive:")
             for src in archive_files:
