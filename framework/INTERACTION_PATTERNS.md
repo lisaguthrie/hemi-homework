@@ -98,39 +98,135 @@ playBtn.onclick = function() { speak(buildSentence(q, userAnswers[i])); };
 
 **When to use:** Any worksheet where a sentence contains an inline widget (dropdown, input) that breaks the sentence into segments. Prefer this over tapping-reads-full-sentence when the segments are long enough to be independently meaningful.
 
----
+### Play Button Gating (Type 6 / Binary Choice)
 
-## Speech Recognition (STT)
-
-Browser support: Chrome/Edge reliable. Safari works, may re-prompt for mic. Firefox unsupported — button disables gracefully. On iOS, the OS dictation key on the keyboard is a zero-code fallback.
+On worksheets where a sentence contains a pronoun-choice dropdown inline, the per-card ▶ play button **must be disabled until the student has made a selection**. Without this, the play button reveals the answer by reading a default value.
 
 ```javascript
-function initSpeechInput(textareaEl, micBtnEl) {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) {
-    micBtnEl.disabled = true;
-    micBtnEl.title = 'Speech input not available in this browser';
-    return;
-  }
-  const rec = new SR();
-  rec.continuous     = false;
-  rec.interimResults = false;
-  rec.lang           = 'en-US';
-  let listening = false;
+// On card creation:
+pb.disabled = true;
+pb.style.opacity = '0.4';
+pb.style.cursor = 'default';
 
-  micBtnEl.onclick = () => {
-    if (listening) { rec.stop(); return; }
-    rec.start();
-  };
-  rec.onstart  = () => { listening = true;  micBtnEl.textContent = '⏹'; micBtnEl.classList.add('listening'); };
-  rec.onresult = (e) => {
-    const t = e.results[0][0].transcript;
-    textareaEl.value += (textareaEl.value ? ' ' : '') + t;
-  };
-  rec.onend    = () => { listening = false; micBtnEl.textContent = '🎤'; micBtnEl.classList.remove('listening'); };
-  rec.onerror  = (e) => { console.warn('STT error:', e.error); rec.onend(); };
+// In the dropdown onchange handler:
+if (!val) {
+  pb.disabled = true; pb.style.opacity = '0.4'; pb.style.cursor = 'default';
+} else {
+  pb.disabled = false; pb.style.opacity = ''; pb.style.cursor = '';
+  // Always read aloud — correct OR wrong selection
+  setTimeout(() => speak(buildSentence(val)), 300);
+}
+
+// On state restore (page reload):
+if (savedAnswer) {
+  pb.disabled = false; pb.style.opacity = ''; pb.style.cursor = '';
 }
 ```
+
+**Always read aloud on selection, correct or wrong.** Hearing the wrong sentence read back helps the student self-correct by ear — do not gate read-aloud on correctness.
+
+---
+
+## Speech Recognition (STT) — Continuous Mode
+
+Browser support: Chrome/Edge reliable on HTTPS or localhost. Safari works, may re-prompt for mic. Firefox unsupported — button disables gracefully. **Does not work on `file://` URLs in Chrome/Edge** (browser security restriction, not a code issue). On iOS, the OS dictation key on the keyboard is a zero-code fallback.
+
+**Status:** Implemented but not yet fully validated across browsers. Known working context: Chrome/Edge on HTTPS or localhost.
+
+```javascript
+function initMic(btn, taEl, onResult) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    btn.disabled = true;
+    btn.title = 'Speech input not available in this browser';
+    btn.style.opacity = '0.4';
+    return;
+  }
+
+  let rec = null;
+  let listening = false;
+
+  function startListening() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    rec = new SR();
+    rec.continuous = true;        // stay open until manually stopped
+    rec.interimResults = false;
+    rec.lang = 'en-US';
+
+    rec.onstart = () => {
+      listening = true;
+      btn.textContent = '⏹';
+      btn.classList.add('listening');
+    };
+
+    rec.onresult = (e) => {
+      let transcript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) transcript += e.results[i][0].transcript + ' ';
+      }
+      transcript = transcript.trim();
+      if (transcript) {
+        taEl.value += (taEl.value ? ' ' : '') + transcript;
+        if (onResult) onResult(transcript);
+      }
+    };
+
+    rec.onend = () => {
+      if (listening) {
+        // Browser ended session on its own — restart to keep it going
+        try { rec.start(); return; } catch(err) {}
+      }
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+    };
+
+    rec.onerror = (e) => {
+      if (e.error === 'no-speech') return; // ignore — onend handles restart
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        btn.title = 'Microphone access was denied. Check browser permissions.';
+        btn.style.opacity = '0.5';
+      }
+    };
+
+    try {
+      rec.start();
+    } catch(err) {
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+    }
+  }
+
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    if (listening) {
+      // Manual stop — set flag BEFORE calling stop() so onend doesn't restart
+      listening = false;
+      if (rec) { try { rec.stop(); } catch(err) {} }
+    } else {
+      startListening();
+    }
+  };
+}
+```
+
+**Key changes from previous pattern:**
+- `continuous: true` keeps the session open across silences
+- `onend` restarts the session if `listening` is still `true` (browser closed it on its own)
+- Manual stop sets `listening = false` before `rec.stop()` so `onend` knows not to restart
+- `no-speech` errors are silently ignored — `onend` handles the restart
+- Fresh `SpeechRecognition` instance per session start (not reused)
+- `e.stopPropagation()` on click prevents bubbling interference
+- Cancels speech synthesis before starting mic
+
+**Open issue (as of 2026-03-24):** Still not working reliably in Edge from local server — further investigation needed in a dedicated chat.
 
 Always pair a free-text area with both a mic button (STT) and a read-back button that calls `speak(textarea.value)`.
 
@@ -237,6 +333,79 @@ function updateProgress() {
   document.getElementById('progressCount').textContent = `${done} / ${total} answered`;
 }
 ```
+
+---
+
+## Collapsible Sections with Sticky Nav
+
+For worksheets with multiple distinct exercise sections on one page (rather than splitting into separate files), use collapsible section cards with a sticky navigation bar.
+
+**When to use:** When the user explicitly requests a single file for multiple short sections, or when sections are closely related and benefit from shared state/context.
+
+**Sticky nav bar:**
+```html
+<nav class="section-nav" id="sectionNav">
+  <button class="nav-btn active" onclick="scrollToSection('sec1')">🔍 1A: Find It</button>
+  <button class="nav-btn" onclick="scrollToSection('sec2')">🔗 1B: Match It</button>
+  <!-- ... -->
+</nav>
+```
+
+```css
+.section-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid #e0eaf8;
+  padding: 10px 12px;
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.nav-btn {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.82rem;
+  padding: 7px 14px; border-radius: 22px;
+  border: 2px solid #3b9ede; background: white; color: #1a6fa8;
+  cursor: pointer; white-space: nowrap; min-height: 36px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-btn.active  { background: #3b9ede; color: white; }
+.nav-btn.complete { border-color: #5dca7e; color: #1d7a40; }
+.nav-btn.complete.active { background: #5dca7e; color: white; border-color: #5dca7e; }
+```
+
+**Section card collapse pattern:**
+```javascript
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+  updateNavActive();
+}
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('collapsed');
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateNavActive();
+}
+// Auto-collapse completed sections after a short delay
+function autoCollapseIfComplete(secId) {
+  setTimeout(() => {
+    document.getElementById(secId).classList.add('collapsed');
+    updateNavActive();
+  }, 1200);
+}
+```
+
+**Section card HTML structure:**
+```html
+<div class="section-card" id="sec1">
+  <div class="section-header" onclick="toggleSection('sec1')">
+    <span class="section-title">🔍 Part A — Find the Pronoun</span>
+    <span class="section-badge" id="sec1-badge">0 / 7</span>
+    <span class="section-toggle">▼</span>  <!-- rotates -90deg when collapsed -->
+  </div>
+  <div class="section-body"><!-- content --></div>
+</div>
+```
+
+**Completed section:** gains `.complete` class → green border, green badge background. Nav button also gains `.complete`.
 
 ---
 
