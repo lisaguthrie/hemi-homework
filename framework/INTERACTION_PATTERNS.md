@@ -98,6 +98,33 @@ playBtn.onclick = function() { speak(buildSentence(q, userAnswers[i])); };
 
 **When to use:** Any worksheet where a sentence contains an inline widget (dropdown, input) that breaks the sentence into segments. Prefer this over tapping-reads-full-sentence when the segments are long enough to be independently meaningful.
 
+### Play Button Gating (Type 6 / Binary Choice)
+
+On worksheets where a sentence contains a pronoun-choice dropdown inline, the per-card ▶ play button **must be disabled until the student has made a selection**. Without this, the play button reveals the answer by reading a default value.
+
+```javascript
+// On card creation:
+pb.disabled = true;
+pb.style.opacity = '0.4';
+pb.style.cursor = 'default';
+
+// In the dropdown onchange handler:
+if (!val) {
+  pb.disabled = true; pb.style.opacity = '0.4'; pb.style.cursor = 'default';
+} else {
+  pb.disabled = false; pb.style.opacity = ''; pb.style.cursor = '';
+  // Always read aloud — correct OR wrong selection
+  setTimeout(() => speak(buildSentence(val)), 300);
+}
+
+// On state restore (page reload):
+if (savedAnswer) {
+  pb.disabled = false; pb.style.opacity = ''; pb.style.cursor = '';
+}
+```
+
+**Always read aloud on selection, correct or wrong.** Hearing the wrong sentence read back helps the student self-correct by ear — do not gate read-aloud on correctness.
+
 ---
 
 ## Speech Recognition (STT)
