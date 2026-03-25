@@ -326,7 +326,37 @@ const remaining = s.errors.length - state.foundErrors[i].length;
 partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining} more errors`} in this sentence — keep looking!`;
 ```
 
-**Reference implementation:** `worksheets/christina/2026-03-16-proofreading-arctic-animals.html`
+**Reference implementation:** `worksheets/reference/2026-03-16-proofreading-arctic-animals.html`
+
+---
+
+## Type 8: Two-Step Word Identification (Tap Pronoun → Tap Noun)
+
+*A sentence is rendered word by word. The student first taps the target word (e.g. the possessive pronoun), which highlights it and prompts step 2. Then the student taps a second related word (e.g. the noun it describes). Both words highlight on completion; wrong taps flash red briefly.*
+
+**Data shape:**
+```javascript
+{
+  text:    "My family is moving next summer, so we're cleaning out the house.",
+  pronoun: "My",       // the word to find in step 1
+  noun:    "family"    // the word to find in step 2
+}
+```
+
+**State shape:** Integer per question: `0` = untouched, `1` = step 1 complete, `2` = both steps complete. Store as array of integers (not booleans — bump storage key if migrating from boolean saves).
+
+**Interaction decisions:**
+- Step 1 correct tap: word highlights gold (`.pronoun-found`), a purple step-hint banner appears below the sentence: "👆 Now tap the noun it describes"
+- Step 1 wrong tap: flash red animation, speak the tapped word, no state change
+- Step 2 correct tap: noun highlights gold+green (`.pronoun-found.answered`), pronoun also gains `.answered`, banner hides, card turns green, speaks confirmation e.g. *"their describes honeymoon. Well done!"*
+- Step 2 wrong tap: flash red, speak the tapped word, no state change; tapping the pronoun again in step 2 just speaks it
+- Tapping the whole sentence area (non-word zone) reads the full sentence at any time
+- Per-card ▶ play button reads the full sentence
+- Cards lock (state 2) and cannot be un-done
+
+**Progress tracking:** Pips and count key off `state === 2` only — step-1-only progress does not advance pips.
+
+**Reference implementation:** `worksheets/reference/2026-03-24-possessive-pronouns.html`, Section 1 (Part A)
 
 ---
 
