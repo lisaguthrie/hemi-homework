@@ -240,6 +240,79 @@ function updateProgress() {
 
 ---
 
+## Collapsible Sections with Sticky Nav
+
+For worksheets with multiple distinct exercise sections on one page (rather than splitting into separate files), use collapsible section cards with a sticky navigation bar.
+
+**When to use:** When the user explicitly requests a single file for multiple short sections, or when sections are closely related and benefit from shared state/context.
+
+**Sticky nav bar:**
+```html
+<nav class="section-nav" id="sectionNav">
+  <button class="nav-btn active" onclick="scrollToSection('sec1')">🔍 1A: Find It</button>
+  <button class="nav-btn" onclick="scrollToSection('sec2')">🔗 1B: Match It</button>
+  <!-- ... -->
+</nav>
+```
+
+```css
+.section-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid #e0eaf8;
+  padding: 10px 12px;
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.nav-btn {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.82rem;
+  padding: 7px 14px; border-radius: 22px;
+  border: 2px solid #3b9ede; background: white; color: #1a6fa8;
+  cursor: pointer; white-space: nowrap; min-height: 36px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-btn.active  { background: #3b9ede; color: white; }
+.nav-btn.complete { border-color: #5dca7e; color: #1d7a40; }
+.nav-btn.complete.active { background: #5dca7e; color: white; border-color: #5dca7e; }
+```
+
+**Section card collapse pattern:**
+```javascript
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+  updateNavActive();
+}
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('collapsed');
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateNavActive();
+}
+// Auto-collapse completed sections after a short delay
+function autoCollapseIfComplete(secId) {
+  setTimeout(() => {
+    document.getElementById(secId).classList.add('collapsed');
+    updateNavActive();
+  }, 1200);
+}
+```
+
+**Section card HTML structure:**
+```html
+<div class="section-card" id="sec1">
+  <div class="section-header" onclick="toggleSection('sec1')">
+    <span class="section-title">🔍 Part A — Find the Pronoun</span>
+    <span class="section-badge" id="sec1-badge">0 / 7</span>
+    <span class="section-toggle">▼</span>  <!-- rotates -90deg when collapsed -->
+  </div>
+  <div class="section-body"><!-- content --></div>
+</div>
+```
+
+**Completed section:** gains `.complete` class → green border, green badge background. Nav button also gains `.complete`.
+
+---
+
 ## localStorage — Progress Persistence
 
 Key format: `worksheet_{subject}_{YYYY_MM_DD}` — derive from worksheet metadata, not hardcoded.
