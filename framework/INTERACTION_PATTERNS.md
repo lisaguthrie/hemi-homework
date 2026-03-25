@@ -127,37 +127,106 @@ if (savedAnswer) {
 
 ---
 
-## Speech Recognition (STT)
+## Speech Recognition (STT) — Continuous Mode
 
-Browser support: Chrome/Edge reliable. Safari works, may re-prompt for mic. Firefox unsupported — button disables gracefully. On iOS, the OS dictation key on the keyboard is a zero-code fallback.
+Browser support: Chrome/Edge reliable on HTTPS or localhost. Safari works, may re-prompt for mic. Firefox unsupported — button disables gracefully. **Does not work on `file://` URLs in Chrome/Edge** (browser security restriction, not a code issue). On iOS, the OS dictation key on the keyboard is a zero-code fallback.
+
+**Status:** Implemented but not yet fully validated across browsers. Known working context: Chrome/Edge on HTTPS or localhost.
 
 ```javascript
-function initSpeechInput(textareaEl, micBtnEl) {
+function initMic(btn, taEl, onResult) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    micBtnEl.disabled = true;
-    micBtnEl.title = 'Speech input not available in this browser';
+    btn.disabled = true;
+    btn.title = 'Speech input not available in this browser';
+    btn.style.opacity = '0.4';
     return;
   }
-  const rec = new SR();
-  rec.continuous     = false;
-  rec.interimResults = false;
-  rec.lang           = 'en-US';
+
+  let rec = null;
   let listening = false;
 
-  micBtnEl.onclick = () => {
-    if (listening) { rec.stop(); return; }
-    rec.start();
+  function startListening() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    rec = new SR();
+    rec.continuous = true;        // stay open until manually stopped
+    rec.interimResults = false;
+    rec.lang = 'en-US';
+
+    rec.onstart = () => {
+      listening = true;
+      btn.textContent = '⏹';
+      btn.classList.add('listening');
+    };
+
+    rec.onresult = (e) => {
+      let transcript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) transcript += e.results[i][0].transcript + ' ';
+      }
+      transcript = transcript.trim();
+      if (transcript) {
+        taEl.value += (taEl.value ? ' ' : '') + transcript;
+        if (onResult) onResult(transcript);
+      }
+    };
+
+    rec.onend = () => {
+      if (listening) {
+        // Browser ended session on its own — restart to keep it going
+        try { rec.start(); return; } catch(err) {}
+      }
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+    };
+
+    rec.onerror = (e) => {
+      if (e.error === 'no-speech') return; // ignore — onend handles restart
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        btn.title = 'Microphone access was denied. Check browser permissions.';
+        btn.style.opacity = '0.5';
+      }
+    };
+
+    try {
+      rec.start();
+    } catch(err) {
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+    }
+  }
+
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    if (listening) {
+      // Manual stop — set flag BEFORE calling stop() so onend doesn't restart
+      listening = false;
+      if (rec) { try { rec.stop(); } catch(err) {} }
+    } else {
+      startListening();
+    }
   };
-  rec.onstart  = () => { listening = true;  micBtnEl.textContent = '⏹'; micBtnEl.classList.add('listening'); };
-  rec.onresult = (e) => {
-    const t = e.results[0][0].transcript;
-    textareaEl.value += (textareaEl.value ? ' ' : '') + t;
-  };
-  rec.onend    = () => { listening = false; micBtnEl.textContent = '🎤'; micBtnEl.classList.remove('listening'); };
-  rec.onerror  = (e) => { console.warn('STT error:', e.error); rec.onend(); };
 }
 ```
+
+**Key changes from previous pattern:**
+- `continuous: true` keeps the session open across silences
+- `onend` restarts the session if `listening` is still `true` (browser closed it on its own)
+- Manual stop sets `listening = false` before `rec.stop()` so `onend` knows not to restart
+- `no-speech` errors are silently ignored — `onend` handles the restart
+- Fresh `SpeechRecognition` instance per session start (not reused)
+- `e.stopPropagation()` on click prevents bubbling interference
+- Cancels speech synthesis before starting mic
+
+**Open issue (as of 2026-03-24):** Still not working reliably in Edge from local server — further investigation needed in a dedicated chat.
 
 Always pair a free-text area with both a mic button (STT) and a read-back button that calls `speak(textarea.value)`.
 
