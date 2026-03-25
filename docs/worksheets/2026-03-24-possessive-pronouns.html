@@ -560,6 +560,21 @@ body {
 }
 .clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
 
+.export-btn {
+  background: #7c5cbf;
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 7px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  box-shadow: 0 2px 8px rgba(124,92,191,0.25);
+}
+.export-btn:hover { background: #5a3fa0; }
+
 @media (max-width: 480px) {
   .section-body { padding: 12px 12px; }
   .question-card { padding: 10px 12px; }
@@ -618,8 +633,8 @@ body {
       <span class="section-toggle">▼</span>
     </div>
     <div class="section-body">
-      <div class="instructions" onclick="speak('For each subject pronoun, choose the matching possessive pronoun from the drop-down.')">
-        🔊 For each subject pronoun, choose the matching possessive pronoun.
+      <div class="instructions" style="cursor:default;">
+        For each subject pronoun, choose the matching possessive pronoun.
       </div>
       <div class="progress-row">
         <span id="sec2-pips"></span>
@@ -693,7 +708,10 @@ body {
     </div>
   </div>
 
-  <button class="clear-btn" id="clearBtn" onclick="clearAll()">🗑️ Clear all responses</button>
+  <div style="text-align:center;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+    <button class="clear-btn" id="clearBtn" onclick="clearAll()">🗑️ Clear all responses</button>
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
+  </div>
 
 </div><!-- /container -->
 
@@ -806,13 +824,12 @@ const sec3Pairs = [
     scaffold: {
       before: "",
       segments: [
-        { text: "I brought " },
-        { blank: true, options: ["— pick —","my","mine"], answer: "my" },
-        { text: " jacket, and the umbrella over there is " },
+        { blank: true, options: ["— pick —","my","mine"], answer: "My" },
+        { text: " coat is on the chair, and the blue one is " },
         { blank: true, options: ["— pick —","my","mine"], answer: "mine" },
         { text: " too." }
       ],
-      full: "I brought my jacket, and the umbrella over there is mine too."
+      full: "My coat is on the chair, and the blue one is mine too."
     }
   },
   {
@@ -822,12 +839,13 @@ const sec3Pairs = [
     scaffold: {
       before: "",
       segments: [
-        { blank: true, options: ["— pick —","Your","Yours"], answer: "Your" },
-        { text: " backpack is by the door, and the water bottle next to it is " },
+        { text: "Is this " },
+        { blank: true, options: ["— pick —","your","yours"], answer: "your" },
+        { text: " pencil, or is it " },
         { blank: true, options: ["— pick —","your","yours"], answer: "yours" },
-        { text: " too." }
+        { text: "?" }
       ],
-      full: "Your backpack is by the door, and the water bottle next to it is yours too."
+      full: "Is this your pencil, or is it yours?"
     }
   },
   {
@@ -837,13 +855,13 @@ const sec3Pairs = [
     scaffold: {
       before: "",
       segments: [
-        { text: "Jake did finish " },
+        { text: "Jake left " },
         { blank: true, options: ["— pick —","his"], answer: "his" },
-        { text: " homework, but that homework page is not " },
+        { text: " jacket on the bus, so the bag is " },
         { blank: true, options: ["— pick —","his"], answer: "his" },
-        { text: "." }
+        { text: " too." }
       ],
-      full: "Jake did finish his homework, but that homework page is not his."
+      full: "Jake left his jacket on the bus, so the bag is his too."
     }
   },
   {
@@ -855,11 +873,27 @@ const sec3Pairs = [
       segments: [
         { text: "Sofia forgot " },
         { blank: true, options: ["— pick —","her","hers"], answer: "her" },
-        { text: " her umbrella, so that blue one can't be " },
+        { text: " umbrella, so the blue one must be " },
         { blank: true, options: ["— pick —","her","hers"], answer: "hers" },
         { text: "." }
       ],
-      full: "Sofia forgot her umbrella, so that blue one can't be hers."
+      full: "Sofia forgot her umbrella, so the blue one must be hers."
+    }
+  },
+  {
+    label: "its",
+    desc: "its",
+    speak: "its",
+    scaffold: {
+      before: "",
+      segments: [
+        { text: "The dog wagged " },
+        { blank: true, options: ["— pick —","its"], answer: "its" },
+        { text: " tail and licked " },
+        { blank: true, options: ["— pick —","its"], answer: "its" },
+        { text: " paw." }
+      ],
+      full: "The dog wagged its tail and licked its paw."
     }
   },
   {
@@ -869,13 +903,13 @@ const sec3Pairs = [
     scaffold: {
       before: "",
       segments: [
-        { text: "That rental car in the driveway is " },
-        { blank: true, options: ["— pick —","our","ours"], answer: "ours" },
-        { text: ", because " },
+        { text: "We painted " },
         { blank: true, options: ["— pick —","our","ours"], answer: "our" },
-        { text: " car is in the shop." }
+        { text: " fence, and the red one next door is " },
+        { blank: true, options: ["— pick —","our","ours"], answer: "ours" },
+        { text: " too." }
       ],
-      full: "That rental car in the driveway is ours, because our car is in the shop."
+      full: "We painted our fence, and the red one next door is ours too."
     }
   },
   {
@@ -889,9 +923,9 @@ const sec3Pairs = [
         { blank: true, options: ["— pick —","their","theirs"], answer: "their" },
         { text: " bags, and the extra suitcase is " },
         { blank: true, options: ["— pick —","their","theirs"], answer: "theirs" },
-        { text: " too." }
+        { text: "." }
       ],
-      full: "The twins packed their bags, and the extra suitcase is theirs too."
+      full: "The twins packed their bags, and the extra suitcase is theirs."
     }
   },
 ];
@@ -1156,8 +1190,6 @@ function buildSec2() {
     const lbl = document.createElement('div');
     lbl.className = 'pronoun-match-label';
     lbl.textContent = q.subject;
-    lbl.style.cursor = 'pointer';
-    lbl.onclick = () => speak(q.subject);
 
     const arrow = document.createElement('div');
     arrow.className = 'arrow-label';
@@ -1186,7 +1218,6 @@ function buildSec2() {
       card.classList.toggle('correct', correct);
       fb.className = 'match-fb show ' + (correct ? 'correct' : 'hint');
       fb.textContent = correct ? '✅' : '💡 ' + q.hint;
-      if (correct) setTimeout(() => speak(`${q.subject} — ${val}. Correct!`), 300);
       updateSec2Progress();
     };
 
@@ -1363,12 +1394,38 @@ function renderSec3Scaffold(si) {
   scaffoldEl.innerHTML = '';
   scaffoldEl.classList.add('visible');
 
+  // Count total blanks in this scaffold
+  const totalBlanks = pair.scaffold.segments.filter(s => s.blank).length;
+
+  function checkAllCorrect() {
+    const answers = appState.sec3[si].scaffoldAnswers || [];
+    const segsWithBlanks = pair.scaffold.segments.filter(s => s.blank);
+    return segsWithBlanks.every((seg, bi) => answers[bi] && answers[bi].toLowerCase() === seg.answer.toLowerCase());
+  }
+
+  function fillTextareaIfComplete() {
+    if (checkAllCorrect()) {
+      const ta = document.getElementById(`s3-ta-${si}`);
+      if (ta && !ta.value.trim()) {
+        ta.value = pair.scaffold.full;
+        appState.sec3[si].freeText = pair.scaffold.full;
+        saveState();
+        updateSec3Progress();
+      }
+      setTimeout(() => speak(pair.scaffold.full), 300);
+    }
+  }
+
   let blankCount = 0;
   const segs = pair.scaffold.segments;
   segs.forEach((seg, segi) => {
     if (seg.text !== undefined) {
       const sp = document.createElement('span');
       sp.textContent = seg.text;
+      sp.style.cssText = 'cursor:pointer;border-radius:5px;padding:1px 3px;transition:background 0.12s;';
+      sp.onmouseover = () => sp.style.background = '#f0ebff';
+      sp.onmouseout  = () => sp.style.background = '';
+      sp.onclick = (e) => { e.stopPropagation(); speak(seg.text.trim()); };
       scaffoldEl.appendChild(sp);
     } else {
       const bi = blankCount++;
@@ -1396,7 +1453,7 @@ function renderSec3Scaffold(si) {
         const correct = sel.value.toLowerCase() === seg.answer.toLowerCase();
         fbSpan.className = 'scaffold-fb ' + (correct ? 'correct' : 'hint');
         fbSpan.textContent = correct ? '✅' : `💡 Try ${seg.answer}`;
-        if (correct) setTimeout(() => speak(pair.scaffold.full), 300);
+        fillTextareaIfComplete();
       };
 
       scaffoldEl.appendChild(sel);
@@ -1491,7 +1548,10 @@ function buildSec4() {
     const pb = document.createElement('button');
     pb.className = 'play-btn';
     pb.textContent = '▶';
-    pb.onclick = () => speak(buildSentence(sel.value || q.choices[0]));
+    pb.disabled = true;
+    pb.style.opacity = '0.4';
+    pb.style.cursor = 'default';
+    pb.onclick = () => { if (sel.value) speak(buildSentence(sel.value)); };
 
     const fb = document.createElement('div');
     fb.className = 'feedback';
@@ -1501,12 +1561,21 @@ function buildSec4() {
       const val = sel.value;
       appState.sec4[qi] = val;
       saveState();
-      if (!val) { fb.className = 'feedback'; card.classList.remove('correct'); updateSec4Progress(); return; }
+      if (!val) {
+        fb.className = 'feedback';
+        card.classList.remove('correct');
+        pb.disabled = true; pb.style.opacity = '0.4'; pb.style.cursor = 'default';
+        updateSec4Progress();
+        return;
+      }
+      // Enable play button once any selection is made
+      pb.disabled = false; pb.style.opacity = ''; pb.style.cursor = '';
       const correct = val === q.answer;
       card.classList.toggle('correct', correct);
       const text = correct ? `Yes! "${val}" is correct. ${buildSentence(val)}` : q.hint;
       showFeedback(`s4-fb-${qi}`, correct, text);
-      if (correct) setTimeout(() => speak(buildSentence(val)), 300);
+      // Always read the full sentence (correct or wrong)
+      setTimeout(() => speak(buildSentence(val)), 300);
       updateSec4Progress();
     };
 
@@ -1520,6 +1589,7 @@ function buildSec4() {
     // Restore
     if (appState.sec4[qi]) {
       sel.value = appState.sec4[qi];
+      pb.disabled = false; pb.style.opacity = ''; pb.style.cursor = '';
       sel.dispatchEvent(new Event('change'));
     }
   });
@@ -1630,9 +1700,10 @@ function buildSec5() {
       const correct = val.toLowerCase() === q.rewriteAnswer.toLowerCase();
       rwFb.className = 'scaffold-fb ' + (correct ? 'correct' : 'hint');
       rwFb.textContent = correct ? '✅' : '💡 ' + q.hint;
+      // Always read the sentence with the chosen pronoun (correct or wrong)
+      const full = q.rewritePrefix + val + q.rewriteSuffix;
+      setTimeout(() => speak(full), 300);
       if (correct) {
-        const full = q.rewritePrefix + val + q.rewriteSuffix;
-        setTimeout(() => speak(full), 300);
         appState.sec5[qi].text = full;
         const taEl = document.getElementById(`s5-ta-${qi}`);
         if (taEl) taEl.value = full;
@@ -1732,19 +1803,84 @@ function updateSec5Progress() {
 // ═══════════════════════════════════════════════════════════════
 function initMic(btn, taEl, onResult) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { btn.disabled = true; btn.title = 'Speech input not available in this browser'; return; }
-  const rec = new SR();
-  rec.continuous = false; rec.interimResults = false; rec.lang = 'en-US';
+  if (!SR) {
+    btn.disabled = true;
+    btn.title = 'Speech input not available in this browser';
+    btn.style.opacity = '0.4';
+    return;
+  }
+
+  let rec = null;
   let listening = false;
-  btn.onclick = () => { if (listening) { rec.stop(); return; } rec.start(); };
-  rec.onstart  = () => { listening = true; btn.textContent = '⏹'; btn.classList.add('listening'); };
-  rec.onresult = (e) => {
-    const t = e.results[0][0].transcript;
-    taEl.value += (taEl.value ? ' ' : '') + t;
-    if (onResult) onResult(t);
+
+  function startListening() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    rec = new SR();
+    rec.continuous = true;        // stay open until manually stopped
+    rec.interimResults = false;
+    rec.lang = 'en-US';
+
+    rec.onstart = () => {
+      listening = true;
+      btn.textContent = '⏹';
+      btn.classList.add('listening');
+    };
+
+    rec.onresult = (e) => {
+      let transcript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) transcript += e.results[i][0].transcript + ' ';
+      }
+      transcript = transcript.trim();
+      if (transcript) {
+        taEl.value += (taEl.value ? ' ' : '') + transcript;
+        if (onResult) onResult(transcript);
+      }
+    };
+
+    rec.onend = () => {
+      if (listening) {
+        // Browser ended the session on its own — restart to keep it going
+        try { rec.start(); return; } catch(err) {}
+      }
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+    };
+
+    rec.onerror = (e) => {
+      if (e.error === 'no-speech') return; // ignore — onend will restart
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        btn.title = 'Microphone access was denied. Check browser permissions.';
+        btn.style.opacity = '0.5';
+      }
+    };
+
+    try {
+      rec.start();
+    } catch(err) {
+      listening = false;
+      btn.textContent = '🎤';
+      btn.classList.remove('listening');
+      rec = null;
+    }
+  }
+
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    if (listening) {
+      // Manual stop — set flag before calling stop() so onend doesn't restart
+      listening = false;
+      if (rec) { try { rec.stop(); } catch(err) {} }
+    } else {
+      startListening();
+    }
   };
-  rec.onend  = () => { listening = false; btn.textContent = '🎤'; btn.classList.remove('listening'); };
-  rec.onerror = () => rec.onend();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1790,6 +1926,160 @@ function clearAll() {
   buildSec5();
   updateNavActive();
 })();
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT / PRINT
+// ═══════════════════════════════════════════════════════════════
+function exportPrint() {
+  // ── Sec 1: pronoun + noun pairs ──
+  const sec1Rows = sec1Questions.map((q, qi) => {
+    const state = appState.sec1[qi];
+    const pronoun = state >= 1 ? `<strong>${q.pronoun}</strong>` : '___';
+    const noun    = state === 2 ? `<strong>${q.noun}</strong>` : '___';
+    const check   = state === 2 ? '✓' : '';
+    return `<tr>
+      <td>${qi+1}.</td>
+      <td>${q.text.replace(q.pronoun, `<u>${q.pronoun}</u>`)}</td>
+      <td style="text-align:center">${pronoun} → ${noun}</td>
+      <td style="text-align:center;color:#1d7a40;font-weight:800">${check}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Sec 2: subject → possessive ──
+  const sec2Rows = sec2Questions.map((q, qi) => {
+    const val = appState.sec2[qi] || '___';
+    const correct = q.answers.map(a=>a.toLowerCase()).includes(val.toLowerCase());
+    const valHtml = val !== '___' ? `<span style="font-weight:800;color:${correct?'#1d7a40':'#c05000'}">${val}</span>` : '___';
+    return `<tr>
+      <td>${qi+1}.</td>
+      <td style="font-weight:700">${q.subject}</td>
+      <td style="text-align:center">→</td>
+      <td>${valHtml}</td>
+      <td style="color:#1d7a40;font-weight:800">${correct?'✓':''}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Sec 3: sentences ──
+  const sec3Rows = appState.sec3.map((s, si) => {
+    const pairLabel = s.pair !== '' ? sec3Pairs[parseInt(s.pair)].label : '—';
+    const sentence  = s.freeText ? s.freeText : '&nbsp;';
+    return `<tr>
+      <td style="font-weight:700;white-space:nowrap">${pairLabel}</td>
+      <td>${sentence}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Sec 4: binary choice ──
+  const sec4Rows = sec4Questions.map((q, qi) => {
+    const val = appState.sec4[qi] || '___';
+    const correct = val === q.answer;
+    const fullSent = q.before + (val !== '___' ? val : `(${q.choices.join('/')})`) + q.after;
+    const valColor = val !== '___' ? (correct ? '#1d7a40' : '#c05000') : '#888';
+    const display  = q.before
+      + (val !== '___' ? `<span style="font-weight:800;text-decoration:underline;color:${valColor}">${val}</span>` : `<em>(${q.choices.join('/')})</em>`)
+      + q.after;
+    return `<tr>
+      <td>${qi+1}.</td>
+      <td>${display}</td>
+      <td style="text-align:center;color:#1d7a40;font-weight:800">${correct?'✓':''}</td>
+    </tr>`;
+  }).join('');
+
+  // ── Sec 5: rewrites ──
+  const sec5Rows = sec5Questions.map((q, qi) => {
+    const s = appState.sec5[qi];
+    const answer = s.text ? s.text : '&nbsp;';
+    const helpAns = s.helpAnswer;
+    const correct = helpAns && helpAns.toLowerCase() === q.rewriteAnswer.toLowerCase();
+    return `<tr>
+      <td style="vertical-align:top;padding-top:6px">${qi+1}.</td>
+      <td>
+        <div style="font-size:0.85rem;color:#555;margin-bottom:4px">${q.original.replace(q.underlineText,`<u>${q.underlineText}</u>`)}</div>
+        <div style="font-weight:700;${correct?'color:#1d7a40':''}">${answer}</div>
+      </td>
+      <td style="text-align:center;color:#1d7a40;font-weight:800;vertical-align:top;padding-top:6px">${correct?'✓':''}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Possessive Pronouns — Answer Sheet</title>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px 28px; color: #111; font-size: 13px; }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .name-line { display: flex; gap: 24px; margin: 10px 0 18px; font-size: 0.9rem; }
+  .name-line span { display: flex; align-items: flex-end; gap: 6px; }
+  .name-line .line { display: inline-block; width: 180px; border-bottom: 1.5px solid #333; }
+  h2 { font-size: 1rem; margin: 20px 0 8px; border-bottom: 2px solid #333; padding-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  th { background: #eee; padding: 5px 8px; text-align: left; font-size: 0.8rem; border: 1px solid #ccc; }
+  td { padding: 5px 8px; border: 1px solid #ddd; vertical-align: middle; }
+  .footer { margin-top: 28px; font-size: 0.75rem; color: #888; text-align: right; border-top: 1px solid #ccc; padding-top: 6px; }
+  .print-btn { margin-bottom: 16px; padding: 8px 20px; font-size: 0.9rem; cursor: pointer; border: 2px solid #333; border-radius: 4px; background: #f0f0f0; font-weight: 700; }
+  @media print { .print-btn { display: none; } }
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨️ Print</button>
+<h1>Possessive Pronouns</h1>
+<div class="name-line">
+  <span>Name <span class="line"></span></span>
+  <span>Date <span class="line" style="width:100px"></span></span>
+</div>
+
+<h2>Part A — Find the Possessive Pronoun</h2>
+<table>
+  <thead><tr><th>#</th><th>Sentence</th><th>Pronoun → Noun</th><th>✓</th></tr></thead>
+  <tbody>${sec1Rows}</tbody>
+</table>
+
+<h2>Part B — Match to Possessive Pronoun</h2>
+<table>
+  <thead><tr><th>#</th><th>Subject</th><th></th><th>Possessive</th><th>✓</th></tr></thead>
+  <tbody>${sec2Rows}</tbody>
+</table>
+
+<h2>Part C — Write a Sentence</h2>
+<table>
+  <thead><tr><th>Pronoun Pair</th><th>My Sentence</th></tr></thead>
+  <tbody>${sec3Rows}</tbody>
+</table>
+
+<h2>Part A (p.2) — Choose the Correct Pronoun</h2>
+<table>
+  <thead><tr><th>#</th><th>Sentence</th><th>✓</th></tr></thead>
+  <tbody>${sec4Rows}</tbody>
+</table>
+
+<h2>Part B (p.2) — Rewrite with Possessive Pronouns</h2>
+<table>
+  <thead><tr><th>#</th><th>Original → Rewrite</th><th>✓</th></tr></thead>
+  <tbody>${sec5Rows}</tbody>
+</table>
+
+<div class="footer">Scholastic Success With Grammar • Grade 5 · Possessive Pronouns pp. 50–51</div>
+</body>
+</html>`;
+
+  // Open in a new window and write directly — works from local file and GitHub Pages
+  const win = window.open('', '_blank');
+  if (!win) {
+    // Popup blocked — fall back to data URI download
+    const enc = encodeURIComponent(html);
+    const a = document.createElement('a');
+    a.href = 'data:text/html;charset=utf-8,' + enc;
+    a.download = '2026-03-24-possessive-pronouns-answers.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return;
+  }
+  win.document.open();
+  win.document.write(html);
+  win.document.close();
+}
 </script>
 </body>
 </html>
