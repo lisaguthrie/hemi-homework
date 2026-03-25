@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Possessive Pronouns</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(160deg, #e0f4ff 0%, #f0e8ff 100%);
+  min-height: 100vh;
+  color: #1a2a3a;
+  padding: 0 0 80px;
+}
+
+/* ── Sticky nav ── */
+.section-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 2px solid #e0eaf8;
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.nav-btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 7px 14px;
+  border-radius: 22px;
+  border: 2px solid #3b9ede;
+  background: white;
+  color: #1a6fa8;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  min-height: 36px;
+}
+.nav-btn:hover { background: #e8f4ff; }
+.nav-btn.active { background: #3b9ede; color: white; }
+.nav-btn.complete { border-color: #5dca7e; color: #1d7a40; }
+.nav-btn.complete.active { background: #5dca7e; color: white; border-color: #5dca7e; }
+
+/* ── Page layout ── */
+.page-header {
+  text-align: center;
+  padding: 20px 16px 10px;
+}
+.page-header h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  color: #1a6fa8;
+}
+.page-header .subtitle {
+  font-size: 0.95rem;
+  color: #6a8299;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.container { max-width: 700px; margin: 0 auto; padding: 0 16px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── Section card ── */
+.section-card {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  border: 2.5px solid transparent;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.section-card.complete { border-color: #5dca7e; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+  background: #f8fbff;
+  border-bottom: 2px solid #e8f0fa;
+  transition: background 0.15s;
+}
+.section-header:hover { background: #eef5ff; }
+.section-card.collapsed .section-header { border-bottom: none; }
+
+.section-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: #1a6fa8;
+  flex: 1;
+}
+.section-badge {
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #e8f4ff;
+  color: #1a6fa8;
+  white-space: nowrap;
+}
+.section-card.complete .section-badge { background: #d0f5e0; color: #1d7a40; }
+.section-toggle {
+  font-size: 1rem;
+  color: #6a8299;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.section-card.collapsed .section-toggle { transform: rotate(-90deg); }
+
+.section-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.section-card.collapsed .section-body { display: none; }
+
+/* ── Reteaching box ── */
+.reteach-box {
+  background: #ffe566;
+  border: 3px solid #e6c800;
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #5a4000;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s;
+}
+.reteach-box:active { transform: scale(0.98); }
+
+/* ── Instructions ── */
+.instructions {
+  background: #3b9ede;
+  color: white;
+  border-radius: 14px;
+  padding: 11px 16px;
+  font-size: 0.93rem;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.1s;
+}
+.instructions:active { transform: scale(0.98); }
+
+/* ── Progress pips ── */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pip { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #dde0e8; transition: background 0.3s; }
+.pip.done { background: #5dca7e; }
+.progress-label { font-size: 0.85rem; font-weight: 700; color: #6a8299; }
+
+/* ── Question card ── */
+.question-card {
+  background: #fafcff;
+  border-radius: 14px;
+  border: 2.5px solid transparent;
+  padding: 13px 15px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.question-card.correct { border-color: #5dca7e; background: #f0fff5; }
+
+.card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.q-num {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: #3b9ede;
+  min-width: 26px;
+  flex-shrink: 0;
+}
+
+/* ── Tappable sentence text ── */
+.tap-sentence {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.7;
+  user-select: none;
+  transition: background 0.15s;
+  flex: 1;
+}
+.tap-sentence:hover { background: #e8f4ff; }
+
+/* ── Word tokens ── */
+.word-token {
+  display: inline;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 1px 3px;
+  transition: background 0.12s;
+  user-select: none;
+}
+.word-token:hover { background: #e8f4ff; }
+.word-token.pronoun-found {
+  background: #fff3c4;
+  border: 2px solid #e6c800;
+  border-radius: 7px;
+  padding: 1px 7px;
+  font-weight: 800;
+  color: #5a3a00;
+}
+.word-token.pronoun-found.answered { background: #d0f5e0; border-color: #5dca7e; color: #1d7a40; }
+@keyframes notPronoun { 0% { background: #ffe0e0; } 100% { background: transparent; } }
+.word-token.not-pronoun { animation: notPronoun 0.4s ease; }
+
+/* ── Play button ── */
+.play-btn {
+  background: #5dca7e;
+  border: none;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.play-btn:hover { background: #3aaa5a; }
+
+/* ── Feedback ── */
+.feedback {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.feedback.show { display: flex; }
+.feedback.correct { background: #d0f5e0; color: #1d7a40; }
+.feedback.hint { background: #ffeedd; color: #c05000; }
+.fb-play-btn {
+  background: none; border: none; font-size: 1rem;
+  cursor: pointer; padding: 0 2px; opacity: 0.75;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+
+/* ── Dropdown selects ── */
+.answer-select {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a6fa8;
+  background: #e8f4ff;
+  border: 2.5px solid #3b9ede;
+  border-radius: 10px;
+  padding: 6px 10px;
+  min-width: 100px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.answer-select:focus { border-color: #1a6fa8; }
+
+/* ── Part B: subject→possessive grid ── */
+.pronoun-match-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 480px) { .pronoun-match-grid { grid-template-columns: 1fr; } }
+
+.pronoun-match-card {
+  background: #f0f8ff;
+  border-radius: 12px;
+  border: 2.5px solid transparent;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.pronoun-match-card.correct { border-color: #5dca7e; background: #f0fff5; }
+.pronoun-match-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem;
+  color: #1a6fa8;
+  min-width: 48px;
+}
+.arrow-label { color: #6a8299; font-weight: 700; font-size: 1rem; }
+.match-fb { display: none; font-size: 0.85rem; font-weight: 700; }
+.match-fb.show { display: inline; }
+.match-fb.correct { color: #1d7a40; }
+.match-fb.hint { color: #c05000; }
+
+/* ── Part C: sentence composer ── */
+.slot-card {
+  background: #f8f4ff;
+  border: 2.5px solid #c4b5fd;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.slot-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.slot-label { font-family: 'Fredoka One', cursive; font-size: 1rem; color: #7c3aed; min-width: 56px; }
+.pair-select {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #7c3aed;
+  background: #f0ebff;
+  border: 2.5px solid #c4b5fd;
+  border-radius: 10px;
+  padding: 6px 10px;
+  min-width: 140px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.pair-select:focus { border-color: #7c3aed; }
+
+.help-btn {
+  background: #f0ebff;
+  border: 2px solid #c4b5fd;
+  border-radius: 22px;
+  padding: 7px 16px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: #7c3aed;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  min-height: 36px;
+  white-space: nowrap;
+}
+.help-btn:hover { background: #e0d6ff; border-color: #a78bfa; }
+.help-btn:active { transform: scale(0.96); }
+
+.help-scaffold {
+  display: none;
+  background: #fff8ff;
+  border: 2px solid #c4b5fd;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 2;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.help-scaffold.visible { display: flex; }
+.scaffold-select {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #7c3aed;
+  background: #ede9fe;
+  border: 2px solid #a78bfa;
+  border-radius: 8px;
+  padding: 3px 8px;
+  cursor: pointer;
+  outline: none;
+  min-width: 80px;
+}
+.scaffold-fb { font-size: 0.85rem; font-weight: 700; margin-left: 4px; }
+.scaffold-fb.correct { color: #1d7a40; }
+.scaffold-fb.hint { color: #c05000; }
+
+.free-text-area-wrap { display: flex; flex-direction: column; gap: 6px; }
+.free-text-label { font-size: 0.8rem; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px; }
+.free-textarea {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a2a3a;
+  background: #f8fbff;
+  border: 2.5px solid #3b9ede;
+  border-radius: 12px;
+  padding: 10px 14px;
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.free-textarea:focus { border-color: #1a6fa8; }
+.textarea-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.mic-btn {
+  background: #3b9ede;
+  border: none;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  font-size: 1.1rem;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.mic-btn.listening { background: #ff7eb3; animation: pulse 0.7s infinite alternate; }
+.mic-btn:disabled { opacity: 0.4; cursor: default; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+.readback-btn {
+  background: #5dca7e;
+  border: none;
+  border-radius: 22px;
+  padding: 8px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 40px;
+}
+.readback-btn:hover { background: #3aaa5a; }
+
+/* ── Page 2 Part A: binary choice ── */
+.choice-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #fff3c4;
+  border: 2px solid #e6c800;
+  border-radius: 8px;
+  padding: 1px 8px;
+  font-weight: 800;
+  color: #5a3a00;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.93rem;
+  transition: background 0.15s, transform 0.1s;
+}
+.choice-chip:hover { background: #ffe88a; }
+.choice-chip:active { transform: scale(0.95); }
+
+/* ── Page 2 Part B: rewrite ── */
+.rewrite-card {
+  background: #f8fff8;
+  border: 2.5px solid #b3e8c8;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rewrite-original {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a2a3a;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 2px 4px;
+  transition: background 0.15s;
+  user-select: none;
+}
+.rewrite-original:hover { background: #e8f4ff; }
+.underline-noun { text-decoration: underline; font-weight: 800; }
+
+.rewrite-help-area {
+  display: none;
+  background: #f0fff5;
+  border: 2px solid #5dca7e;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 2;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.rewrite-help-area.visible { display: flex; }
+
+.rewrite-select {
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1d7a40;
+  background: #d0f5e0;
+  border: 2px solid #5dca7e;
+  border-radius: 8px;
+  padding: 3px 8px;
+  cursor: pointer;
+  outline: none;
+  min-width: 90px;
+}
+
+.rewrite-help-btn {
+  background: #f0fff5;
+  border: 2px solid #5dca7e;
+  border-radius: 22px;
+  padding: 7px 16px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: #1d7a40;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-height: 36px;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+.rewrite-help-btn:hover { background: #c8f5dc; }
+
+/* ── Speaking toast ── */
+.speaking-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a6fa8;
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 10px 24px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, background 0.2s;
+  z-index: 100;
+  cursor: pointer;
+  user-select: none;
+  pointer-events: none;
+}
+.speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.speaking-toast.visible:hover { background: #c0392b; }
+.speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+
+/* ── Clear btn ── */
+.clear-btn {
+  background: #f0f0f0;
+  color: #888;
+  border: 2px solid #ccc;
+  border-radius: 18px;
+  padding: 7px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  display: block;
+  margin: 0 auto;
+}
+.clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+
+@media (max-width: 480px) {
+  .section-body { padding: 12px 12px; }
+  .question-card { padding: 10px 12px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Sticky section nav -->
+<nav class="section-nav" id="sectionNav">
+  <button class="nav-btn active" onclick="scrollToSection('sec1')">🔍 1A: Find It</button>
+  <button class="nav-btn" onclick="scrollToSection('sec2')">🔗 1B: Match It</button>
+  <button class="nav-btn" onclick="scrollToSection('sec3')">✏️ 1C: Write It</button>
+  <button class="nav-btn" onclick="scrollToSection('sec4')">🔤 2A: Choose It</button>
+  <button class="nav-btn" onclick="scrollToSection('sec5')">🔄 2B: Rewrite It</button>
+</nav>
+
+<div class="page-header">
+  <h1>🏷️ Possessive Pronouns</h1>
+  <p class="subtitle">Tap any sentence to hear it · Tap highlighted words to hear them</p>
+</div>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════════════
+       SECTION 1 — PAGE 1
+       ══════════════════════════════════════════ -->
+
+  <!-- SEC 1: Part A — Find the pronoun -->
+  <div class="section-card" id="sec1">
+    <div class="section-header" onclick="toggleSection('sec1')">
+      <span class="section-title">🔍 Part A — Find the Possessive Pronoun</span>
+      <span class="section-badge" id="sec1-badge">0 / 7</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="reteach-box" onclick="speak('Reteaching: A possessive pronoun shows ownership. The possessive pronouns my, your, his, her, its, our, and their come before nouns. Mine, yours, hers, his, ours, and theirs are used alone. His can be used before a noun or alone.')">
+        🔊 <strong>RETEACHING:</strong> A possessive pronoun shows ownership. <em>My, your, his, her, its, our, their</em> come before nouns. <em>Mine, yours, hers, his, ours, theirs</em> are used alone.
+      </div>
+      <div class="instructions" onclick="speak('Tap the possessive pronoun in each sentence. It will highlight in yellow. Then tap the noun it describes to complete the answer.')">
+        🔊 Step 1: Tap the possessive pronoun. Step 2: Tap the noun it describes.
+      </div>
+      <div class="progress-row">
+        <span id="sec1-pips"></span>
+        <span class="progress-label" id="sec1-count">0 / 7 found</span>
+      </div>
+      <div id="sec1-list"></div>
+    </div>
+  </div>
+
+  <!-- SEC 2: Part B — Match subject to possessive -->
+  <div class="section-card collapsed" id="sec2">
+    <div class="section-header" onclick="toggleSection('sec2')">
+      <span class="section-title">🔗 Part B — Match to Possessive Pronoun</span>
+      <span class="section-badge" id="sec2-badge">0 / 7</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="instructions" onclick="speak('For each subject pronoun, choose the matching possessive pronoun from the drop-down.')">
+        🔊 For each subject pronoun, choose the matching possessive pronoun.
+      </div>
+      <div class="progress-row">
+        <span id="sec2-pips"></span>
+        <span class="progress-label" id="sec2-count">0 / 7 answered</span>
+      </div>
+      <div class="pronoun-match-grid" id="sec2-grid"></div>
+    </div>
+  </div>
+
+  <!-- SEC 3: Part C — Write a sentence -->
+  <div class="section-card collapsed" id="sec3">
+    <div class="section-header" onclick="toggleSection('sec3')">
+      <span class="section-title">✏️ Part C — Write a Sentence</span>
+      <span class="section-badge" id="sec3-badge">0 / 3</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="reteach-box" onclick="speak('Choose three pronoun pairs. For each pair, write a sentence that uses both pronouns. Need help? Tap Help Me to see a sentence with drop-downs.')">
+        🔊 Choose 3 pronoun pairs. Write a sentence using both pronouns in the pair. Tap <strong>Help Me</strong> for a scaffold sentence!
+      </div>
+      <div id="sec3-slots"></div>
+      <div class="progress-row" style="margin-top:4px">
+        <span id="sec3-pips"></span>
+        <span class="progress-label" id="sec3-count">0 / 3 written</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 2 — PAGE 2
+       ══════════════════════════════════════════ -->
+
+  <!-- SEC 4: Part A — Choose correct pronoun -->
+  <div class="section-card collapsed" id="sec4">
+    <div class="section-header" onclick="toggleSection('sec4')">
+      <span class="section-title">🔤 Part A — Choose the Correct Pronoun</span>
+      <span class="section-badge" id="sec4-badge">0 / 5</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="reteach-box" onclick="speak('Reteaching: Possessive pronouns show ownership. You can use a possessive pronoun to replace a possessive noun. The pronouns my, your, his, her, its, our, and their come before nouns. The pronouns mine, yours, his, hers, ours, and theirs stand alone.')">
+        🔊 <strong>RETEACHING:</strong> Use a possessive pronoun to replace a possessive noun. <em>My, your, his, her, its, our, their</em> before nouns. <em>Mine, yours, his, hers, ours, theirs</em> stand alone.
+      </div>
+      <div class="instructions" onclick="speak('In each sentence, the pronoun choices are highlighted. Tap the highlighted choices to hear them. Choose the correct pronoun from the drop-down.')">
+        🔊 The choices are highlighted. Choose the correct pronoun from the drop-down.
+      </div>
+      <div class="progress-row">
+        <span id="sec4-pips"></span>
+        <span class="progress-label" id="sec4-count">0 / 5 answered</span>
+      </div>
+      <div id="sec4-list"></div>
+    </div>
+  </div>
+
+  <!-- SEC 5: Part B — Rewrite with possessive pronoun -->
+  <div class="section-card collapsed" id="sec5">
+    <div class="section-header" onclick="toggleSection('sec5')">
+      <span class="section-title">🔄 Part B — Rewrite with Possessive Pronouns</span>
+      <span class="section-badge" id="sec5-badge">0 / 5</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="instructions" onclick="speak('Rewrite each sentence, replacing the underlined words with a possessive pronoun. Type or speak your answer. Need help? Tap Help Me to see the sentence with a pronoun drop-down.')">
+        🔊 Rewrite each sentence, replacing the underlined words with a possessive pronoun. Tap <strong>Help Me</strong> to get a drop-down if you need it.
+      </div>
+      <div class="progress-row">
+        <span id="sec5-pips"></span>
+        <span class="progress-label" id="sec5-count">0 / 5 answered</span>
+      </div>
+      <div id="sec5-list"></div>
+    </div>
+  </div>
+
+  <button class="clear-btn" id="clearBtn" onclick="clearAll()">🗑️ Clear all responses</button>
+
+</div><!-- /container -->
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()">
+  🔊 <span class="toast-label">Reading aloud…</span>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// TTS
+// ═══════════════════════════════════════════════════════════════
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.88; u.pitch = 1.05;
+  u.onstart = showToast; u.onend = hideToast; u.onerror = hideToast;
+  window.speechSynthesis.speak(u);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+
+const feedbackTexts = {};
+function showFeedback(fbId, pass, text) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  if (!el) return;
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = (pass ? '✅ ' : '💡 Hint: ') + text +
+    ` <button class="fb-play-btn" onclick="speak(feedbackTexts['${fbId}'])" title="Read aloud">🔊</button>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Section toggle + nav
+// ═══════════════════════════════════════════════════════════════
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+  updateNavActive();
+}
+function scrollToSection(id) {
+  const el = document.getElementById(id);
+  el.classList.remove('collapsed');
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  updateNavActive();
+}
+function updateNavActive() {
+  const secs = ['sec1','sec2','sec3','sec4','sec5'];
+  const navBtns = document.querySelectorAll('.nav-btn');
+  secs.forEach((id, i) => {
+    navBtns[i].classList.toggle('active', !document.getElementById(id).classList.contains('collapsed'));
+    navBtns[i].classList.toggle('complete', document.getElementById(id).classList.contains('complete'));
+  });
+}
+
+function autoCollapseIfComplete(secId) {
+  // slight delay so student sees the final state
+  setTimeout(() => {
+    document.getElementById(secId).classList.add('collapsed');
+    updateNavActive();
+  }, 1200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'worksheet_possessive_pronouns_2026_03_24_v2';
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch(e) {}
+}
+function loadState() {
+  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; } catch(e) { return null; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+
+// SEC 1: sentences + which word is the possessive pronoun
+const sec1Questions = [
+  { text: "My family is moving next summer, so we're cleaning out the house.", pronoun: "My",    noun: "family"    },
+  { text: "You wouldn't believe what we found in our attic!",                  pronoun: "our",   noun: "attic"     },
+  { text: "Mom and Dad discovered a stack of old photos from their honeymoon.", pronoun: "their", noun: "honeymoon" },
+  { text: "Ella found her first bicycle.",                                      pronoun: "her",   noun: "bicycle"   },
+  { text: "Adam found his diary from third grade.",                             pronoun: "his",   noun: "diary"     },
+  { text: "Now he is looking for its key.",                                     pronoun: "its",   noun: "key"       },
+  { text: "What do you think you would find in your house?",                   pronoun: "your",  noun: "house"     },
+];
+
+// SEC 2: subject → possessive (accepted: any of the pair)
+const sec2Questions = [
+  { subject: "I",    answers: ["my","mine"],        hint: "I → my (before noun) or mine (alone)" },
+  { subject: "you",  answers: ["your","yours"],      hint: "you → your (before noun) or yours (alone)" },
+  { subject: "he",   answers: ["his"],               hint: "he → his (works both ways)" },
+  { subject: "she",  answers: ["her","hers"],        hint: "she → her (before noun) or hers (alone)" },
+  { subject: "it",   answers: ["its"],               hint: "it → its (before a noun)" },
+  { subject: "we",   answers: ["our","ours"],        hint: "we → our (before noun) or ours (alone)" },
+  { subject: "they", answers: ["their","theirs"],    hint: "they → their (before noun) or theirs (alone)" },
+];
+const possessiveOptions = ["my","mine","your","yours","his","her","hers","its","our","ours","their","theirs"];
+
+// SEC 3: pronoun pairs with predefined scaffold sentences
+// For every possible pair choice, we have a scaffold sentence.
+// scaffold: array of segments, each is { text } or { blank, options, answer }
+const sec3Pairs = [
+  {
+    label: "my / mine",
+    desc: "my, mine",
+    speak: "my and mine",
+    scaffold: {
+      before: "",
+      segments: [
+        { text: "I brought " },
+        { blank: true, options: ["— pick —","my","mine"], answer: "my" },
+        { text: " jacket, and the umbrella over there is " },
+        { blank: true, options: ["— pick —","my","mine"], answer: "mine" },
+        { text: " too." }
+      ],
+      full: "I brought my jacket, and the umbrella over there is mine too."
+    }
+  },
+  {
+    label: "your / yours",
+    desc: "your, yours",
+    speak: "your and yours",
+    scaffold: {
+      before: "",
+      segments: [
+        { blank: true, options: ["— pick —","Your","Yours"], answer: "Your" },
+        { text: " backpack is by the door, and the water bottle next to it is " },
+        { blank: true, options: ["— pick —","your","yours"], answer: "yours" },
+        { text: " too." }
+      ],
+      full: "Your backpack is by the door, and the water bottle next to it is yours too."
+    }
+  },
+  {
+    label: "his / his",
+    desc: "his, his",
+    speak: "his and his",
+    scaffold: {
+      before: "",
+      segments: [
+        { text: "Jake did finish " },
+        { blank: true, options: ["— pick —","his"], answer: "his" },
+        { text: " homework, but that homework page is not " },
+        { blank: true, options: ["— pick —","his"], answer: "his" },
+        { text: "." }
+      ],
+      full: "Jake did finish his homework, but that homework page is not his."
+    }
+  },
+  {
+    label: "her / hers",
+    desc: "her, hers",
+    speak: "her and hers",
+    scaffold: {
+      before: "",
+      segments: [
+        { text: "Sofia forgot " },
+        { blank: true, options: ["— pick —","her","hers"], answer: "her" },
+        { text: " her umbrella, so that blue one can't be " },
+        { blank: true, options: ["— pick —","her","hers"], answer: "hers" },
+        { text: "." }
+      ],
+      full: "Sofia forgot her umbrella, so that blue one can't be hers."
+    }
+  },
+  {
+    label: "our / ours",
+    desc: "our, ours",
+    speak: "our and ours",
+    scaffold: {
+      before: "",
+      segments: [
+        { text: "That rental car in the driveway is " },
+        { blank: true, options: ["— pick —","our","ours"], answer: "ours" },
+        { text: ", because " },
+        { blank: true, options: ["— pick —","our","ours"], answer: "our" },
+        { text: " car is in the shop." }
+      ],
+      full: "That rental car in the driveway is ours, because our car is in the shop."
+    }
+  },
+  {
+    label: "their / theirs",
+    desc: "their, theirs",
+    speak: "their and theirs",
+    scaffold: {
+      before: "",
+      segments: [
+        { text: "The twins packed " },
+        { blank: true, options: ["— pick —","their","theirs"], answer: "their" },
+        { text: " bags, and the extra suitcase is " },
+        { blank: true, options: ["— pick —","their","theirs"], answer: "theirs" },
+        { text: " too." }
+      ],
+      full: "The twins packed their bags, and the extra suitcase is theirs too."
+    }
+  },
+];
+
+// SEC 4: binary choice sentences
+const sec4Questions = [
+  {
+    before: "They practiced ",
+    choices: ["their","theirs"],
+    after: " lines over and over again.",
+    answer: "their",
+    hint: "comes before the noun 'lines' — use the form that goes before a noun"
+  },
+  {
+    before: "She uses ",
+    choices: ["her","hers"],
+    after: " talent to create beautiful heroines.",
+    answer: "her",
+    hint: "comes before the noun 'talent' — use the form that goes before a noun"
+  },
+  {
+    before: '"Is that ',
+    choices: ["my","mine"],
+    after: ' playbook?" asked Lily.',
+    answer: "my",
+    hint: "comes before the noun 'playbook' — use the form that goes before a noun"
+  },
+  {
+    before: '"No! It is ',
+    choices: ["my","mine"],
+    after: '," replied Sean.',
+    answer: "mine",
+    hint: "used alone here, not before a noun — use the stand-alone form"
+  },
+  {
+    before: "The play is about a woman's struggle to find ",
+    choices: ["her","hers"],
+    after: " missing sister.",
+    answer: "her",
+    hint: "comes before the noun 'missing sister' — use the form that goes before a noun"
+  },
+];
+
+// SEC 5: rewrite sentences
+// underlineText = the possessive noun phrase to replace
+// rewriteAnswer = the correct possessive pronoun
+// rewritePrefix/Suffix = the rest of the sentence around the noun
+const sec5Questions = [
+  {
+    original: "Which dresses in the closet are Barbara's?",
+    underlineText: "Barbara's",
+    rewritePrefix: "Which dresses in the closet are ",
+    rewriteSuffix: "?",
+    rewriteAnswer: "hers",
+    hint: "Barbara is one woman — the stand-alone possessive for 'she' is hers"
+  },
+  {
+    original: "This is Ken and Tony's collection of dried flowers.",
+    underlineText: "Ken and Tony's",
+    rewritePrefix: "This is ",
+    rewriteSuffix: " collection of dried flowers.",
+    rewriteAnswer: "their",
+    hint: "Ken and Tony are more than one person — use their (it comes before 'collection')"
+  },
+  {
+    original: "I am enjoying Paul's book.",
+    underlineText: "Paul's",
+    rewritePrefix: "I am enjoying ",
+    rewriteSuffix: " book.",
+    rewriteAnswer: "his",
+    hint: "Paul is one man — use his"
+  },
+  {
+    original: "Elizabeth's disappointment showed clearly.",
+    underlineText: "Elizabeth's",
+    rewritePrefix: "",
+    rewriteSuffix: " disappointment showed clearly.",
+    rewriteAnswer: "her",
+    hint: "Elizabeth is one woman — use her (it comes before 'disappointment')"
+  },
+  {
+    original: "Is this Kevin's idea of a joke?",
+    underlineText: "Kevin's",
+    rewritePrefix: "Is this ",
+    rewriteSuffix: " idea of a joke?",
+    rewriteAnswer: "his",
+    hint: "Kevin is one man — use his"
+  },
+];
+
+const allPossessivePronouns = ["— pick —","my","mine","your","yours","his","her","hers","its","our","ours","their","theirs"];
+
+// ═══════════════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════════════
+let appState = {
+  sec1: new Array(sec1Questions.length).fill(0),   // 0=untouched, 1=pronoun tapped, 2=noun tapped (complete)
+  sec2: new Array(sec2Questions.length).fill(''),
+  sec3: [
+    { pair: '', freeText: '', scaffoldAnswers: ['',''], scaffoldShown: false },
+    { pair: '', freeText: '', scaffoldAnswers: ['',''], scaffoldShown: false },
+    { pair: '', freeText: '', scaffoldAnswers: ['',''], scaffoldShown: false },
+  ],
+  sec4: new Array(sec4Questions.length).fill(''),
+  sec5: new Array(sec5Questions.length).fill({ text: '', helpShown: false, helpAnswer: '' }),
+};
+
+// Reinitialize sec5 properly
+appState.sec5 = sec5Questions.map(() => ({ text: '', helpShown: false, helpAnswer: '' }));
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 1: Find the pronoun (two-step: tap pronoun, then tap the noun it describes)
+// ═══════════════════════════════════════════════════════════════
+function buildSec1() {
+  const list = document.getElementById('sec1-list');
+  list.innerHTML = '';
+  sec1Questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `s1-card-${qi}`;
+
+    const top = document.createElement('div');
+    top.className = 'card-top';
+
+    const num = document.createElement('div');
+    num.className = 'q-num';
+    num.textContent = `${qi+1}.`;
+
+    const sentWrap = document.createElement('div');
+    sentWrap.style.cssText = 'flex:1;font-size:1rem;font-weight:600;line-height:2;';
+    // Tapping the wrap itself (non-word area) reads the sentence
+    sentWrap.onclick = () => speak(q.text);
+
+    // Step hint shown between pronoun tap and noun tap
+    const stepHint = document.createElement('div');
+    stepHint.id = `s1-hint-${qi}`;
+    stepHint.style.cssText = 'display:none;font-size:0.82rem;font-weight:800;color:#7c3aed;background:#f0ebff;border:2px solid #c4b5fd;border-radius:10px;padding:5px 12px;margin-top:4px;';
+    stepHint.textContent = '👆 Now tap the noun it describes';
+
+    // Tokenise — track pronoun and noun spans
+    let pronounSpan = null;
+    let nounSpan = null;
+
+    const words = q.text.split(/(\s+)/);
+    words.forEach(tok => {
+      if (/^\s+$/.test(tok)) { sentWrap.appendChild(document.createTextNode(tok)); return; }
+      const clean = tok.replace(/[^a-zA-Z']/g, '');
+      const span = document.createElement('span');
+      span.className = 'word-token';
+      span.textContent = tok;
+
+      const isPronoun = clean.toLowerCase() === q.pronoun.toLowerCase();
+      const isNoun    = clean.toLowerCase() === q.noun.toLowerCase();
+
+      if (isPronoun) pronounSpan = span;
+      if (isNoun)    nounSpan    = span;
+
+      span.onclick = (e) => {
+        e.stopPropagation();
+        const state = appState.sec1[qi];
+
+        if (state === 2) {
+          // Already complete — just speak the word
+          speak(clean);
+          return;
+        }
+
+        if (state === 0) {
+          // Step 1: waiting for pronoun tap
+          if (isPronoun) {
+            appState.sec1[qi] = 1;
+            span.classList.add('pronoun-found');
+            stepHint.style.display = 'block';
+            saveState();
+            speak(`Yes! ${clean} is the possessive pronoun. Now tap the noun it describes.`);
+            updateSec1Progress();
+          } else {
+            // Wrong word for step 1
+            span.classList.add('not-pronoun');
+            span.addEventListener('animationend', () => span.classList.remove('not-pronoun'), { once: true });
+            speak(clean);
+          }
+          return;
+        }
+
+        if (state === 1) {
+          // Step 2: waiting for noun tap
+          if (isNoun) {
+            appState.sec1[qi] = 2;
+            span.classList.add('pronoun-found', 'answered');
+            // Also mark pronoun as fully answered
+            if (pronounSpan) pronounSpan.classList.add('answered');
+            stepHint.style.display = 'none';
+            card.classList.add('correct');
+            saveState();
+            speak(`${q.pronoun} describes ${clean}. Well done!`);
+            updateSec1Progress();
+          } else if (isPronoun) {
+            // Tapped the pronoun again — just speak it, stay on step 2
+            speak(clean);
+          } else {
+            // Wrong noun
+            span.classList.add('not-pronoun');
+            span.addEventListener('animationend', () => span.classList.remove('not-pronoun'), { once: true });
+            speak(clean);
+          }
+          return;
+        }
+      };
+
+      sentWrap.appendChild(span);
+    });
+
+    const pb = document.createElement('button');
+    pb.className = 'play-btn';
+    pb.title = 'Hear sentence';
+    pb.textContent = '▶';
+    pb.onclick = () => speak(q.text);
+
+    top.appendChild(num);
+    top.appendChild(sentWrap);
+    top.appendChild(pb);
+    card.appendChild(top);
+    card.appendChild(stepHint);
+    list.appendChild(card);
+
+    // Restore saved state
+    const savedState = appState.sec1[qi];
+    if (savedState >= 1 && pronounSpan) pronounSpan.classList.add('pronoun-found');
+    if (savedState === 2 && pronounSpan) pronounSpan.classList.add('answered');
+    if (savedState === 2 && nounSpan)    { nounSpan.classList.add('pronoun-found','answered'); card.classList.add('correct'); }
+    if (savedState === 1) stepHint.style.display = 'block';
+  });
+  updateSec1Progress();
+}
+
+function updateSec1Progress() {
+  const done = appState.sec1.filter(v => v === 2).length;
+  const total = sec1Questions.length;
+  document.getElementById('sec1-pips').innerHTML = appState.sec1.map(v => `<span class="pip ${v===2?'done':''}"></span>`).join('');
+  document.getElementById('sec1-count').textContent = `${done} / ${total} found`;
+  document.getElementById('sec1-badge').textContent = `${done} / ${total}`;
+  const sec = document.getElementById('sec1');
+  if (done === total) {
+    sec.classList.add('complete');
+    autoCollapseIfComplete('sec1');
+  }
+  updateNavActive();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 2: Match subject → possessive
+// ═══════════════════════════════════════════════════════════════
+function buildSec2() {
+  const grid = document.getElementById('sec2-grid');
+  grid.innerHTML = '';
+  sec2Questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'pronoun-match-card';
+    card.id = `s2-card-${qi}`;
+
+    const lbl = document.createElement('div');
+    lbl.className = 'pronoun-match-label';
+    lbl.textContent = q.subject;
+    lbl.style.cursor = 'pointer';
+    lbl.onclick = () => speak(q.subject);
+
+    const arrow = document.createElement('div');
+    arrow.className = 'arrow-label';
+    arrow.textContent = '→';
+
+    const sel = document.createElement('select');
+    sel.className = 'answer-select';
+    sel.id = `s2-sel-${qi}`;
+    sel.style.minWidth = '120px';
+    ['',...possessiveOptions].forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v || '— pick —';
+      sel.appendChild(o);
+    });
+
+    const fb = document.createElement('span');
+    fb.className = 'match-fb';
+    fb.id = `s2-fb-${qi}`;
+
+    sel.onchange = () => {
+      const val = sel.value;
+      appState.sec2[qi] = val;
+      saveState();
+      if (!val) { fb.className = 'match-fb'; card.classList.remove('correct'); updateSec2Progress(); return; }
+      const correct = q.answers.map(a=>a.toLowerCase()).includes(val.toLowerCase());
+      card.classList.toggle('correct', correct);
+      fb.className = 'match-fb show ' + (correct ? 'correct' : 'hint');
+      fb.textContent = correct ? '✅' : '💡 ' + q.hint;
+      if (correct) setTimeout(() => speak(`${q.subject} — ${val}. Correct!`), 300);
+      updateSec2Progress();
+    };
+
+    card.appendChild(lbl);
+    card.appendChild(arrow);
+    card.appendChild(sel);
+    card.appendChild(fb);
+    grid.appendChild(card);
+
+    // Restore
+    if (appState.sec2[qi]) {
+      sel.value = appState.sec2[qi];
+      sel.dispatchEvent(new Event('change'));
+    }
+  });
+  updateSec2Progress();
+}
+
+function updateSec2Progress() {
+  const done = appState.sec2.filter(v=>v!=='').length;
+  const total = sec2Questions.length;
+  document.getElementById('sec2-pips').innerHTML = appState.sec2.map(v => `<span class="pip ${v?'done':''}"></span>`).join('');
+  document.getElementById('sec2-count').textContent = `${done} / ${total} answered`;
+  document.getElementById('sec2-badge').textContent = `${done} / ${total}`;
+  const sec = document.getElementById('sec2');
+  const allCorrect = sec2Questions.every((q,i) => q.answers.map(a=>a.toLowerCase()).includes((appState.sec2[i]||'').toLowerCase()));
+  if (done === total && allCorrect) {
+    sec.classList.add('complete');
+    autoCollapseIfComplete('sec2');
+  }
+  updateNavActive();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 3: Write a sentence
+// ═══════════════════════════════════════════════════════════════
+function buildSec3() {
+  const slotsEl = document.getElementById('sec3-slots');
+  slotsEl.innerHTML = '';
+  for (let si = 0; si < 3; si++) {
+    const slot = appState.sec3[si];
+    const card = document.createElement('div');
+    card.className = 'slot-card';
+    card.id = `s3-slot-${si}`;
+    card.style.marginBottom = '10px';
+
+    // Top row: label + pair selector + play + help
+    const top = document.createElement('div');
+    top.className = 'slot-top';
+
+    const lbl = document.createElement('div');
+    lbl.className = 'slot-label';
+    lbl.textContent = `Sentence ${si+1}`;
+
+    const pairSel = document.createElement('select');
+    pairSel.className = 'pair-select';
+    pairSel.id = `s3-pair-${si}`;
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = ''; defaultOpt.textContent = '— choose a pronoun pair —';
+    pairSel.appendChild(defaultOpt);
+    sec3Pairs.forEach((p, pi) => {
+      const o = document.createElement('option');
+      o.value = String(pi);
+      o.textContent = p.label;
+      pairSel.appendChild(o);
+    });
+
+    const playScaffoldBtn = document.createElement('button');
+    playScaffoldBtn.className = 'play-btn';
+    playScaffoldBtn.style.background = '#a78bfa';
+    playScaffoldBtn.style.boxShadow = '0 2px 8px rgba(167,139,250,0.4)';
+    playScaffoldBtn.title = 'Hear the scaffold sentence';
+    playScaffoldBtn.textContent = '▶';
+    playScaffoldBtn.onclick = () => {
+      const pairIdx = parseInt(pairSel.value);
+      if (isNaN(pairIdx)) { speak('Choose a pronoun pair first.'); return; }
+      speak(sec3Pairs[pairIdx].scaffold.full);
+    };
+
+    const helpBtn = document.createElement('button');
+    helpBtn.className = 'help-btn';
+    helpBtn.textContent = '💡 Help Me';
+    helpBtn.onclick = () => showSec3Help(si);
+
+    top.appendChild(lbl);
+    top.appendChild(pairSel);
+    top.appendChild(playScaffoldBtn);
+    top.appendChild(helpBtn);
+
+    // Scaffold area (hidden until Help Me)
+    const scaffoldDiv = document.createElement('div');
+    scaffoldDiv.className = 'help-scaffold';
+    scaffoldDiv.id = `s3-scaffold-${si}`;
+
+    // Free text area
+    const ftWrap = document.createElement('div');
+    ftWrap.className = 'free-text-area-wrap';
+    const ftLabel = document.createElement('div');
+    ftLabel.className = 'free-text-label';
+    ftLabel.textContent = 'My sentence:';
+    const ta = document.createElement('textarea');
+    ta.className = 'free-textarea';
+    ta.id = `s3-ta-${si}`;
+    ta.placeholder = 'Type or speak your sentence here…';
+    ta.value = slot.freeText || '';
+    ta.oninput = () => {
+      appState.sec3[si].freeText = ta.value;
+      saveState();
+      updateSec3Progress();
+    };
+    const btns = document.createElement('div');
+    btns.className = 'textarea-btns';
+    const micBtn = document.createElement('button');
+    micBtn.className = 'mic-btn';
+    micBtn.textContent = '🎤';
+    micBtn.title = 'Speak your sentence';
+    micBtn.id = `s3-mic-${si}`;
+    const rbBtn = document.createElement('button');
+    rbBtn.className = 'readback-btn';
+    rbBtn.textContent = '🔊 Read back';
+    rbBtn.onclick = () => speak(ta.value || 'Nothing typed yet.');
+    btns.appendChild(micBtn);
+    btns.appendChild(rbBtn);
+    ftWrap.appendChild(ftLabel);
+    ftWrap.appendChild(ta);
+    ftWrap.appendChild(btns);
+
+    card.appendChild(top);
+    card.appendChild(scaffoldDiv);
+    card.appendChild(ftWrap);
+    slotsEl.appendChild(card);
+
+    // Wire mic
+    initMic(micBtn, ta, (text) => {
+      appState.sec3[si].freeText = ta.value;
+      saveState();
+      updateSec3Progress();
+    });
+
+    // Restore pair selection
+    if (slot.pair !== '') {
+      pairSel.value = slot.pair;
+      if (slot.scaffoldShown) renderSec3Scaffold(si);
+    }
+
+    pairSel.onchange = () => {
+      appState.sec3[si].pair = pairSel.value;
+      appState.sec3[si].scaffoldAnswers = ['',''];
+      appState.sec3[si].scaffoldShown = false;
+      const scaffoldEl = document.getElementById(`s3-scaffold-${si}`);
+      scaffoldEl.classList.remove('visible');
+      scaffoldEl.innerHTML = '';
+      saveState();
+      // Auto-read the pair
+      const pairIdx = parseInt(pairSel.value);
+      if (!isNaN(pairIdx)) setTimeout(() => speak(sec3Pairs[pairIdx].speak), 300);
+    };
+  }
+  updateSec3Progress();
+}
+
+function showSec3Help(si) {
+  const pairIdxStr = document.getElementById(`s3-pair-${si}`).value;
+  if (pairIdxStr === '') { speak('Choose a pronoun pair first, then tap Help Me.'); return; }
+  appState.sec3[si].scaffoldShown = true;
+  saveState();
+  renderSec3Scaffold(si);
+}
+
+function renderSec3Scaffold(si) {
+  const pairIdx = parseInt(appState.sec3[si].pair);
+  const pair = sec3Pairs[pairIdx];
+  const scaffoldEl = document.getElementById(`s3-scaffold-${si}`);
+  scaffoldEl.innerHTML = '';
+  scaffoldEl.classList.add('visible');
+
+  let blankCount = 0;
+  const segs = pair.scaffold.segments;
+  segs.forEach((seg, segi) => {
+    if (seg.text !== undefined) {
+      const sp = document.createElement('span');
+      sp.textContent = seg.text;
+      scaffoldEl.appendChild(sp);
+    } else {
+      const bi = blankCount++;
+      const sel = document.createElement('select');
+      sel.className = 'scaffold-select';
+      sel.id = `s3-sc-${si}-${bi}`;
+      seg.options.forEach(opt => {
+        const o = document.createElement('option');
+        o.value = opt === '— pick —' ? '' : opt;
+        o.textContent = opt;
+        sel.appendChild(o);
+      });
+
+      const savedAns = appState.sec3[si].scaffoldAnswers || [];
+      if (savedAns[bi]) sel.value = savedAns[bi];
+
+      const fbSpan = document.createElement('span');
+      fbSpan.className = 'scaffold-fb';
+      fbSpan.id = `s3-sc-fb-${si}-${bi}`;
+
+      sel.onchange = () => {
+        if (!appState.sec3[si].scaffoldAnswers) appState.sec3[si].scaffoldAnswers = [];
+        appState.sec3[si].scaffoldAnswers[bi] = sel.value;
+        saveState();
+        const correct = sel.value.toLowerCase() === seg.answer.toLowerCase();
+        fbSpan.className = 'scaffold-fb ' + (correct ? 'correct' : 'hint');
+        fbSpan.textContent = correct ? '✅' : `💡 Try ${seg.answer}`;
+        if (correct) setTimeout(() => speak(pair.scaffold.full), 300);
+      };
+
+      scaffoldEl.appendChild(sel);
+      scaffoldEl.appendChild(fbSpan);
+
+      // Restore feedback
+      if (savedAns[bi]) {
+        const correct = savedAns[bi].toLowerCase() === seg.answer.toLowerCase();
+        fbSpan.className = 'scaffold-fb ' + (correct ? 'correct' : 'hint');
+        fbSpan.textContent = correct ? '✅' : `💡 Try ${seg.answer}`;
+      }
+    }
+  });
+}
+
+function updateSec3Progress() {
+  const done = appState.sec3.filter(s => s.freeText && s.freeText.trim() !== '').length;
+  document.getElementById('sec3-pips').innerHTML = appState.sec3.map(s => `<span class="pip ${s.freeText&&s.freeText.trim()?'done':''}"></span>`).join('');
+  document.getElementById('sec3-count').textContent = `${done} / 3 written`;
+  document.getElementById('sec3-badge').textContent = `${done} / 3`;
+  const sec = document.getElementById('sec3');
+  if (done === 3) {
+    sec.classList.add('complete');
+    autoCollapseIfComplete('sec3');
+  }
+  updateNavActive();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 4: Choose the correct pronoun (binary)
+// ═══════════════════════════════════════════════════════════════
+function buildSec4() {
+  const list = document.getElementById('sec4-list');
+  list.innerHTML = '';
+  sec4Questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `s4-card-${qi}`;
+
+    const top = document.createElement('div');
+    top.className = 'card-top';
+
+    const num = document.createElement('div');
+    num.className = 'q-num';
+    num.textContent = `${qi+1}.`;
+
+    const sentArea = document.createElement('div');
+    sentArea.style.cssText = 'flex:1;font-size:1rem;font-weight:600;line-height:2;display:flex;flex-wrap:wrap;align-items:center;gap:4px;';
+
+    function buildSentence(val) {
+      return q.before + (val || q.choices.join(' or ')) + q.after;
+    }
+
+    if (q.before) {
+      const sp = document.createElement('span');
+      sp.style.cssText = 'cursor:pointer;border-radius:5px;padding:1px 3px;transition:background 0.12s;';
+      sp.textContent = q.before;
+      sp.onmouseover = () => sp.style.background='#e8f4ff';
+      sp.onmouseout = () => sp.style.background='';
+      sp.onclick = () => speak(q.before.trim());
+      sentArea.appendChild(sp);
+    }
+
+    const chip = document.createElement('span');
+    chip.className = 'choice-chip';
+    chip.innerHTML = `🔊 (${q.choices[0]} / ${q.choices[1]})`;
+    chip.onclick = (e) => { e.stopPropagation(); speak(`${q.choices[0]} or ${q.choices[1]}?`); };
+    sentArea.appendChild(chip);
+
+    const sel = document.createElement('select');
+    sel.className = 'answer-select';
+    sel.id = `s4-sel-${qi}`;
+    const defOpt = document.createElement('option');
+    defOpt.value = ''; defOpt.textContent = '— pick —';
+    sel.appendChild(defOpt);
+    q.choices.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c; o.textContent = c; sel.appendChild(o);
+    });
+    sentArea.appendChild(sel);
+
+    if (q.after) {
+      const sp2 = document.createElement('span');
+      sp2.style.cssText = 'cursor:pointer;border-radius:5px;padding:1px 3px;transition:background 0.12s;';
+      sp2.textContent = q.after;
+      sp2.onmouseover = () => sp2.style.background='#e8f4ff';
+      sp2.onmouseout = () => sp2.style.background='';
+      sp2.onclick = () => speak(q.after.trim());
+      sentArea.appendChild(sp2);
+    }
+
+    const pb = document.createElement('button');
+    pb.className = 'play-btn';
+    pb.textContent = '▶';
+    pb.onclick = () => speak(buildSentence(sel.value || q.choices[0]));
+
+    const fb = document.createElement('div');
+    fb.className = 'feedback';
+    fb.id = `s4-fb-${qi}`;
+
+    sel.onchange = () => {
+      const val = sel.value;
+      appState.sec4[qi] = val;
+      saveState();
+      if (!val) { fb.className = 'feedback'; card.classList.remove('correct'); updateSec4Progress(); return; }
+      const correct = val === q.answer;
+      card.classList.toggle('correct', correct);
+      const text = correct ? `Yes! "${val}" is correct. ${buildSentence(val)}` : q.hint;
+      showFeedback(`s4-fb-${qi}`, correct, text);
+      if (correct) setTimeout(() => speak(buildSentence(val)), 300);
+      updateSec4Progress();
+    };
+
+    top.appendChild(num);
+    top.appendChild(sentArea);
+    top.appendChild(pb);
+    card.appendChild(top);
+    card.appendChild(fb);
+    list.appendChild(card);
+
+    // Restore
+    if (appState.sec4[qi]) {
+      sel.value = appState.sec4[qi];
+      sel.dispatchEvent(new Event('change'));
+    }
+  });
+  updateSec4Progress();
+}
+
+function updateSec4Progress() {
+  const done = appState.sec4.filter(v=>v!=='').length;
+  const total = sec4Questions.length;
+  document.getElementById('sec4-pips').innerHTML = appState.sec4.map(v=>`<span class="pip ${v?'done':''}"></span>`).join('');
+  document.getElementById('sec4-count').textContent = `${done} / ${total} answered`;
+  document.getElementById('sec4-badge').textContent = `${done} / ${total}`;
+  const allCorrect = sec4Questions.every((q,i) => appState.sec4[i] === q.answer);
+  const sec = document.getElementById('sec4');
+  if (done === total && allCorrect) {
+    sec.classList.add('complete');
+    autoCollapseIfComplete('sec4');
+  }
+  updateNavActive();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SECTION 5: Rewrite with possessive pronoun
+// ═══════════════════════════════════════════════════════════════
+function buildSec5() {
+  const list = document.getElementById('sec5-list');
+  list.innerHTML = '';
+  sec5Questions.forEach((q, qi) => {
+    const s = appState.sec5[qi];
+    const card = document.createElement('div');
+    card.className = 'rewrite-card';
+    card.id = `s5-card-${qi}`;
+
+    const num = document.createElement('div');
+    num.style.cssText = 'font-family:"Fredoka One",cursive;font-size:1.1rem;color:#3b9ede;';
+    num.textContent = `${qi+1}.`;
+
+    // Original sentence with underlined noun
+    const original = document.createElement('div');
+    original.className = 'rewrite-original';
+    const parts = q.original.split(q.underlineText);
+    parts.forEach((part, pi) => {
+      if (part) original.appendChild(document.createTextNode(part));
+      if (pi < parts.length - 1) {
+        const u = document.createElement('span');
+        u.className = 'underline-noun';
+        u.textContent = q.underlineText;
+        original.appendChild(u);
+      }
+    });
+    original.onclick = () => speak(q.original);
+
+    // Header row
+    const headerRow = document.createElement('div');
+    headerRow.style.cssText = 'display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;';
+    headerRow.appendChild(num);
+    headerRow.appendChild(original);
+
+    // Play button
+    const pb = document.createElement('button');
+    pb.className = 'play-btn';
+    pb.style.cssText = 'background:#5dca7e;flex-shrink:0;align-self:flex-start;margin-top:2px;';
+    pb.textContent = '▶';
+    pb.onclick = () => speak(q.original);
+    headerRow.appendChild(pb);
+    card.appendChild(headerRow);
+
+    // Help scaffold (initially hidden)
+    const helpArea = document.createElement('div');
+    helpArea.className = 'rewrite-help-area';
+    helpArea.id = `s5-help-${qi}`;
+
+    // Build the sentence with a dropdown replacing the underlined noun
+    if (q.rewritePrefix) {
+      const prefixSpan = document.createElement('span');
+      prefixSpan.style.cssText = 'cursor:pointer;border-radius:5px;padding:1px 3px;';
+      prefixSpan.textContent = q.rewritePrefix;
+      prefixSpan.onclick = () => speak(q.rewritePrefix.trim());
+      helpArea.appendChild(prefixSpan);
+    }
+    const rwSel = document.createElement('select');
+    rwSel.className = 'rewrite-select';
+    rwSel.id = `s5-rw-sel-${qi}`;
+    allPossessivePronouns.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p === '— pick —' ? '' : p;
+      o.textContent = p;
+      rwSel.appendChild(o);
+    });
+    helpArea.appendChild(rwSel);
+    if (q.rewriteSuffix) {
+      const suffixSpan = document.createElement('span');
+      suffixSpan.style.cssText = 'cursor:pointer;border-radius:5px;padding:1px 3px;';
+      suffixSpan.textContent = q.rewriteSuffix;
+      suffixSpan.onclick = () => speak(q.rewriteSuffix.trim());
+      helpArea.appendChild(suffixSpan);
+    }
+    const rwFb = document.createElement('span');
+    rwFb.className = 'scaffold-fb';
+    rwFb.id = `s5-rw-fb-${qi}`;
+    helpArea.appendChild(rwFb);
+
+    rwSel.onchange = () => {
+      const val = rwSel.value;
+      appState.sec5[qi].helpAnswer = val;
+      saveState();
+      if (!val) { rwFb.textContent=''; return; }
+      const correct = val.toLowerCase() === q.rewriteAnswer.toLowerCase();
+      rwFb.className = 'scaffold-fb ' + (correct ? 'correct' : 'hint');
+      rwFb.textContent = correct ? '✅' : '💡 ' + q.hint;
+      if (correct) {
+        const full = q.rewritePrefix + val + q.rewriteSuffix;
+        setTimeout(() => speak(full), 300);
+        appState.sec5[qi].text = full;
+        const taEl = document.getElementById(`s5-ta-${qi}`);
+        if (taEl) taEl.value = full;
+        saveState();
+        updateSec5Progress();
+      }
+    };
+
+    card.appendChild(helpArea);
+
+    // Help Me button + free text
+    const helpBtn = document.createElement('button');
+    helpBtn.className = 'rewrite-help-btn';
+    helpBtn.textContent = '💡 Help Me';
+    helpBtn.onclick = () => {
+      appState.sec5[qi].helpShown = true;
+      saveState();
+      document.getElementById(`s5-help-${qi}`).classList.add('visible');
+      helpBtn.style.display = 'none';
+    };
+    card.appendChild(helpBtn);
+
+    // Free text
+    const ftWrap = document.createElement('div');
+    ftWrap.className = 'free-text-area-wrap';
+    const ftLbl = document.createElement('div');
+    ftLbl.className = 'free-text-label';
+    ftLbl.style.color = '#1d7a40';
+    ftLbl.textContent = 'My rewrite:';
+    const ta = document.createElement('textarea');
+    ta.className = 'free-textarea';
+    ta.id = `s5-ta-${qi}`;
+    ta.placeholder = 'Type or speak your rewritten sentence…';
+    ta.value = s.text || '';
+    ta.style.minHeight = '64px';
+    ta.oninput = () => {
+      appState.sec5[qi].text = ta.value;
+      saveState();
+      updateSec5Progress();
+    };
+    const btns = document.createElement('div');
+    btns.className = 'textarea-btns';
+    const micBtn = document.createElement('button');
+    micBtn.className = 'mic-btn';
+    micBtn.textContent = '🎤';
+    micBtn.id = `s5-mic-${qi}`;
+    const rbBtn = document.createElement('button');
+    rbBtn.className = 'readback-btn';
+    rbBtn.textContent = '🔊 Read back';
+    rbBtn.onclick = () => speak(ta.value || 'Nothing written yet.');
+    btns.appendChild(micBtn);
+    btns.appendChild(rbBtn);
+    ftWrap.appendChild(ftLbl);
+    ftWrap.appendChild(ta);
+    ftWrap.appendChild(btns);
+    card.appendChild(ftWrap);
+
+    list.appendChild(card);
+
+    initMic(micBtn, ta, () => {
+      appState.sec5[qi].text = ta.value;
+      saveState();
+      updateSec5Progress();
+    });
+
+    // Restore help state
+    if (s.helpShown) {
+      helpArea.classList.add('visible');
+      helpBtn.style.display = 'none';
+      if (s.helpAnswer) {
+        rwSel.value = s.helpAnswer;
+        const correct = s.helpAnswer.toLowerCase() === q.rewriteAnswer.toLowerCase();
+        rwFb.className = 'scaffold-fb ' + (correct ? 'correct' : 'hint');
+        rwFb.textContent = correct ? '✅' : '💡 ' + q.hint;
+      }
+    }
+  });
+  updateSec5Progress();
+}
+
+function updateSec5Progress() {
+  const done = appState.sec5.filter(s => s.text && s.text.trim() !== '').length;
+  const total = sec5Questions.length;
+  document.getElementById('sec5-pips').innerHTML = appState.sec5.map(s=>`<span class="pip ${s.text&&s.text.trim()?'done':''}"></span>`).join('');
+  document.getElementById('sec5-count').textContent = `${done} / ${total} answered`;
+  document.getElementById('sec5-badge').textContent = `${done} / ${total}`;
+  const sec = document.getElementById('sec5');
+  if (done === total) {
+    sec.classList.add('complete');
+    autoCollapseIfComplete('sec5');
+  }
+  updateNavActive();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MIC helper (shared)
+// ═══════════════════════════════════════════════════════════════
+function initMic(btn, taEl, onResult) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { btn.disabled = true; btn.title = 'Speech input not available in this browser'; return; }
+  const rec = new SR();
+  rec.continuous = false; rec.interimResults = false; rec.lang = 'en-US';
+  let listening = false;
+  btn.onclick = () => { if (listening) { rec.stop(); return; } rec.start(); };
+  rec.onstart  = () => { listening = true; btn.textContent = '⏹'; btn.classList.add('listening'); };
+  rec.onresult = (e) => {
+    const t = e.results[0][0].transcript;
+    taEl.value += (taEl.value ? ' ' : '') + t;
+    if (onResult) onResult(t);
+  };
+  rec.onend  = () => { listening = false; btn.textContent = '🎤'; btn.classList.remove('listening'); };
+  rec.onerror = () => rec.onend();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Clear all
+// ═══════════════════════════════════════════════════════════════
+function clearAll() {
+  const btn = document.getElementById('clearBtn');
+  if (btn.dataset.confirming === 'true') {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    location.reload();
+  } else {
+    btn.dataset.confirming = 'true';
+    btn.textContent = '⚠️ Tap again to confirm';
+    btn.style.background = '#ffeedd'; btn.style.color = '#c05000'; btn.style.borderColor = '#c05000';
+    setTimeout(() => {
+      if (btn.dataset.confirming === 'true') {
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+      }
+    }, 3000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+(function init() {
+  const saved = loadState();
+  if (saved) {
+    // Merge carefully
+    if (saved.sec1 && saved.sec1.length === appState.sec1.length) appState.sec1 = saved.sec1;
+    if (saved.sec2 && saved.sec2.length === appState.sec2.length) appState.sec2 = saved.sec2;
+    if (saved.sec3 && saved.sec3.length === 3) appState.sec3 = saved.sec3;
+    if (saved.sec4 && saved.sec4.length === appState.sec4.length) appState.sec4 = saved.sec4;
+    if (saved.sec5 && saved.sec5.length === appState.sec5.length) appState.sec5 = saved.sec5;
+  }
+
+  buildSec1();
+  buildSec2();
+  buildSec3();
+  buildSec4();
+  buildSec5();
+  updateNavActive();
+})();
+</script>
+</body>
+</html>
