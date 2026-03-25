@@ -326,6 +326,77 @@ const remaining = s.errors.length - state.foundErrors[i].length;
 partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining} more errors`} in this sentence — keep looking!`;
 ```
 
+**Reference implementation:** `worksheets/reference/2026-03-16-proofreading-arctic-animals.html`
+
+---
+
+## Type 8: Two-Step Word Identification (Tap Pronoun → Tap Noun)
+
+*A sentence is rendered word by word. The student first taps the target word (e.g. the possessive pronoun), which highlights it and prompts step 2. Then the student taps a second related word (e.g. the noun it describes). Both words highlight on completion; wrong taps flash red briefly.*
+
+**Data shape:**
+```javascript
+{
+  text:    "My family is moving next summer, so we're cleaning out the house.",
+  pronoun: "My",       // the word to find in step 1
+  noun:    "family"    // the word to find in step 2
+}
+```
+
+**State shape:** Integer per question: `0` = untouched, `1` = step 1 complete, `2` = both steps complete. Store as array of integers (not booleans — bump storage key if migrating from boolean saves).
+
+**Interaction decisions:**
+- Step 1 correct tap: word highlights gold (`.pronoun-found`), a purple step-hint banner appears below the sentence: "👆 Now tap the noun it describes"
+- Step 1 wrong tap: flash red animation, speak the tapped word, no state change
+- Step 2 correct tap: noun highlights gold+green (`.pronoun-found.answered`), pronoun also gains `.answered`, banner hides, card turns green, speaks confirmation e.g. *"their describes honeymoon. Well done!"*
+- Step 2 wrong tap: flash red, speak the tapped word, no state change; tapping the pronoun again in step 2 just speaks it
+- Tapping the whole sentence area (non-word zone) reads the full sentence at any time
+- Per-card ▶ play button reads the full sentence
+- Cards lock (state 2) and cannot be un-done
+
+**Progress tracking:** Pips and count key off `state === 2` only — step-1-only progress does not advance pips.
+
+**Reference implementation:** `worksheets/reference/2026-03-24-possessive-pronouns.html`, Section 1 (Part A)
+
+---
+
+## Type 9: Pronoun Pair Sentence Composer (Choose Pair → Free Write + Optional Scaffold)
+
+*The student chooses a pronoun pair from a dropdown (e.g. "her / hers"), then writes a sentence using both pronouns in a free-text area with mic + read-back. A "Help Me" button reveals a pre-authored scaffold sentence with inline dropdowns for the blanks. When all scaffold dropdowns are correct, the full sentence auto-fills the textarea.*
+
+**Use case:** Part C of pronoun worksheets — "Choose three pairs and write a sentence using each."
+
+**Data shape (pre-authored scaffolds — one per possible pair):**
+```javascript
+{
+  label: "her / hers",
+  speak: "her and hers",       // spoken when pair is selected
+  scaffold: {
+    segments: [
+      { text: "Sofia forgot " },
+      { blank: true, options: ["— pick —","her","hers"], answer: "her" },
+      { text: " umbrella, so the blue one must be " },
+      { blank: true, options: ["— pick —","her","hers"], answer: "hers" },
+      { text: "." }
+    ],
+    full: "Sofia forgot her umbrella, so the blue one must be hers."
+  }
+}
+```
+
+**Key authoring rule:** Author a scaffold for **every possible pair** the student might pick — not just the required number of slots. At runtime the student selects N pairs (e.g. 3) and each slot renders the scaffold for whichever pair she chose.
+
+**Interaction decisions:**
+- Pair picker dropdown auto-reads the pair name (e.g. "her and hers") on selection
+- Free-text area + mic + read-back always visible, not gated behind Help Me
+- Help Me button: reveals the scaffold sentence; text segments within the scaffold are individually tappable (speak just that segment); the full-sentence ▶ button speaks the `full` string
+- When all scaffold blanks are correct: `full` sentence auto-fills the textarea (only if textarea is currently empty), reads aloud, and `updateProgress()` is called
+- Wrong scaffold blank: shows `💡 Try [answer]` feedback inline
+- Changing the pair selector clears the scaffold and resets scaffold answers
+- Progress pips key off whether the free-text area has any non-empty content
+
+**Storage:** Per slot: `{ pair: '3', freeText: 'Sofia forgot...', scaffoldAnswers: ['her','hers'], scaffoldShown: true }`
+
 **Rewrite-with-Help Sub-Pattern:**
 
 *The student rewrites a sentence by replacing an underlined noun phrase with a pronoun. Default view: free-text area + mic + read-back only. "Help Me" replaces the text box label area with a structured version of the sentence where the underlined noun is swapped for a full-pronoun-set dropdown.*
@@ -339,8 +410,7 @@ partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining}
 - Help Me button hides itself after tap (one-way reveal)
 
 **Reference implementation:** `profiles/reference/2026-03-24-possessive-pronouns.html`, Section 5 (Part B p.2)
-
-**Reference implementation:** `profiles/reference/2026-03-16-proofreading-arctic-animals.html`
+**Reference implementation:** `worksheets/reference/2026-03-24-possessive-pronouns.html`, Section 3 (Part C)
 
 ---
 
