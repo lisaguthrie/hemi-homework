@@ -31,7 +31,7 @@ function buildFullSentence(q, answer) {
 
 **Answer evaluation:** `q.answers.map(a => a.toLowerCase()).includes(val.toLowerCase())`
 
-**Reference:** `worksheets/reference/2026-03-10-pronouns.html` — 14 questions, talent show theme. First implementation; treat as gold standard for this type.
+**Reference:** `profiles/reference/2026-03-10-pronouns.html` — 14 questions, talent show theme. First implementation; treat as gold standard for this type.
 
 ---
 
@@ -102,7 +102,7 @@ Call `updateIntermediates()` at the top of `onInputChange()`. Checkbox defaults 
 
 **Export / Print button:** Required. See Export / Print section in INTERACTION_PATTERNS.md.
 
-**Reference implementation:** `worksheets/reference/2026_03_11_guess-check` - skating rink problem, Joy/Heidi/Saul, 3 constraints, total = 64 min
+**Reference implementation:** `profiles/reference/2026_03_11_guess-check.html` - skating rink problem, Joy/Heidi/Saul, 3 constraints, total = 64 min
 
 ---
 
@@ -169,7 +169,7 @@ function navigateTo(i) {
 
 **Collapsible marks legend:** Proofreading marks panel starts collapsed. Tap the header to expand. Reduces visual noise on load.
 
-**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-a.html`
+**Reference implementation:** `profiles/reference/2026-03-16-subj-obj-pronouns-a.html`
 
 ## Type 5: Label Pronouns Subject or Object (S/O Classification)
  
@@ -206,7 +206,7 @@ function navigateTo(i) {
 - The word span gains `.answered` (green) when the S/O selection is correct.
 - **Print rendering:** Each pronoun is underlined+bold with its S/O label as a superscript badge (colored span: green if correct, orange if incorrect, grey `_` if unanswered). Sentence text is reconstructed by tokenising on word boundaries and replacing pronoun occurrences in order — handle repeated words (e.g. "I" appearing twice) by tracking a per-word usage count.
 
-**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-b.html`
+**Reference implementation:** `profiles/reference/2026-03-16-subj-obj-pronouns-b.html`
 
 ---
 
@@ -236,7 +236,7 @@ function navigateTo(i) {
 - If a bonus free-text section is present, pair with mic button (STT) and read-back button
 - **Print rendering:** Both choices are always kept in parentheses — never collapse to just the answer. The selected choice is highlighted inline with a colored span (green if correct, orange if incorrect); the other choice renders as plain text. Unanswered items show the plain parenthetical with no highlight. This mirrors the original worksheet's "circle the correct word" format.
 
-**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-c.html`
+**Reference implementation:** `profiles/reference/2026-03-16-subj-obj-pronouns-c.html`
 
 ---
 
@@ -397,6 +397,19 @@ partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining}
 
 **Storage:** Per slot: `{ pair: '3', freeText: 'Sofia forgot...', scaffoldAnswers: ['her','hers'], scaffoldShown: true }`
 
+**Rewrite-with-Help Sub-Pattern:**
+
+*The student rewrites a sentence by replacing an underlined noun phrase with a pronoun. Default view: free-text area + mic + read-back only. "Help Me" replaces the text box label area with a structured version of the sentence where the underlined noun is swapped for a full-pronoun-set dropdown.*
+
+**Key difference from Type 9 scaffold:** Help Me does not hide the textarea — it adds the dropdown above it. Selecting the correct pronoun from the dropdown auto-fills the textarea with the rewritten sentence.
+
+**Interaction decisions:**
+- Always read aloud the sentence with the chosen pronoun on dropdown change, correct or wrong
+- Wrong selection: shows hint, speaks the (wrong) sentence so she can hear why it sounds off
+- Correct selection: fills textarea, speaks sentence, advances pip
+- Help Me button hides itself after tap (one-way reveal)
+
+**Reference implementation:** `profiles/reference/2026-03-24-possessive-pronouns.html`, Section 5 (Part B p.2)
 **Reference implementation:** `worksheets/reference/2026-03-24-possessive-pronouns.html`, Section 3 (Part C)
 
 ---
