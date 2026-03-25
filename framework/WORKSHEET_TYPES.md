@@ -326,7 +326,54 @@ const remaining = s.errors.length - state.foundErrors[i].length;
 partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining} more errors`} in this sentence — keep looking!`;
 ```
 
-**Reference implementation:** `worksheets/christina/2026-03-16-proofreading-arctic-animals.html`
+**Reference implementation:** `worksheets/reference/2026-03-16-proofreading-arctic-animals.html`
+
+---
+
+## Type 8: [To be added]
+
+*Reserved for future types.*
+
+---
+
+## Type 9: Pronoun Pair Sentence Composer (Choose Pair → Free Write + Optional Scaffold)
+
+*The student chooses a pronoun pair from a dropdown (e.g. "her / hers"), then writes a sentence using both pronouns in a free-text area with mic + read-back. A "Help Me" button reveals a pre-authored scaffold sentence with inline dropdowns for the blanks. When all scaffold dropdowns are correct, the full sentence auto-fills the textarea.*
+
+**Use case:** Part C of pronoun worksheets — "Choose three pairs and write a sentence using each."
+
+**Data shape (pre-authored scaffolds — one per possible pair):**
+```javascript
+{
+  label: "her / hers",
+  speak: "her and hers",       // spoken when pair is selected
+  scaffold: {
+    segments: [
+      { text: "Sofia forgot " },
+      { blank: true, options: ["— pick —","her","hers"], answer: "her" },
+      { text: " umbrella, so the blue one must be " },
+      { blank: true, options: ["— pick —","her","hers"], answer: "hers" },
+      { text: "." }
+    ],
+    full: "Sofia forgot her umbrella, so the blue one must be hers."
+  }
+}
+```
+
+**Key authoring rule:** Author a scaffold for **every possible pair** the student might pick — not just the required number of slots. At runtime the student selects N pairs (e.g. 3) and each slot renders the scaffold for whichever pair she chose.
+
+**Interaction decisions:**
+- Pair picker dropdown auto-reads the pair name (e.g. "her and hers") on selection
+- Free-text area + mic + read-back always visible, not gated behind Help Me
+- Help Me button: reveals the scaffold sentence; text segments within the scaffold are individually tappable (speak just that segment); the full-sentence ▶ button speaks the `full` string
+- When all scaffold blanks are correct: `full` sentence auto-fills the textarea (only if textarea is currently empty), reads aloud, and `updateProgress()` is called
+- Wrong scaffold blank: shows `💡 Try [answer]` feedback inline
+- Changing the pair selector clears the scaffold and resets scaffold answers
+- Progress pips key off whether the free-text area has any non-empty content
+
+**Storage:** Per slot: `{ pair: '3', freeText: 'Sofia forgot...', scaffoldAnswers: ['her','hers'], scaffoldShown: true }`
+
+**Reference implementation:** `worksheets/reference/2026-03-24-possessive-pronouns.html`, Section 3 (Part C)
 
 ---
 
