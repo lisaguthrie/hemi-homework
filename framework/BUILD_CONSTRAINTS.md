@@ -69,6 +69,16 @@ Where `{section}` is a lowercase letter (a, b, c) or a short descriptor (e.g. `-
 - Tappable content must be visually distinct (background + border, not underline alone)
 - **Do not add microphone buttons to number-only input fields** — they provide no benefit and add visual clutter
 
+### Selective Read-Aloud
+
+Not every section requires read-aloud. Matching/labeling sections (e.g. Type 1B: match subject pronoun to possessive pronoun) where the interaction is purely visual and the words are short labels do not benefit from TTS and should omit it entirely:
+
+- Remove `cursor: pointer` and `onclick` from label elements
+- Remove `speak()` calls from `onchange` handlers
+- Change the instructions box from tappable (blue, `onclick`) to static (keep the blue style but set `cursor: default` and no `onclick`)
+
+Only add read-aloud where it removes a genuine barrier — reading a full sentence aloud, confirming a selected answer in context, or speaking a definition. Single-word labels and match arrows do not need it.
+
 ---
 
 ## Answer Data
