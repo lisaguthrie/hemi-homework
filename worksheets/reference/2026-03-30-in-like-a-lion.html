@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>In Like a Lion, Out Like a Lamb</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(160deg, #e0f4ff 0%, #f0e8ff 100%);
+  min-height: 100vh;
+  color: #1a2a3a;
+  padding: 20px 16px 80px;
+}
+
+.container { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem;
+  color: #1a6fa8;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.subtitle { text-align: center; font-size: 0.95rem; color: #6a8299; margin-bottom: 4px; font-weight: 600; }
+
+.instructions {
+  background: #3b9ede; color: white; border-radius: 18px;
+  padding: 12px 18px; font-size: 0.95rem; font-weight: 700;
+  text-align: center; cursor: pointer; user-select: none;
+  transition: transform 0.1s;
+}
+.instructions:active { transform: scale(0.98); }
+
+/* Marks legend */
+.marks-legend { background: white; border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+.marks-legend-title {
+  font-family: 'Fredoka One', cursive; color: #1a6fa8; font-size: 0.95rem;
+  padding: 12px 16px; cursor: pointer; display: flex; align-items: center;
+  justify-content: space-between; user-select: none;
+}
+.marks-legend-title .toggle-arrow { font-size: 0.8rem; color: #6a8299; transition: transform 0.2s; }
+.marks-legend.open .toggle-arrow { transform: rotate(180deg); }
+.marks-body { display: none; padding: 0 16px 14px; }
+.marks-legend.open .marks-body { display: block; }
+.marks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mark-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: #f0f8ff; border: 2px solid #3b9ede;
+  border-radius: 10px; padding: 6px 10px;
+  font-size: 0.85rem; font-weight: 700; color: #1a2a3a;
+}
+.mark-symbol { font-family: 'Fredoka One', cursive; color: #1a6fa8; min-width: 22px; text-align: center; }
+
+/* Passage panel */
+.passage-card { background: white; border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); padding: 16px 18px; }
+.passage-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.passage-title { font-family: 'Fredoka One', cursive; color: #1a6fa8; font-size: 1rem; flex: 1; }
+.play-btn {
+  background: #5dca7e; border: none; border-radius: 50%;
+  width: 40px; height: 40px; font-size: 1.1rem;
+  cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.play-btn:hover { background: #3aaa5a; }
+.passage-text { font-size: 1rem; font-weight: 600; line-height: 2.1; }
+.passage-sentence {
+  cursor: pointer; border-radius: 5px; padding: 1px 3px;
+  transition: background 0.12s; user-select: none;
+}
+.passage-sentence:hover { background: #e8f4ff; }
+.passage-sentence.ps-active { background: #fff3c4; font-weight: 800; color: #3a2000; box-shadow: 0 0 0 2px #e6c800; border-radius: 5px; }
+.passage-sentence.ps-done { color: #b0bec8; }
+.passage-sentence.ps-done:hover { background: #f0f4f8; }
+.passage-sentence.ps-second-pass { background: #fffbec; box-shadow: 0 0 0 2px #e6c800; }
+
+/* Progress */
+.progress-bar {
+  background: white; border-radius: 18px;
+  padding: 10px 18px; text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; flex-wrap: wrap;
+}
+.pip { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #dde0e8; transition: background 0.3s; margin: 2px; }
+.pip.done { background: #5dca7e; }
+.pip.missed-pip { background: #ff9966; }
+.pip.active-pip { background: #3b9ede; }
+#progressCount, #qProgressCount { font-weight: 700; color: #1a6fa8; font-size: 0.88rem; }
+
+/* Phase badge */
+.phase-badge {
+  background: white; border-radius: 14px; padding: 8px 14px;
+  text-align: center; font-weight: 800; font-size: 0.85rem; color: #1a6fa8;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.phase-badge.second-pass { background: #fff8e0; color: #b07800; border: 2px solid #e6c800; }
+
+/* Second pass intro */
+.second-pass-intro {
+  display: none; background: #fff8e0; border: 2.5px solid #e6c800;
+  border-radius: 18px; padding: 14px 18px; text-align: center;
+  font-weight: 700; font-size: 0.95rem; color: #7a5800; cursor: pointer;
+}
+.second-pass-intro.show { display: block; }
+
+/* Win banner */
+.win-banner {
+  display: none; background: linear-gradient(135deg, #d0f5e0, #b8f0d0);
+  border: 3px solid #5dca7e; border-radius: 18px;
+  padding: 20px; text-align: center;
+}
+.win-banner.show { display: block; }
+.win-banner h2 { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: #1d7a40; margin-bottom: 6px; }
+.win-banner p { font-weight: 700; color: #1d7a40; font-size: 0.95rem; }
+
+/* Sentence work cards */
+.sentence-card {
+  background: white; border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  padding: 16px 18px; border: 2.5px solid #3b9ede;
+  display: none;
+}
+.sentence-card.visible { display: block; }
+.sentence-card.correct { border-color: #5dca7e; background: #f0fff5; }
+.sentence-card.missed { border-color: #ff9966; background: #fff5f0; }
+.sentence-card.second-pass-focus { border-color: #e6c800; background: #fffbec; }
+
+.card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sentence-num { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #1a6fa8; min-width: 28px; }
+
+.sentence-display {
+  line-height: 2.2; font-size: 1.05rem; font-weight: 600;
+  margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 2px; align-items: baseline;
+}
+.word-chip {
+  display: inline-flex; align-items: center;
+  padding: 2px 5px; border-radius: 6px; cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  border: 2px solid transparent;
+  user-select: none; font-weight: 600; white-space: nowrap; min-height: 32px;
+}
+.word-chip:hover { background: #e8f4ff; }
+.word-chip.selected { background: #fff3c4; border-color: #e6c800; color: #5a3a00; font-weight: 800; }
+.word-chip.error-marked { background: #ffeedd; border-color: #ff9966; color: #7a2000; text-decoration: underline wavy #ff6600; }
+
+.decision-row { display: flex; gap: 10px; margin-bottom: 12px; }
+.decision-btn {
+  flex: 1; padding: 12px 10px; border-radius: 14px;
+  border: 2.5px solid transparent;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; user-select: none; min-height: 44px;
+}
+.decision-btn:active { transform: scale(0.96); }
+.btn-good { background: #e8fff2; border-color: #5dca7e; color: #1d7a40; }
+.btn-good:hover { background: #d0f5e0; }
+.btn-good.selected-btn { background: #5dca7e; color: white; }
+.btn-fix { background: #fff3e0; border-color: #ff9966; color: #7a3a00; }
+.btn-fix:hover { background: #ffeedd; }
+.btn-fix.selected-btn { background: #ff9966; color: white; }
+
+.mark-panel { display: none; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.mark-panel.visible { display: flex; }
+.mark-instruction { font-size: 0.88rem; font-weight: 700; color: #6a8299; text-align: center; }
+.mark-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mark-type-btn {
+  padding: 9px 8px; border-radius: 12px; border: 2.5px solid #d0d8e8;
+  background: white; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.85rem; cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  color: #1a2a3a; text-align: center; user-select: none; min-height: 44px;
+}
+.mark-type-btn:hover { border-color: #3b9ede; background: #f0f8ff; }
+.mark-type-btn:active { transform: scale(0.96); }
+.mark-type-btn.selected-mark { background: #3b9ede; border-color: #1a6fa8; color: white; }
+
+.confirm-btn {
+  background: #1a6fa8; color: white; border: none;
+  border-radius: 14px; padding: 11px 20px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; width: 100%; min-height: 44px;
+}
+.confirm-btn:hover { background: #155a8a; }
+.confirm-btn:active { transform: scale(0.97); }
+.confirm-btn:disabled { background: #aaa; cursor: default; }
+
+.feedback {
+  display: none; align-items: center; gap: 6px;
+  font-size: 0.9rem; font-weight: 700;
+  padding: 8px 14px; border-radius: 14px; margin-top: 6px; flex-wrap: wrap;
+}
+.feedback.show { display: flex; }
+.feedback.correct { background: #d0f5e0; color: #1d7a40; }
+.feedback.hint { background: #ffeedd; color: #c05000; }
+.fb-text { flex: 1; }
+.fb-play-btn {
+  background: none; border: none; font-size: 1rem;
+  cursor: pointer; padding: 0 2px; opacity: 0.75;
+  transition: opacity 0.15s, transform 0.1s; flex-shrink: 0;
+}
+.fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+.next-btn {
+  background: #1a6fa8; color: white; border: none;
+  border-radius: 20px; padding: 6px 18px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; min-height: 36px; flex-shrink: 0;
+}
+.next-btn:hover { background: #155a8a; }
+.next-btn:active { transform: scale(0.96); }
+
+/* ── Section divider ── */
+.section-divider {
+  background: white; border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  padding: 16px 20px; border-left: 6px solid #a78bfa;
+  display: none;
+}
+.section-divider.show { display: block; }
+.section-divider h2 {
+  font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: #7c3aed; margin-bottom: 6px;
+}
+.section-divider p { font-size: 0.92rem; font-weight: 700; color: #4a3060; }
+
+/* ── Comprehension question cards ── */
+.q-section { display: none; flex-direction: column; gap: 14px; }
+.q-section.show { display: flex; }
+
+.q-card {
+  background: white; border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  padding: 16px 18px; border: 2.5px solid #c4b5fd;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.q-card-top { display: flex; align-items: flex-start; gap: 10px; }
+.q-num-purple { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: #7c3aed; min-width: 28px; flex-shrink: 0; }
+.q-text {
+  flex: 1; font-size: 1rem; font-weight: 700; line-height: 1.5;
+  cursor: pointer; border-radius: 6px; padding: 2px 4px;
+  user-select: none; transition: background 0.15s;
+}
+.q-text:hover { background: #f0ebff; }
+.q-play-btn {
+  background: #a78bfa; border: none; border-radius: 50%;
+  width: 40px; height: 40px; font-size: 1.1rem; color: white;
+  cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(167,139,250,0.4);
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.q-play-btn:hover { background: #7c3aed; }
+
+.q-textarea {
+  font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600;
+  color: #1a2a3a; background: #f8f4ff;
+  border: 2.5px solid #c4b5fd; border-radius: 12px;
+  padding: 10px 14px; width: 100%; min-height: 120px;
+  resize: vertical; outline: none; transition: border-color 0.2s;
+}
+.q-textarea:focus { border-color: #7c3aed; }
+
+.q-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.mic-btn {
+  background: #3b9ede; border: none; border-radius: 50%;
+  width: 44px; height: 44px; font-size: 1.2rem; color: white;
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.mic-btn.listening { background: #ff7eb3; animation: pulse 0.7s infinite alternate; }
+.mic-btn:disabled { opacity: 0.4; cursor: default; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+
+.readback-btn {
+  background: #5dca7e; border: none; border-radius: 22px;
+  padding: 10px 18px; font-family: 'Nunito', sans-serif;
+  font-weight: 800; font-size: 0.9rem; color: white;
+  cursor: pointer; transition: background 0.15s; min-height: 44px;
+}
+.readback-btn:hover { background: #3aaa5a; }
+
+/* ── Q Progress ── */
+.q-progress-bar {
+  background: white; border-radius: 18px;
+  padding: 10px 18px; text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  display: none; align-items: center; justify-content: center;
+  gap: 10px; flex-wrap: wrap;
+}
+.q-progress-bar.show { display: flex; }
+
+/* Buttons row */
+.btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.clear-btn {
+  background: #f0f0f0; color: #888; border: 2px solid #ccc;
+  border-radius: 18px; padding: 9px 22px;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.92rem;
+  cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.clear-btn:hover { background: #ffeedd; border-color: #c05000; color: #c05000; }
+.export-btn {
+  background: #7c5cbf; color: white; border: none;
+  border-radius: 18px; padding: 9px 22px;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.92rem;
+  cursor: pointer; transition: background 0.15s;
+  box-shadow: 0 2px 8px rgba(124,92,191,0.25);
+}
+.export-btn:hover { background: #5a3fa0; }
+
+/* Speaking toast */
+.speaking-toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1a6fa8; color: white;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem;
+  padding: 10px 24px; border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, background 0.2s;
+  z-index: 100; cursor: pointer; user-select: none; pointer-events: none;
+}
+.speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.speaking-toast.visible:hover { background: #c0392b; }
+.speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+
+/* ── Corrected passage card ── */
+.corrected-passage-card {
+  background: #f8f4ff;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  padding: 16px 18px;
+  border: 2.5px solid #c4b5fd;
+  display: none;
+}
+.corrected-passage-card.show { display: block; }
+.corrected-passage-card .passage-title { color: #7c3aed; }
+.corrected-passage-card .play-btn { background: #a78bfa; box-shadow: 0 2px 8px rgba(167,139,250,0.4); }
+.corrected-passage-card .play-btn:hover { background: #7c3aed; }
+.corrected-passage-card .passage-sentence:hover { background: #f0ebff; }
+.corrected-passage-card .passage-sentence.ps-active { background: #f0ebff; box-shadow: 0 0 0 2px #a78bfa; color: #4a1d7a; }
+.corrected-passage-hint { font-size: 0.84rem; color: #7c3aed; font-weight: 700; margin-bottom: 10px; }
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.5rem; }
+  .mark-type-grid { grid-template-columns: 1fr; }
+  .marks-grid { grid-template-columns: 1fr; }
+  .sentence-display { font-size: 0.97rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🦁 In Like a Lion, Out Like a Lamb</h1>
+  <p class="subtitle">Proofreading Practice + Comprehension Questions</p>
+
+  <div class="instructions" onclick="speak('Listen to each sentence. Decide if there is an error or if it looks good. If there is an error, tap the word and choose what kind of fix it needs. Then answer the questions about what you read.')">
+    🔊 Listen to each sentence. Decide: error or looks good? Tap the word, choose the fix. Then answer the questions!
+  </div>
+
+  <!-- Proofreading marks legend -->
+  <div class="marks-legend" id="marksLegend">
+    <div class="marks-legend-title" onclick="toggleMarks()">
+      <span>📋 Proofreading Marks (tap to show)</span>
+      <span class="toggle-arrow">▼</span>
+    </div>
+    <div class="marks-body">
+      <div class="marks-grid">
+        <div class="mark-pill"><span class="mark-symbol">≡</span> Capitalize</div>
+        <div class="mark-pill"><span class="mark-symbol">lc</span> Lowercase</div>
+        <div class="mark-pill"><span class="mark-symbol">✗</span> Delete</div>
+        <div class="mark-pill"><span class="mark-symbol">,</span> Add comma</div>
+        <div class="mark-pill"><span class="mark-symbol">sp</span> Fix spelling</div>
+        <div class="mark-pill"><span class="mark-symbol">'</span> Add apostrophe</div>
+        <div class="mark-pill"><span class="mark-symbol">.</span> Add punctuation</div>
+        <div class="mark-pill"><span class="mark-symbol">vb</span> Fix verb</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full passage -->
+  <div class="passage-card">
+    <div class="passage-header">
+      <span class="passage-title">📄 The Passage</span>
+      <button class="play-btn" onclick="speakPassage()" title="Read entire passage">▶</button>
+    </div>
+    <div class="passage-text" id="passageText"></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-bar">
+    <span id="progressPips"></span>
+    <span id="progressCount">0 / 14 reviewed</span>
+  </div>
+
+  <!-- Phase badge -->
+  <div class="phase-badge" id="phaseBadge">📖 First Pass — work through each sentence</div>
+
+  <!-- Second pass intro -->
+  <div class="second-pass-intro" id="secondPassIntro"
+       onclick="speak('Great first pass! A few sentences need another look.')">
+    🔊 Great first pass! A few sentences need another look.
+  </div>
+
+  <!-- Win banner -->
+  <div class="win-banner" id="winBanner">
+    <h2>🎉 Amazing proofreading!</h2>
+    <p>You found all the errors. Now try the comprehension questions below!</p>
+  </div>
+
+  <!-- Sentence work cards -->
+  <div id="sentenceList"></div>
+
+  <!-- Section divider — shows after proofreading complete -->
+  <div class="section-divider" id="sectionDivider">
+    <h2>✨ Comprehension Questions</h2>
+    <p>Now answer some questions about what you read. Tap the question to hear it, then speak or type your answer.</p>
+  </div>
+
+  <!-- Corrected passage (shown after proofreading completes) -->
+  <div class="corrected-passage-card" id="correctedPassageCard">
+    <div class="passage-header">
+      <span class="passage-title">✅ Corrected Passage</span>
+      <button class="play-btn" id="corrPlayBtn" title="Read entire passage">▶</button>
+    </div>
+    <p class="corrected-passage-hint">Tap any sentence to hear it read aloud.</p>
+    <div class="passage-text" id="correctedPassageText"></div>
+  </div>
+
+  <!-- Comprehension questions -->
+  <div class="q-section" id="qSection"></div>
+
+  <!-- Q progress -->
+  <div class="q-progress-bar" id="qProgressBar">
+    <span id="qProgressPips"></span>
+    <span id="qProgressCount">0 / 4 answered</span>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button class="clear-btn" id="clearBtn" onclick="clearAllResponses()">🗑️ Clear all responses</button>
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
+  </div>
+
+</div><!-- /container -->
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+  🔊 <span class="toast-label">Reading aloud…</span>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const sentences = [
+  {
+    text: "March comes in like a lion and out like a lamb.",
+    hasError: false, noError: true,
+    feedbackOk: "Right! This sentence is correct."
+  },
+  {
+    text: "have you ever herd this proverb what does this mean",
+    hasError: true,
+    errors: [
+      { wordIndex: 0, errorType: "capitalize", altErrorType: null, feedbackCorrect: "Yes! 'have' starts a sentence — it should be capitalized: 'Have.'", correctSpelling: null },
+      { wordIndex: 3, errorType: "spelling", altErrorType: null, feedbackCorrect: "Right! 'herd' is misspelled here — the correct word is 'heard.'", correctSpelling: "heard" },
+      { wordIndex: 5, errorType: "punctuation", altErrorType: null, feedbackCorrect: "Good catch! There should be a question mark after 'proverb' — it's a question.", correctSpelling: null },
+      { wordIndex: 6, errorType: "capitalize", altErrorType: null, feedbackCorrect: "Yes! 'what' starts a sentence — it should be capitalized: 'What.'", correctSpelling: null },
+      { wordIndex: 9, errorType: "punctuation", altErrorType: null, feedbackCorrect: "Good catch! There should be a question mark after 'mean' — it's a question.", correctSpelling: null }
+    ],
+    errorNote: "Missing capital, spelling error, missing punctuation",
+    feedbackHint: "There are five errors in this sentence — two missing capital letters, a misspelled word, and two missing punctuation marks."
+  },
+  {
+    text: "Well, it means that the month of march usually start out cold and stormy but ends mild and nice.",
+    hasError: true,
+    errors: [
+      { wordIndex: 7, errorType: "capitalize", altErrorType: null, feedbackCorrect: "Yes! 'March' is a proper noun — the month name should be capitalized.", correctSpelling: null },
+      { wordIndex: 9, errorType: "verb", altErrorType: null, feedbackCorrect: "Right! 'start' should be 'starts' — the subject 'month' is singular.", correctSpelling: null }
+    ],
+    errorNote: "Missing capital on 'march' and verb agreement error 'start'",
+    feedbackHint: "There are two errors in this sentence — a proper noun that needs a capital, and a verb that doesn't match its subject."
+  },
+  {
+    text: "That is because March is both in the Winter season and the spring season.",
+    hasError: true,
+    errors: [
+      { wordIndex: 8, errorType: "lowercase", altErrorType: null, feedbackCorrect: "Yes! Season names are not proper nouns — 'Winter' should be lowercase.", correctSpelling: null }
+    ],
+    errorNote: "Season name 'Winter' should be lowercase",
+    feedbackHint: "Look at one of the season names — should it really be capitalized?"
+  },
+  {
+    text: "The first day of spring is around the Twentieth of March.",
+    hasError: true,
+    errors: [
+      { wordIndex: 8, errorType: "lowercase", altErrorType: null, feedbackCorrect: "Right! 'Twentieth' doesn't need to be capitalized here — it's an ordinary word in the middle of a sentence.", correctSpelling: null }
+    ],
+    errorNote: "'Twentieth' should be lowercase",
+    feedbackHint: "One word in this sentence has a capital letter it doesn't need."
+  },
+  {
+    text: "during spring, the days become longer and warmer",
+    hasError: true,
+    errors: [
+      { wordIndex: 0, errorType: "capitalize", altErrorType: null, feedbackCorrect: "Yes! 'during' starts a sentence — it needs a capital D.", correctSpelling: null },
+      { wordIndex: 7, errorType: "punctuation", altErrorType: null, feedbackCorrect: "Right! This sentence needs a period at the end after 'warmer.'", correctSpelling: null }
+    ],
+    errorNote: "Missing capital at start, missing period at end",
+    feedbackHint: "There are two errors — one at the very beginning and one at the very end of the sentence."
+  },
+  {
+    text: "This means you may bee able to stay outside and play a little longer.",
+    hasError: true,
+    errors: [
+      { wordIndex: 4, errorType: "spelling", altErrorType: null, feedbackCorrect: "Good eye! 'bee' is the insect — the correct word here is 'be.'", correctSpelling: "be" }
+    ],
+    errorNote: "Spelling: 'bee' should be 'be'",
+    feedbackHint: "One word sounds right but is spelled like a buzzing insect!"
+  },
+  {
+    text: "Also, animals that hibernate start two wake up.",
+    hasError: true,
+    errors: [
+      { wordIndex: 5, errorType: "spelling", altErrorType: null, feedbackCorrect: "Yes! 'two' is the number — the correct word here is 'to.'", correctSpelling: "to" }
+    ],
+    errorNote: "Spelling: 'two' should be 'to'",
+    feedbackHint: "One word sounds right but should be the short word meaning in the direction of."
+  },
+  {
+    text: "These animals include bears squirrels skunks and bats.",
+    hasError: true,
+    errors: [
+      { wordIndex: 3, errorType: "comma", altErrorType: null, feedbackCorrect: "Yes! A comma is needed after 'bears' in this list.", correctSpelling: null },
+      { wordIndex: 4, errorType: "comma", altErrorType: null, feedbackCorrect: "Right! A comma is needed after 'squirrels' in the list.", correctSpelling: null },
+      { wordIndex: 5, errorType: "comma", altErrorType: null, feedbackCorrect: "Right! A comma is needed after 'skunks' in the list.", correctSpelling: null }
+    ],
+    errorNote: "Missing commas in the list after bears, squirrels, and skunks.",
+    feedbackHint: "This is a list of animals — are all the commas in the right places?"
+  },
+  {
+    text: "You may sea many baby animal's in the spring, to.",
+    hasError: true,
+    errors: [
+      { wordIndex: 2, errorType: "spelling", altErrorType: null, feedbackCorrect: "Yes! 'sea' is the ocean — the correct word is 'see.'", correctSpelling: "see" },
+      { wordIndex: 5, errorType: "apostrophe", altErrorType: null, feedbackCorrect: "Right! 'animal's' has a wrong apostrophe — it's just a plural, so it should be 'animals' with no apostrophe.", correctSpelling: null },
+      { wordIndex: 9, errorType: "spelling", altErrorType: null, feedbackCorrect: "Good catch! 'to' should be 'too' here — meaning also.", correctSpelling: "too" }
+    ],
+    errorNote: "Three errors: 'sea'→'see', wrong apostrophe in 'animal's', 'to'→'too'",
+    feedbackHint: "There are three errors in this sentence — a word that sounds like the ocean, a wrong apostrophe, and a word that should mean also."
+  },
+  {
+    text: "Many baby animals is born at this time because their is more food available witch is important for they're survival",
+    hasError: true,
+    errors: [
+      { wordIndex: 3, errorType: "verb", altErrorType: null, feedbackCorrect: "Yes! 'animals is born' — since 'animals' is plural, it should be 'are born.'", correctSpelling: null },
+      { wordIndex: 9, errorType: "spelling", altErrorType: null, feedbackCorrect: "Right! 'their' shows ownership — but here we need 'there,' meaning in that place.", correctSpelling: "there" },
+      { wordIndex: 14, errorType: "spelling", altErrorType: null, feedbackCorrect: "Good catch! 'witch' is a Halloween character — the correct connecting word is 'which.'", correctSpelling: "which" },
+      { wordIndex: 18, errorType: "spelling", altErrorType: "apostrophe", feedbackCorrect: "Yes! 'they're' means 'they are' — but here we need the ownership word 'their.'", correctSpelling: "their" }
+    ],
+    errorNote: "Four errors: verb agreement, their/there, witch/which, they're/their",
+    feedbackHint: "There are four errors in this last sentence — a verb, and three words that sound like other words but are spelled differently."
+  }
+];
+
+// Fully corrected passage sentences (for reference card)
+const correctedSentences = [
+  "March comes in like a lion and out like a lamb.",
+  "Have you ever heard this proverb?",
+  "What does this mean?",
+  "Well, it means that the month of March usually starts out cold and stormy but ends mild and nice.",
+  "That is because March is both in the winter season and the spring season.",
+  "The first day of spring is around the twentieth of March.",
+  "During spring, the days become longer and warmer.",
+  "This means you may be able to stay outside and play a little longer.",
+  "Also, animals that hibernate start to wake up.",
+  "These animals include bears, squirrels, skunks, and bats.",
+  "You may see many baby animals in the spring, too.",
+  "Many baby animals are born at this time because there is more food available which is important for their survival."
+];
+
+// Comprehension questions
+const compQuestions = [
+  { text: "What does In like a lion, out like a lamb mean?", num: 1 },
+  { text: "Name 2 events that happen for animals in the spring.", num: 2 },
+  { text: "Why is it important for animals to be born in the spring?", num: 3 },
+  { text: "What do you like most about the season of spring?", num: 4 }
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'worksheet_proofreading_lion_lamb_2026_03_30_v1';
+let state = {
+  decisions:     new Array(sentences.length).fill(null),
+  selectedWords: new Array(sentences.length).fill(null),
+  selectedMarks: new Array(sentences.length).fill(null),
+  submitted:     new Array(sentences.length).fill(false),
+  foundErrors:   new Array(sentences.length).fill(null),
+  activeIndex:   0,
+  phase:         'first',
+  secondPassIds: [],
+  qAnswers:      new Array(compQuestions.length).fill('')
+};
+
+function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {} }
+function loadState() { try { const r = localStorage.getItem(STORAGE_KEY); if (r) state = { ...state, ...JSON.parse(r) }; } catch(e) {} }
+
+function clearAllResponses() {
+  const btn = document.getElementById('clearBtn');
+  if (btn.dataset.confirming === 'true') {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    location.reload();
+  } else {
+    btn.dataset.confirming = 'true';
+    btn.textContent = '⚠️ Tap again to confirm';
+    btn.style.cssText = 'background:#ffeedd;color:#c05000;border-color:#c05000;border-radius:18px;padding:9px 22px;font-family:Nunito,sans-serif;font-weight:700;font-size:0.92rem;cursor:pointer;';
+    setTimeout(() => {
+      if (btn.dataset.confirming === 'true') {
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.cssText = '';
+      }
+    }, 3000);
+  }
+}
+
+// ── TTS ───────────────────────────────────────────────────────────────────────
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88; utter.pitch = 1.05;
+  utter.onstart = showToast; utter.onend = hideToast; utter.onerror = hideToast;
+  window.speechSynthesis.speak(utter);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+function speakPassage() { speak(sentences.map(s => s.text).join(' ')); }
+function toggleMarks() { document.getElementById('marksLegend').classList.toggle('open'); }
+
+// ── Passage panel ─────────────────────────────────────────────────────────────
+function buildPassage() {
+  const container = document.getElementById('passageText');
+  container.innerHTML = '';
+  sentences.forEach((s, i) => {
+    const span = document.createElement('span');
+    span.className = 'passage-sentence';
+    span.id = `ps-${i}`;
+    span.textContent = s.text;
+    span.onclick = () => navigateTo(i);
+    container.appendChild(span);
+    if (i < sentences.length - 1) container.appendChild(document.createTextNode(' '));
+  });
+}
+
+function updatePassageHighlights() {
+  sentences.forEach((_, i) => {
+    const span = document.getElementById(`ps-${i}`);
+    if (!span) return;
+    span.className = 'passage-sentence';
+    if (i === state.activeIndex) span.classList.add('ps-active');
+    else if (state.submitted[i]) span.classList.add('ps-done');
+    else if (state.phase === 'second' && state.secondPassIds.includes(i) && !state.submitted[i]) span.classList.add('ps-second-pass');
+  });
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+let currentCard = null;
+function navigateTo(i) {
+  if (currentCard) currentCard.classList.remove('visible');
+  state.activeIndex = i;
+  saveState();
+  currentCard = document.getElementById(`card-${i}`);
+  currentCard.classList.add('visible');
+  updatePassageHighlights();
+  updateProgress();
+  setTimeout(() => speak(sentences[i].text), 200);
+  setTimeout(() => currentCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+}
+
+function goToNext() {
+  let next = -1;
+  if (state.phase === 'second') {
+    const found = state.secondPassIds.find(id => !state.submitted[id]);
+    next = found !== undefined ? found : -1;
+  } else {
+    for (let j = state.activeIndex + 1; j < sentences.length; j++) {
+      if (!state.submitted[j]) { next = j; break; }
+    }
+    if (next === -1) {
+      for (let j = 0; j < state.activeIndex; j++) {
+        if (!state.submitted[j]) { next = j; break; }
+      }
+    }
+  }
+  if (next !== -1) navigateTo(next);
+}
+
+// ── Build sentence cards ──────────────────────────────────────────────────────
+const feedbackTexts = {};
+
+function buildCard(i) {
+  const s = sentences[i];
+  const words = s.text.split(' ');
+  const card = document.createElement('div');
+  card.className = 'sentence-card';
+  card.id = `card-${i}`;
+
+  const header = document.createElement('div');
+  header.className = 'card-header';
+  const num = document.createElement('span');
+  num.className = 'sentence-num';
+  num.textContent = `${i + 1}.`;
+  const playBtn = document.createElement('button');
+  playBtn.className = 'play-btn';
+  playBtn.title = 'Hear this sentence';
+  playBtn.innerHTML = '▶';
+  playBtn.onclick = () => speak(s.text);
+  header.appendChild(num);
+  header.appendChild(playBtn);
+  card.appendChild(header);
+
+  const display = document.createElement('div');
+  display.className = 'sentence-display';
+  display.id = `display-${i}`;
+  words.forEach((word, wi) => {
+    const chip = document.createElement('span');
+    chip.className = 'word-chip';
+    chip.id = `word-${i}-${wi}`;
+    chip.textContent = word;
+    chip.onclick = () => onWordTap(i, wi);
+    display.appendChild(chip);
+  });
+  card.appendChild(display);
+
+  const decisionRow = document.createElement('div');
+  decisionRow.className = 'decision-row';
+  const btnGood = document.createElement('button');
+  btnGood.className = 'decision-btn btn-good';
+  btnGood.id = `btn-good-${i}`;
+  btnGood.innerHTML = '✅ Looks good!';
+  btnGood.onclick = () => onDecision(i, 'good');
+  const btnFix = document.createElement('button');
+  btnFix.className = 'decision-btn btn-fix';
+  btnFix.id = `btn-fix-${i}`;
+  btnFix.innerHTML = '🔍 Fix it!';
+  btnFix.onclick = () => onDecision(i, 'fix');
+  decisionRow.appendChild(btnGood);
+  decisionRow.appendChild(btnFix);
+  card.appendChild(decisionRow);
+
+  const markPanel = document.createElement('div');
+  markPanel.className = 'mark-panel';
+  markPanel.id = `mark-panel-${i}`;
+  const wordInstruction = document.createElement('div');
+  wordInstruction.className = 'mark-instruction';
+  wordInstruction.textContent = '👆 Tap the word that needs fixing';
+  const markInstruction = document.createElement('div');
+  markInstruction.className = 'mark-instruction';
+  markInstruction.textContent = '🖊️ Choose the type of fix:';
+  const markGrid = document.createElement('div');
+  markGrid.className = 'mark-type-grid';
+  const markTypes = [
+    { id: 'capitalize', label: '≡ Capitalize' },
+    { id: 'lowercase',  label: 'lc Lowercase'  },
+    { id: 'delete',     label: '✗ Delete'       },
+    { id: 'comma',      label: ', Add comma'    },
+    { id: 'spelling',   label: 'sp Fix spelling'},
+    { id: 'apostrophe', label: "' Add apostrophe"},
+    { id: 'punctuation',label: '. Add punctuation'},
+    { id: 'verb',       label: 'vb Fix verb'    },
+  ];
+  markTypes.forEach(mt => {
+    const btn = document.createElement('button');
+    btn.className = 'mark-type-btn';
+    btn.id = `mark-${i}-${mt.id}`;
+    btn.textContent = mt.label;
+    btn.onclick = () => onMarkType(i, mt.id);
+    markGrid.appendChild(btn);
+  });
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'confirm-btn';
+  confirmBtn.id = `confirm-${i}`;
+  confirmBtn.textContent = '✓ Submit my answer';
+  confirmBtn.disabled = true;
+  confirmBtn.onclick = () => submitAnswer(i);
+  markPanel.appendChild(wordInstruction);
+  markPanel.appendChild(markInstruction);
+  markPanel.appendChild(markGrid);
+  markPanel.appendChild(confirmBtn);
+  card.appendChild(markPanel);
+
+  const fb = document.createElement('div');
+  fb.className = 'feedback';
+  fb.id = `fb-${i}`;
+  card.appendChild(fb);
+
+  return card;
+}
+
+// ── Handlers ──────────────────────────────────────────────────────────────────
+function onDecision(i, val) {
+  if (state.submitted[i]) return;
+  state.decisions[i] = val;
+  saveState();
+  document.getElementById(`btn-good-${i}`).classList.toggle('selected-btn', val === 'good');
+  document.getElementById(`btn-fix-${i}`).classList.toggle('selected-btn', val === 'fix');
+  const panel = document.getElementById(`mark-panel-${i}`);
+  if (val === 'fix') {
+    panel.classList.add('visible');
+    document.getElementById(`fb-${i}`).className = 'feedback';
+    document.getElementById(`card-${i}`).classList.remove('missed');
+  } else {
+    panel.classList.remove('visible');
+    if (!sentences[i].hasError) {
+      submitAnswer(i);
+    } else {
+      showFeedback(`fb-${i}`, false, sentences[i].feedbackHint, false);
+      document.getElementById(`card-${i}`).classList.add('missed');
+      updateProgress();
+    }
+  }
+}
+
+function onWordTap(i, wi) {
+  if (state.submitted[i]) return;
+  if (state.decisions[i] !== 'fix') return;
+  state.selectedWords[i] = wi;
+  saveState();
+  sentences[i].text.split(' ').forEach((_, wj) => {
+    const chip = document.getElementById(`word-${i}-${wj}`);
+    if (chip) chip.classList.toggle('selected', wj === wi);
+  });
+  checkConfirmReady(i);
+}
+
+function onMarkType(i, markId) {
+  if (state.submitted[i]) return;
+  state.selectedMarks[i] = markId;
+  saveState();
+  ['capitalize','lowercase','delete','comma','spelling','apostrophe','punctuation','verb'].forEach(mt => {
+    const btn = document.getElementById(`mark-${i}-${mt}`);
+    if (btn) btn.classList.toggle('selected-mark', mt === markId);
+  });
+  checkConfirmReady(i);
+}
+
+function checkConfirmReady(i) {
+  const btn = document.getElementById(`confirm-${i}`);
+  if (btn) btn.disabled = !(state.selectedWords[i] !== null && state.selectedMarks[i] !== null);
+}
+
+function submitAnswer(i) {
+  if (state.submitted[i]) return;
+  const s = sentences[i];
+  const dec = state.decisions[i];
+  let pass = false, fbText = '';
+
+  if (s.hasError) {
+    if (dec === 'good') {
+      fbText = s.feedbackHint;
+    } else {
+      const wi = state.selectedWords[i];
+      const mark = state.selectedMarks[i];
+      const matchedError = s.errors.find(e => e.wordIndex === wi && (e.errorType === mark || e.altErrorType === mark));
+      const matchedWord  = s.errors.find(e => e.wordIndex === wi);
+
+      if (matchedError) {
+        if (!state.foundErrors[i]) state.foundErrors[i] = [];
+        if (state.foundErrors[i].includes(wi)) {
+          fbText = "You already found that one! Look for another error in this sentence.";
+          showFeedback(`fb-${i}`, true, fbText, false);
+          updateProgress();
+          return;
+        }
+        state.foundErrors[i].push(wi);
+        const allFound = s.errors.every(e => state.foundErrors[i].includes(e.wordIndex));
+
+        if (allFound) {
+          pass = true;
+          fbText = matchedError.feedbackCorrect;
+          if (matchedError.correctSpelling) fbText += ` Correct spelling: "${matchedError.correctSpelling}"`;
+        } else {
+          const remaining = s.errors.length - state.foundErrors[i].length;
+          let partialText = matchedError.feedbackCorrect;
+          if (matchedError.correctSpelling) partialText += ` Correct spelling: "${matchedError.correctSpelling}"`;
+          partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining} more errors`} in this sentence — keep looking!`;
+          showFeedback(`fb-${i}`, true, partialText, false);
+          const chip = document.getElementById(`word-${i}-${wi}`);
+          if (chip) chip.classList.add('error-marked');
+          state.selectedWords[i] = null;
+          state.selectedMarks[i] = null;
+          saveState();
+          sentences[i].text.split(' ').forEach((_, wj) => {
+            const c = document.getElementById(`word-${i}-${wj}`);
+            if (c && !(state.foundErrors[i] || []).includes(wj)) c.classList.remove('selected');
+          });
+          ['capitalize','lowercase','delete','comma','spelling','apostrophe','punctuation','verb'].forEach(mt => {
+            const b = document.getElementById(`mark-${i}-${mt}`);
+            if (b) b.classList.remove('selected-mark');
+          });
+          document.getElementById(`confirm-${i}`).disabled = true;
+          updateProgress();
+          return;
+        }
+      } else if (matchedWord) {
+        fbText = `Good — you found the right word! But the fix type needs to be different. Hint: ${s.errorNote}.`;
+      } else {
+        fbText = s.feedbackHint;
+      }
+    }
+  } else {
+    pass = true;
+    fbText = s.feedbackOk;
+  }
+
+  showFeedback(`fb-${i}`, pass, fbText, pass);
+  const card = document.getElementById(`card-${i}`);
+
+  if (pass) {
+    state.submitted[i] = true;
+    saveState();
+    card.classList.remove('missed', 'second-pass-focus');
+    card.classList.add('correct');
+    if (s.hasError) {
+      s.errors.forEach(e => {
+        const chip = document.getElementById(`word-${i}-${e.wordIndex}`);
+        if (chip) chip.classList.add('error-marked');
+      });
+    }
+    document.getElementById(`btn-good-${i}`).disabled = true;
+    document.getElementById(`btn-fix-${i}`).disabled = true;
+    updateProgress();
+    updatePassageHighlights();
+    checkPhaseComplete();
+  } else {
+    card.classList.add('missed');
+    const cb = document.getElementById(`confirm-${i}`);
+    if (cb) cb.disabled = false;
+    updateProgress();
+  }
+}
+
+function showFeedback(fbId, pass, text, showNext) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  if (!el) return;
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = '';
+  const textSpan = document.createElement('span');
+  textSpan.className = 'fb-text';
+  textSpan.textContent = (pass ? '✅ ' : '💡 Hint: ') + text.replace(/^💡\s*/, '');
+  el.appendChild(textSpan);
+  const playBtn = document.createElement('button');
+  playBtn.className = 'fb-play-btn';
+  playBtn.title = 'Read aloud';
+  playBtn.textContent = '🔊';
+  playBtn.onclick = () => speak(feedbackTexts[fbId]);
+  el.appendChild(playBtn);
+  if (showNext) {
+    const hasMore = sentences.some((_, j) => j !== parseInt(fbId.replace('fb-','')) && !state.submitted[j]);
+    if (hasMore) {
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'next-btn';
+      nextBtn.textContent = 'Next →';
+      nextBtn.onclick = () => goToNext();
+      el.appendChild(nextBtn);
+    }
+  }
+}
+
+function updateProgress() {
+  const done = state.submitted.filter(Boolean).length;
+  const pips = sentences.map((s, i) => {
+    if (i === state.activeIndex && !state.submitted[i]) return `<span class="pip active-pip"></span>`;
+    if (!state.submitted[i]) return `<span class="pip"></span>`;
+    const correct = s.hasError
+      ? (state.decisions[i] === 'fix' && s.errors.every(e => (state.foundErrors[i] || []).includes(e.wordIndex)))
+      : (state.decisions[i] === 'good');
+    return `<span class="pip ${correct ? 'done' : 'missed-pip'}"></span>`;
+  }).join('');
+  document.getElementById('progressPips').innerHTML = pips;
+  document.getElementById('progressCount').textContent = `${done} / ${sentences.length} reviewed`;
+}
+
+function checkPhaseComplete() {
+  if (!state.submitted.every(Boolean)) return;
+  const missed = sentences.map((s, i) => {
+    if (!s.hasError) return null;
+    const correct = state.decisions[i] === 'fix'
+      && s.errors.every(e => (state.foundErrors[i] || []).includes(e.wordIndex));
+    return correct ? null : i;
+  }).filter(x => x !== null);
+
+  if (missed.length === 0) {
+    if (currentCard) currentCard.classList.remove('visible');
+    document.getElementById('winBanner').classList.add('show');
+    speak("Amazing work! You found every error in the passage. Now try the comprehension questions below!");
+    showQSection();
+    return;
+  }
+  if (state.phase === 'first') {
+    state.phase = 'second';
+    state.secondPassIds = missed;
+    saveState();
+    enterSecondPass(missed);
+  } else {
+    // Second pass also complete — still show questions
+    if (currentCard) currentCard.classList.remove('visible');
+    document.getElementById('winBanner').classList.add('show');
+    showQSection();
+  }
+}
+
+function enterSecondPass(missedIds) {
+  document.getElementById('phaseBadge').textContent =
+    `🔁 Second Pass — ${missedIds.length} sentence${missedIds.length > 1 ? 's' : ''} to revisit`;
+  document.getElementById('phaseBadge').classList.add('second-pass');
+  document.getElementById('secondPassIntro').classList.add('show');
+  setTimeout(() => speak(`Great first pass! Let's go back and look at ${missedIds.length} more sentence${missedIds.length > 1 ? 's' : ''}. There's an error hiding in there.`), 400);
+
+  missedIds.forEach(i => {
+    const card = document.getElementById(`card-${i}`);
+    card.classList.remove('missed', 'correct', 'visible');
+    card.classList.add('second-pass-focus');
+    state.submitted[i] = false;
+    state.decisions[i] = null;
+    state.selectedWords[i] = null;
+    state.selectedMarks[i] = null;
+    state.foundErrors[i] = null;
+    document.getElementById(`btn-good-${i}`).classList.remove('selected-btn');
+    document.getElementById(`btn-good-${i}`).disabled = false;
+    document.getElementById(`btn-fix-${i}`).classList.remove('selected-btn');
+    document.getElementById(`btn-fix-${i}`).disabled = false;
+    document.getElementById(`mark-panel-${i}`).classList.remove('visible');
+    document.getElementById(`fb-${i}`).className = 'feedback';
+    const cb = document.getElementById(`confirm-${i}`);
+    if (cb) cb.disabled = true;
+    sentences[i].text.split(' ').forEach((_, wi) => {
+      const c = document.getElementById(`word-${i}-${wi}`);
+      if (c) c.classList.remove('selected', 'error-marked');
+    });
+    ['capitalize','lowercase','delete','comma','spelling','apostrophe','punctuation','verb'].forEach(mt => {
+      const b = document.getElementById(`mark-${i}-${mt}`);
+      if (b) b.classList.remove('selected-mark');
+    });
+  });
+  saveState();
+  updatePassageHighlights();
+  navigateTo(missedIds[0]);
+}
+
+// ── Comprehension questions ───────────────────────────────────────────────────
+function hideProofreadingSection() {
+  [
+    document.querySelector('.instructions'),
+    document.getElementById('marksLegend'),
+    document.querySelector('.passage-card'),
+    document.querySelector('.progress-bar'),
+    document.getElementById('phaseBadge'),
+    document.getElementById('secondPassIntro'),
+    document.getElementById('winBanner'),
+    document.getElementById('sentenceList')
+  ].forEach(el => { if (el) el.style.display = 'none'; });
+}
+
+function buildCorrectedCard() {
+  const textContainer = document.getElementById('correctedPassageText');
+  if (textContainer.children.length > 0) return; // already built
+  correctedSentences.forEach((sentence, i) => {
+    const span = document.createElement('span');
+    span.className = 'passage-sentence';
+    span.id = `cps-${i}`;
+    span.textContent = sentence;
+    span.onclick = () => speak(sentence);
+    textContainer.appendChild(span);
+    if (i < correctedSentences.length - 1) textContainer.appendChild(document.createTextNode(' '));
+  });
+  document.getElementById('corrPlayBtn').onclick = () => speak(correctedSentences.join(' '));
+  document.getElementById('correctedPassageCard').classList.add('show');
+}
+
+function showQSection() {
+  hideProofreadingSection();
+  buildCorrectedCard();
+  document.getElementById('sectionDivider').classList.add('show');
+  document.getElementById('qSection').classList.add('show');
+  document.getElementById('qProgressBar').classList.add('show');
+  updateQProgress();
+  setTimeout(() => {
+    document.getElementById('sectionDivider').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 600);
+}
+
+function buildQSection() {
+  const section = document.getElementById('qSection');
+  section.innerHTML = '';
+  compQuestions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+
+    const top = document.createElement('div');
+    top.className = 'q-card-top';
+
+    const num = document.createElement('div');
+    num.className = 'q-num-purple';
+    num.textContent = `${q.num}.`;
+
+    const qText = document.createElement('div');
+    qText.className = 'q-text';
+    qText.textContent = q.text;
+    qText.onclick = () => speak(q.text);
+    qText.title = 'Tap to hear the question';
+
+    const pb = document.createElement('button');
+    pb.className = 'q-play-btn';
+    pb.title = 'Hear this question';
+    pb.innerHTML = '▶';
+    pb.onclick = () => speak(q.text);
+
+    top.appendChild(num);
+    top.appendChild(qText);
+    top.appendChild(pb);
+
+    const ta = document.createElement('textarea');
+    ta.className = 'q-textarea';
+    ta.id = `q-ta-${qi}`;
+    ta.placeholder = 'Tap the mic to speak your answer, or type here…';
+    ta.value = state.qAnswers[qi] || '';
+    ta.oninput = () => {
+      state.qAnswers[qi] = ta.value;
+      saveState();
+      updateQProgress();
+    };
+
+    const btns = document.createElement('div');
+    btns.className = 'q-btns';
+
+    const micBtn = document.createElement('button');
+    micBtn.className = 'mic-btn';
+    micBtn.id = `q-mic-${qi}`;
+    micBtn.textContent = '🎤';
+    micBtn.title = 'Speak your answer';
+
+    const rbBtn = document.createElement('button');
+    rbBtn.className = 'readback-btn';
+    rbBtn.textContent = '🔊 Read back';
+    rbBtn.onclick = () => speak(ta.value || 'Nothing written yet.');
+
+    btns.appendChild(micBtn);
+    btns.appendChild(rbBtn);
+
+    card.appendChild(top);
+    card.appendChild(ta);
+    card.appendChild(btns);
+    section.appendChild(card);
+
+    initMic(micBtn, ta, () => {
+      state.qAnswers[qi] = ta.value;
+      saveState();
+      updateQProgress();
+    });
+  });
+}
+
+function updateQProgress() {
+  const done = state.qAnswers.filter(a => a && a.trim() !== '').length;
+  document.getElementById('qProgressPips').innerHTML =
+    state.qAnswers.map(a => `<span class="pip ${a && a.trim() ? 'done' : ''}"></span>`).join('');
+  document.getElementById('qProgressCount').textContent = `${done} / ${compQuestions.length} answered`;
+}
+
+// ── STT ───────────────────────────────────────────────────────────────────────
+function initMic(btn, taEl, onResult) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { btn.disabled = true; btn.title = 'Speech input not available in this browser'; btn.style.opacity = '0.4'; return; }
+  let rec = null;
+  let listening = false;
+
+  function startListening() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    rec = new SR();
+    rec.continuous = true; rec.interimResults = false; rec.lang = 'en-US';
+    rec.onstart = () => { listening = true; btn.textContent = '⏹'; btn.classList.add('listening'); };
+    rec.onresult = (e) => {
+      let transcript = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) transcript += e.results[i][0].transcript + ' ';
+      }
+      transcript = transcript.trim();
+      if (transcript) { taEl.value += (taEl.value ? ' ' : '') + transcript; if (onResult) onResult(transcript); }
+    };
+    rec.onend = () => {
+      if (listening) { try { rec.start(); return; } catch(err) {} }
+      listening = false; btn.textContent = '🎤'; btn.classList.remove('listening'); rec = null;
+    };
+    rec.onerror = (e) => {
+      if (e.error === 'no-speech') return;
+      listening = false; btn.textContent = '🎤'; btn.classList.remove('listening'); rec = null;
+      if (e.error === 'not-allowed') { btn.title = 'Microphone access denied.'; btn.style.opacity = '0.5'; }
+    };
+    try { rec.start(); } catch(err) { listening = false; btn.textContent = '🎤'; btn.classList.remove('listening'); rec = null; }
+  }
+
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    if (listening) { listening = false; if (rec) { try { rec.stop(); } catch(err) {} } }
+    else { startListening(); }
+  };
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadState();
+buildPassage();
+
+const list = document.getElementById('sentenceList');
+sentences.forEach((_, i) => list.appendChild(buildCard(i)));
+
+// Restore submitted cards
+state.submitted.forEach((sub, i) => {
+  if (!sub) return;
+  const s = sentences[i];
+  const dec = state.decisions[i];
+  document.getElementById(`btn-good-${i}`).classList.toggle('selected-btn', dec === 'good');
+  document.getElementById(`btn-fix-${i}`).classList.toggle('selected-btn', dec === 'fix');
+  document.getElementById(`btn-good-${i}`).disabled = true;
+  document.getElementById(`btn-fix-${i}`).disabled = true;
+  if (dec === 'fix') {
+    document.getElementById(`mark-panel-${i}`).classList.add('visible');
+    if (state.selectedWords[i] !== null) {
+      const chip = document.getElementById(`word-${i}-${state.selectedWords[i]}`);
+      if (chip) chip.classList.add('selected');
+    }
+    if (state.selectedMarks[i]) {
+      const btn = document.getElementById(`mark-${i}-${state.selectedMarks[i]}`);
+      if (btn) btn.classList.add('selected-mark');
+    }
+  }
+  const correct = s.hasError
+    ? (dec === 'fix' && s.errors && s.errors.every(e => (state.foundErrors[i] || []).includes(e.wordIndex)))
+    : dec === 'good';
+  document.getElementById(`card-${i}`).classList.add(correct ? 'correct' : 'missed');
+  if (s.hasError && s.errors) {
+    s.errors.forEach(e => {
+      if ((state.foundErrors[i] || []).includes(e.wordIndex)) {
+        const chip = document.getElementById(`word-${i}-${e.wordIndex}`);
+        if (chip) chip.classList.add('error-marked');
+      }
+    });
+  }
+  let fbText = s.hasError
+    ? (correct ? s.errors[s.errors.length - 1].feedbackCorrect : s.feedbackHint)
+    : s.feedbackOk;
+  showFeedback(`fb-${i}`, correct, fbText, false);
+});
+
+// Restore phase badge
+if (state.phase === 'second' && state.secondPassIds.length > 0) {
+  document.getElementById('phaseBadge').textContent =
+    `🔁 Second Pass — ${state.secondPassIds.length} sentence${state.secondPassIds.length > 1 ? 's' : ''} to revisit`;
+  document.getElementById('phaseBadge').classList.add('second-pass');
+  document.getElementById('secondPassIntro').classList.add('show');
+  state.secondPassIds.forEach(i => {
+    if (!state.submitted[i]) document.getElementById(`card-${i}`).classList.add('second-pass-focus');
+  });
+}
+
+// Build Q section always (restore answers), show only if proofreading done
+buildQSection();
+const allSubmitted = state.submitted.every(Boolean);
+if (allSubmitted) {
+  showQSection();
+} else {
+  navigateTo(state.activeIndex);
+}
+
+// ── Export / Print ────────────────────────────────────────────────────────────
+function exportPrint() {
+  const markMeta = {
+    capitalize:  { symbol: '≡', label: 'Capitalize' },
+    lowercase:   { symbol: 'lc', label: 'Lowercase' },
+    delete:      { symbol: '✗', label: 'Delete' },
+    comma:       { symbol: ',', label: 'Add comma' },
+    spelling:    { symbol: 'sp', label: 'Fix spelling' },
+    apostrophe:  { symbol: "'", label: 'Add apostrophe' },
+    punctuation: { symbol: '.', label: 'Add punctuation' },
+    verb:        { symbol: 'vb', label: 'Fix verb' }
+  };
+
+  function buildCorrectionNote(error, sentenceWords) {
+    const originalWord = sentenceWords[error.wordIndex] || '';
+    const label = (markMeta[error.errorType] || {}).label || 'Fix';
+
+    if (error.correctSpelling) {
+      return `${originalWord} -> ${error.correctSpelling} (${label})`;
+    }
+    if (error.errorType === 'comma') {
+      return `Add comma after "${originalWord}"`;
+    }
+    if (error.errorType === 'punctuation') {
+      return `Add punctuation after "${originalWord}"`;
+    }
+    if (error.errorType === 'capitalize') {
+      return `Capitalize "${originalWord}"`;
+    }
+    if (error.errorType === 'lowercase') {
+      return `Lowercase "${originalWord}"`;
+    }
+    if (error.errorType === 'apostrophe') {
+      return `Fix apostrophe in "${originalWord}"`;
+    }
+    if (error.errorType === 'verb') {
+      return `Fix verb form near "${originalWord}"`;
+    }
+    return `${label}: "${originalWord}"`;
+  }
+
+  let markedPassage = '';
+
+  sentences.forEach((s, i) => {
+    const dec = state.decisions[i];
+    const foundSet = new Set(state.foundErrors[i] || []);
+    const allFound = s.hasError
+      ? s.errors.every(e => foundSet.has(e.wordIndex))
+      : true;
+    const correct = s.hasError
+      ? (dec === 'fix' && allFound)
+      : dec === 'good';
+
+    const sentenceStatus = state.submitted[i]
+      ? (correct ? 'status-correct' : 'status-needs-review')
+      : 'status-not-submitted';
+
+    const words = s.text.split(' ');
+    const expectedByWord = new Map();
+    if (s.errors) {
+      s.errors.forEach(e => expectedByWord.set(e.wordIndex, e));
+    }
+
+    const markedWords = words.map((word, wi) => {
+      const expected = expectedByWord.get(wi);
+      if (!expected) return `<span class="w">${word}</span>`;
+
+      const wasFound = foundSet.has(wi);
+      const markType = expected.errorType;
+      const symbol = (markMeta[markType] || {}).symbol || '•';
+      const klass = wasFound ? 'w marked-found' : 'w marked-missed';
+      return `<span class="${klass}">${word}<sup class="mark-symbol">${symbol}</sup></span>`;
+    }).join(' ');
+
+    const corrections = s.hasError
+      ? s.errors.map(e => `<li>${buildCorrectionNote(e, words)}</li>`).join('')
+      : '<li>No correction needed.</li>';
+
+    markedPassage += `<section class="sentence-block ${sentenceStatus}">
+      <div class="sentence-main">
+        <div class="sentence-head">
+          <span class="sentence-num">${i + 1}.</span>
+          <span class="sentence-state">${state.submitted[i] ? (correct ? 'Correct' : 'Needs review') : 'Not submitted'}</span>
+        </div>
+        <p class="sentence-text">${markedWords}</p>
+      </div>
+      <aside class="typed-notes">
+        <p class="notes-title">Corrections made:</p>
+        <ul>${corrections}</ul>
+      </aside>
+    </section>`;
+  });
+
+  const qRows = compQuestions.map((q, qi) => {
+    const ans = state.qAnswers[qi] || '';
+    return `<div class="q-item">
+      <p class="q-prompt">${q.num}. ${q.text}</p>
+      <div class="q-answer">${ans || '&nbsp;'}</div>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>In Like a Lion, Out Like a Lamb — Marked Worksheet</title>
+<style>
+  body { font-family: "Trebuchet MS", Arial, sans-serif; font-size: 12pt; margin: 0.8in; color: #1f2933; line-height: 1.35; background: #fffefb; }
+  h1 { font-size: 1.35rem; margin-bottom: 4px; color: #0b4f8a; }
+  .sub { margin: 0 0 10px; font-weight: 700; color: #4a5a6a; }
+  .name-line { display: flex; gap: 24px; margin: 10px 0 16px; font-size: 0.92rem; }
+  .name-line span { display: flex; align-items: flex-end; gap: 6px; }
+  .name-line .line { display: inline-block; width: 180px; border-bottom: 1.5px solid #333; }
+
+  .legend { border: 2px solid #c7d6e8; border-radius: 8px; padding: 8px 10px; margin: 8px 0 14px; background: #f7fbff; }
+  .legend h2 { font-size: 0.95rem; margin: 0 0 6px; border: 0; padding: 0; }
+  .legend-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 10px; font-size: 0.84rem; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; }
+  .chip b { display: inline-block; min-width: 20px; text-align: center; border: 1px solid #9bb4cf; border-radius: 4px; padding: 0 4px; background: #fff; }
+
+  h2 { font-size: 1.05rem; margin: 16px 0 8px; border-bottom: 2px solid #d6dde6; padding-bottom: 4px; color: #0f3554; }
+  .sentence-block {
+    border: 1.5px solid #d6dde6;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    break-inside: avoid;
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 230px;
+    gap: 10px 14px;
+    align-items: start;
+  }
+  .status-correct { border-left: 8px solid #2a9d62; background: #f3fcf7; }
+  .status-needs-review { border-left: 8px solid #d97706; background: #fff8f1; }
+  .status-not-submitted { border-left: 8px solid #9aa6b2; background: #fafbfc; }
+  .sentence-main { min-width: 0; }
+  .sentence-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.86rem; }
+  .sentence-num { font-weight: 800; color: #0b4f8a; }
+  .sentence-state {
+    font-family: "Comic Sans MS", "Bradley Hand", cursive;
+    font-weight: 700;
+    color: #38516b;
+    letter-spacing: 0.2px;
+    transform: rotate(-1.2deg);
+  }
+  .sentence-text { font-size: 1rem; margin: 0 0 8px; }
+
+  .w { display: inline-block; padding: 1px 4px; border-radius: 12px; margin: 0 1px; }
+  .marked-found {
+    border: 2px solid #d13f3f;
+    background: linear-gradient(transparent 58%, rgba(255, 237, 120, 0.7) 58%);
+    transform: rotate(-0.7deg);
+  }
+  .marked-missed {
+    border: 2px dashed #c86c10;
+    background: linear-gradient(transparent 58%, rgba(255, 193, 135, 0.62) 58%);
+    transform: rotate(0.6deg);
+  }
+  .mark-symbol {
+    font-family: "Comic Sans MS", "Bradley Hand", cursive;
+    font-size: 0.74em;
+    margin-left: 2px;
+    color: #b02020;
+    font-weight: 800;
+  }
+
+  .typed-notes {
+    border: 2px solid #cc2e2e;
+    border-radius: 16px;
+    padding: 8px 10px 8px 12px;
+    position: relative;
+    background: #fff7f7;
+    box-shadow: 2px 2px 0 #f1c8c8;
+    transform: rotate(-1.1deg);
+  }
+  .typed-notes::before {
+    content: "";
+    position: absolute;
+    left: -14px;
+    top: 18px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 14px solid #cc2e2e;
+  }
+  .typed-notes::after {
+    content: "";
+    position: absolute;
+    left: -11px;
+    top: 19px;
+    width: 0;
+    height: 0;
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-right: 12px solid #fff7f7;
+  }
+  .notes-title {
+    margin: 0 0 4px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #cc2e2e;
+    font-family: "Comic Sans MS", "Bradley Hand", cursive;
+    transform: rotate(-0.6deg);
+  }
+  .typed-notes ul {
+    margin: 0 0 0 20px;
+    font-size: 0.88rem;
+    font-family: "Comic Sans MS", "Bradley Hand", cursive;
+    color: #2f4258;
+  }
+  .typed-notes li { margin-bottom: 3px; }
+
+  .q-item { margin-bottom: 14px; break-inside: avoid; }
+  .q-prompt { margin: 0 0 4px; font-weight: 700; }
+  .q-answer { border: 1.5px solid #c8d3df; border-radius: 6px; padding: 8px 10px; min-height: 48px; background: #fff; }
+
+  .print-btn { margin-bottom: 14px; padding: 7px 16px; font-size: 0.9rem; border-radius: 4px; border: 1px solid #555; background: #fff; cursor: pointer; }
+  .footer { margin-top: 22px; font-size: 0.76rem; color: #667788; text-align: right; border-top: 1px solid #d6dde6; padding-top: 8px; }
+  @media print {
+    .print-btn { display: none; }
+    body { margin: 0.55in; }
+  }
+  @media (max-width: 760px) {
+    .sentence-block { grid-template-columns: 1fr; }
+    .typed-notes {
+      transform: none;
+      border-radius: 10px;
+      margin-top: 2px;
+    }
+    .typed-notes::before,
+    .typed-notes::after { display: none; }
+  }
+</style></head><body>
+<button class="print-btn" onclick="window.print()">Print</button>
+<h1>In Like a Lion, Out Like a Lamb</h1>
+<p class="sub">Typewritten worksheet styled like handwritten proofreading marks</p>
+<div class="name-line">
+  <span>Name <span class="line"></span></span>
+  <span>Date <span class="line" style="width:110px"></span></span>
+</div>
+
+<section class="legend">
+  <h2>Proofreading Legend</h2>
+  <div class="legend-grid">
+    <span class="chip"><b>≡</b> Capitalize</span>
+    <span class="chip"><b>lc</b> Lowercase</span>
+    <span class="chip"><b>✗</b> Delete</span>
+    <span class="chip"><b>,</b> Add comma</span>
+    <span class="chip"><b>sp</b> Fix spelling</span>
+    <span class="chip"><b>'</b> Add apostrophe</span>
+    <span class="chip"><b>.</b> Add punctuation</span>
+    <span class="chip"><b>vb</b> Fix verb</span>
+  </div>
+</section>
+
+<h2>Marked Passage</h2>
+${markedPassage}
+
+<h2>Comprehension Questions</h2>
+${qRows}
+
+<div class="footer">In Like a Lion, Out Like a Lamb · Generated 2026-03-30</div>
+</body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+</script>
+</body>
+</html>

@@ -326,7 +326,95 @@ const remaining = s.errors.length - state.foundErrors[i].length;
 partialText += ` There ${remaining === 1 ? 'is 1 more error' : `are ${remaining} more errors`} in this sentence — keep looking!`;
 ```
 
-**Reference implementation:** `worksheets/reference/2026-03-16-proofreading-arctic-animals.html`
+**Comprehension Questions Phase:**
+
+After proofreading completes (win state fires), the proofreading UI is hidden and a comprehension section is revealed. This is the canonical pattern for Type 7 worksheets that include reading comprehension.
+
+*Hide proofreading UI on completion:*
+```javascript
+function hideProofreadingSection() {
+  [
+    document.querySelector('.instructions'),
+    document.getElementById('marksLegend'),
+    document.querySelector('.passage-card'),
+    document.querySelector('.progress-bar'),
+    document.getElementById('phaseBadge'),
+    document.getElementById('secondPassIntro'),
+    document.getElementById('winBanner'),
+    document.getElementById('sentenceList')
+  ].forEach(el => { if (el) el.style.display = 'none'; });
+}
+```
+Call `hideProofreadingSection()` at the start of `showQSection()`. Also guard `navigateTo()` on init — only call it when proofreading is not yet complete, since there is no active card once the Q phase is shown.
+
+*DOM order after proofreading completes:*
+1. Section divider card (`#sectionDivider`) — heading "✨ Comprehension Questions", brief instruction line
+2. Corrected passage card (`#correctedPassageCard`) — the fully corrected text
+3. Q cards (`#qSection`) — one card per question
+
+*Corrected passage card:* A purple-themed card placed **between** the section divider and the first question card. Contains:
+- ▶ play button that reads the entire corrected passage via TTS
+- Each corrected sentence rendered as a tappable `.passage-sentence` span; tap reads that sentence aloud
+- A brief hint line: "Tap any sentence to hear it read aloud."
+- Styled to match the Q section color family (purple borders, `#f8f4ff` background)
+
+Author a `correctedSentences` array (string per sentence, all errors fixed) alongside the `sentences` data array. Build the card lazily on first reveal, idempotent:
+```javascript
+const correctedSentences = [
+  "Sentence one, fully corrected.",
+  // ...
+];
+
+function buildCorrectedCard() {
+  const container = document.getElementById('correctedPassageText');
+  if (container.children.length > 0) return; // already built
+  correctedSentences.forEach((sentence, i) => {
+    const span = document.createElement('span');
+    span.className = 'passage-sentence';
+    span.textContent = sentence;
+    span.onclick = () => speak(sentence);
+    container.appendChild(span);
+    if (i < correctedSentences.length - 1) container.appendChild(document.createTextNode(' '));
+  });
+  document.getElementById('corrPlayBtn').onclick = () => speak(correctedSentences.join(' '));
+  document.getElementById('correctedPassageCard').classList.add('show');
+}
+```
+
+*Q card data shape:*
+```javascript
+const compQuestions = [
+  { text: "What does In like a lion, out like a lamb mean?", num: 1 },
+  // ...
+];
+```
+
+*Q card interaction:*
+- Question text tappable (reads aloud) + per-card ▶ play button (purple, matches Q section)
+- `<textarea>` for typed responses (min-height 120px, resizable)
+- Mic button (🎤 / ⏹ toggle, continuous STT, appends transcript to textarea)
+- "🔊 Read back" button — speaks textarea value or "Nothing written yet."
+- Q progress: pip row + answered count, same pattern as proofreading progress
+
+*Page restore (proofreading already done):* `showQSection()` is the single entry point — it calls `hideProofreadingSection()`, `buildCorrectedCard()`, shows the divider/q-section/progress, and scrolls to the section divider. Do **not** call `navigateTo()` on init when `allSubmitted` is true.
+
+**Print rendering (Type 7):**
+
+Type 7 export/print must look like a typewritten version of handwritten markup, not a scoring report.
+
+- Preserve full passage content sentence by sentence; do not reduce output to a checkmark-only table.
+- Render expected error words inline with visible proofreading marks:
+  - Found/correctly identified error words: red pen-style outline + warm yellow marker swash + proofreading symbol superscript.
+  - Missed expected error words: orange dashed outline + light orange marker swash + proofreading symbol superscript.
+- For each sentence, include a right-margin "teacher notes" callout bubble (red pen style) listing typed correction notes (example: `herd -> heard (Fix spelling)`, `Add comma after "bears"`).
+- Keep the proofreading legend in the print view so symbols are self-explanatory.
+- Keep comprehension responses in print output.
+- Do not include a "Sentence Status" summary section for Type 7 unless explicitly requested.
+
+This print format intentionally mimics manual paper markup while remaining fully typewritten and readable.
+
+**Reference implementations:**
+- `worksheets/christina/2026-03-30-in-like-a-lion.html` — full implementation with comprehension questions phase (canonical)
 
 ---
 

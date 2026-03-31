@@ -642,7 +642,7 @@ Standard section order for every worksheet:
 
 ## Export / Print
 
-When a worksheet has a printable export button, generate a clean black-and-white print-ready HTML page and open it using a **Blob URL** — never `window.open('', '_blank')`, which returns `null` when running from a local file and popup blockers are active.
+When a worksheet has a printable export button, generate a print-ready HTML page and open it using a **Blob URL** — never `window.open('', '_blank')`, which returns `null` when running from a local file and popup blockers are active.
 
 ```javascript
 function exportPrint() {
@@ -659,6 +659,12 @@ function exportPrint() {
 ```
 
 The print HTML should: reproduce the original worksheet layout (problem text, clues, any work including guess tables), include `@media print { button { display: none } }`, provide an explicit Print button for non-Ctrl+P users, pre-fill the student's name on the name line, and include a footer with source attribution if known. Name/date header lines must use `align-items: flex-end` on their flex container so label text sits at the baseline of the underline, not floating in the middle.
+
+**Type-specific print styling override (Type 7 Proofreading):**
+- Do not default to plain black-and-white score tables for proofreading/error-correction worksheets.
+- Export should visually mirror handwritten teacher markup in a typewritten way: marked words inline, proofreading symbols visible, and per-sentence correction notes shown as margin callouts.
+- Keep color in print for annotation meaning (for example, warm marker highlight plus red/orange outlines) when the worksheet relies on those distinctions.
+- Include the corrected/annotated passage and comprehension answers; avoid replacing this with a sentence-status-only report.
 
 ```css
 /* Name/date header — used in every print page */
