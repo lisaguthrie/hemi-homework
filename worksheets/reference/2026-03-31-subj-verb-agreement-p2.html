@@ -385,9 +385,9 @@ function buildSecB() {
     card.appendChild(helpBtn);
 
     var ftWrap=document.createElement('div'); ftWrap.className='free-text-area-wrap';
-    var ftLbl=document.createElement('div'); ftLbl.className='free-text-label'; ftLbl.textContent='My sentence:';
+    var ftLbl=document.createElement('div'); ftLbl.className='free-text-label'; ftLbl.textContent='My verb:';
     var ta=document.createElement('textarea'); ta.className='free-textarea'; ta.id='sB-ta-'+qi;
-    ta.placeholder='Type or speak your answer…'; ta.value=s.text||'';
+    ta.placeholder='Type or speak a present tense verb…'; ta.value=s.text||'';
     (function(qi2){ ta.oninput=function(){ appState.secB[qi2].text=ta.value; saveState(); updateSecBProgress(); }; })(qi);
     var btns=document.createElement('div'); btns.className='textarea-btns';
     var micBtn=document.createElement('button'); micBtn.className='mic-btn'; micBtn.textContent='🎤'; micBtn.id='sB-mic-'+qi;
@@ -410,7 +410,7 @@ function buildSecB() {
       hFb2.textContent=isCorrect?'✅':'💡 '+q2.hintNote;
       var full=q2.hintPrefix+' '+val+' '+q2.hintSuffix;
       setTimeout(function(){ speak(full); },300);
-      if(isCorrect&&!ta2.value.trim()){ ta2.value=full; appState.secB[qi2].text=full; saveState(); updateSecBProgress(); }
+      if(isCorrect&&!ta2.value.trim()){ ta2.value=val; appState.secB[qi2].text=val; saveState(); updateSecBProgress(); }
     }; })(qi,q,ta,hFb);
 
     if(s.helpShown){ hintArea.classList.add('visible'); helpBtn.style.display='none'; }
@@ -429,7 +429,7 @@ function updateSecBProgress() {
   document.getElementById('secB-pips').innerHTML=appState.secB.map(function(s){return '<span class="pip '+(s.text&&s.text.trim()?'done':'')+'"></span>';}).join('');
   document.getElementById('secB-count').textContent=done+' / '+secBData.length+' done';
   document.getElementById('secB-badge').textContent=done+' / '+secBData.length;
-  if(done===secBData.length){ document.getElementById('secB').classList.add('complete'); autoCollapse('secB'); }
+  if(done===secBData.length){ document.getElementById('secB').classList.add('complete'); }
   updateNavActive();
 }
 
@@ -507,7 +507,15 @@ function exportPrint() {
     return '<tr><td>'+(i+1)+'.</td><td>'+display+'</td></tr>';
   }).join('');
   var rowsB=secBData.map(function(q,i){
-    var s=appState.secB[i]; var answer=s.text||'&nbsp;';
+    var s=appState.secB[i];
+    var raw=(s.text||'').trim();
+    var answer='&nbsp;';
+    if(raw){
+      var escapedPrefix=q.hintPrefix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      var escapedSuffix=q.hintSuffix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      var fullSentenceMatch=raw.match(new RegExp('^'+escapedPrefix+'\\s+(.+?)\\s+'+escapedSuffix+'$','i'));
+      answer=fullSentenceMatch ? fullSentenceMatch[1].trim() : raw;
+    }
     return '<tr><td>'+(i+1)+'.</td><td>'+q.prompt.replace('__________','<span style="font-weight:800;text-decoration:underline">'+answer+'</span>')+'</td></tr>';
   }).join('');
   var rowsC=secCData.map(function(q,i){

@@ -521,6 +521,8 @@ This print format intentionally mimics manual paper markup while remaining fully
 
 **Answer control:** Sequential word taps followed by a dropdown (or equivalent explicit selector) for `S` / `P`.
 
+For subject-verb agreement worksheets that include a **verb-form selection subpart** (for example, choosing between `study / studies`), use a dropdown but defer correctness feedback until a section-level `Check Answers` button is pressed. Do not mark each item correct/incorrect immediately on selection.
+
 **Interaction decisions:**
 
 - Every word is tappable; tapping the sentence background reads the full sentence
@@ -535,7 +537,26 @@ This print format intentionally mimics manual paper markup while remaining fully
 - Card completion and progress pips key off the final submitted `S / P` answer, not off intermediate target taps
 - Saved state should support migration from older single-boolean subject state by reconstructing selected subject targets from the answer key on load
 
-**Reference implementation:** `worksheets/reference/2026-03-31-subj-verb-agreement-p1.html`, Part A
+**Reference implementations:**
+
+- `worksheets/reference/2026-03-31-subj-verb-agreement-p1.html` — Part A only (two-step tap → S/P classify, 8 questions)
+- `worksheets/reference/2026-03-31-subj-verb-agreement-p2.html` — Parts A/B/C (verb-form dropdown, verb free-write with hint autofill, compose sentences; 10 + 3 + 2 questions)
+
+**Part A notes (verb-form selection with delayed review):**
+
+- Use one dropdown per sentence plus a section-level `Check Answers` button at the bottom
+- Disable `Check Answers` until every dropdown has a selection
+- Do not reveal correctness, hints, or green card borders on dropdown change
+- After `Check Answers`, show per-item correct / hint feedback in one batch
+- If the student changes any answer after checking, clear the reviewed state and require another explicit `Check Answers` pass
+- Mark the section complete only when all answers are filled, `Check Answers` has been pressed, and every item is correct
+
+**Part B notes (free-write with hint):**
+
+- Label the input "My verb:" (not "My sentence:") — export slots the verb into the prompt template
+- Hint autofill should write only the verb value to the textarea, not the full rendered sentence
+- Do **not** call `autoCollapse()` from the Part B progress-update function; Part B must stay open while the student types
+- Export: use the saved verb value to fill `q.prompt.replace('__________', answer)`; if migrating from a build that saved full sentences, extract the verb via regex: `prefix \s+ (verb) \s+ suffix`
 
 ---
 

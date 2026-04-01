@@ -290,6 +290,63 @@ function updateFeedback(i, val) {
 }
 ```
 
+### Deferred Answer Review (`Check Answers`)
+
+Use this pattern for fixed-answer dropdown sections when immediate correctness feedback causes the student to click through options without committing to a choice first. Instead of marking each answer on `change`, wait until the whole section is answered and require an explicit `Check Answers` tap.
+
+**When to use:** Small grammar sections with one correct answer per item, especially two-choice verb-form or pronoun-choice drills where the student may otherwise trial-and-error through the dropdowns.
+
+**Interaction decisions:**
+
+- Dropdown `onchange` updates saved state and progress only; it does **not** show correctness or hints
+- A section-level `Check Answers` button stays disabled until every item in the section has a non-empty answer
+- Pressing `Check Answers` reveals correct / hint feedback for the whole section in one pass
+- Any later answer change clears the reviewed state and hides stale feedback until `Check Answers` is pressed again
+- Section completion / auto-collapse should key off both `all answered` and `checked + all correct`
+
+```javascript
+function resetReview() {
+  state.checked = false;
+  questions.forEach((_, i) => {
+    const card = document.getElementById(`card-${i}`);
+    const fb = document.getElementById(`fb-${i}`);
+    if (card) card.classList.remove('correct');
+    if (fb) fb.className = 'feedback';
+  });
+}
+
+function checkAnswers() {
+  const answered = userAnswers.filter(v => v !== '').length;
+  if (answered !== questions.length) return;
+
+  state.checked = true;
+  questions.forEach((q, i) => {
+    const val = userAnswers[i];
+    const pass = q.answers.map(a => a.toLowerCase()).includes(val.toLowerCase());
+    document.getElementById(`card-${i}`).classList.toggle('correct', pass);
+    showFeedback(`fb-${i}`, pass, pass ? 'Great!' : q.hint);
+  });
+  saveState();
+  updateProgress();
+}
+
+sel.onchange = () => {
+  resetReview();
+  userAnswers[i] = sel.value;
+  saveState();
+  updateProgress();
+};
+
+function updateProgress() {
+  const answered = userAnswers.filter(v => v !== '').length;
+  checkBtn.disabled = answered !== questions.length;
+  const allCorrect = questions.every((q, i) =>
+    q.answers.map(a => a.toLowerCase()).includes((userAnswers[i] || '').toLowerCase())
+  );
+  section.classList.toggle('complete', answered === questions.length && state.checked && allCorrect);
+}
+```
+
 ### Retry-Until-Correct Pattern
 
 For worksheet types where a correct answer requires multiple selections (e.g. word chip + mark type), do NOT finalize the card on a wrong attempt. Show feedback and keep all controls live:

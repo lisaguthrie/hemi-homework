@@ -57,6 +57,9 @@ h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.6rem,5vw,2.2rem); c
 .feedback.hint { background: #ffeedd; color: #c05000; }
 .fb-play-btn { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0 2px; opacity: 0.75; transition: opacity 0.15s, transform 0.1s; }
 .fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+.check-btn { background: #1a6fa8; color: white; border: none; border-radius: 22px; padding: 10px 22px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.92rem; cursor: pointer; transition: background 0.15s, opacity 0.15s; min-height: 42px; align-self: center; }
+.check-btn:hover { background: #145782; }
+.check-btn:disabled { background: #9eb9cc; cursor: default; opacity: 0.75; }
 .freewrite-card { background: #f8f4ff; border: 2.5px solid #c4b5fd; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
 .fw-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .fw-num { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #7c3aed; min-width: 26px; flex-shrink: 0; }
@@ -136,6 +139,7 @@ h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.6rem,5vw,2.2rem); c
         <span class="progress-label" id="secA-count">0 / 10 done</span>
       </div>
       <div id="secA-list"></div>
+      <button class="check-btn" id="secA-check-btn" onclick="checkSecAAnswers()" disabled>Check Answers</button>
     </div>
   </div>
 
@@ -270,9 +274,43 @@ var secCData = [
 
 var appState = {
   secA: new Array(secAData.length).fill(''),
+  secAChecked: false,
   secB: secBData.map(function(){ return {text:'',helpShown:false,helpAnswer:''}; }),
   secC: ['',''],
 };
+
+function resetSecAReview() {
+  appState.secAChecked = false;
+  secAData.forEach(function(_, qi) {
+    var card = document.getElementById('sA-card-' + qi);
+    var fb = document.getElementById('sA-fb-' + qi);
+    if (card) card.classList.remove('correct');
+    if (fb) fb.className = 'feedback';
+  });
+}
+
+function checkSecAAnswers() {
+  var answered = appState.secA.filter(function(v){ return v !== ''; }).length;
+  if (answered !== secAData.length) return;
+
+  appState.secAChecked = true;
+  secAData.forEach(function(q, qi) {
+    var card = document.getElementById('sA-card-' + qi);
+    var val = appState.secA[qi];
+    var pass = val === q.answer;
+    if (card) card.classList.toggle('correct', pass);
+    if (pass) {
+      showFeedback('sA-fb-' + qi, true, 'Yes! "' + val + '" is correct.');
+      return;
+    }
+
+    var isPlural = q.before.indexOf(' and ') !== -1 || q.before.toLowerCase().indexOf('advertisements') === 0 || q.before.toLowerCase().indexOf('the races') === 0;
+    var hint = isPlural ? 'The subject is plural — use the base form of the verb.' : 'The subject is singular — add -s or -es to the verb.';
+    showFeedback('sA-fb-' + qi, false, hint);
+  });
+  saveState();
+  updateSecAProgress();
+}
 
 function buildSecA() {
   var list = document.getElementById('secA-list');
@@ -312,20 +350,10 @@ function buildSecA() {
 
     (function(qi2,q2,pb2){ sel.onchange=function(){
       var val=sel.value;
+      resetSecAReview();
       appState.secA[qi2]=val;
       saveState();
       pb2.disabled=!val; pb2.style.opacity=val?'':'0.4'; pb2.style.cursor=val?'':'default';
-      if(!val){ fb.className='feedback'; card.classList.remove('correct'); updateSecAProgress(); return; }
-      var pass=val===q2.answer;
-      card.classList.toggle('correct',pass);
-      var full=q2.before+' '+val+' '+q2.after;
-      if(pass){ showFeedback('sA-fb-'+qi2,true,'Yes! "'+val+'" is correct.'); }
-      else {
-        var isPlural=q2.before.indexOf(' and ')!==-1||q2.before.toLowerCase().indexOf('advertisements')===0||q2.before.toLowerCase().indexOf('the races')===0;
-        var hint=isPlural?'The subject is plural — use the base form of the verb.':'The subject is singular — add -s or -es to the verb.';
-        showFeedback('sA-fb-'+qi2,false,hint);
-      }
-      setTimeout(function(){ speak(full); },300);
       updateSecAProgress();
     }; })(qi,q,pb);
 
@@ -335,16 +363,22 @@ function buildSecA() {
 
     if(appState.secA[qi]){ sel.value=appState.secA[qi]; pb.disabled=false; pb.style.opacity=''; pb.style.cursor=''; sel.dispatchEvent(new Event('change')); }
   });
+  if (appState.secAChecked && appState.secA.every(function(v){ return v !== ''; })) checkSecAAnswers();
   updateSecAProgress();
 }
 
 function updateSecAProgress() {
   var done=appState.secA.filter(function(v){return v!=='';}).length;
+  var checkBtn=document.getElementById('secA-check-btn');
   document.getElementById('secA-pips').innerHTML=appState.secA.map(function(v){return '<span class="pip '+(v?'done':'')+'"></span>';}).join('');
   document.getElementById('secA-count').textContent=done+' / '+secAData.length+' done';
   document.getElementById('secA-badge').textContent=done+' / '+secAData.length;
   var allCorrect=secAData.every(function(q,i){return appState.secA[i]===q.answer;});
-  if(done===secAData.length&&allCorrect){ document.getElementById('secA').classList.add('complete'); autoCollapse('secA'); }
+  var shouldComplete=done===secAData.length&&appState.secAChecked&&allCorrect;
+  var secASection=document.getElementById('secA');
+  if (checkBtn) checkBtn.disabled = done !== secAData.length;
+  if(shouldComplete&&!secASection.classList.contains('complete')){ secASection.classList.add('complete'); autoCollapse('secA'); }
+  if(!shouldComplete){ secASection.classList.remove('complete'); }
   updateNavActive();
 }
 
@@ -385,9 +419,9 @@ function buildSecB() {
     card.appendChild(helpBtn);
 
     var ftWrap=document.createElement('div'); ftWrap.className='free-text-area-wrap';
-    var ftLbl=document.createElement('div'); ftLbl.className='free-text-label'; ftLbl.textContent='My sentence:';
+    var ftLbl=document.createElement('div'); ftLbl.className='free-text-label'; ftLbl.textContent='My verb:';
     var ta=document.createElement('textarea'); ta.className='free-textarea'; ta.id='sB-ta-'+qi;
-    ta.placeholder='Type or speak your answer…'; ta.value=s.text||'';
+    ta.placeholder='Type or speak a present tense verb…'; ta.value=s.text||'';
     (function(qi2){ ta.oninput=function(){ appState.secB[qi2].text=ta.value; saveState(); updateSecBProgress(); }; })(qi);
     var btns=document.createElement('div'); btns.className='textarea-btns';
     var micBtn=document.createElement('button'); micBtn.className='mic-btn'; micBtn.textContent='🎤'; micBtn.id='sB-mic-'+qi;
@@ -410,7 +444,7 @@ function buildSecB() {
       hFb2.textContent=isCorrect?'✅':'💡 '+q2.hintNote;
       var full=q2.hintPrefix+' '+val+' '+q2.hintSuffix;
       setTimeout(function(){ speak(full); },300);
-      if(isCorrect&&!ta2.value.trim()){ ta2.value=full; appState.secB[qi2].text=full; saveState(); updateSecBProgress(); }
+      if(isCorrect&&!ta2.value.trim()){ ta2.value=val; appState.secB[qi2].text=val; saveState(); updateSecBProgress(); }
     }; })(qi,q,ta,hFb);
 
     if(s.helpShown){ hintArea.classList.add('visible'); helpBtn.style.display='none'; }
@@ -429,7 +463,7 @@ function updateSecBProgress() {
   document.getElementById('secB-pips').innerHTML=appState.secB.map(function(s){return '<span class="pip '+(s.text&&s.text.trim()?'done':'')+'"></span>';}).join('');
   document.getElementById('secB-count').textContent=done+' / '+secBData.length+' done';
   document.getElementById('secB-badge').textContent=done+' / '+secBData.length;
-  if(done===secBData.length){ document.getElementById('secB').classList.add('complete'); autoCollapse('secB'); }
+  if(done===secBData.length){ document.getElementById('secB').classList.add('complete'); }
   updateNavActive();
 }
 
@@ -507,7 +541,15 @@ function exportPrint() {
     return '<tr><td>'+(i+1)+'.</td><td>'+display+'</td></tr>';
   }).join('');
   var rowsB=secBData.map(function(q,i){
-    var s=appState.secB[i]; var answer=s.text||'&nbsp;';
+    var s=appState.secB[i];
+    var raw=(s.text||'').trim();
+    var answer='&nbsp;';
+    if(raw){
+      var escapedPrefix=q.hintPrefix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      var escapedSuffix=q.hintSuffix.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      var fullSentenceMatch=raw.match(new RegExp('^'+escapedPrefix+'\\s+(.+?)\\s+'+escapedSuffix+'$','i'));
+      answer=fullSentenceMatch ? fullSentenceMatch[1].trim() : raw;
+    }
     return '<tr><td>'+(i+1)+'.</td><td>'+q.prompt.replace('__________','<span style="font-weight:800;text-decoration:underline">'+answer+'</span>')+'</td></tr>';
   }).join('');
   var rowsC=secCData.map(function(q,i){
@@ -547,6 +589,7 @@ function exportPrint() {
   var saved=loadState();
   if(saved){
     if(saved.secA&&saved.secA.length===appState.secA.length) appState.secA=saved.secA;
+    if(typeof saved.secAChecked==='boolean') appState.secAChecked=saved.secAChecked;
     if(saved.secB&&saved.secB.length===appState.secB.length) appState.secB=saved.secB;
     if(saved.secC&&saved.secC.length===appState.secC.length) appState.secC=saved.secC;
   }
