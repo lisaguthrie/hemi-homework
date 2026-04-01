@@ -31,7 +31,7 @@ function buildFullSentence(q, answer) {
 
 **Answer evaluation:** `q.answers.map(a => a.toLowerCase()).includes(val.toLowerCase())`
 
-**Reference:** `profiles/reference/2026-03-10-pronouns.html` — 14 questions, talent show theme. First implementation; treat as gold standard for this type.
+**Reference:** `worksheets/reference/2026-03-10-pronouns.html` — 14 questions, talent show theme. First implementation; treat as gold standard for this type.
 
 ---
 
@@ -102,7 +102,7 @@ Call `updateIntermediates()` at the top of `onInputChange()`. Checkbox defaults 
 
 **Export / Print button:** Required. See Export / Print section in INTERACTION_PATTERNS.md.
 
-**Reference implementation:** `profiles/reference/2026_03_11_guess-check.html` - skating rink problem, Joy/Heidi/Saul, 3 constraints, total = 64 min
+**Reference implementation:** `worksheets/reference/2026_03_11_guess-check.html` - skating rink problem, Joy/Heidi/Saul, 3 constraints, total = 64 min
 
 ---
 
@@ -169,7 +169,7 @@ function navigateTo(i) {
 
 **Collapsible marks legend:** Proofreading marks panel starts collapsed. Tap the header to expand. Reduces visual noise on load.
 
-**Reference implementation:** `profiles/reference/2026-03-16-subj-obj-pronouns-a.html`
+**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-a.html`
 
 ## Type 5: Label Pronouns Subject or Object (S/O Classification)
  
@@ -206,7 +206,7 @@ function navigateTo(i) {
 - The word span gains `.answered` (green) when the S/O selection is correct.
 - **Print rendering:** Each pronoun is underlined+bold with its S/O label as a superscript badge (colored span: green if correct, orange if incorrect, grey `_` if unanswered). Sentence text is reconstructed by tokenising on word boundaries and replacing pronoun occurrences in order — handle repeated words (e.g. "I" appearing twice) by tracking a per-word usage count.
 
-**Reference implementation:** `profiles/reference/2026-03-16-subj-obj-pronouns-b.html`
+**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-b.html`
 
 ---
 
@@ -236,7 +236,7 @@ function navigateTo(i) {
 - If a bonus free-text section is present, pair with mic button (STT) and read-back button
 - **Print rendering:** Both choices are always kept in parentheses — never collapse to just the answer. The selected choice is highlighted inline with a colored span (green if correct, orange if incorrect); the other choice renders as plain text. Unanswered items show the plain parenthetical with no highlight. This mirrors the original worksheet's "circle the correct word" format.
 
-**Reference implementation:** `profiles/reference/2026-03-16-subj-obj-pronouns-c.html`
+**Reference implementation:** `worksheets/reference/2026-03-16-subj-obj-pronouns-c.html`
 
 ---
 
@@ -414,7 +414,7 @@ Type 7 export/print must look like a typewritten version of handwritten markup, 
 This print format intentionally mimics manual paper markup while remaining fully typewritten and readable.
 
 **Reference implementations:**
-- `worksheets/christina/2026-03-30-in-like-a-lion.html` — full implementation with comprehension questions phase (canonical)
+- `worksheets/reference/2026-03-30-in-like-a-lion.html` — full implementation with comprehension questions phase (canonical)
 
 ---
 
@@ -497,8 +497,45 @@ This print format intentionally mimics manual paper markup while remaining fully
 - Correct selection: fills textarea, speaks sentence, advances pip
 - Help Me button hides itself after tap (one-way reveal)
 
-**Reference implementation:** `profiles/reference/2026-03-24-possessive-pronouns.html`, Section 5 (Part B p.2)
+**Reference implementation:** `worksheets/reference/2026-03-24-possessive-pronouns.html`, Section 5 (Part B p.2)
 **Reference implementation:** `worksheets/reference/2026-03-24-possessive-pronouns.html`, Section 3 (Part C)
+
+---
+
+## Type 10: Subject-Verb Agreement (Identify Targets → Classify S/P)
+
+*Each sentence is rendered word by word. The student identifies the grammatical targets in sequence, then classifies the subject-verb pair as singular or plural.*
+
+**Use case:** Grammar worksheets where the student must first find the subject and verb, then decide whether the sentence uses a singular or plural subject-verb pairing.
+
+**Data shape:**
+
+```javascript
+{
+  text: "The singers and lead guitarist often practice together.",
+  subject: ["singers", "guitarist"],
+  verb: ["practice"],
+  sp: "P"
+}
+```
+
+**Answer control:** Sequential word taps followed by a dropdown (or equivalent explicit selector) for `S` / `P`.
+
+**Interaction decisions:**
+
+- Every word is tappable; tapping the sentence background reads the full sentence
+- Correct subject taps highlight yellow/gold; correct verb taps highlight blue
+- Wrong taps flash red briefly and speak the tapped word, but do not advance state
+- Do not show the `S / P` control until all required target taps are complete
+- If the subject is coordinated (`subject.length > 1`), require all subject words before advancing to the verb step
+- Step hints must name the next action explicitly:
+  - one subject target: `Now tap the verb`
+  - coordinated subject, first target found: `Now tap the second subject`
+  - coordinated subject complete: `Now tap the verb`
+- Card completion and progress pips key off the final submitted `S / P` answer, not off intermediate target taps
+- Saved state should support migration from older single-boolean subject state by reconstructing selected subject targets from the answer key on load
+
+**Reference implementation:** `worksheets/reference/2026-03-31-subj-verb-agreement-p1.html`, Part A
 
 ---
 

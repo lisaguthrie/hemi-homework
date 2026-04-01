@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject-Verb Agreement — Page 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Nunito', sans-serif; background: linear-gradient(160deg, #e0f4ff 0%, #f0e8ff 100%); min-height: 100vh; color: #1a2a3a; padding: 20px 16px 80px; }
+.container { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.6rem,5vw,2.2rem); color: #1a6fa8; text-align: center; margin-bottom: 2px; }
+.subtitle { text-align: center; font-size: 0.95rem; color: #6a8299; font-weight: 600; }
+.section-nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 2px solid #e0eaf8; padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.nav-btn { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.82rem; padding: 7px 14px; border-radius: 22px; border: 2px solid #3b9ede; background: white; color: #1a6fa8; cursor: pointer; white-space: nowrap; min-height: 36px; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.nav-btn:hover { background: #e8f4ff; }
+.nav-btn.active { background: #3b9ede; color: white; }
+.nav-btn.complete { border-color: #5dca7e; color: #1d7a40; }
+.nav-btn.complete.active { background: #5dca7e; color: white; border-color: #5dca7e; }
+.section-card { background: white; border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.09); border: 2.5px solid transparent; overflow: hidden; transition: border-color 0.2s; }
+.section-card.complete { border-color: #5dca7e; }
+.section-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; user-select: none; background: #f8fbff; border-bottom: 2px solid #e8f0fa; transition: background 0.15s; }
+.section-header:hover { background: #eef5ff; }
+.section-card.collapsed .section-header { border-bottom: none; }
+.section-title { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #1a6fa8; flex: 1; }
+.section-badge { font-size: 0.8rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; background: #e8f4ff; color: #1a6fa8; white-space: nowrap; }
+.section-card.complete .section-badge { background: #d0f5e0; color: #1d7a40; }
+.section-toggle { font-size: 1rem; color: #6a8299; transition: transform 0.2s; flex-shrink: 0; }
+.section-card.collapsed .section-toggle { transform: rotate(-90deg); }
+.section-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.section-card.collapsed .section-body { display: none; }
+.reteach-box { background: #ffe566; border: 3px solid #e6c800; border-radius: 14px; padding: 12px 16px; font-size: 0.9rem; font-weight: 700; color: #5a4000; cursor: pointer; user-select: none; transition: transform 0.1s; }
+.reteach-box:active { transform: scale(0.98); }
+.instructions { background: #3b9ede; color: white; border-radius: 14px; padding: 11px 16px; font-size: 0.93rem; font-weight: 700; cursor: pointer; user-select: none; transition: transform 0.1s; }
+.instructions:active { transform: scale(0.98); }
+.progress-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pip { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #dde0e8; transition: background 0.3s; }
+.pip.done { background: #5dca7e; }
+.progress-label { font-size: 0.85rem; font-weight: 700; color: #6a8299; }
+.question-card { background: #fafcff; border-radius: 14px; border: 2.5px solid transparent; padding: 13px 15px; transition: border-color 0.2s, background 0.2s; }
+.question-card.correct { border-color: #5dca7e; background: #f0fff5; }
+.card-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.q-num { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #3b9ede; min-width: 26px; flex-shrink: 0; }
+.sentence-area { flex: 1; font-size: 1rem; font-weight: 600; line-height: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.plain-seg { cursor: pointer; border-radius: 6px; padding: 2px 4px; user-select: none; transition: background 0.15s; }
+.plain-seg:hover { background: #e8f4ff; }
+.verb-hint-chip { display: inline-flex; align-items: center; gap: 3px; background: #fff3c4; border: 2px solid #e6c800; border-radius: 8px; padding: 1px 8px; font-weight: 800; color: #5a3a00; cursor: pointer; user-select: none; white-space: nowrap; font-size: 0.9rem; transition: background 0.15s, transform 0.1s; }
+.verb-hint-chip:hover { background: #ffe88a; }
+.verb-hint-chip:active { transform: scale(0.95); }
+.answer-select { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: #1a6fa8; background: #e8f4ff; border: 2.5px solid #3b9ede; border-radius: 10px; padding: 6px 10px; min-width: 120px; cursor: pointer; outline: none; transition: border-color 0.2s; }
+.answer-select:focus { border-color: #1a6fa8; }
+.play-btn { background: #5dca7e; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.1rem; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 8px rgba(93,202,126,0.4); transition: background 0.15s; display: flex; align-items: center; justify-content: center; }
+.play-btn:hover { background: #3aaa5a; }
+.feedback { display: none; align-items: center; gap: 5px; font-size: 0.88rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-top: 6px; flex-wrap: wrap; }
+.feedback.show { display: flex; }
+.feedback.correct { background: #d0f5e0; color: #1d7a40; }
+.feedback.hint { background: #ffeedd; color: #c05000; }
+.fb-play-btn { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0 2px; opacity: 0.75; transition: opacity 0.15s, transform 0.1s; }
+.fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+.freewrite-card { background: #f8f4ff; border: 2.5px solid #c4b5fd; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.fw-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fw-num { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #7c3aed; min-width: 26px; flex-shrink: 0; }
+.fw-prompt { flex: 1; font-size: 1rem; font-weight: 600; line-height: 1.6; cursor: pointer; border-radius: 6px; padding: 2px 4px; transition: background 0.15s; user-select: none; }
+.fw-prompt:hover { background: #ede9fe; }
+.hint-area { display: none; background: #fff8ff; border: 2px solid #c4b5fd; border-radius: 12px; padding: 12px 14px; font-size: 1rem; font-weight: 600; line-height: 2; flex-wrap: wrap; align-items: center; gap: 4px; }
+.hint-area.visible { display: flex; }
+.hint-select { font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 800; color: #7c3aed; background: #ede9fe; border: 2px solid #a78bfa; border-radius: 8px; padding: 3px 8px; cursor: pointer; outline: none; min-width: 90px; }
+.hint-fb { font-size: 0.85rem; font-weight: 700; margin-left: 4px; }
+.hint-fb.correct { color: #1d7a40; }
+.hint-fb.wrong { color: #c05000; }
+.free-text-area-wrap { display: flex; flex-direction: column; gap: 6px; }
+.free-text-label { font-size: 0.8rem; font-weight: 800; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.5px; }
+.free-textarea { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600; color: #1a2a3a; background: #f8fbff; border: 2.5px solid #3b9ede; border-radius: 12px; padding: 10px 14px; width: 100%; min-height: 80px; resize: vertical; outline: none; transition: border-color 0.2s; }
+.free-textarea:focus { border-color: #1a6fa8; }
+.textarea-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.mic-btn { background: #3b9ede; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.1rem; color: white; cursor: pointer; flex-shrink: 0; transition: background 0.15s; display: flex; align-items: center; justify-content: center; }
+.mic-btn.listening { background: #ff7eb3; animation: pulse 0.7s infinite alternate; }
+.mic-btn:disabled { opacity: 0.4; cursor: default; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+.readback-btn { background: #5dca7e; border: none; border-radius: 22px; padding: 8px 18px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem; color: white; cursor: pointer; transition: background 0.15s; min-height: 40px; }
+.readback-btn:hover { background: #3aaa5a; }
+.help-btn { background: #f0ebff; border: 2px solid #c4b5fd; border-radius: 22px; padding: 7px 16px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem; color: #7c3aed; cursor: pointer; transition: background 0.15s; min-height: 36px; white-space: nowrap; align-self: flex-start; }
+.help-btn:hover { background: #e0d6ff; border-color: #a78bfa; }
+.compose-card { background: #fff8e8; border: 2.5px solid #f5c842; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.compose-num { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #b07800; }
+.compose-label { font-size: 0.8rem; font-weight: 800; color: #b07800; text-transform: uppercase; letter-spacing: 0.5px; }
+.compose-textarea { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 600; color: #1a2a3a; background: #fffdf0; border: 2.5px solid #f5c842; border-radius: 12px; padding: 10px 14px; width: 100%; min-height: 80px; resize: vertical; outline: none; transition: border-color 0.2s; }
+.compose-textarea:focus { border-color: #b07800; }
+.compose-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.compose-mic { background: #f5c842; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.1rem; color: #5a3a00; cursor: pointer; flex-shrink: 0; transition: background 0.15s; display: flex; align-items: center; justify-content: center; }
+.compose-mic.listening { background: #ff7eb3; animation: pulse 0.7s infinite alternate; }
+.compose-mic:disabled { opacity: 0.4; cursor: default; }
+.compose-readback { background: #b07800; border: none; border-radius: 22px; padding: 8px 18px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.88rem; color: white; cursor: pointer; min-height: 40px; transition: background 0.15s; }
+.compose-readback:hover { background: #8a5c00; }
+.btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.clear-btn { background: #f0f0f0; color: #888; border: 2px solid #ccc; border-radius: 18px; padding: 7px 18px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+.export-btn { background: #7c5cbf; color: white; border: none; border-radius: 18px; padding: 9px 22px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: background 0.15s; box-shadow: 0 2px 8px rgba(124,92,191,0.25); }
+.export-btn:hover { background: #5a3fa0; }
+.speaking-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a6fa8; color: white; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem; padding: 10px 24px; border-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); transition: transform 0.3s ease, background 0.2s; z-index: 100; cursor: pointer; user-select: none; pointer-events: none; }
+.speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.speaking-toast.visible:hover { background: #c0392b; }
+.speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+@media (max-width: 480px) { .section-body { padding: 12px; } .question-card { padding: 10px 12px; } }
+</style>
+</head>
+<body>
+
+<nav class="section-nav" id="sectionNav">
+  <button class="nav-btn active" onclick="scrollToSection('secA')">✏️ A: Verb Form</button>
+  <button class="nav-btn" onclick="scrollToSection('secB')">🖊️ B: Free Write</button>
+  <button class="nav-btn" onclick="scrollToSection('secC')">⭐ C: Compose</button>
+</nav>
+
+<div class="container">
+  <header style="text-align:center;padding-top:14px;">
+    <h1>🎼 Subject-Verb Agreement</h1>
+    <p class="subtitle">Page 2 · Tap any sentence to hear it</p>
+  </header>
+
+  <div class="section-card" id="secA">
+    <div class="section-header" onclick="toggleSection('secA')">
+      <span class="section-title">✏️ Part A — Write the Correct Verb Form</span>
+      <span class="section-badge" id="secA-badge">0 / 10</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="reteach-box" onclick="speak('Reteaching: The subject and verb in a sentence must agree in person and in number. A singular subject takes a singular verb. A plural subject takes a plural verb.')">
+        🔊 <strong>RETEACHING:</strong> Singular subject → singular verb. Plural subject → plural verb.
+      </div>
+      <div class="instructions" onclick="speak('Choose the correct present tense form of the verb shown in the yellow chip. The verb must agree with the subject.')">
+        🔊 Choose the correct present tense form of the verb in the yellow chip.
+      </div>
+      <div class="progress-row">
+        <span id="secA-pips"></span>
+        <span class="progress-label" id="secA-count">0 / 10 done</span>
+      </div>
+      <div id="secA-list"></div>
+    </div>
+  </div>
+
+  <div class="section-card collapsed" id="secB">
+    <div class="section-header" onclick="toggleSection('secB')">
+      <span class="section-title">🖊️ Part B — Complete with a Present Tense Verb</span>
+      <span class="section-badge" id="secB-badge">0 / 3</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="instructions" onclick="speak('Complete each sentence with a present tense action verb. Type or speak your answer. Tap Help Me to see some verb choices.')">
+        🔊 Complete each sentence with a present tense verb. Tap <strong>Help Me</strong> for verb choices!
+      </div>
+      <div class="progress-row">
+        <span id="secB-pips"></span>
+        <span class="progress-label" id="secB-count">0 / 3 done</span>
+      </div>
+      <div id="secB-list"></div>
+    </div>
+  </div>
+
+  <div class="section-card collapsed" id="secC">
+    <div class="section-header" onclick="toggleSection('secC')">
+      <span class="section-title">⭐ Part C — Write Your Own Sentences</span>
+      <span class="section-badge" id="secC-badge">0 / 2</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="reteach-box" onclick="speak('Write one sentence describing your best friend, and another sentence about a place you like to go together. Use present tense verbs in both sentences.')">
+        🔊 Write one sentence about your best friend and one about a place you go together. Use present tense verbs!
+      </div>
+      <div class="progress-row">
+        <span id="secC-pips"></span>
+        <span class="progress-label" id="secC-count">0 / 2 done</span>
+      </div>
+      <div id="secC-list"></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="clear-btn" id="clearBtn" onclick="clearAll()">🗑️ Clear all responses</button>
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
+  </div>
+</div>
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()">
+  🔊 <span class="toast-label">Reading aloud…</span>
+</div>
+
+<script>
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.88; u.pitch = 1.05;
+  u.onstart = showToast; u.onend = hideToast; u.onerror = hideToast;
+  window.speechSynthesis.speak(u);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+const feedbackTexts = {};
+function showFeedback(fbId, pass, text) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  if (!el) return;
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = (pass ? '✅ ' : '💡 Hint: ') + text +
+    ' <button class="fb-play-btn" onclick="speak(feedbackTexts[\'' + fbId + '\'])" title="Read aloud">🔊</button>';
+}
+
+function toggleSection(id) { document.getElementById(id).classList.toggle('collapsed'); updateNavActive(); }
+function scrollToSection(id) { var el=document.getElementById(id); el.classList.remove('collapsed'); el.scrollIntoView({behavior:'smooth',block:'start'}); updateNavActive(); }
+function updateNavActive() {
+  var ids=['secA','secB','secC'];
+  var btns=document.querySelectorAll('.nav-btn');
+  ids.forEach(function(id,i){
+    btns[i].classList.toggle('active',!document.getElementById(id).classList.contains('collapsed'));
+    btns[i].classList.toggle('complete',document.getElementById(id).classList.contains('complete'));
+  });
+}
+function autoCollapse(id) { setTimeout(function(){ document.getElementById(id).classList.add('collapsed'); updateNavActive(); },1200); }
+
+var STORAGE_KEY = 'worksheet_svagree_p2_2026_03_31';
+function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch(e) {} }
+function loadState() { try { var s=localStorage.getItem(STORAGE_KEY); return s?JSON.parse(s):null; } catch(e) { return null; } }
+
+var secAData = [
+  { before: "Advertisements sometimes",   verb: "persuade", after: "people to buy things they don't need.", answer: "persuade", options: ["persuade","persuades"] },
+  { before: "Wendy usually",              verb: "study",    after: "at the library on Saturday.",            answer: "studies",  options: ["study","studies"] },
+  { before: "Please",                     verb: "describe", after: "the missing locket.",                    answer: "describe", options: ["describe","describes"] },
+  { before: "When the cat",               verb: "arrive",   after: ", I will take good care of it.",         answer: "arrives",  options: ["arrive","arrives"] },
+  { before: "No one ever",                verb: "watch",    after: "the clock in our class.",                answer: "watches",  options: ["watch","watches"] },
+  { before: "I write to him often, but he seldom", verb: "reply", after: ".",                               answer: "replies",  options: ["reply","replies"] },
+  { before: "Mr. Swanson",                verb: "paint",    after: "landscapes on Sunday afternoons.",       answer: "paints",   options: ["paint","paints"] },
+  { before: "He",                         verb: "fly",      after: "to San Francisco tomorrow.",             answer: "flies",    options: ["fly","flies"] },
+  { before: "The races",                  verb: "end",      after: "at Barrow Street.",                      answer: "end",      options: ["end","ends"] },
+  { before: "Mary and Denise always",     verb: "attend",   after: "school baseball games.",                 answer: "attend",   options: ["attend","attends"] },
+];
+
+var secBData = [
+  {
+    prompt: "My friends and I __________ on Saturdays.",
+    hintPrefix: "My friends and I",
+    hintSuffix: "on Saturdays.",
+    options: ["— pick —","play","plays","bike","bikes","swim","swims","hike","hikes","cook","cooks"],
+    correctOpts: ["play","bike","swim","hike","cook"],
+    hintNote: "My friends and I is plural — use the base form of the verb (no -s or -es)."
+  },
+  {
+    prompt: "Jeff __________ every summer.",
+    hintPrefix: "Jeff",
+    hintSuffix: "every summer.",
+    options: ["— pick —","travel","travels","visit","visits","camp","camps","swim","swims","work","works"],
+    correctOpts: ["travels","visits","camps","swims","works"],
+    hintNote: "Jeff is singular — add -s or -es to the verb."
+  },
+  {
+    prompt: "Anna always __________ on the weekend.",
+    hintPrefix: "Anna always",
+    hintSuffix: "on the weekend.",
+    options: ["— pick —","read","reads","cook","cooks","run","runs","bake","bakes","draw","draws"],
+    correctOpts: ["reads","cooks","runs","bakes","draws"],
+    hintNote: "Anna is singular — add -s or -es to the verb."
+  },
+];
+
+var secCData = [
+  { label: "Sentence 1 — My best friend:", prompt: "Write one sentence describing your best friend. Use a present tense verb.", placeholder: "My best friend always…" },
+  { label: "Sentence 2 — A place we go:", prompt: "Write a sentence about a place you like to go together. Use a present tense verb.", placeholder: "We like to go to…" },
+];
+
+var appState = {
+  secA: new Array(secAData.length).fill(''),
+  secB: secBData.map(function(){ return {text:'',helpShown:false,helpAnswer:''}; }),
+  secC: ['',''],
+};
+
+function buildSecA() {
+  var list = document.getElementById('secA-list');
+  list.innerHTML = '';
+  secAData.forEach(function(q,qi) {
+    var card=document.createElement('div'); card.className='question-card'; card.id='sA-card-'+qi;
+    var top=document.createElement('div'); top.className='card-top';
+    var num=document.createElement('div'); num.className='q-num'; num.textContent=(qi+1)+'.';
+    var sentArea=document.createElement('div'); sentArea.className='sentence-area';
+
+    if (q.before) {
+      var sp=document.createElement('span'); sp.className='plain-seg';
+      sp.textContent=q.before+' ';
+      (function(txt){ sp.onclick=function(){ speak(txt.trim()); }; })(q.before);
+      sentArea.appendChild(sp);
+    }
+    var chip=document.createElement('span'); chip.className='verb-hint-chip';
+    chip.innerHTML='🔊 '+q.verb;
+    (function(v){ chip.onclick=function(e){ e.stopPropagation(); speak(v); }; })(q.verb);
+    sentArea.appendChild(chip);
+    var sel=document.createElement('select'); sel.className='answer-select'; sel.id='sA-sel-'+qi;
+    var defOpt=document.createElement('option'); defOpt.value=''; defOpt.textContent='— pick —'; sel.appendChild(defOpt);
+    q.options.forEach(function(opt){ var o=document.createElement('option'); o.value=opt; o.textContent=opt; sel.appendChild(o); });
+    sentArea.appendChild(sel);
+    if (q.after) {
+      var sp2=document.createElement('span'); sp2.className='plain-seg';
+      sp2.textContent=' '+q.after;
+      (function(txt){ sp2.onclick=function(){ speak(txt.trim()); }; })(q.after);
+      sentArea.appendChild(sp2);
+    }
+
+    var pb=document.createElement('button'); pb.className='play-btn';
+    pb.innerHTML='▶'; pb.disabled=true; pb.style.opacity='0.4'; pb.style.cursor='default';
+    (function(qi2,q2){ pb.onclick=function(){ var v=document.getElementById('sA-sel-'+qi2).value; if(v) speak(q2.before+' '+v+' '+q2.after); }; })(qi,q);
+
+    var fb=document.createElement('div'); fb.className='feedback'; fb.id='sA-fb-'+qi;
+
+    (function(qi2,q2,pb2){ sel.onchange=function(){
+      var val=sel.value;
+      appState.secA[qi2]=val;
+      saveState();
+      pb2.disabled=!val; pb2.style.opacity=val?'':'0.4'; pb2.style.cursor=val?'':'default';
+      if(!val){ fb.className='feedback'; card.classList.remove('correct'); updateSecAProgress(); return; }
+      var pass=val===q2.answer;
+      card.classList.toggle('correct',pass);
+      var full=q2.before+' '+val+' '+q2.after;
+      if(pass){ showFeedback('sA-fb-'+qi2,true,'Yes! "'+val+'" is correct.'); }
+      else {
+        var isPlural=q2.before.indexOf(' and ')!==-1||q2.before.toLowerCase().indexOf('advertisements')===0||q2.before.toLowerCase().indexOf('the races')===0;
+        var hint=isPlural?'The subject is plural — use the base form of the verb.':'The subject is singular — add -s or -es to the verb.';
+        showFeedback('sA-fb-'+qi2,false,hint);
+      }
+      setTimeout(function(){ speak(full); },300);
+      updateSecAProgress();
+    }; })(qi,q,pb);
+
+    top.appendChild(num); top.appendChild(sentArea); top.appendChild(pb);
+    card.appendChild(top); card.appendChild(fb);
+    list.appendChild(card);
+
+    if(appState.secA[qi]){ sel.value=appState.secA[qi]; pb.disabled=false; pb.style.opacity=''; pb.style.cursor=''; sel.dispatchEvent(new Event('change')); }
+  });
+  updateSecAProgress();
+}
+
+function updateSecAProgress() {
+  var done=appState.secA.filter(function(v){return v!=='';}).length;
+  document.getElementById('secA-pips').innerHTML=appState.secA.map(function(v){return '<span class="pip '+(v?'done':'')+'"></span>';}).join('');
+  document.getElementById('secA-count').textContent=done+' / '+secAData.length+' done';
+  document.getElementById('secA-badge').textContent=done+' / '+secAData.length;
+  var allCorrect=secAData.every(function(q,i){return appState.secA[i]===q.answer;});
+  if(done===secAData.length&&allCorrect){ document.getElementById('secA').classList.add('complete'); autoCollapse('secA'); }
+  updateNavActive();
+}
+
+function buildSecB() {
+  var list=document.getElementById('secB-list');
+  list.innerHTML='';
+  secBData.forEach(function(q,qi){
+    var s=appState.secB[qi];
+    var card=document.createElement('div'); card.className='freewrite-card'; card.id='sB-card-'+qi;
+    var top=document.createElement('div'); top.className='fw-top';
+    var num=document.createElement('div'); num.className='fw-num'; num.textContent=(qi+1)+'.';
+    var prompt=document.createElement('div'); prompt.className='fw-prompt'; prompt.textContent=q.prompt;
+    (function(txt){ prompt.onclick=function(){ speak(txt); }; })(q.prompt);
+    top.appendChild(num); top.appendChild(prompt);
+    card.appendChild(top);
+
+    var hintArea=document.createElement('div'); hintArea.className='hint-area'; hintArea.id='sB-hint-'+qi;
+    var prefSpan=document.createElement('span'); prefSpan.style.cssText='cursor:pointer;border-radius:5px;padding:1px 3px;';
+    prefSpan.textContent=q.hintPrefix+' ';
+    (function(txt){ prefSpan.onclick=function(){ speak(txt); }; })(q.hintPrefix);
+    hintArea.appendChild(prefSpan);
+
+    var hSel=document.createElement('select'); hSel.className='hint-select'; hSel.id='sB-hsel-'+qi;
+    q.options.forEach(function(opt){ var o=document.createElement('option'); o.value=opt==='— pick —'?'':opt; o.textContent=opt; hSel.appendChild(o); });
+    hintArea.appendChild(hSel);
+
+    var suffSpan=document.createElement('span'); suffSpan.style.cssText='cursor:pointer;border-radius:5px;padding:1px 3px;';
+    suffSpan.textContent=' '+q.hintSuffix;
+    (function(txt){ suffSpan.onclick=function(){ speak(txt); }; })(q.hintSuffix);
+    hintArea.appendChild(suffSpan);
+
+    var hFb=document.createElement('span'); hFb.className='hint-fb'; hFb.id='sB-hfb-'+qi;
+    hintArea.appendChild(hFb);
+    card.appendChild(hintArea);
+
+    var helpBtn=document.createElement('button'); helpBtn.className='help-btn'; helpBtn.textContent='💡 Help Me';
+    (function(qi2,ha,hb){ helpBtn.onclick=function(){ appState.secB[qi2].helpShown=true; saveState(); ha.classList.add('visible'); hb.style.display='none'; }; })(qi,hintArea,helpBtn);
+    card.appendChild(helpBtn);
+
+    var ftWrap=document.createElement('div'); ftWrap.className='free-text-area-wrap';
+    var ftLbl=document.createElement('div'); ftLbl.className='free-text-label'; ftLbl.textContent='My sentence:';
+    var ta=document.createElement('textarea'); ta.className='free-textarea'; ta.id='sB-ta-'+qi;
+    ta.placeholder='Type or speak your answer…'; ta.value=s.text||'';
+    (function(qi2){ ta.oninput=function(){ appState.secB[qi2].text=ta.value; saveState(); updateSecBProgress(); }; })(qi);
+    var btns=document.createElement('div'); btns.className='textarea-btns';
+    var micBtn=document.createElement('button'); micBtn.className='mic-btn'; micBtn.textContent='🎤'; micBtn.id='sB-mic-'+qi;
+    var rbBtn=document.createElement('button'); rbBtn.className='readback-btn'; rbBtn.textContent='🔊 Read back';
+    (function(t){ rbBtn.onclick=function(){ speak(t.value||'Nothing written yet.'); }; })(ta);
+    btns.appendChild(micBtn); btns.appendChild(rbBtn);
+    ftWrap.appendChild(ftLbl); ftWrap.appendChild(ta); ftWrap.appendChild(btns);
+    card.appendChild(ftWrap);
+    list.appendChild(card);
+
+    (function(qi2,t){ initMic(micBtn, t, function(){ appState.secB[qi2].text=t.value; saveState(); updateSecBProgress(); }); })(qi,ta);
+
+    (function(qi2,q2,ta2,hFb2){ hSel.onchange=function(){
+      var val=hSel.value;
+      appState.secB[qi2].helpAnswer=val;
+      saveState();
+      if(!val){ hFb2.textContent=''; return; }
+      var isCorrect=q2.correctOpts.indexOf(val)!==-1;
+      hFb2.className='hint-fb '+(isCorrect?'correct':'wrong');
+      hFb2.textContent=isCorrect?'✅':'💡 '+q2.hintNote;
+      var full=q2.hintPrefix+' '+val+' '+q2.hintSuffix;
+      setTimeout(function(){ speak(full); },300);
+      if(isCorrect&&!ta2.value.trim()){ ta2.value=full; appState.secB[qi2].text=full; saveState(); updateSecBProgress(); }
+    }; })(qi,q,ta,hFb);
+
+    if(s.helpShown){ hintArea.classList.add('visible'); helpBtn.style.display='none'; }
+    if(s.helpAnswer){
+      hSel.value=s.helpAnswer;
+      var isC=q.correctOpts.indexOf(s.helpAnswer)!==-1;
+      hFb.className='hint-fb '+(isC?'correct':'wrong');
+      hFb.textContent=isC?'✅':'💡 '+q.hintNote;
+    }
+  });
+  updateSecBProgress();
+}
+
+function updateSecBProgress() {
+  var done=appState.secB.filter(function(s){return s.text&&s.text.trim()!=='';}).length;
+  document.getElementById('secB-pips').innerHTML=appState.secB.map(function(s){return '<span class="pip '+(s.text&&s.text.trim()?'done':'')+'"></span>';}).join('');
+  document.getElementById('secB-count').textContent=done+' / '+secBData.length+' done';
+  document.getElementById('secB-badge').textContent=done+' / '+secBData.length;
+  if(done===secBData.length){ document.getElementById('secB').classList.add('complete'); autoCollapse('secB'); }
+  updateNavActive();
+}
+
+function buildSecC() {
+  var list=document.getElementById('secC-list');
+  list.innerHTML='';
+  secCData.forEach(function(q,qi){
+    var card=document.createElement('div'); card.className='compose-card'; card.id='sC-card-'+qi;
+    var header=document.createElement('div'); header.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;';
+    var num=document.createElement('div'); num.className='compose-num'; num.textContent=(qi+1)+'.';
+    var lbl=document.createElement('div'); lbl.className='compose-label'; lbl.textContent=q.label;
+    header.appendChild(num); header.appendChild(lbl); card.appendChild(header);
+    var pDiv=document.createElement('div'); pDiv.style.cssText='font-size:0.88rem;font-weight:700;color:#b07800;cursor:pointer;border-radius:6px;padding:2px 4px;transition:background 0.15s;user-select:none;';
+    pDiv.textContent=q.prompt;
+    (function(txt){ pDiv.onclick=function(){ speak(txt); }; })(q.prompt);
+    card.appendChild(pDiv);
+    var ta=document.createElement('textarea'); ta.className='compose-textarea'; ta.id='sC-ta-'+qi;
+    ta.placeholder=q.placeholder; ta.value=appState.secC[qi]||'';
+    (function(qi2){ ta.oninput=function(){ appState.secC[qi2]=ta.value; saveState(); updateSecCProgress(); }; })(qi);
+    var btns=document.createElement('div'); btns.className='compose-btns';
+    var micBtn=document.createElement('button'); micBtn.className='compose-mic'; micBtn.textContent='🎤'; micBtn.id='sC-mic-'+qi;
+    var rbBtn=document.createElement('button'); rbBtn.className='compose-readback'; rbBtn.textContent='🔊 Read back';
+    (function(t){ rbBtn.onclick=function(){ speak(t.value||'Nothing written yet.'); }; })(ta);
+    btns.appendChild(micBtn); btns.appendChild(rbBtn);
+    card.appendChild(ta); card.appendChild(btns);
+    list.appendChild(card);
+    (function(qi2,t){ initMic(micBtn, t, function(){ appState.secC[qi2]=t.value; saveState(); updateSecCProgress(); }); })(qi,ta);
+  });
+  updateSecCProgress();
+}
+
+function updateSecCProgress() {
+  var done=appState.secC.filter(function(v){return v&&v.trim()!=='';}).length;
+  document.getElementById('secC-pips').innerHTML=appState.secC.map(function(v){return '<span class="pip '+(v&&v.trim()?'done':'')+'"></span>';}).join('');
+  document.getElementById('secC-count').textContent=done+' / '+secCData.length+' done';
+  document.getElementById('secC-badge').textContent=done+' / '+secCData.length;
+  if(done===secCData.length){ document.getElementById('secC').classList.add('complete'); }
+  updateNavActive();
+}
+
+function initMic(btn, taEl, onResult) {
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){ btn.disabled=true; btn.title='Speech input not available'; btn.style.opacity='0.4'; return; }
+  var rec=null, listening=false;
+  function startListening() {
+    if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    rec=new SR(); rec.continuous=true; rec.interimResults=false; rec.lang='en-US';
+    rec.onstart=function(){ listening=true; btn.textContent='⏹'; btn.classList.add('listening'); };
+    rec.onresult=function(e){ var t=''; for(var i=e.resultIndex;i<e.results.length;i++) if(e.results[i].isFinal) t+=e.results[i][0].transcript+' '; t=t.trim(); if(t){ taEl.value+=(taEl.value?' ':'')+t; if(onResult) onResult(t); } };
+    rec.onend=function(){ if(listening){ try{rec.start();return;}catch(err){} } listening=false; btn.textContent='🎤'; btn.classList.remove('listening'); rec=null; };
+    rec.onerror=function(e){ if(e.error==='no-speech') return; listening=false; btn.textContent='🎤'; btn.classList.remove('listening'); rec=null; };
+    try{ rec.start(); }catch(err){ listening=false; btn.textContent='🎤'; btn.classList.remove('listening'); rec=null; }
+  }
+  btn.onclick=function(e){ e.stopPropagation(); if(listening){ listening=false; if(rec){try{rec.stop();}catch(err){}} }else{ startListening(); } };
+}
+
+function clearAll() {
+  var btn=document.getElementById('clearBtn');
+  if(btn.dataset.confirming==='true'){
+    try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+    location.reload();
+  } else {
+    btn.dataset.confirming='true'; btn.textContent='⚠️ Tap again to confirm';
+    btn.style.background='#ffeedd'; btn.style.color='#c05000'; btn.style.borderColor='#c05000';
+    setTimeout(function(){ if(btn.dataset.confirming==='true'){ btn.dataset.confirming='false'; btn.textContent='🗑️ Clear all responses'; btn.style.background=''; btn.style.color=''; btn.style.borderColor=''; } },3000);
+  }
+}
+
+function exportPrint() {
+  var rowsA=secAData.map(function(q,i){
+    var val=appState.secA[i]||'___';
+    var correct=val===q.answer;
+    var color=appState.secA[i]?(correct?'#1d7a40':'#c05000'):'#333';
+    var display=q.before+' <span style="font-weight:800;color:'+color+';text-decoration:underline">'+val+'</span> '+q.after;
+    return '<tr><td>'+(i+1)+'.</td><td>'+display+'</td></tr>';
+  }).join('');
+  var rowsB=secBData.map(function(q,i){
+    var s=appState.secB[i]; var answer=s.text||'&nbsp;';
+    return '<tr><td>'+(i+1)+'.</td><td>'+q.prompt.replace('__________','<span style="font-weight:800;text-decoration:underline">'+answer+'</span>')+'</td></tr>';
+  }).join('');
+  var rowsC=secCData.map(function(q,i){
+    var text=appState.secC[i]||'&nbsp;';
+    return '<tr><td>'+(i+1)+'.</td><td><small style="color:#888">'+q.label+'</small><br>'+text+'</td></tr>';
+  }).join('');
+
+  var html='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Subject-Verb Agreement p.2</title>'
+    +'<style>body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:24px 28px;font-size:13px;color:#111}'
+    +'h1{font-size:1.4rem;margin-bottom:4px}h2{font-size:1rem;margin:20px 0 8px;border-bottom:2px solid #333;padding-bottom:4px}'
+    +'.name-line{display:flex;gap:24px;margin:10px 0 18px;font-size:.9rem}.name-line span{display:flex;align-items:flex-end;gap:6px}'
+    +'.name-line .line{display:inline-block;width:180px;border-bottom:1.5px solid #333}'
+    +'table{width:100%;border-collapse:collapse;margin-bottom:6px}th{background:#eee;padding:5px 8px;text-align:left;font-size:.8rem;border:1px solid #ccc}'
+    +'td{padding:6px 8px;border:1px solid #ddd;vertical-align:top}'
+    +'.footer{margin-top:28px;font-size:.75rem;color:#888;text-align:right;border-top:1px solid #ccc;padding-top:6px}'
+    +'.print-btn{margin-bottom:16px;padding:8px 20px;font-size:.9rem;cursor:pointer;border:2px solid #333;border-radius:4px;background:#f0f0f0;font-weight:700}'
+    +'@media print{.print-btn{display:none}}</style></head><body>'
+    +'<button class="print-btn" onclick="window.print()">🖨️ Print</button>'
+    +'<h1>Subject-Verb Agreement</h1>'
+    +'<div class="name-line"><span>Name <span class="line"></span></span><span>Date <span class="line" style="width:100px"></span></span></div>'
+    +'<h2>Part A — Write the correct present tense form of the verb in parentheses.</h2>'
+    +'<table><thead><tr><th>#</th><th>Sentence</th></tr></thead><tbody>'+rowsA+'</tbody></table>'
+    +'<h2>Part B — Complete each sentence using a present tense action verb.</h2>'
+    +'<table><thead><tr><th>#</th><th>Sentence</th></tr></thead><tbody>'+rowsB+'</tbody></table>'
+    +'<h2>Part C — Write two sentences using present tense verbs.</h2>'
+    +'<table><thead><tr><th>#</th><th>My sentence</th></tr></thead><tbody>'+rowsC+'</tbody></table>'
+    +'<div class="footer">Scholastic Success With Grammar · Grade 5 · p. 54</div>'
+    +'</body></html>';
+
+  var blob=new Blob([html],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},10000);
+}
+
+(function init() {
+  var saved=loadState();
+  if(saved){
+    if(saved.secA&&saved.secA.length===appState.secA.length) appState.secA=saved.secA;
+    if(saved.secB&&saved.secB.length===appState.secB.length) appState.secB=saved.secB;
+    if(saved.secC&&saved.secC.length===appState.secC.length) appState.secC=saved.secC;
+  }
+  buildSecA();
+  buildSecB();
+  buildSecC();
+  updateNavActive();
+})();
+</script>
+</body>
+</html>

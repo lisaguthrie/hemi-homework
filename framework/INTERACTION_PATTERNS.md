@@ -320,6 +320,65 @@ if (state.foundErrors[i].includes(wi)) {
 
 Do NOT block the visual `.selected` highlight from appearing on already-found words — removing that guard caused taps to appear to do nothing, making the interface feel broken.
 
+### Sequential Multi-Target Tap Flow
+
+Use this pattern when a sentence requires more than one correct tap before the answer control appears, for example: coordinated subjects in a subject-verb agreement sentence.
+
+**Rule:** Do not advance to the next step after the first correct tap if the answer key contains multiple required targets for the current phase. Require every target in that phase before revealing the next phase.
+
+**Typical phases:**
+
+- Phase 1: tap all subject words
+- Phase 2: tap the verb
+- Phase 3: choose the classification answer (for example `S` or `P`)
+
+**State shape:**
+
+```javascript
+{
+  selectedSubjects: [],
+  subjectFound: false,
+  verbFound: false,
+  sp: '',
+  step: 0
+}
+```
+
+`selectedSubjects` stores normalized word keys (`toLowerCase()`). `subjectFound` becomes `true` only when `selectedSubjects.length >= q.subject.length`.
+
+```javascript
+if (st.step === 0 && isSubject) {
+  if (!st.selectedSubjects.includes(cleanLower)) {
+    st.selectedSubjects.push(cleanLower);
+  }
+
+  (subjectSpanMap.get(cleanLower) || []).forEach(el => el.classList.add('subject-found'));
+  st.subjectFound = st.selectedSubjects.length >= q.subject.length;
+
+  stepHint.style.display = 'block';
+  if (st.subjectFound) {
+    st.step = 1;
+    stepHint.textContent = '👆 Now tap the verb';
+    speak(q.subject.length > 1
+      ? 'You found both subjects. Now tap the verb.'
+      : `${cleanLower} is the subject. Now tap the verb.`);
+  } else {
+    stepHint.textContent = '👆 Now tap the second subject';
+    speak(`${cleanLower} is part of the subject. Now tap the second subject.`);
+  }
+}
+```
+
+**Interaction decisions:**
+
+- Highlight each correctly tapped target immediately, even before the full phase is complete
+- Change the step hint text to name the next missing target, not the final target
+- Keep the answer control hidden until all required taps in the current phase are complete
+- Re-tapping an already-found target should be harmless; speak the word if useful, but do not duplicate state
+- Progress pips should advance only when the final answer for the item is submitted, not when an intermediate target is found
+
+**Restore / migration rule:** If older saves only stored `subjectFound: true`, normalize them on load by backfilling `selectedSubjects` from the answer key before rebuilding the UI.
+
 ---
 
 ## Progress Tracking

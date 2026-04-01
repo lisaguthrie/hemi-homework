@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject-Verb Agreement — Page 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(160deg, #e0f4ff 0%, #f0e8ff 100%);
+  min-height: 100vh;
+  color: #1a2a3a;
+  padding: 20px 16px 80px;
+}
+.container { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+h1 { font-family: 'Fredoka One', cursive; font-size: clamp(1.6rem,5vw,2.2rem); color: #1a6fa8; text-align: center; margin-bottom: 2px; }
+.subtitle { text-align: center; font-size: 0.95rem; color: #6a8299; font-weight: 600; }
+
+/* Sticky nav */
+.section-nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);
+  border-bottom: 2px solid #e0eaf8;
+  padding: 10px 12px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.nav-btn {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.82rem;
+  padding: 7px 14px; border-radius: 22px; border: 2px solid #3b9ede;
+  background: white; color: #1a6fa8; cursor: pointer; white-space: nowrap; min-height: 36px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-btn:hover { background: #e8f4ff; }
+.nav-btn.active { background: #3b9ede; color: white; }
+.nav-btn.complete { border-color: #5dca7e; color: #1d7a40; }
+.nav-btn.complete.active { background: #5dca7e; color: white; border-color: #5dca7e; }
+
+/* Section cards */
+.section-card {
+  background: white; border-radius: 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  border: 2.5px solid transparent; overflow: hidden; transition: border-color 0.2s;
+}
+.section-card.complete { border-color: #5dca7e; }
+.section-header {
+  display: flex; align-items: center; gap: 12px; padding: 14px 18px;
+  cursor: pointer; user-select: none; background: #f8fbff; border-bottom: 2px solid #e8f0fa;
+  transition: background 0.15s;
+}
+.section-header:hover { background: #eef5ff; }
+.section-card.collapsed .section-header { border-bottom: none; }
+.section-title { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #1a6fa8; flex: 1; }
+.section-badge { font-size: 0.8rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; background: #e8f4ff; color: #1a6fa8; white-space: nowrap; }
+.section-card.complete .section-badge { background: #d0f5e0; color: #1d7a40; }
+.section-toggle { font-size: 1rem; color: #6a8299; transition: transform 0.2s; flex-shrink: 0; }
+.section-card.collapsed .section-toggle { transform: rotate(-90deg); }
+.section-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.section-card.collapsed .section-body { display: none; }
+
+/* Reteach + instructions */
+.reteach-box {
+  background: #ffe566; border: 3px solid #e6c800; border-radius: 14px;
+  padding: 12px 16px; font-size: 0.9rem; font-weight: 700; color: #5a4000;
+  cursor: pointer; user-select: none; transition: transform 0.1s;
+}
+.reteach-box:active { transform: scale(0.98); }
+.instructions {
+  background: #3b9ede; color: white; border-radius: 14px; padding: 11px 16px;
+  font-size: 0.93rem; font-weight: 700; cursor: pointer; user-select: none; transition: transform 0.1s;
+}
+.instructions:active { transform: scale(0.98); }
+
+/* Progress */
+.progress-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pip { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #dde0e8; transition: background 0.3s; }
+.pip.done { background: #5dca7e; }
+.progress-label { font-size: 0.85rem; font-weight: 700; color: #6a8299; }
+
+/* Question card */
+.question-card {
+  background: #fafcff; border-radius: 14px; border: 2.5px solid transparent;
+  padding: 13px 15px; transition: border-color 0.2s, background 0.2s;
+}
+.question-card.correct { border-color: #5dca7e; background: #f0fff5; }
+.card-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.q-num { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: #3b9ede; min-width: 26px; flex-shrink: 0; }
+
+/* Word tokens */
+.sentence-wrap { flex: 1; font-size: 1rem; font-weight: 600; line-height: 2; cursor: pointer; border-radius: 6px; padding: 2px 4px; transition: background 0.15s; user-select: none; }
+.sentence-wrap:hover { background: #e8f4ff; }
+.word-token { display: inline; cursor: pointer; border-radius: 5px; padding: 1px 3px; transition: background 0.12s; user-select: none; }
+.word-token:hover { background: #e8f4ff; }
+.word-token.subject-found { background: #fff3c4; border: 2px solid #e6c800; border-radius: 7px; padding: 1px 7px; font-weight: 800; color: #5a3a00; }
+.word-token.verb-found { background: #e0eeff; border: 2px solid #3b9ede; border-radius: 7px; padding: 1px 7px; font-weight: 800; color: #1a6fa8; }
+.word-token.subject-found.answered { background: #d0f5e0; border-color: #5dca7e; color: #1d7a40; }
+.word-token.verb-found.answered { background: #d0f5e0; border-color: #5dca7e; color: #1d7a40; }
+@keyframes notTarget { 0% { background: #ffe0e0; } 100% { background: transparent; } }
+.word-token.not-target { animation: notTarget 0.4s ease; }
+
+/* Step hint */
+.step-hint {
+  display: none; font-size: 0.82rem; font-weight: 800; color: #7c3aed;
+  background: #f0ebff; border: 2px solid #c4b5fd; border-radius: 10px;
+  padding: 5px 12px; margin-top: 4px;
+}
+
+/* S/P row */
+.sp-row { display: none; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; padding-left: 36px; }
+.sp-row.visible { display: flex; }
+.sp-label { font-size: 0.88rem; font-weight: 800; color: #6a8299; }
+.sp-select {
+  font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: #1a6fa8;
+  background: #e8f4ff; border: 2.5px solid #3b9ede; border-radius: 10px;
+  padding: 6px 10px; min-width: 120px; cursor: pointer; outline: none;
+}
+.sp-select:focus { border-color: #1a6fa8; }
+
+/* Play button */
+.play-btn {
+  background: #5dca7e; border: none; border-radius: 50%; width: 40px; height: 40px;
+  font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(93,202,126,0.4); transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+}
+.play-btn:hover { background: #3aaa5a; }
+
+/* Feedback */
+.feedback { display: none; align-items: center; gap: 5px; font-size: 0.88rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-top: 6px; flex-wrap: wrap; }
+.feedback.show { display: flex; }
+.feedback.correct { background: #d0f5e0; color: #1d7a40; }
+.feedback.hint { background: #ffeedd; color: #c05000; }
+.fb-play-btn { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0 2px; opacity: 0.75; transition: opacity 0.15s, transform 0.1s; }
+.fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
+
+/* Part B: verb-form dropdown */
+.sentence-area { flex: 1; font-size: 1rem; font-weight: 600; line-height: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.plain-seg { cursor: pointer; border-radius: 6px; padding: 2px 4px; user-select: none; transition: background 0.15s; }
+.plain-seg:hover { background: #e8f4ff; }
+.verb-hint-chip {
+  display: inline-flex; align-items: center; gap: 3px; background: #fff3c4;
+  border: 2px solid #e6c800; border-radius: 8px; padding: 1px 8px;
+  font-weight: 800; color: #5a3a00; cursor: pointer; user-select: none;
+  white-space: nowrap; font-size: 0.9rem; transition: background 0.15s, transform 0.1s;
+}
+.verb-hint-chip:hover { background: #ffe88a; }
+.verb-hint-chip:active { transform: scale(0.95); }
+.answer-select {
+  font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: #1a6fa8;
+  background: #e8f4ff; border: 2.5px solid #3b9ede; border-radius: 10px;
+  padding: 6px 10px; min-width: 120px; cursor: pointer; outline: none; transition: border-color 0.2s;
+}
+.answer-select:focus { border-color: #1a6fa8; }
+
+/* Buttons */
+.btn-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.clear-btn { background: #f0f0f0; color: #888; border: 2px solid #ccc; border-radius: 18px; padding: 7px 18px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.clear-btn:hover { background: #ffeedd; color: #c05000; border-color: #c05000; }
+.export-btn { background: #7c5cbf; color: white; border: none; border-radius: 18px; padding: 9px 22px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.92rem; cursor: pointer; transition: background 0.15s; box-shadow: 0 2px 8px rgba(124,92,191,0.25); }
+.export-btn:hover { background: #5a3fa0; }
+
+/* Speaking toast */
+.speaking-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a6fa8; color: white; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem; padding: 10px 24px; border-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); transition: transform 0.3s ease, background 0.2s; z-index: 100; cursor: pointer; user-select: none; pointer-events: none; }
+.speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.speaking-toast.visible:hover { background: #c0392b; }
+.speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+
+@media (max-width: 480px) { .section-body { padding: 12px; } .question-card { padding: 10px 12px; } }
+</style>
+</head>
+<body>
+
+<nav class="section-nav" id="sectionNav">
+  <button class="nav-btn active" onclick="scrollToSection('secA')">🎵 A: Identify</button>
+  <button class="nav-btn" onclick="scrollToSection('secB')">✏️ B: Verb Form</button>
+</nav>
+
+<div class="container">
+  <header style="text-align:center;padding-top:14px;">
+    <h1>🎼 Subject-Verb Agreement</h1>
+    <p class="subtitle">Page 1 · Tap any sentence to hear it</p>
+  </header>
+
+  <!-- SECTION A -->
+  <div class="section-card" id="secA">
+    <div class="section-header" onclick="toggleSection('secA')">
+      <span class="section-title">🎵 Part A — Identify Subject &amp; Verb</span>
+      <span class="section-badge" id="secA-badge">0 / 8</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="reteach-box" onclick="speak('Reteaching: The subject and verb in a sentence must agree in person — first, second, or third — and in number. A singular subject takes a singular verb. A plural subject takes a plural verb.')">
+        🔊 <strong>RETEACHING:</strong> Subject and verb must agree in person and number. Singular subject → singular verb. Plural subject → plural verb.
+      </div>
+      <div class="instructions" onclick="speak('Step 1: Tap the subject of the sentence — it will highlight in yellow. Step 2: Tap the verb — it will highlight in blue. Then choose S for singular or P for plural.')">
+        🔊 Step 1: Tap the <strong>subject</strong> (yellow). Step 2: Tap the <strong>verb</strong> (blue). Then pick S or P.
+      </div>
+      <div class="progress-row">
+        <span id="secA-pips"></span>
+        <span class="progress-label" id="secA-count">0 / 8 done</span>
+      </div>
+      <div id="secA-list"></div>
+    </div>
+  </div>
+
+  <!-- SECTION B -->
+  <div class="section-card collapsed" id="secB">
+    <div class="section-header" onclick="toggleSection('secB')">
+      <span class="section-title">✏️ Part B — Write the Correct Verb Form</span>
+      <span class="section-badge" id="secB-badge">0 / 8</span>
+      <span class="section-toggle">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="instructions" onclick="speak('Choose the correct present tense form of the verb shown in the yellow chip. The verb must agree with the subject of the sentence.')">
+        🔊 Choose the correct present tense form of the verb shown in the yellow chip.
+      </div>
+      <div class="progress-row">
+        <span id="secB-pips"></span>
+        <span class="progress-label" id="secB-count">0 / 8 done</span>
+      </div>
+      <div id="secB-list"></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="clear-btn" id="clearBtn" onclick="clearAll()">🗑️ Clear all responses</button>
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
+  </div>
+</div>
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()">
+  🔊 <span class="toast-label">Reading aloud…</span>
+</div>
+
+<script>
+// ── TTS ──────────────────────────────────────────────────────────────────────
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 0.88; u.pitch = 1.05;
+  u.onstart = showToast; u.onend = hideToast; u.onerror = hideToast;
+  window.speechSynthesis.speak(u);
+}
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+const feedbackTexts = {};
+function showFeedback(fbId, pass, text) {
+  feedbackTexts[fbId] = text;
+  const el = document.getElementById(fbId);
+  if (!el) return;
+  el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+  el.innerHTML = (pass ? '✅ ' : '💡 Hint: ') + text +
+    ` <button class="fb-play-btn" onclick="speak(feedbackTexts['${fbId}'])" title="Read aloud">🔊</button>`;
+}
+
+// ── Section nav ───────────────────────────────────────────────────────────────
+function toggleSection(id) { document.getElementById(id).classList.toggle('collapsed'); updateNavActive(); }
+function scrollToSection(id) { const el = document.getElementById(id); el.classList.remove('collapsed'); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); updateNavActive(); }
+function updateNavActive() {
+  const ids = ['secA','secB'];
+  const btns = document.querySelectorAll('.nav-btn');
+  ids.forEach((id,i) => {
+    btns[i].classList.toggle('active', !document.getElementById(id).classList.contains('collapsed'));
+    btns[i].classList.toggle('complete', document.getElementById(id).classList.contains('complete'));
+  });
+}
+function autoCollapse(id) { setTimeout(() => { document.getElementById(id).classList.add('collapsed'); updateNavActive(); }, 1200); }
+
+// ── Storage ───────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'worksheet_svagree_p1_2026_03_31';
+function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch(e) {} }
+function loadState() { try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : null; } catch(e) { return null; } }
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+// Part A: subject word(s), verb word(s), S or P
+const secAData = [
+  { text: "A conductor beats time with a baton.",     subject: ["conductor"],                       verb: ["beats"],    sp: "S" },
+  { text: "Many musicians memorize their music.",     subject: ["musicians"],                       verb: ["memorize"], sp: "P" },
+  { text: "The principal violinist leads the other musicians.", subject: ["violinist"],             verb: ["leads"],    sp: "S" },
+  { text: "The concert hall buzzes with voices.",     subject: ["hall"],                            verb: ["buzzes"],   sp: "S" },
+  { text: "Mariachi bands consist of violins, guitars, trumpets, and singers.", subject: ["bands"], verb: ["consist"],  sp: "P" },
+  { text: "The singers and lead guitarist often practice together.", subject: ["singers","guitarist"], verb: ["practice"], sp: "P" },
+  { text: "Jazz groups perform at the State Theater in our city.", subject: ["groups"],             verb: ["perform"],  sp: "P" },
+  { text: "A pianist works hard to prepare for a performance.", subject: ["pianist"],               verb: ["works"],    sp: "S" },
+];
+
+// Part B: before text, verb base, after text, answer (verb form), options
+const secBData = [
+  { before: "Mariachi bands", verb: "play", after: "all over the world.", answer: "play",   options: ["play","plays"] },
+  { before: "My cousin",      verb: "go",   after: "everywhere with the band.", answer: "goes",   options: ["go","goes"] },
+  { before: "The trumpet player always", verb: "take", after: "a radio with him.", answer: "takes",  options: ["take","takes"] },
+  { before: "The guitarist in this band also", verb: "write", after: "music.", answer: "writes", options: ["write","writes"] },
+  { before: "The drummer", verb: "watch", after: "the conductor carefully.", answer: "watches", options: ["watch","watches"] },
+  { before: "My favorite singer", verb: "have", after: "two songs on the Top Ten list.", answer: "has", options: ["have","has"] },
+  { before: "My brother and I", verb: "listen", after: "to them every morning.", answer: "listen", options: ["listen","listens"] },
+  { before: "Jamal and Denise", verb: "visit", after: "the city every year.", answer: "visit", options: ["visit","visits"] },
+];
+
+// App state
+let appState = {
+  secA: secAData.map(() => ({ selectedSubjects: [], subjectFound: false, verbFound: false, sp: '', step: 0 })),
+  secB: new Array(secBData.length).fill(''),
+};
+
+// ── Section A: two-step tap ───────────────────────────────────────────────────
+function buildSecA() {
+  const list = document.getElementById('secA-list');
+  list.innerHTML = '';
+  secAData.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `sA-card-${qi}`;
+
+    const top = document.createElement('div');
+    top.className = 'card-top';
+
+    const num = document.createElement('div');
+    num.className = 'q-num';
+    num.textContent = `${qi+1}.`;
+
+    const sentWrap = document.createElement('div');
+    sentWrap.className = 'sentence-wrap';
+    sentWrap.onclick = () => speak(q.text);
+
+    // Track span references
+    let subjectSpans = [];
+    const subjectSpanMap = new Map();
+    let verbSpans = [];
+
+    // Tokenise preserving punctuation
+    const tokens = q.text.split(/(\s+)/);
+    tokens.forEach(tok => {
+      if (/^\s+$/.test(tok)) { sentWrap.appendChild(document.createTextNode(tok)); return; }
+      const cleanLower = tok.replace(/[^a-zA-Z]/g, '').toLowerCase();
+      const span = document.createElement('span');
+      span.className = 'word-token';
+      span.textContent = tok;
+
+      const isSubject = q.subject.some(s => s.toLowerCase() === cleanLower);
+      const isVerb    = q.verb.some(v => v.toLowerCase() === cleanLower);
+      if (isSubject) {
+        subjectSpans.push(span);
+        if (!subjectSpanMap.has(cleanLower)) subjectSpanMap.set(cleanLower, []);
+        subjectSpanMap.get(cleanLower).push(span);
+      }
+      if (isVerb)    verbSpans.push(span);
+
+      span.onclick = (e) => {
+        e.stopPropagation();
+        const st = appState.secA[qi];
+        if (st.sp) { speak(tok.replace(/[^a-zA-Z]/g,'')); return; } // locked
+
+        if (st.step === 0) {
+          // waiting for subject
+          if (isSubject) {
+            if (!st.selectedSubjects.includes(cleanLower)) {
+              st.selectedSubjects.push(cleanLower);
+            }
+            (subjectSpanMap.get(cleanLower) || []).forEach(subjectSpan => subjectSpan.classList.add('subject-found'));
+            st.subjectFound = st.selectedSubjects.length >= q.subject.length;
+            stepHint.style.display = 'block';
+            if (st.subjectFound) {
+              st.step = 1;
+              stepHint.textContent = '👆 Now tap the verb';
+            } else {
+              stepHint.textContent = '👆 Now tap the second subject';
+            }
+            saveState(); updateSecAProgress();
+            if (st.subjectFound) {
+              const subjectPrompt = q.subject.length > 1
+                ? 'You found both subjects. Now tap the verb.'
+                : `${tok.replace(/[^a-zA-Z]/g,'')} is the subject. Now tap the verb.`;
+              speak(subjectPrompt);
+            } else {
+              speak(`${tok.replace(/[^a-zA-Z]/g,'')} is part of the subject. Now tap the second subject.`);
+            }
+          } else {
+            span.classList.add('not-target');
+            span.addEventListener('animationend', () => span.classList.remove('not-target'), { once: true });
+            speak(tok.replace(/[^a-zA-Z]/g,''));
+          }
+        } else if (st.step === 1) {
+          // waiting for verb
+          if (isVerb) {
+            st.verbFound = true; st.step = 2;
+            span.classList.add('verb-found');
+            stepHint.style.display = 'none';
+            spRow.classList.add('visible');
+            saveState();
+            speak(`${tok.replace(/[^a-zA-Z]/g,'')} is the verb. Is the subject singular or plural?`);
+          } else if (isSubject) {
+            speak(tok.replace(/[^a-zA-Z]/g,''));
+          } else {
+            span.classList.add('not-target');
+            span.addEventListener('animationend', () => span.classList.remove('not-target'), { once: true });
+            speak(tok.replace(/[^a-zA-Z]/g,''));
+          }
+        }
+      };
+      sentWrap.appendChild(span);
+    });
+
+    const pb = document.createElement('button');
+    pb.className = 'play-btn'; pb.title = 'Hear sentence'; pb.innerHTML = '▶';
+    pb.onclick = () => speak(q.text);
+
+    const stepHint = document.createElement('div');
+    stepHint.className = 'step-hint';
+    stepHint.id = `sA-hint-${qi}`;
+
+    // S/P row
+    const spRow = document.createElement('div');
+    spRow.className = 'sp-row';
+    spRow.id = `sA-sp-${qi}`;
+    const spLabel = document.createElement('span');
+    spLabel.className = 'sp-label';
+    spLabel.textContent = 'Subject and verb are:';
+    const spSel = document.createElement('select');
+    spSel.className = 'sp-select';
+    spSel.id = `sA-sel-${qi}`;
+    [['','— S or P —'],['S','S — Singular'],['P','P — Plural']].forEach(([v,t]) => {
+      const o = document.createElement('option'); o.value=v; o.textContent=t; spSel.appendChild(o);
+    });
+    const spFb = document.createElement('div');
+    spFb.className = 'feedback'; spFb.id = `sA-fb-${qi}`;
+
+    spSel.onchange = () => {
+      const val = spSel.value;
+      appState.secA[qi].sp = val;
+      saveState();
+      if (!val) return;
+      const pass = val === q.sp;
+      card.classList.toggle('correct', pass);
+      const subjectWord = q.subject.join(' and ');
+      const verbWord = q.verb[0];
+      if (pass) {
+        // Mark both as answered
+        subjectSpans.forEach(s => s.classList.add('answered'));
+        verbSpans.forEach(s => s.classList.add('answered'));
+        showFeedback(`sA-fb-${qi}`, true, `Yes! "${subjectWord}" and "${verbWord}" are ${val === 'S' ? 'singular' : 'plural'}.`);
+        setTimeout(() => speak(q.text), 300);
+        updateSecAProgress();
+      } else {
+        showFeedback(`sA-fb-${qi}`, false, `Look at "${subjectWord}" — is it one or more than one? That tells you S or P.`);
+        updateSecAProgress();
+      }
+    };
+
+    spRow.appendChild(spLabel);
+    spRow.appendChild(spSel);
+    top.appendChild(num); top.appendChild(sentWrap); top.appendChild(pb);
+    card.appendChild(top);
+    card.appendChild(stepHint);
+    spRow.appendChild(spFb);
+    card.appendChild(spRow);
+    list.appendChild(card);
+
+    // Restore state
+    const st = appState.secA[qi];
+    st.selectedSubjects.forEach(subject => {
+      (subjectSpanMap.get(subject) || []).forEach(subjectSpan => subjectSpan.classList.add('subject-found'));
+    });
+    if (st.selectedSubjects.length > 0 && !st.subjectFound) {
+      stepHint.style.display = 'block'; stepHint.textContent = '👆 Now tap the second subject';
+    }
+    if (st.step >= 1) {
+      stepHint.style.display = 'block'; stepHint.textContent = '👆 Now tap the verb';
+    }
+    if (st.step >= 2) {
+      verbSpans.forEach(s => s.classList.add('verb-found'));
+      stepHint.style.display = 'none'; spRow.classList.add('visible');
+    }
+    if (st.sp) {
+      spSel.value = st.sp;
+      const pass = st.sp === q.sp;
+      card.classList.toggle('correct', pass);
+      const subjectWord = q.subject.join(' and ');
+      const verbWord = q.verb[0];
+      if (pass) {
+        subjectSpans.forEach(s => s.classList.add('answered'));
+        verbSpans.forEach(s => s.classList.add('answered'));
+        showFeedback(`sA-fb-${qi}`, true, `Yes! "${subjectWord}" and "${verbWord}" are ${st.sp === 'S' ? 'singular' : 'plural'}.`);
+      } else {
+        showFeedback(`sA-fb-${qi}`, false, `Look at "${subjectWord}" — is it one or more than one?`);
+      }
+    }
+  });
+  updateSecAProgress();
+}
+
+function updateSecAProgress() {
+  const done = appState.secA.filter(s => s.sp !== '').length;
+  document.getElementById('secA-pips').innerHTML = appState.secA.map(s => `<span class="pip ${s.sp?'done':''}"></span>`).join('');
+  document.getElementById('secA-count').textContent = `${done} / ${secAData.length} done`;
+  document.getElementById('secA-badge').textContent = `${done} / ${secAData.length}`;
+  const allCorrect = appState.secA.every((s,i) => s.sp === secAData[i].sp);
+  if (done === secAData.length && allCorrect) {
+    document.getElementById('secA').classList.add('complete');
+    autoCollapse('secA');
+  }
+  updateNavActive();
+}
+
+// ── Section B: verb form dropdown ─────────────────────────────────────────────
+function buildSecB() {
+  const list = document.getElementById('secB-list');
+  list.innerHTML = '';
+  secBData.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'question-card'; card.id = `sB-card-${qi}`;
+    const top = document.createElement('div'); top.className = 'card-top';
+    const num = document.createElement('div'); num.className = 'q-num'; num.textContent = `${qi+1}.`;
+
+    const sentArea = document.createElement('div'); sentArea.className = 'sentence-area';
+
+    // Before
+    if (q.before) {
+      const sp = document.createElement('span'); sp.className = 'plain-seg';
+      sp.textContent = q.before + ' '; sp.onclick = () => speak(q.before.trim());
+      sentArea.appendChild(sp);
+    }
+
+    // Verb hint chip
+    const chip = document.createElement('span'); chip.className = 'verb-hint-chip';
+    chip.innerHTML = `🔊 ${q.verb}`; chip.onclick = (e) => { e.stopPropagation(); speak(q.verb); };
+    sentArea.appendChild(chip);
+
+    // Dropdown
+    const sel = document.createElement('select'); sel.className = 'answer-select'; sel.id = `sB-sel-${qi}`;
+    const defOpt = document.createElement('option'); defOpt.value=''; defOpt.textContent='— pick —'; sel.appendChild(defOpt);
+    q.options.forEach(opt => { const o=document.createElement('option'); o.value=opt; o.textContent=opt; sel.appendChild(o); });
+    sentArea.appendChild(sel);
+
+    // After
+    if (q.after) {
+      const sp2 = document.createElement('span'); sp2.className = 'plain-seg';
+      sp2.textContent = ' ' + q.after; sp2.onclick = () => speak(q.after.trim());
+      sentArea.appendChild(sp2);
+    }
+
+    const pb = document.createElement('button'); pb.className = 'play-btn';
+    pb.innerHTML = '▶'; pb.disabled = true; pb.style.opacity = '0.4'; pb.style.cursor = 'default';
+    pb.onclick = () => { if (sel.value) speak(q.before + ' ' + sel.value + ' ' + q.after); };
+
+    const fb = document.createElement('div'); fb.className = 'feedback'; fb.id = `sB-fb-${qi}`;
+
+    sel.onchange = () => {
+      const val = sel.value;
+      appState.secB[qi] = val;
+      saveState();
+      pb.disabled = !val; pb.style.opacity = val ? '' : '0.4'; pb.style.cursor = val ? '' : 'default';
+      if (!val) { fb.className='feedback'; card.classList.remove('correct'); updateSecBProgress(); return; }
+      const pass = val === q.answer;
+      card.classList.toggle('correct', pass);
+      const full = q.before + ' ' + val + ' ' + q.after;
+      if (pass) {
+        showFeedback(`sB-fb-${qi}`, true, `Yes! "${val}" is correct. ${full}`);
+      } else {
+        const hint = q.before.includes(' and ') || q.before.toLowerCase().includes('bands') || q.before.toLowerCase().includes('brother and')
+          ? `The subject is plural — use the base form of the verb.`
+          : `The subject is singular — add -s or -es to the verb.`;
+        showFeedback(`sB-fb-${qi}`, false, hint);
+      }
+      setTimeout(() => speak(full), 300);
+      updateSecBProgress();
+    };
+
+    top.appendChild(num); top.appendChild(sentArea); top.appendChild(pb);
+    card.appendChild(top); card.appendChild(fb);
+    list.appendChild(card);
+
+    // Restore
+    if (appState.secB[qi]) {
+      sel.value = appState.secB[qi];
+      pb.disabled = false; pb.style.opacity = ''; pb.style.cursor = '';
+      sel.dispatchEvent(new Event('change'));
+    }
+  });
+  updateSecBProgress();
+}
+
+function updateSecBProgress() {
+  const done = appState.secB.filter(v=>v!=='').length;
+  document.getElementById('secB-pips').innerHTML = appState.secB.map(v=>`<span class="pip ${v?'done':''}"></span>`).join('');
+  document.getElementById('secB-count').textContent = `${done} / ${secBData.length} done`;
+  document.getElementById('secB-badge').textContent = `${done} / ${secBData.length}`;
+  const allCorrect = secBData.every((q,i) => appState.secB[i] === q.answer);
+  if (done === secBData.length && allCorrect) {
+    document.getElementById('secB').classList.add('complete');
+    autoCollapse('secB');
+  }
+  updateNavActive();
+}
+
+// ── Clear ─────────────────────────────────────────────────────────────────────
+function clearAll() {
+  const btn = document.getElementById('clearBtn');
+  if (btn.dataset.confirming === 'true') {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+    location.reload();
+  } else {
+    btn.dataset.confirming = 'true';
+    btn.textContent = '⚠️ Tap again to confirm';
+    btn.style.background='#ffeedd'; btn.style.color='#c05000'; btn.style.borderColor='#c05000';
+    setTimeout(() => {
+      if (btn.dataset.confirming==='true') {
+        btn.dataset.confirming='false'; btn.textContent='🗑️ Clear all responses';
+        btn.style.background=''; btn.style.color=''; btn.style.borderColor='';
+      }
+    }, 3000);
+  }
+}
+
+// ── Export ────────────────────────────────────────────────────────────────────
+function exportPrint() {
+  const rowsA = secAData.map((q,i) => {
+    const st = appState.secA[i];
+    const subj = st.subjectFound ? `<u><strong>${q.subject.join(', ')}</strong></u>` : `<u style="color:#aaa">___</u>`;
+    const vb   = st.verbFound   ? `<u style="text-decoration:underline double"><strong>${q.verb[0]}</strong></u>` : `<u style="color:#aaa">___</u>`;
+    const sp   = st.sp || '___';
+    const correct = st.sp === q.sp;
+    const spColor = st.sp ? (correct ? '#1d7a40' : '#c05000') : '#333';
+    // Build sentence with subject and verb highlighted
+    let display = q.text;
+    q.subject.forEach(s => { display = display.replace(new RegExp(`\\b${s}\\b`), `<u><strong>${s}</strong></u>`); });
+    q.verb.forEach(v => { display = display.replace(new RegExp(`\\b${v}\\b`), `<u style="text-decoration:underline double"><strong>${v}</strong></u>`); });
+    return `<tr><td>${i+1}.</td><td>${display}</td><td style="text-align:center;font-weight:800;color:${spColor}">${sp}</td></tr>`;
+  }).join('');
+
+  const rowsB = secBData.map((q,i) => {
+    const val = appState.secB[i] || '___';
+    const correct = val === q.answer;
+    const color = appState.secB[i] ? (correct?'#1d7a40':'#c05000') : '#333';
+    const display = q.before + ' <span style="font-weight:800;color:'+color+';text-decoration:underline">' + val + '</span> ' + q.after;
+    return `<tr><td>${i+1}.</td><td>${display}</td></tr>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Subject-Verb Agreement p.1</title>
+<style>body{font-family:Arial,sans-serif;max-width:700px;margin:0 auto;padding:24px 28px;font-size:13px;color:#111}
+h1{font-size:1.4rem;margin-bottom:4px}h2{font-size:1rem;margin:20px 0 8px;border-bottom:2px solid #333;padding-bottom:4px}
+.name-line{display:flex;gap:24px;margin:10px 0 18px;font-size:.9rem}.name-line span{display:flex;align-items:flex-end;gap:6px}
+.name-line .line{display:inline-block;width:180px;border-bottom:1.5px solid #333}
+table{width:100%;border-collapse:collapse;margin-bottom:6px}th{background:#eee;padding:5px 8px;text-align:left;font-size:.8rem;border:1px solid #ccc}
+td{padding:5px 8px;border:1px solid #ddd;vertical-align:middle}
+.footer{margin-top:28px;font-size:.75rem;color:#888;text-align:right;border-top:1px solid #ccc;padding-top:6px}
+.print-btn{margin-bottom:16px;padding:8px 20px;font-size:.9rem;cursor:pointer;border:2px solid #333;border-radius:4px;background:#f0f0f0;font-weight:700}
+@media print{.print-btn{display:none}}</style></head><body>
+<button class="print-btn" onclick="window.print()">🖨️ Print</button>
+<h1>Subject-Verb Agreement</h1>
+<div class="name-line"><span>Name <span class="line"></span></span><span>Date <span class="line" style="width:100px"></span></span></div>
+<h2>Part A — Underline subject (single) and verb (double). Write S or P.</h2>
+<table><thead><tr><th>#</th><th>Sentence</th><th>S / P</th></tr></thead><tbody>${rowsA}</tbody></table>
+<h2>Part B — Write the correct present tense form of the verb in parentheses.</h2>
+<table><thead><tr><th>#</th><th>Sentence</th></tr></thead><tbody>${rowsB}</tbody></table>
+<div class="footer">Scholastic Success With Grammar · Grade 5 · p. 53</div>
+</body></html>`;
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(function init() {
+  const saved = loadState();
+  if (saved) {
+    if (saved.secA && saved.secA.length === appState.secA.length) {
+      appState.secA = saved.secA.map((state, index) => {
+        const selectedSubjects = Array.isArray(state.selectedSubjects)
+          ? state.selectedSubjects
+          : (state.subjectFound ? secAData[index].subject.map(subject => subject.toLowerCase()) : []);
+        const subjectFound = selectedSubjects.length >= secAData[index].subject.length;
+        let step = Number.isInteger(state.step) ? state.step : 0;
+        if (state.verbFound) {
+          step = 2;
+        } else if (subjectFound) {
+          step = Math.max(step, 1);
+        } else {
+          step = 0;
+        }
+        return {
+          selectedSubjects,
+          subjectFound,
+          verbFound: !!state.verbFound,
+          sp: state.sp || '',
+          step,
+        };
+      });
+    }
+    if (saved.secB && saved.secB.length === appState.secB.length) appState.secB = saved.secB;
+  }
+  buildSecA();
+  buildSecB();
+  updateNavActive();
+})();
+</script>
+</body>
+</html>

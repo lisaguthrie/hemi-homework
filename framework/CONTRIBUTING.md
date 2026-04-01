@@ -53,7 +53,7 @@ Preferred rich format:
 Describe the change in normal markdown. Include examples, snippets, constraints, and any optional
 `*Trigger:*` note if useful.
 
-Place reference files in the profiles/reference/ subdirectory.
+Place reference files in the worksheets/reference/ subdirectory.
 ```
 
 Legacy compact format is also accepted:
