@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialogue and Quotations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-start: #e0f4ff;
+      --bg-end: #f0e8ff;
+      --card-bg: #ffffff;
+      --text-primary: #1a2a3a;
+      --text-muted: #5f7388;
+      --accent-blue: #3b9ede;
+      --accent-blue-dk: #1a6fa8;
+      --section-a: #dff5ff;
+      --section-b: #fff4d8;
+      --section-c: #e8f7e8;
+      --btn-play: #5dca7e;
+      --btn-play-dk: #3aaa5a;
+      --feedback-ok-bg: #d0f5e0;
+      --feedback-ok-txt: #1d7a40;
+      --feedback-hint-bg: #ffeedd;
+      --feedback-hint-txt: #c05000;
+      --pip-empty: #dde0e8;
+      --pip-done: #5dca7e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      padding: 20px 14px 60px;
+    }
+
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .title-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border: 2.5px solid #b8dfff;
+      padding: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-family: 'Fredoka One', cursive;
+      letter-spacing: 0.3px;
+      font-size: 2rem;
+      line-height: 1.08;
+      color: #12354f;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .instructions {
+      background: #e7f3ff;
+      border: 2px solid var(--accent-blue);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      color: var(--accent-blue-dk);
+      cursor: pointer;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-header {
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 800;
+      border: 2px solid rgba(0,0,0,0.08);
+    }
+
+    .section-a { background: var(--section-a); }
+    .section-b { background: var(--section-b); }
+    .section-c { background: var(--section-c); }
+
+    .progress-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pip {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--pip-empty);
+      transition: background 0.2s;
+    }
+
+    .pip.done { background: var(--pip-done); }
+
+    .progress-text {
+      font-weight: 800;
+      color: #2e4a63;
+    }
+
+    .question-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 14px;
+      border: 2.5px solid transparent;
+      transition: border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .question-card.correct {
+      border-color: var(--btn-play);
+      background: #f0fff5;
+    }
+
+    .row-top {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .num {
+      font-weight: 900;
+      font-size: 1.06rem;
+    }
+
+    .meta {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #52687e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .play-btn {
+      background: var(--btn-play);
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+    }
+
+    .play-btn:hover { background: var(--btn-play-dk); }
+
+    .line-label {
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #4f657b;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+    }
+
+    .line-text {
+      border: 2px solid #dbe9f7;
+      border-radius: 10px;
+      background: #f8fbff;
+      padding: 10px 11px;
+      font-weight: 700;
+      line-height: 1.45;
+      cursor: pointer;
+      min-height: 44px;
+      display: block;
+    }
+
+    .line-text.word-select-line {
+      display: block;
+      cursor: default;
+      line-height: 1.8;
+    }
+
+    .quote-mark {
+      font-weight: 900;
+      color: #1a2a3a;
+      margin: 0 1px;
+    }
+
+    .answer-select {
+      width: 100%;
+      min-height: 44px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-blue-dk);
+      background: #e8f4ff;
+      border: 2.5px solid var(--accent-blue);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .answer-select:focus {
+      border-color: var(--accent-blue-dk);
+      background: #d5edff;
+    }
+
+    .gap-select {
+      min-height: 44px;
+      min-width: 70px;
+      max-width: 150px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--accent-blue-dk);
+      background: #e8f4ff;
+      border: 2.5px solid var(--accent-blue);
+      border-radius: 8px;
+      padding: 4px 6px;
+      margin: 0 2px;
+      vertical-align: baseline;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .gap-select:focus {
+      border-color: var(--accent-blue-dk);
+      background: #d5edff;
+    }
+
+    .sentence-word {
+      appearance: none;
+      -webkit-appearance: none;
+      min-height: 44px;
+      border-radius: 4px;
+      border: none;
+      background: transparent;
+      color: #1a2a3a;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.5;
+      padding: 6px 2px;
+      margin-right: 3px;
+      cursor: pointer;
+      vertical-align: baseline;
+      text-decoration: none;
+    }
+
+    .sentence-word:hover {
+      background: #eef7ff;
+    }
+
+    .sentence-word.selected {
+      color: #a91f1f;
+      text-decoration: underline;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 4px;
+    }
+
+    .sentence-word:focus-visible {
+      outline: 2px solid #3b9ede;
+      outline-offset: 1px;
+    }
+
+    .readable-span {
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 0 1px;
+      transition: background 0.15s;
+    }
+
+    .readable-span:hover {
+      background: #daeeff;
+    }
+
+    .a-line-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .a-line-row .line-text {
+      flex: 1;
+    }
+
+    .check-btn {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      border: 2px solid #1a6fa8;
+      border-radius: 10px;
+      background: #e8f4ff;
+      color: #1a6fa8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 0;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 1.2rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .check-btn:hover {
+      background: #d5edff;
+    }
+
+    .check-btn.done {
+      background: #5dca7e;
+      border-color: #3aaa5a;
+      color: #ffffff;
+    }
+
+    .feedback {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      padding: 6px 11px;
+      border-radius: 20px;
+    }
+
+    .feedback.show { display: inline-flex; }
+    .feedback.correct { background: var(--feedback-ok-bg); color: var(--feedback-ok-txt); }
+    .feedback.hint { background: var(--feedback-hint-bg); color: var(--feedback-hint-txt); }
+
+    .identified-wrap {
+      border: 2px dashed #c8def2;
+      background: #f7fbff;
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .identified-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #4f657b;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+      margin-bottom: 4px;
+    }
+
+    .identified-line {
+      font-weight: 800;
+      line-height: 1.55;
+      color: #1a2a3a;
+      min-height: 24px;
+    }
+
+    .identified-mark {
+      text-decoration: underline;
+      text-decoration-thickness: 3px;
+      text-underline-offset: 3px;
+      color: #a91f1f;
+      margin: 0 1px;
+      font-weight: 900;
+    }
+
+    .identified-placeholder {
+      color: #7b8fa2;
+      font-weight: 700;
+      margin: 0 2px;
+    }
+
+    .actions {
+      text-align: center;
+    }
+
+    .clear-btn {
+      background: #f0f0f0;
+      color: #888;
+      border: 2px solid #ccc;
+      border-radius: 18px;
+      padding: 7px 18px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      min-height: 44px;
+    }
+
+    .clear-btn:hover {
+      background: #ffeedd;
+      color: #c05000;
+      border-color: #c05000;
+    }
+
+    .export-btn {
+      background: #2f4f3f;
+      color: #ffffff;
+      border: none;
+      border-radius: 18px;
+      padding: 9px 22px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 2px 8px rgba(47,79,63,0.25);
+      min-height: 44px;
+    }
+
+    .export-btn:hover { background: #254334; }
+
+    .speaking-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a6fa8;
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 10px 18px;
+      border-radius: 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.22);
+      transition: transform 0.3s ease, background 0.2s;
+      z-index: 100;
+      pointer-events: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .speaking-toast.visible {
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    .speaking-toast.visible:hover { background: #c0392b; }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.65rem; }
+      .subtitle { font-size: 0.95rem; }
+      .line-text, .answer-select, .sentence-word { font-size: 0.96rem; }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 8px;
+      }
+
+      .play-btn,
+      .clear-btn,
+      .export-btn,
+      .instructions,
+      .speaking-toast {
+        display: none !important;
+      }
+
+      .wrap {
+        max-width: 100%;
+        gap: 10px;
+      }
+
+      .question-card,
+      .title-card,
+      .progress-card {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+
+  <div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+    🔊 Reading aloud... tap to stop
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'christina_dialogue_quotations_2026_04_07_v2';
+
+    const questions = [
+      {
+        section: 'A',
+        prompt: "Can't we stay up just five more minutes? the children begged.",
+        answer: '"Can\'t we stay up just five more minutes?" the children begged.',
+        hint: 'Put quotation marks around exactly what the children said.',
+        options: [
+          '"Can\'t we stay up just five more minutes?" the children begged.',
+          'Can\'t we stay up just five more minutes? "the children begged."',
+          '"Can\'t we stay up just five more minutes", the children begged?'
+        ]
+      },
+      {
+        section: 'A',
+        prompt: "Kate replied, That's another story.",
+        answer: 'Kate replied, "That\'s another story."',
+        hint: 'The spoken words go inside quotation marks after the dialogue tag.',
+        options: [
+          'Kate replied, "That\'s another story."',
+          '"Kate replied," That\'s another story.',
+          'Kate replied "That\'s another story".'
+        ]
+      },
+      {
+        section: 'A',
+        prompt: "What's for lunch? Bob asked.",
+        answer: '"What\'s for lunch?" Bob asked.',
+        hint: 'Keep the question mark inside the closing quotation mark.',
+        options: [
+          '"What\'s for lunch?" Bob asked.',
+          '"What\'s for lunch"? Bob asked.',
+          'What\'s for lunch? "Bob asked."'
+        ]
+      },
+      {
+        section: 'A',
+        prompt: "I am so excited! Betsy cried.",
+        answer: '"I am so excited!" Betsy cried.',
+        hint: 'Use quotation marks around Betsy\'s exact words, with ! inside.',
+        options: [
+          '"I am so excited!" Betsy cried.',
+          '"I am so excited"! Betsy cried.',
+          'I am so excited! "Betsy cried."'
+        ]
+      },
+      {
+        section: 'B',
+        prompt: 'Poissant said__ "I remember once when Duke Ellington stayed at my house__"',
+        answer: 'Poissant said, "I remember once when Duke Ellington stayed at my house."',
+        hint: 'Add a comma after the dialogue tag and end the quote correctly.',
+        gapAnswers: [',', '.'],
+        gapOptions: [
+          [',', '?', '.', '!'],
+          ['!', '?', '.', ',']
+        ]
+      },
+      {
+        section: 'B',
+        prompt: '"Was Duke Ellington famous__" Punkin asked__',
+        answer: '"Was Duke Ellington famous?" Punkin asked.',
+        hint: 'Question mark belongs inside the quote; dialogue tag ends with a period.',
+        gapAnswers: ['?', '.'],
+        gapOptions: [
+          ['?', ',', '.', '!'],
+          ['.', '?', ',', '!']
+        ]
+      },
+      {
+        section: 'B',
+        prompt: '"He sure was__" Miss Ida exclaimed__',
+        answer: '"He sure was!" Miss Ida exclaimed.',
+        hint: 'When a quote continues to a dialogue tag, use a comma before the closing quote.',
+        gapAnswers: ['!', '.'],
+        gapOptions: [
+          ['!', '.', '?', ','],
+          ['.', '!', '?', ',']
+        ]
+      },
+      {
+        section: 'B',
+        prompt: '"I not only met him__" Poissant explained__ "but I was sitting in the parlor when he sat down at the piano and started to play__"',
+        answer: '"I not only met him," Poissant explained, "but I was sitting in the parlor when he sat down at the piano and started to play."',
+        hint: 'In interrupted dialogue, use commas around the dialogue tag and end with punctuation inside the last quote.',
+        gapAnswers: [',', ',', '.'],
+        gapOptions: [
+          [',', '.', '?', '!'],
+          [',', '.', '?', '!'],
+          ['.', '?', '!', ',']
+        ]
+      },
+      {
+        section: 'C',
+        prompt: '__Duke\'s playing sure heated up that little room__ __ exclaimed Poissant__',
+        answer: '"Duke\'s playing sure heated up that little room!" exclaimed Poissant.',
+        hint: 'Add opening and closing quotation marks and keep end punctuation in the quote.',
+        gapAnswers: ['"', '!', '"', '.'],
+        gapOptions: [
+          ['"', "'", '(', '-'],
+          ['!', '.', '?', ','],
+          ['"', "'", ')', '-'],
+          ['.', '?', ',', '!']
+        ]
+      },
+      {
+        section: 'C',
+        prompt: '__Did any other famous people stay at your house__ __ asked Freda__',
+        answer: '"Did any other famous people stay at your house?" asked Freda.',
+        hint: 'Question mark stays inside the quote, then dialogue tag ends with a period.',
+        gapAnswers: ['"', '?', '"', '.'],
+        gapOptions: [
+          ['"', "'", '(', '-'],
+          ['?', '.', ',', '!'],
+          ['"', "'", ')', '-'],
+          ['.', '?', ',', '!']
+        ]
+      },
+      {
+        section: 'C',
+        prompt: '__No__ __ said Poissant__ __ but Lena Horne once stayed at Miss Jackson\'s house__ __',
+        answer: '"No," said Poissant, "but Lena Horne once stayed at Miss Jackson\'s house."',
+        hint: 'Use quotes around both spoken parts and commas around the dialogue tag.',
+        gapAnswers: ['"', ',', '"', ',', '"', '.', '"'],
+        gapOptions: [
+          ['"', "'", '(', '-'],
+          [',', '.', '?', '!'],
+          ['"', "'", ')', '-'],
+          [',', '.', '?', '!'],
+          ['"', "'", '(', '-'],
+          ['.', '?', '...', ','],
+          ['"', "'", ')', '-']
+        ]
+      },
+      {
+        section: 'C',
+        prompt: 'Then he added__ __However__ that is a story for another day__ __',
+        answer: 'Then he added, "However, that is a story for another day."',
+        hint: 'Put the spoken sentence in quotation marks and set off However with a comma.',
+        gapAnswers: [',', '"', ',', '.', '"'],
+        gapOptions: [
+          [',', '.', '?', '!'],
+          ['"', "'", '(', '-'],
+          [',', '.', '?', '!'],
+          ['.', '?', '...', ','],
+          ['"', "'", ')', '-']
+        ]
+      }
+    ];
+
+    const sectionInstructions = {
+      A: 'Section A. Tap each word the speaker actually said to underline it, then press Check.',
+      B: 'Section B. Use each dropdown to add the missing dialogue punctuation mark in that gap.',
+      C: 'Section C. Fill every gap with the punctuation or quote mark that makes the dialogue correct.'
+    };
+
+    const sectionLongLabels = {
+      A: 'Section A - Add quotation marks',
+      B: 'Section B - Add missing dialogue punctuation',
+      C: 'Section C - Restore all punctuation and quotes'
+    };
+
+    const SECTION_A_TARGETS = {
+      0: [0, 1, 2, 3, 4, 5, 6, 7],
+      1: [2, 3, 4],
+      2: [0, 1, 2],
+      3: [0, 1, 2, 3]
+    };
+
+    const GAP_OPTION_VALUES = [',', '.', '?', '!', '"'];
+
+    function gapCountFor(q) {
+      return q.prompt.split('__').length - 1;
+    }
+
+    function makeEmptyAnswerFor(q) {
+      if (q.section === 'A') return '';
+      return new Array(gapCountFor(q)).fill('');
+    }
+
+    function makeInitialAnswers() {
+      return questions.map((q) => makeEmptyAnswerFor(q));
+    }
+
+    function isAnswerComplete(i) {
+      const q = questions[i];
+      if (q.section === 'A') return userAnswers[i] === '__A_OK__';
+      const arr = Array.isArray(userAnswers[i]) ? userAnswers[i] : [];
+      return arr.length === gapCountFor(q) && arr.every((v) => !!v);
+    }
+
+    function isAnswerCorrect(i) {
+      const q = questions[i];
+      if (q.section === 'A') return userAnswers[i] === '__A_OK__';
+      if (!isAnswerComplete(i)) return false;
+      const arr = userAnswers[i];
+      for (let g = 0; g < q.gapAnswers.length; g++) {
+        if (arr[g] !== q.gapAnswers[g]) return false;
+      }
+      return true;
+    }
+
+    function buildLineFromGaps(q, picks, useAnswerFallback) {
+      const parts = q.prompt.split('__');
+      let out = '';
+      for (let g = 0; g < parts.length - 1; g++) {
+        const val = picks && picks[g]
+          ? picks[g]
+          : (useAnswerFallback ? q.gapAnswers[g] : '...');
+        out += parts[g] + val;
+      }
+      out += parts[parts.length - 1];
+      return out;
+    }
+
+    let userAnswers = makeInitialAnswers();
+    let sectionASelections = {
+      0: [],
+      1: [],
+      2: [],
+      3: []
+    };
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.88;
+      utter.pitch = 1.05;
+      utter.onstart = showToast;
+      utter.onend = hideToast;
+      utter.onerror = hideToast;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function showToast() {
+      document.getElementById('speakingToast').classList.add('visible');
+    }
+
+    function hideToast() {
+      document.getElementById('speakingToast').classList.remove('visible');
+    }
+
+    function cancelSpeak() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      hideToast();
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        userAnswers,
+        sectionASelections
+      }));
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length === questions.length) {
+          parsed = { userAnswers: parsed };
+        }
+        if (parsed && Array.isArray(parsed.userAnswers) && parsed.userAnswers.length === questions.length) {
+          userAnswers = questions.map((q, i) => {
+            const val = parsed.userAnswers[i];
+            if (q.section === 'A') {
+              return val === '__A_OK__' ? '__A_OK__' : '';
+            }
+            const expectedLength = gapCountFor(q);
+            if (Array.isArray(val)) {
+              const out = val.slice(0, expectedLength).map((x) => (typeof x === 'string' ? x : ''));
+              while (out.length < expectedLength) out.push('');
+              return out;
+            }
+            // Migration from old whole-sentence select model.
+            if (typeof val === 'string' && val === q.answer) {
+              return q.gapAnswers.slice();
+            }
+            return new Array(expectedLength).fill('');
+          });
+          if (parsed.sectionASelections && typeof parsed.sectionASelections === 'object') {
+            sectionASelections = {
+              0: Array.isArray(parsed.sectionASelections[0]) ? parsed.sectionASelections[0] : [],
+              1: Array.isArray(parsed.sectionASelections[1]) ? parsed.sectionASelections[1] : [],
+              2: Array.isArray(parsed.sectionASelections[2]) ? parsed.sectionASelections[2] : [],
+              3: Array.isArray(parsed.sectionASelections[3]) ? parsed.sectionASelections[3] : []
+            };
+          }
+        }
+      } catch (err) {
+        userAnswers = makeInitialAnswers();
+        sectionASelections = { 0: [], 1: [], 2: [], 3: [] };
+      }
+    }
+
+    function tokenizePrompt(prompt) {
+      return prompt.split(' ');
+    }
+
+    function renderSectionALine(lineText, q, i) {
+      const isChecked = userAnswers[i] === '__A_OK__';
+      lineText.className = 'line-text';
+      lineText.id = 'line-text-' + i;
+      lineText.innerHTML = '';
+
+      if (isChecked) {
+        lineText.textContent = q.answer;
+        lineText.title = 'Tap to hear the corrected sentence';
+        lineText.style.cursor = 'pointer';
+        lineText.onclick = function() {
+          speak(q.answer);
+        };
+        return;
+      }
+
+      lineText.classList.add('word-select-line');
+      lineText.title = 'Tap words in this sentence to mark what was spoken';
+      lineText.style.cursor = 'default';
+      lineText.onclick = null;
+
+      const words = tokenizePrompt(q.prompt);
+      const selectedSet = new Set(sectionASelections[i] || []);
+      const selectedList = Array.from(selectedSet).sort((a, b) => a - b);
+      const firstSelected = selectedList.length ? selectedList[0] : -1;
+      const lastSelected = selectedList.length ? selectedList[selectedList.length - 1] : -1;
+
+      function appendQuoteMark(parent) {
+        const qMark = document.createElement('span');
+        qMark.className = 'quote-mark';
+        qMark.textContent = '"';
+        parent.appendChild(qMark);
+      }
+
+      words.forEach((word, wi) => {
+        if (wi === firstSelected) {
+          appendQuoteMark(lineText);
+        }
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sentence-word';
+        btn.textContent = word;
+        if (selectedSet.has(wi)) btn.classList.add('selected');
+        btn.onclick = function() {
+          const curr = new Set(sectionASelections[i] || []);
+          if (curr.has(wi)) {
+            curr.delete(wi);
+            btn.classList.remove('selected');
+          } else {
+            curr.add(wi);
+            btn.classList.add('selected');
+          }
+          sectionASelections[i] = Array.from(curr).sort((a, b) => a - b);
+          userAnswers[i] = '';
+          const fb = document.getElementById('fb-' + i);
+          const c = document.getElementById('card-' + i);
+          const cb = document.getElementById('check-a-' + i);
+          if (fb) fb.className = 'feedback';
+          if (c) c.classList.remove('correct');
+          if (cb) cb.classList.remove('done');
+          renderIdentifiedLine(i);
+          saveState();
+          updateProgress();
+        };
+        lineText.appendChild(btn);
+
+        if (wi === lastSelected) {
+          appendQuoteMark(lineText);
+        }
+      });
+    }
+
+    function isSectionACorrect(i) {
+      const targets = SECTION_A_TARGETS[i] || [];
+      const selected = (sectionASelections[i] || []).slice().sort((a, b) => a - b);
+      if (selected.length !== targets.length) return false;
+      for (let k = 0; k < targets.length; k++) {
+        if (selected[k] !== targets[k]) return false;
+      }
+      return true;
+    }
+
+    function checkSectionA(i) {
+      const q = questions[i];
+      const fb = document.getElementById('fb-' + i);
+      const card = document.getElementById('card-' + i);
+      const lineText = document.getElementById('line-text-' + i);
+      const checkBtn = document.getElementById('check-a-' + i);
+      if (!fb || !card) return;
+
+      const pass = isSectionACorrect(i);
+      if (pass) {
+        userAnswers[i] = '__A_OK__';
+        fb.className = 'feedback show correct';
+        fb.textContent = '✅ Great! You underlined exactly what the speaker said.';
+        card.classList.add('correct');
+        if (checkBtn) checkBtn.classList.add('done');
+        if (lineText) renderSectionALine(lineText, q, i);
+      } else {
+        userAnswers[i] = '';
+        fb.className = 'feedback show hint';
+        fb.textContent = '💡 Hint: Underline only the exact spoken words, not the dialogue tag.';
+        card.classList.remove('correct');
+        if (checkBtn) checkBtn.classList.remove('done');
+      }
+
+      renderIdentifiedLine(i);
+      saveState();
+      updateProgress();
+    }
+
+    function checkAnswer(i) {
+      const q = questions[i];
+      const fb = document.getElementById('fb-' + i);
+      const card = document.getElementById('card-' + i);
+
+      // During initial card construction, elements are not yet in the live DOM.
+      if (!fb || !card) return;
+
+      if (!isAnswerComplete(i)) {
+        fb.className = 'feedback';
+        card.classList.remove('correct');
+        return;
+      }
+
+      const pass = isAnswerCorrect(i);
+      fb.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+      fb.textContent = pass ? '✅ Nice punctuation!' : '💡 Hint: ' + q.hint;
+      card.classList.toggle('correct', pass);
+    }
+
+    function updateProgress() {
+      let answered = 0;
+      userAnswers.forEach((_, i) => {
+        if (isAnswerComplete(i)) answered++;
+      });
+
+      document.getElementById('progressText').textContent = answered + ' / ' + questions.length + ' answered';
+      for (let i = 0; i < questions.length; i++) {
+        const pip = document.getElementById('pip-' + i);
+        pip.classList.toggle('done', isAnswerComplete(i));
+      }
+    }
+
+    function clearAllResponses() {
+      const btn = document.getElementById('clearBtn');
+      if (!btn) return;
+
+      if (btn.dataset.confirming === 'true') {
+        userAnswers = makeInitialAnswers();
+        sectionASelections = { 0: [], 1: [], 2: [], 3: [] };
+        try { localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+        render();
+        speak('All responses cleared. You can start again from section A.');
+        return;
+      }
+
+      btn.dataset.confirming = 'true';
+      btn.textContent = '⚠️ Tap again to confirm';
+      btn.style.background = '#ffeedd';
+      btn.style.color = '#c05000';
+      btn.style.borderColor = '#c05000';
+      setTimeout(() => {
+        if (btn.dataset.confirming === 'true') {
+          btn.dataset.confirming = 'false';
+          btn.textContent = '🗑️ Clear all responses';
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }
+      }, 3000);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function identifiedTextFor(q, i) {
+      if (q.section === 'A') {
+        const words = tokenizePrompt(q.prompt);
+        const selected = (sectionASelections[i] || []).slice().sort((a, b) => a - b);
+        if (!selected.length) return 'Not answered yet';
+        const first = selected[0];
+        const last = selected[selected.length - 1];
+        let spoken = '';
+        for (let wi = first; wi <= last; wi++) {
+          spoken += words[wi] + (wi < last ? ' ' : '');
+        }
+        return '"' + spoken + '"';
+      }
+
+      const parts = q.prompt.split('__');
+      const picks = Array.isArray(userAnswers[i]) ? userAnswers[i] : [];
+      let out = '';
+      for (let g = 0; g < parts.length - 1; g++) {
+        out += parts[g] + (picks[g] || '_');
+      }
+      return out + parts[parts.length - 1];
+    }
+
+    function identifiedPartAHtml(q, i) {
+      const words = tokenizePrompt(q.prompt);
+      const selectedList = (sectionASelections[i] || []).slice().sort((a, b) => a - b);
+      const selected = new Set(selectedList);
+      const firstSelected = selectedList.length ? selectedList[0] : -1;
+      const lastSelected = selectedList.length ? selectedList[selectedList.length - 1] : -1;
+      return words.map((word, wi) => {
+        const safeWord = escapeHtml(word);
+        let out = '';
+        if (wi === firstSelected) out += '<span class="a-quote">"</span>';
+        out += selected.has(wi)
+          ? '<span class="a-underlined">' + safeWord + '</span>'
+          : safeWord;
+        if (wi === lastSelected) out += '<span class="a-quote">"</span>';
+        return out;
+      }).join(' ');
+    }
+
+    function exportPrint() {
+      const today = new Date().toLocaleDateString();
+      let cardsHtml = '';
+
+      let activeSection = '';
+      let sectionItemNumber = 0;
+      questions.forEach((q, i) => {
+        if (q.section !== activeSection) {
+          activeSection = q.section;
+          sectionItemNumber = 0;
+          cardsHtml += '<div class="print-section">' + escapeHtml(sectionLongLabels[q.section]) + '</div>';
+        }
+
+        sectionItemNumber += 1;
+        const lineHtml = q.section === 'A'
+          ? identifiedPartAHtml(q, i)
+          : escapeHtml(identifiedTextFor(q, i));
+
+        cardsHtml +=
+          '<div class="print-card">' +
+            '<div class="print-line"><strong>' + sectionItemNumber + '.</strong> ' + lineHtml + '</div>' +
+          '</div>';
+      });
+
+      const html =
+`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialogue and Quotations - Export</title>
+  <style>
+    body { font-family: Georgia, 'Times New Roman', serif; margin: 24px; color: #111; }
+    h1 { margin: 0 0 10px; font-size: 1.8rem; }
+    .subtitle { margin: 0 0 14px; font-size: 1rem; }
+    .name-line { display: flex; gap: 20px; margin: 12px 0 18px; font-size: 0.95rem; }
+    .name-line span { display: flex; align-items: flex-end; gap: 6px; }
+    .name-line .line { display: inline-block; width: 220px; border-bottom: 1.5px solid #333; }
+    .print-section { margin: 14px 0 8px; padding: 6px 8px; border: 1px solid #aaa; font-weight: 700; background: #f4f4f4; }
+    .print-card { border: 1px solid #d3d3d3; padding: 10px; margin-bottom: 8px; }
+    .print-line { line-height: 1.45; margin-top: 4px; }
+    .a-underlined { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 2px; }
+    .a-quote { font-weight: 700; }
+    .print-action { margin: 0 0 16px; }
+    .print-action button { padding: 8px 14px; border-radius: 8px; border: 1px solid #444; background: #f5f5f5; cursor: pointer; }
+    .footer { margin-top: 18px; font-size: 0.88rem; color: #444; }
+    @media print { button { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="print-action"><button onclick="window.print()">Print Worksheet</button></div>
+  <h1>Dialogue and Quotations</h1>
+  <p class="subtitle">Fill each gap to build the correctly punctuated dialog8ue line.</p>
+  <div class="name-line">
+    <span>Name: <span class="line">Tina #18</span></span>
+    <span>Date: <span class="line">${escapeHtml(today)}</span></span>
+  </div>
+  ${cardsHtml}
+  <div class="footer">Source: Scholastic Success With Grammar, Grade 5.</div>
+</body>
+</html>`;
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+
+    function sectionClass(section) {
+      if (section === 'A') return 'section-a';
+      if (section === 'B') return 'section-b';
+      return 'section-c';
+    }
+
+    function renderGapLine(lineText, q, i) {
+      const picks = Array.isArray(userAnswers[i]) ? userAnswers[i] : makeEmptyAnswerFor(q);
+      const parts = q.prompt.split('__');
+
+      lineText.className = 'line-text word-select-line';
+      lineText.id = 'line-text-' + i;
+      lineText.innerHTML = '';
+      lineText.title = 'Fill each gap with the best punctuation mark';
+      lineText.style.cursor = 'default';
+      lineText.onclick = null;
+
+      function makeReadableSpan(text) {
+        const trimmed = text.trim();
+        if (!trimmed) return document.createTextNode(text);
+        const span = document.createElement('span');
+        span.className = 'readable-span';
+        span.textContent = text;
+        span.title = 'Tap to hear this part';
+        span.onclick = function() { speak(trimmed); };
+        return span;
+      }
+
+      for (let g = 0; g < parts.length - 1; g++) {
+        lineText.appendChild(makeReadableSpan(parts[g]));
+
+        const sel = document.createElement('select');
+        sel.className = 'gap-select';
+        sel.setAttribute('aria-label', 'Gap ' + (g + 1));
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = '';
+        sel.appendChild(defaultOpt);
+
+        GAP_OPTION_VALUES.forEach((opt) => {
+          const el = document.createElement('option');
+          el.value = opt;
+          el.textContent = opt;
+          sel.appendChild(el);
+        });
+
+        sel.value = picks[g] || '';
+        sel.onchange = function() {
+          const next = Array.isArray(userAnswers[i]) ? userAnswers[i].slice() : makeEmptyAnswerFor(q);
+          next[g] = sel.value;
+          userAnswers[i] = next;
+          saveState();
+          updateProgress();
+          checkAnswer(i);
+          renderIdentifiedLine(i);
+        };
+
+        lineText.appendChild(sel);
+      }
+
+      lineText.appendChild(makeReadableSpan(parts[parts.length - 1]));
+    }
+
+    function fillIdentifiedLine(container, q, i) {
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (q.section === 'A') {
+        const words = tokenizePrompt(q.prompt);
+        const selected = (sectionASelections[i] || []).slice().sort((a, b) => a - b);
+        if (!selected.length) {
+          container.innerHTML = '<span class="identified-placeholder">Tap words to show the quoted speech here.</span>';
+          return;
+        }
+
+        const first = selected[0];
+        const last = selected[selected.length - 1];
+        const openQuote = document.createElement('span');
+        openQuote.className = 'identified-mark';
+        openQuote.textContent = '"';
+        container.appendChild(openQuote);
+
+        for (let wi = first; wi <= last; wi++) {
+          const span = document.createElement('span');
+          const text = words[wi] + (wi < last ? ' ' : '');
+          span.textContent = text;
+          if (selected.includes(wi)) {
+            span.className = 'identified-mark';
+          }
+          container.appendChild(span);
+        }
+
+        const closeQuote = document.createElement('span');
+        closeQuote.className = 'identified-mark';
+        closeQuote.textContent = '"';
+        container.appendChild(closeQuote);
+        return;
+      }
+
+      const parts = q.prompt.split('__');
+      const picks = Array.isArray(userAnswers[i]) ? userAnswers[i] : [];
+      for (let g = 0; g < parts.length - 1; g++) {
+        const textSpan = document.createElement('span');
+        textSpan.textContent = parts[g];
+        container.appendChild(textSpan);
+
+        const pick = picks[g] || '';
+        const markSpan = document.createElement('span');
+        if (pick) {
+          markSpan.className = 'identified-mark';
+          markSpan.textContent = pick;
+        } else {
+          markSpan.className = 'identified-placeholder';
+          markSpan.textContent = '_';
+        }
+        container.appendChild(markSpan);
+      }
+
+      const tail = document.createElement('span');
+      tail.textContent = parts[parts.length - 1];
+      container.appendChild(tail);
+    }
+
+    function renderIdentifiedLine(i) {
+      const q = questions[i];
+      const line = document.getElementById('identified-line-' + i);
+      fillIdentifiedLine(line, q, i);
+    }
+
+    function buildCard(q, i, displayNumber) {
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      card.id = 'card-' + i;
+
+      const top = document.createElement('div');
+      top.className = 'row-top';
+
+      const left = document.createElement('div');
+
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = displayNumber + '.';
+
+      left.appendChild(num);
+
+      const playBtn = document.createElement('button');
+      playBtn.className = 'play-btn';
+      playBtn.title = 'Read this item aloud';
+      playBtn.textContent = '▶';
+      playBtn.onclick = function() {
+        const selected = q.section === 'A'
+          ? (userAnswers[i] === '__A_OK__' ? q.answer : q.prompt)
+          : buildLineFromGaps(q, userAnswers[i], false);
+        speak(selected);
+      };
+
+      top.appendChild(left);
+      top.appendChild(playBtn);
+
+      const lineLabel = document.createElement('div');
+      lineLabel.className = 'line-label';
+      lineLabel.textContent = 'Original line';
+
+      const lineText = document.createElement('div');
+      lineText.className = 'line-text';
+      lineText.id = 'line-text-' + i;
+      lineText.textContent = q.prompt;
+
+      if (q.section !== 'A') {
+        renderGapLine(lineText, q, i);
+      } else {
+        renderSectionALine(lineText, q, i);
+      }
+
+      const fb = document.createElement('div');
+      fb.id = 'fb-' + i;
+      fb.className = 'feedback';
+
+      card.appendChild(top);
+      card.appendChild(lineLabel);
+
+      if (q.section === 'A') {
+        const lineRow = document.createElement('div');
+        lineRow.className = 'a-line-row';
+
+        const checkBtn = document.createElement('button');
+        checkBtn.type = 'button';
+        checkBtn.className = 'check-btn';
+        checkBtn.id = 'check-a-' + i;
+        checkBtn.textContent = '✓';
+        checkBtn.title = 'Check underlines';
+        if (userAnswers[i] === '__A_OK__') checkBtn.classList.add('done');
+        checkBtn.onclick = function() {
+          checkSectionA(i);
+        };
+
+        lineRow.appendChild(lineText);
+        lineRow.appendChild(checkBtn);
+        card.appendChild(lineRow);
+      } else {
+        card.appendChild(lineText);
+      }
+
+      card.appendChild(fb);
+
+      const identifiedWrap = document.createElement('div');
+      identifiedWrap.className = 'identified-wrap';
+
+      const identifiedLabel = document.createElement('div');
+      identifiedLabel.className = 'identified-label';
+      identifiedLabel.textContent = q.section === 'A'
+        ? 'Your identified spoken words'
+        : 'Your identified punctuation';
+
+      const identifiedLine = document.createElement('div');
+      identifiedLine.className = 'identified-line';
+      identifiedLine.id = 'identified-line-' + i;
+
+      identifiedWrap.appendChild(identifiedLabel);
+      identifiedWrap.appendChild(identifiedLine);
+      card.appendChild(identifiedWrap);
+
+      fillIdentifiedLine(identifiedLine, q, i);
+
+      if (q.section === 'A' && userAnswers[i] === '__A_OK__') {
+        checkSectionA(i);
+      }
+
+      if (q.section !== 'A') {
+        checkAnswer(i);
+      }
+
+      return card;
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      app.innerHTML = '';
+
+      const titleCard = document.createElement('div');
+      titleCard.className = 'title-card';
+      titleCard.innerHTML =
+        '<h1>Dialogue and Quotations</h1>' +
+        '<p class="subtitle">Fill each gap to build the correctly punctuated dialogue line.</p>';
+      app.appendChild(titleCard);
+
+      const globalInstructions = document.createElement('div');
+      globalInstructions.className = 'instructions';
+      globalInstructions.textContent = '🔊 Tap for directions';
+      globalInstructions.onclick = function() {
+        speak('You will complete sections A, B, and C in one page. In section A, tap words to underline what the speaker said, then press Check underlines. In sections B and C, choose the best punctuation and quotation marks.');
+      };
+      app.appendChild(globalInstructions);
+
+      const progressCard = document.createElement('div');
+      progressCard.className = 'progress-card';
+
+      const pips = document.createElement('div');
+      pips.className = 'pips';
+      for (let i = 0; i < questions.length; i++) {
+        const pip = document.createElement('span');
+        pip.className = 'pip';
+        pip.id = 'pip-' + i;
+        pips.appendChild(pip);
+      }
+
+      const progressText = document.createElement('div');
+      progressText.id = 'progressText';
+      progressText.className = 'progress-text';
+
+      progressCard.appendChild(pips);
+      progressCard.appendChild(progressText);
+      app.appendChild(progressCard);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      actions.innerHTML =
+        '<button class="clear-btn" id="clearBtn" onclick="clearAllResponses()">🗑️ Clear all responses</button>' +
+        '&nbsp;' +
+        '<button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>';
+      app.appendChild(actions);
+
+      let activeSection = '';
+      let sectionItemNumber = 0;
+      questions.forEach((q, i) => {
+        if (q.section !== activeSection) {
+          activeSection = q.section;
+          sectionItemNumber = 0;
+          const header = document.createElement('div');
+          header.className = 'section-header ' + sectionClass(q.section);
+          header.textContent = sectionLongLabels[q.section];
+          header.title = 'Tap to hear section directions';
+          header.onclick = function() {
+            speak(sectionInstructions[q.section]);
+          };
+          app.appendChild(header);
+        }
+
+        sectionItemNumber += 1;
+        app.appendChild(buildCard(q, i, sectionItemNumber));
+      });
+
+      updateProgress();
+    }
+
+    loadState();
+    render();
+  </script>
+</body>
+</html>

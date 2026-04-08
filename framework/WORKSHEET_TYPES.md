@@ -560,6 +560,56 @@ For subject-verb agreement worksheets that include a **verb-form selection subpa
 
 ---
 
+## Type 11: Dialogue and Quotations (Quote Scope + Punctuation Repair)
+
+*A dialogue worksheet where the student restores quotation punctuation. In Part A, the student first marks exactly which words were spoken. In later parts, the student selects the correctly punctuated full line.*
+
+**Use case:** Multi-part dialogue worksheets with mixed direct speech and dialogue tags (for example, lines like `What's for lunch? Bob asked.`).
+
+**Data shape (Part A quote-scope cards):**
+
+```javascript
+{
+  section: "A",
+  prompt: "What's for lunch? Bob asked.",
+  spokenWordIndexes: [0, 1, 2],
+  correctedSentence: '"What\'s for lunch?" Bob asked.'
+}
+```
+
+**Data shape (Parts B/C punctuation-repair cards):**
+
+```javascript
+{
+  section: "B",
+  prompt: '"Was Duke Ellington famous__" Punkin asked__',
+  answer: '"Was Duke Ellington famous?" Punkin asked.',
+  options: [
+    '"Was Duke Ellington famous?" Punkin asked.',
+    '"Was Duke Ellington famous"? Punkin asked.',
+    '"Was Duke Ellington famous?" Punkin asked?'
+  ],
+  hint: "Question mark belongs inside the quote; dialogue tag ends with a period."
+}
+```
+
+**Answer controls:**
+
+- Part A: inline tappable words + compact `✓` verify button at the right edge of the sentence
+- Parts B/C: constrained dropdown with full-sentence options
+
+**Interaction decisions:**
+
+- Part A tokens should appear as regular text (not chip bubbles) while remaining tappable
+- Part A verify pass auto-rewrites the line to the corrected quoted sentence
+- Part A verify fail keeps controls live and shows a concept hint
+- Green ▶ play button is always present per card; it reads original text until Part A is verified, then reads corrected text
+- Progress pips advance only when the card is verified (Part A) or answered (Parts B/C)
+
+**Reference implementation:** `worksheets/christina/2026-04-07-dialogue-quotations.html`
+
+---
+
 ## Adding a New Type
 
 When you implement a worksheet that doesn't match an existing type:

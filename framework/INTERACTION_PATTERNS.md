@@ -73,6 +73,8 @@ if (val) setTimeout(() => speak(buildFullSentence(q, val)), 300);
 
 The 300ms delay makes the read-back feel intentional rather than immediate/jarring.
 
+**Do not auto-read when an answer is marked correct or when all gaps are filled.** The play button and tappable sentence segments already give on-demand access to the full sentence. Auto-reading on completion is disruptive and has been removed from worksheets where it was initially added. Only auto-read on an explicit selection change (i.e. the student just picked something), and only when the interaction model calls for it (see Play Button Gating below).
+
 ### Part-of-Sentence Tap-to-Speak
 
 Used when a sentence is rendered in segments (e.g. `before` text + choice chip + `after` text). Each segment speaks **only its own text** on tap, rather than the full sentence. The full sentence is still accessible via the green ▶ play button.
@@ -97,6 +99,112 @@ playBtn.onclick = function() { speak(buildSentence(q, userAnswers[i])); };
 ```
 
 **When to use:** Any worksheet where a sentence contains an inline widget (dropdown, input) that breaks the sentence into segments. Prefer this over tapping-reads-full-sentence when the segments are long enough to be independently meaningful.
+
+### Gap-Fill Tappable Segments (Type: `__` delimiter)
+
+Used when a prompt is stored with `__` markers for inline gap dropdowns (e.g. dialogue punctuation worksheets). Split the prompt on `__` and render each text segment as a tappable span; each `__` position becomes a `<select>`.
+
+```javascript
+const GAP_OPTION_VALUES = [',', '.', '?', '!', '"'];
+
+function renderGapLine(container, q, i) {
+  const parts = q.prompt.split('__');
+
+  function makeReadableSpan(text) {
+    const trimmed = text.trim();
+    if (!trimmed) return document.createTextNode(text);
+    const span = document.createElement('span');
+    span.className = 'readable-span';
+    span.textContent = text;
+    span.title = 'Tap to hear this part';
+    span.onclick = function() { speak(trimmed); };
+    return span;
+  }
+
+  for (let g = 0; g < parts.length - 1; g++) {
+    container.appendChild(makeReadableSpan(parts[g]));
+    const sel = document.createElement('select');
+    sel.className = 'gap-select';
+    // first option is blank — no default selected
+    const blank = document.createElement('option');
+    blank.value = ''; blank.textContent = '';
+    sel.appendChild(blank);
+    GAP_OPTION_VALUES.forEach((opt) => {
+      const el = document.createElement('option');
+      el.value = opt; el.textContent = opt;
+      sel.appendChild(el);
+    });
+    sel.value = picks[g] || '';
+    sel.onchange = function() { /* update state, save, checkAnswer */ };
+    container.appendChild(sel);
+  }
+  container.appendChild(makeReadableSpan(parts[parts.length - 1]));
+}
+```
+
+```css
+.readable-span {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0 1px;
+  transition: background 0.15s;
+}
+.readable-span:hover { background: #daeeff; }
+
+.gap-select {
+  min-height: 44px;
+  min-width: 70px;
+  max-width: 150px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--accent-blue-dk);
+  background: #e8f4ff;
+  border: 2.5px solid var(--accent-blue);
+  border-radius: 8px;
+  padding: 4px 6px;
+  margin: 0 2px;
+  vertical-align: baseline;
+  cursor: pointer;
+  outline: none;
+}
+.gap-select:focus { border-color: var(--accent-blue-dk); background: #d5edff; }
+```
+
+**Option list convention:** Use a single fixed set `[',', '.', '?', '!', '"']` for all gaps so the student is never given implicit hints from differing option counts. Always blank first option — no default selected. Do not vary the list per question.
+
+**Completeness check:** A gap-fill item is considered answered only when every `__` gap has a non-empty selection. The play button reads the line with current gap values substituted (empty gaps shown as `...`).
+
+**Do not auto-read on completion.** See the note under Auto-read after answer selection above.
+
+### Section-local Question Numbering (Multi-part Worksheets)
+
+For worksheets split into labeled parts (for example Part A, Part B, Part C), question numbers should restart within each part instead of continuing globally.
+
+Use a section counter in `render()` and pass the section-local number to card construction:
+
+```javascript
+let activeSection = '';
+let sectionItemNumber = 0;
+
+questions.forEach((q, i) => {
+  if (q.section !== activeSection) {
+    activeSection = q.section;
+    sectionItemNumber = 0;
+    // render section header
+  }
+
+  sectionItemNumber += 1;
+  app.appendChild(buildCard(q, i, sectionItemNumber));
+});
+
+function buildCard(q, i, displayNumber) {
+  // ...
+  num.textContent = displayNumber + '.';
+}
+```
+
+This keeps numbering aligned with workbook conventions (A: 1-4, B: 1-4, C: 1-4) and avoids cross-part counting drift.
 
 ### Play Button Gating (Type 6 / Binary Choice)
 
@@ -376,6 +484,46 @@ if (state.foundErrors[i].includes(wi)) {
 ```
 
 Do NOT block the visual `.selected` highlight from appearing on already-found words — removing that guard caused taps to appear to do nothing, making the interface feel broken.
+
+### Inline Word Toggle + Compact Verify Button (Quote Scope)
+
+Use this pattern when the student must mark a contiguous spoken quote inside a mixed sentence (spoken words + dialogue tag), without using a dropdown.
+
+**When to use:** Dialogue/quotation exercises where the first step is identifying exactly which words were said, before punctuation is added.
+
+**Interaction decisions:**
+
+- Render the original sentence as regular inline text tokens (not chip bubbles)
+- Each token is tappable and toggles selected state (for example, red + underline)
+- Place a compact `✓` verify button to the right of the sentence row instead of a full-width action button
+- Pressing `✓` validates the selected word indices against an answer-key index list
+- On pass: convert the sentence display to the corrected version with quotation marks inserted automatically
+- On fail: keep controls active, show a concept hint, and do not lock the card
+- Keep the green per-card ▶ button; before pass it reads the original sentence, after pass it reads the corrected quoted sentence
+
+```javascript
+function checkQuoteScope(i) {
+  const pass = arraysEqual(sorted(state.selectedWords[i]), answerKey[i].spokenWordIndexes);
+  if (pass) {
+    state.verified[i] = true;
+    lineEl.textContent = answerKey[i].correctedSentence; // auto-insert quotes
+    checkBtn.classList.add('done');
+    showFeedback(`fb-${i}`, true, 'Great! You marked exactly what was said.');
+  } else {
+    state.verified[i] = false;
+    checkBtn.classList.remove('done');
+    showFeedback(`fb-${i}`, false, 'Underline only the exact spoken words, not the dialogue tag.');
+  }
+  saveState();
+  updateProgress();
+}
+```
+
+```css
+.sentence-word.selected { color: #a91f1f; text-decoration: underline; }
+.check-btn { width: 44px; height: 44px; border-radius: 10px; }
+.check-btn.done { background: #5dca7e; border-color: #3aaa5a; color: #fff; }
+```
 
 ### Sequential Multi-Target Tap Flow
 
