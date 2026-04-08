@@ -610,6 +610,62 @@ For subject-verb agreement worksheets that include a **verb-form selection subpa
 
 ---
 
+## Type 12: Dialogue and Quotations (Direct/Indirect + Punctuation Builder + Rewrite)
+
+*A three-part dialogue worksheet: classify direct vs indirect quotations, repair punctuation/capitalization by tapping words and spaces, then rewrite indirect quotations as direct quotations in free text.*
+
+**Use case:** Mixed-skills dialogue worksheets where one page combines quote-type identification, quote punctuation editing, and direct-quotation rewriting.
+
+**Part A data shape (paired sentence classification):**
+
+```javascript
+{
+  a: '"I have a dream," Martin Luther King, Jr., stated.',
+  b: 'Martin Luther King, Jr., said that he had a dream.',
+  answerA: 'direct',
+  answerB: 'indirect'
+}
+```
+
+**Part B data shape (word + space-slot sentence builder):**
+
+```javascript
+{
+  raw: 'You must do the thing you think you cannot do Eleanor Roosevelt advised',
+  target: '"You must do the thing you think you cannot do," Eleanor Roosevelt advised.'
+}
+```
+
+**Part C data shape (free-text with accepted variants):**
+
+```javascript
+{
+  accepted: [
+    'I told my friends, "I\'m glad you came."',
+    'I told my friends, "I am glad you came."'
+  ]
+}
+```
+
+**Answer controls:**
+
+- Part A: two dropdowns per item (`direct` / `indirect`) plus compact per-card check button
+- Part B: tappable words (toggle capitalization) + tappable space slots cycling `space -> . -> , -> "` + compact per-card check button
+- Part C: free-text area + per-card validate button
+
+**Interaction decisions:**
+
+- Part A feedback is deferred: show hints/correctness only after tapping the card check button
+- Part B allows punctuation stacking in a single original gap by auto-maintaining a trailing space slot after punctuation
+- Part B validation compares target and built sentence with whitespace removed; punctuation/capitalization must still match exactly
+- Part B play button reads the target sentence (audio model), not the in-progress built sentence
+- Part C accepts multiple equivalent correct phrasings via an `accepted` array
+- Part C should not show a visible target-answer line unless explicitly requested
+
+**Reference implementation:** `worksheets/reference/2026-04-07-dialogue-quotations-direct-indirect.html`
+
+---
+
 ## Adding a New Type
 
 When you implement a worksheet that doesn't match an existing type:

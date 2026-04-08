@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialogue and Quotations - Direct and Indirect</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-start: #e0f4ff;
+      --bg-end: #f0e8ff;
+      --card-bg: #ffffff;
+      --text-primary: #1a2a3a;
+      --text-muted: #5f7388;
+      --accent-blue: #3b9ede;
+      --accent-blue-dk: #1a6fa8;
+      --btn-play: #5dca7e;
+      --btn-play-dk: #3aaa5a;
+      --feedback-ok-bg: #d0f5e0;
+      --feedback-ok-txt: #1d7a40;
+      --feedback-hint-bg: #ffeedd;
+      --feedback-hint-txt: #c05000;
+      --pip-empty: #dde0e8;
+      --pip-done: #5dca7e;
+      --part-a: #dff5ff;
+      --part-b: #fff4d8;
+      --part-c: #e8f7e8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      padding: 20px 14px 60px;
+    }
+
+    .wrap {
+      max-width: 840px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .title-card,
+    .progress-card,
+    .card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .title-card {
+      border: 2.5px solid #b8dfff;
+      padding: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-family: 'Fredoka One', cursive;
+      letter-spacing: 0.3px;
+      font-size: 2rem;
+      line-height: 1.08;
+      color: #12354f;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .instructions {
+      background: #e7f3ff;
+      border: 2px solid var(--accent-blue);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      color: var(--accent-blue-dk);
+      cursor: pointer;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .progress-card {
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .pip {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--pip-empty);
+      transition: background 0.2s;
+    }
+
+    .pip.done { background: var(--pip-done); }
+
+    .progress-text {
+      font-weight: 800;
+      color: #2e4a63;
+    }
+
+    .section-header {
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 800;
+      border: 2px solid rgba(0,0,0,0.08);
+      cursor: pointer;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-a { background: var(--part-a); }
+    .section-b { background: var(--part-b); }
+    .section-c { background: var(--part-c); }
+
+    .card {
+      padding: 14px;
+      border: 2.5px solid transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card.correct {
+      border-color: var(--btn-play);
+      background: #f0fff5;
+    }
+
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .num {
+      font-size: 1.06rem;
+      font-weight: 900;
+    }
+
+    .play-btn {
+      background: var(--btn-play);
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover { background: var(--btn-play-dk); }
+
+    .line {
+      border: 2px solid #dbe9f7;
+      border-radius: 10px;
+      background: #f8fbff;
+      padding: 10px 11px;
+      font-weight: 700;
+      line-height: 1.45;
+      min-height: 44px;
+    }
+
+    .line-label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #4f657b;
+      letter-spacing: 0.35px;
+      text-transform: uppercase;
+    }
+
+    .a-row {
+      display: grid;
+      grid-template-columns: 1fr 170px;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .answer-select {
+      width: 100%;
+      min-height: 44px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-blue-dk);
+      background: #e8f4ff;
+      border: 2.5px solid var(--accent-blue);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .answer-select:focus {
+      border-color: var(--accent-blue-dk);
+      background: #d5edff;
+    }
+
+    .check-btn {
+      min-height: 44px;
+      border-radius: 10px;
+      border: 2px solid #1a6fa8;
+      background: #e8f4ff;
+      color: #1a6fa8;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 8px 12px;
+      width: fit-content;
+    }
+
+    .check-btn:hover { background: #d5edff; }
+
+    .check-icon-btn {
+      width: 44px;
+      min-width: 44px;
+      height: 44px;
+      padding: 0;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      line-height: 1;
+      border-color: #3aaa5a;
+      background: #5dca7e;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(93,202,126,0.35);
+    }
+
+    .check-icon-btn:hover {
+      background: #3aaa5a;
+      border-color: #2d8f47;
+    }
+
+    .editable-sentence {
+      border: 2px solid #ecd7a2;
+      border-radius: 10px;
+      background: #fffdf4;
+      padding: 9px 10px;
+      line-height: 1.7;
+      font-weight: 700;
+      min-height: 52px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0;
+    }
+
+    .word-btn {
+      min-height: 44px;
+      border: none;
+      background: transparent;
+      color: #1a2a3a;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 7px 3px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .word-btn:hover { background: #f3f9ff; }
+
+    .gap-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+      min-height: 44px;
+      vertical-align: middle;
+    }
+
+    .gap-slot {
+      min-width: 26px;
+      min-height: 44px;
+      border-radius: 7px;
+      border: 2px solid #d0deec;
+      background: #f4f9ff;
+      color: #1a6fa8;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 900;
+      padding: 0 4px;
+      cursor: pointer;
+    }
+
+    .gap-slot:hover { background: #e7f3ff; }
+
+    .gap-space {
+      border-style: dashed;
+      color: #7b8fa2;
+      background: #fafcff;
+    }
+
+    .feedback {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      padding: 6px 11px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+
+    .feedback.show { display: inline-flex; }
+    .feedback.correct { background: var(--feedback-ok-bg); color: var(--feedback-ok-txt); }
+    .feedback.hint { background: var(--feedback-hint-bg); color: var(--feedback-hint-txt); }
+
+    .typed-input {
+      width: 100%;
+      min-height: 120px;
+      border-radius: 12px;
+      border: 2.5px solid var(--accent-blue);
+      background: #f8fbff;
+      color: var(--text-primary);
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 10px 12px;
+      outline: none;
+      resize: vertical;
+    }
+
+    .typed-input:focus { border-color: var(--accent-blue-dk); }
+
+    .target-line {
+      font-weight: 800;
+      color: #36536e;
+      font-size: 0.92rem;
+    }
+
+    .actions {
+      text-align: center;
+    }
+
+    .clear-btn {
+      background: #f0f0f0;
+      color: #888;
+      border: 2px solid #ccc;
+      border-radius: 18px;
+      padding: 7px 18px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      min-height: 44px;
+    }
+
+    .clear-btn:hover {
+      background: #ffeedd;
+      color: #c05000;
+      border-color: #c05000;
+    }
+
+    .export-btn {
+      background: #2f4f3f;
+      color: #ffffff;
+      border: none;
+      border-radius: 18px;
+      padding: 9px 22px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      box-shadow: 0 2px 8px rgba(47,79,63,0.25);
+      min-height: 44px;
+    }
+
+    .export-btn:hover { background: #254334; }
+
+    .speaking-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a6fa8;
+      color: #ffffff;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 10px 18px;
+      border-radius: 28px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.22);
+      transition: transform 0.3s ease, background 0.2s;
+      z-index: 100;
+      pointer-events: none;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .speaking-toast.visible {
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    .speaking-toast.visible:hover { background: #c0392b; }
+
+    @media (max-width: 720px) {
+      h1 { font-size: 1.7rem; }
+      .a-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+
+  <div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+    🔊 Reading aloud... tap to stop
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'christina_dialogue_quotations_direct_indirect_2026_04_07_v1';
+
+    const partAItems = [
+      {
+        a: '"I have a dream," Martin Luther King, Jr., stated.',
+        b: 'Martin Luther King, Jr., said that he had a dream.',
+        answerA: 'direct',
+        answerB: 'indirect'
+      },
+      {
+        a: 'Aesop said that kindness is never wasted.',
+        b: '"No act of kindness is ever wasted," said Aesop.',
+        answerA: 'indirect',
+        answerB: 'direct'
+      }
+    ];
+
+    const partBItems = [
+      {
+        raw: 'Franklin Delano Roosevelt stated the only thing we have to fear is fear itself',
+        target: 'Franklin Delano Roosevelt stated, "The only thing we have to fear is fear itself."'
+      },
+      {
+        raw: 'You must do the thing you think you cannot do Eleanor Roosevelt advised',
+        target: '"You must do the thing you think you cannot do," Eleanor Roosevelt advised.'
+      },
+      {
+        raw: 'whoever is happy will make others happy Anne Frank wrote',
+        target: '"Whoever is happy will make others happy," Anne Frank wrote.'
+      },
+      {
+        raw: 'If winter comes can spring be far behind asked the poet Shelley',
+        target: '"If winter comes, can spring be far behind?" asked the poet Shelley.'
+      },
+      {
+        raw: 'Mark Twain joked everyone talks about the weather but no one does anything about it',
+        target: 'Mark Twain joked, "Everyone talks about the weather, but no one does anything about it."'
+      }
+    ];
+
+    const partCItems = [
+      {
+        prompt: 'Rewrite as a direct quotation:',
+        accepted: [
+          'I told my friends, "I\'m glad you came."',
+          'I told my friends, "I am glad you came."'
+        ]
+      },
+      {
+        prompt: 'Rewrite as a direct quotation:',
+        accepted: ['John asked me, "What did you think of the movie?"']
+      }
+    ];
+
+    const GAP_CYCLE = [' ', '.', ',', '"'];
+
+    function buildInitialState() {
+      return {
+        partA: partAItems.map(() => ({ pickA: '', pickB: '', checked: false, correct: false })),
+        partB: partBItems.map((q) => {
+          const words = q.raw.split(' ');
+          const gaps = [];
+          for (let i = 0; i <= words.length; i++) {
+            gaps.push([' ']);
+          }
+          return {
+            words,
+            gaps,
+            correct: false
+          };
+        }),
+        partC: partCItems.map(() => ({ text: '', correct: false }))
+      };
+    }
+
+    let state = buildInitialState();
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.88;
+      utter.pitch = 1.05;
+      utter.onstart = showToast;
+      utter.onend = hideToast;
+      utter.onerror = hideToast;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function showToast() {
+      document.getElementById('speakingToast').classList.add('visible');
+    }
+
+    function hideToast() {
+      document.getElementById('speakingToast').classList.remove('visible');
+    }
+
+    function cancelSpeak() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      hideToast();
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !parsed.partA || !parsed.partB || !parsed.partC) return;
+        if (parsed.partA.length !== partAItems.length) return;
+        if (parsed.partB.length !== partBItems.length) return;
+        if (parsed.partC.length !== partCItems.length) return;
+
+        state.partA = parsed.partA.map((item) => ({
+          pickA: item.pickA === 'direct' || item.pickA === 'indirect' ? item.pickA : '',
+          pickB: item.pickB === 'direct' || item.pickB === 'indirect' ? item.pickB : '',
+          checked: !!item.checked,
+          correct: !!item.correct
+        }));
+
+        state.partB = partBItems.map((q, i) => {
+          const words = q.raw.split(' ');
+          const src = parsed.partB[i] || {};
+          const srcWords = Array.isArray(src.words) ? src.words.slice(0, words.length) : words.slice();
+          while (srcWords.length < words.length) srcWords.push(words[srcWords.length]);
+          const gaps = [];
+          for (let g = 0; g <= words.length; g++) {
+            const from = src.gaps && Array.isArray(src.gaps[g]) ? src.gaps[g].slice() : [' '];
+            const cleaned = from.filter((c) => GAP_CYCLE.includes(c));
+            gaps.push(cleaned.length ? cleaned : [' ']);
+            normalizeGap(i, g, gaps);
+          }
+          return {
+            words: srcWords,
+            gaps,
+            correct: !!src.correct
+          };
+        });
+
+        state.partC = parsed.partC.map((item) => ({
+          text: typeof item.text === 'string' ? item.text : '',
+          correct: !!item.correct
+        }));
+      } catch (err) {}
+    }
+
+    function normalizeGap(qIndex, gapIndex, gapsOverride) {
+      const gaps = gapsOverride || state.partB[qIndex].gaps;
+      let slots = gaps[gapIndex].slice();
+      slots = slots.filter((v) => GAP_CYCLE.includes(v));
+      if (!slots.length) slots = [' '];
+
+      const compact = [];
+      for (let i = 0; i < slots.length; i++) {
+        if (slots[i] === ' ' && compact.length && compact[compact.length - 1] === ' ') {
+          continue;
+        }
+        compact.push(slots[i]);
+      }
+      slots = compact;
+
+      if (slots[slots.length - 1] !== ' ') {
+        slots.push(' ');
+      }
+
+      while (slots.length > 1 && slots[slots.length - 1] === ' ' && slots[slots.length - 2] === ' ') {
+        slots.pop();
+      }
+
+      gaps[gapIndex] = slots;
+    }
+
+    function cycleGapSlot(qIndex, gapIndex, slotIndex) {
+      const gap = state.partB[qIndex].gaps[gapIndex];
+      const current = gap[slotIndex] || ' ';
+      const ix = GAP_CYCLE.indexOf(current);
+      const next = GAP_CYCLE[(ix + 1) % GAP_CYCLE.length];
+      gap[slotIndex] = next;
+      normalizeGap(qIndex, gapIndex);
+      state.partB[qIndex].correct = false;
+      saveState();
+      render();
+    }
+
+    function toggleWordCase(word) {
+      const idx = word.search(/[A-Za-z]/);
+      if (idx < 0) return word;
+      const ch = word[idx];
+      const flipped = ch === ch.toUpperCase() ? ch.toLowerCase() : ch.toUpperCase();
+      return word.slice(0, idx) + flipped + word.slice(idx + 1);
+    }
+
+    function speakableWord(word) {
+      const stripped = word.replace(/[^A-Za-z']/g, '');
+      return stripped || word;
+    }
+
+    function toggleWord(qIndex, wordIndex) {
+      const current = state.partB[qIndex].words[wordIndex];
+      const next = toggleWordCase(current);
+      state.partB[qIndex].words[wordIndex] = next;
+      state.partB[qIndex].correct = false;
+      speak(speakableWord(next));
+      saveState();
+      render();
+    }
+
+    function gapToText(slots) {
+      return slots.join('');
+    }
+
+    function currentSentenceText(qIndex) {
+      const qState = state.partB[qIndex];
+      let out = '';
+      out += gapToText(qState.gaps[0]);
+      for (let w = 0; w < qState.words.length; w++) {
+        out += qState.words[w];
+        out += gapToText(qState.gaps[w + 1]);
+      }
+      return out.trim();
+    }
+
+    function checkPartA(i) {
+      const item = partAItems[i];
+      const user = state.partA[i];
+      user.checked = true;
+      user.correct = user.pickA === item.answerA && user.pickB === item.answerB;
+      saveState();
+      render();
+    }
+
+    function checkPartB(i) {
+      const current = currentSentenceText(i);
+      const currentNoSpaces = current.replace(/\s+/g, '');
+      const targetNoSpaces = partBItems[i].target.replace(/\s+/g, '');
+      const pass = currentNoSpaces === targetNoSpaces;
+      state.partB[i].correct = pass;
+      saveState();
+      render();
+    }
+
+    function normalizeFreeText(text) {
+      return text
+        .replace(/[“”]/g, '"')
+        .replace(/[‘’]/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function checkPartC(i) {
+      const got = normalizeFreeText(state.partC[i].text);
+      const accepted = partCItems[i].accepted.map((s) => normalizeFreeText(s));
+      state.partC[i].correct = accepted.includes(got);
+      saveState();
+      render();
+    }
+
+    function totalAnswered() {
+      let done = 0;
+      state.partA.forEach((x) => { if (x.correct) done++; });
+      state.partB.forEach((x) => { if (x.correct) done++; });
+      state.partC.forEach((x) => { if (x.correct) done++; });
+      return done;
+    }
+
+    function totalItems() {
+      return partAItems.length + partBItems.length + partCItems.length;
+    }
+
+    function makeFeedback(pass, okText, hintText) {
+      const fb = document.createElement('div');
+      fb.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+      fb.textContent = pass ? ('✅ ' + okText) : ('💡 Hint: ' + hintText);
+      return fb;
+    }
+
+    function clearAllResponses() {
+      const btn = document.getElementById('clearBtn');
+      if (!btn) return;
+
+      if (btn.dataset.confirming === 'true') {
+        state = buildInitialState();
+        try { localStorage.removeItem(STORAGE_KEY); } catch (err) {}
+        render();
+        speak('All responses cleared. You can start again.');
+        return;
+      }
+
+      btn.dataset.confirming = 'true';
+      btn.textContent = '⚠️ Tap again to confirm';
+      btn.style.background = '#ffeedd';
+      btn.style.color = '#c05000';
+      btn.style.borderColor = '#c05000';
+      setTimeout(() => {
+        if (btn.dataset.confirming === 'true') {
+          btn.dataset.confirming = 'false';
+          btn.textContent = '🗑️ Clear all responses';
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }
+      }, 3000);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function exportPrint() {
+      const today = new Date().toLocaleDateString();
+      let cardsHtml = '';
+
+      partAItems.forEach((q, i) => {
+        const statusA = state.partA[i].pickA || 'not answered';
+        const statusB = state.partA[i].pickB || 'not answered';
+        cardsHtml +=
+          '<div class="print-card">' +
+            '<div class="print-line"><strong>' + (i + 1) + '.</strong> a. ' + escapeHtml(q.a) + ' <em>[' + escapeHtml(statusA) + ']</em></div>' +
+            '<div class="print-line">b. ' + escapeHtml(q.b) + ' <em>[' + escapeHtml(statusB) + ']</em></div>' +
+          '</div>';
+      });
+
+      cardsHtml += '<div class="print-section">Part B - Build Punctuation and Capitals</div>';
+      partBItems.forEach((q, i) => {
+        cardsHtml +=
+          '<div class="print-card">' +
+            '<div class="print-line"><strong>' + (i + 1) + '.</strong> ' + escapeHtml(currentSentenceText(i)) + '</div>' +
+          '</div>';
+      });
+
+      cardsHtml += '<div class="print-section">Part C - Rewrite as Direct Quotations</div>';
+      partCItems.forEach((q, i) => {
+        const text = state.partC[i].text.trim() || '[no response]';
+        cardsHtml +=
+          '<div class="print-card">' +
+            '<div class="print-line"><strong>' + (i + 1) + '.</strong> ' + escapeHtml(text) + '</div>' +
+          '</div>';
+      });
+
+      const html =
+'<!DOCTYPE html>' +
+'<html lang="en">' +
+'<head>' +
+'  <meta charset="UTF-8">' +
+'  <meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+'  <title>Dialogue and Quotations - Export</title>' +
+'  <style>' +
+'    body { font-family: Georgia, "Times New Roman", serif; margin: 24px; color: #111; }' +
+'    h1 { margin: 0 0 10px; font-size: 1.8rem; }' +
+'    .subtitle { margin: 0 0 14px; font-size: 1rem; }' +
+'    .name-line { display: flex; gap: 20px; margin: 12px 0 18px; font-size: 0.95rem; }' +
+'    .name-line span { display: flex; align-items: flex-end; gap: 6px; }' +
+'    .name-line .line { display: inline-block; width: 220px; border-bottom: 1.5px solid #333; }' +
+'    .print-section { margin: 14px 0 8px; padding: 6px 8px; border: 1px solid #aaa; font-weight: 700; background: #f4f4f4; }' +
+'    .print-card { border: 1px solid #d3d3d3; padding: 10px; margin-bottom: 8px; }' +
+'    .print-line { line-height: 1.45; margin-top: 4px; }' +
+'    .print-action { margin: 0 0 16px; }' +
+'    .print-action button { padding: 8px 14px; border-radius: 8px; border: 1px solid #444; background: #f5f5f5; cursor: pointer; }' +
+'    .footer { margin-top: 18px; font-size: 0.88rem; color: #444; }' +
+'    @media print { button { display: none; } }' +
+'  </style>' +
+'</head>' +
+'<body>' +
+'  <div class="print-action"><button onclick="window.print()">Print Worksheet</button></div>' +
+'  <h1>Dialogue and Quotations - Direct and Indirect</h1>' +
+'  <p class="subtitle">Student responses export</p>' +
+'  <div class="name-line">' +
+'    <span>Name: <span class="line">Tina #18</span></span>' +
+'    <span>Date: <span class="line">' + escapeHtml(today) + '</span></span>' +
+'  </div>' +
+'  <div class="print-section">Part A - Direct or Indirect</div>' +
+   cardsHtml +
+'  <div class="footer">Source: Scholastic Success With Grammar, Grade 5.</div>' +
+'</body>' +
+'</html>';
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+
+    function renderPartA(app) {
+      const header = document.createElement('div');
+      header.className = 'section-header section-a';
+      header.textContent = 'Part A - Direct or Indirect';
+      header.onclick = function() {
+        speak('Part A. For each number, mark sentence a and sentence b as direct or indirect.');
+      };
+      app.appendChild(header);
+
+      partAItems.forEach((q, i) => {
+        const card = document.createElement('div');
+        card.className = 'card' + (state.partA[i].correct ? ' correct' : '');
+
+        const top = document.createElement('div');
+        top.className = 'row-top';
+        top.innerHTML = '<div class="num">' + (i + 1) + '.</div>';
+        const play = document.createElement('button');
+        play.className = 'play-btn';
+        play.textContent = '▶';
+        play.title = 'Read both sentences';
+        play.onclick = function() { speak('Sentence a. ' + q.a + ' Sentence b. ' + q.b); };
+        top.appendChild(play);
+        card.appendChild(top);
+
+        const rowA = document.createElement('div');
+        rowA.className = 'a-row';
+        const lineA = document.createElement('div');
+        lineA.className = 'line';
+        lineA.textContent = 'a. ' + q.a;
+        lineA.onclick = function() { speak(q.a); };
+        lineA.style.cursor = 'pointer';
+        rowA.appendChild(lineA);
+
+        const selA = document.createElement('select');
+        selA.className = 'answer-select';
+        selA.innerHTML =
+          '<option value="">- pick -</option>' +
+          '<option value="direct">direct</option>' +
+          '<option value="indirect">indirect</option>';
+        selA.value = state.partA[i].pickA;
+        selA.onchange = function() {
+          state.partA[i].pickA = selA.value;
+          state.partA[i].checked = false;
+          state.partA[i].correct = false;
+          saveState();
+          render();
+        };
+        rowA.appendChild(selA);
+        card.appendChild(rowA);
+
+        const rowB = document.createElement('div');
+        rowB.className = 'a-row';
+        const lineB = document.createElement('div');
+        lineB.className = 'line';
+        lineB.textContent = 'b. ' + q.b;
+        lineB.onclick = function() { speak(q.b); };
+        lineB.style.cursor = 'pointer';
+        rowB.appendChild(lineB);
+
+        const selB = document.createElement('select');
+        selB.className = 'answer-select';
+        selB.innerHTML =
+          '<option value="">- pick -</option>' +
+          '<option value="direct">direct</option>' +
+          '<option value="indirect">indirect</option>';
+        selB.value = state.partA[i].pickB;
+        selB.onchange = function() {
+          state.partA[i].pickB = selB.value;
+          state.partA[i].checked = false;
+          state.partA[i].correct = false;
+          saveState();
+          render();
+        };
+        rowB.appendChild(selB);
+        card.appendChild(rowB);
+
+        const btn = document.createElement('button');
+        btn.className = 'check-btn check-icon-btn';
+        btn.textContent = '✓';
+        btn.title = 'Check answers';
+        btn.setAttribute('aria-label', 'Check answers');
+        btn.onclick = function() { checkPartA(i); };
+        card.appendChild(btn);
+
+        if (state.partA[i].checked) {
+          card.appendChild(makeFeedback(
+            state.partA[i].correct,
+            'Great sorting: direct uses exact words in quotation marks.',
+            'Direct quotation shows exact spoken words in quotation marks; indirect does not.'
+          ));
+        }
+
+        app.appendChild(card);
+      });
+    }
+
+    function renderPartB(app) {
+      const header = document.createElement('div');
+      header.className = 'section-header section-b';
+      header.textContent = 'Part B - Build Punctuation and Capitals';
+      header.onclick = function() {
+        speak('Part B. Tap a word to hear it and toggle capitalization. Tap any space box, including the start and end boxes, to cycle space, period, comma, and quotation mark. Then check the full sentence.');
+      };
+      app.appendChild(header);
+
+      partBItems.forEach((q, i) => {
+        const card = document.createElement('div');
+        card.className = 'card' + (state.partB[i].correct ? ' correct' : '');
+
+        const top = document.createElement('div');
+        top.className = 'row-top';
+        top.innerHTML = '<div class="num">' + (i + 1) + '.</div>';
+
+        const play = document.createElement('button');
+        play.className = 'play-btn';
+        play.textContent = '▶';
+        play.title = 'Read target sentence';
+        play.onclick = function() {
+          speak(partBItems[i].target);
+        };
+        top.appendChild(play);
+        card.appendChild(top);
+
+        const label = document.createElement('div');
+        label.className = 'line-label';
+        label.textContent = 'Tap words to toggle capitals, tap space boxes to add punctuation';
+        card.appendChild(label);
+
+        const editor = document.createElement('div');
+        editor.className = 'editable-sentence';
+
+        const qState = state.partB[i];
+
+        for (let g = 0; g < qState.gaps[0].length; g++) {
+          const slotBtn = document.createElement('button');
+          slotBtn.className = 'gap-slot' + (qState.gaps[0][g] === ' ' ? ' gap-space' : '');
+          slotBtn.textContent = qState.gaps[0][g] === ' ' ? '␠' : qState.gaps[0][g];
+          slotBtn.title = 'Start slot: tap to cycle space . , "';
+          slotBtn.onclick = function() { cycleGapSlot(i, 0, g); };
+          const wrap = document.createElement('span');
+          wrap.className = 'gap-wrap';
+          wrap.appendChild(slotBtn);
+          editor.appendChild(wrap);
+        }
+
+        qState.words.forEach((word, w) => {
+          const wordBtn = document.createElement('button');
+          wordBtn.className = 'word-btn';
+          wordBtn.textContent = word;
+          wordBtn.title = 'Tap to hear word and toggle capitalization';
+          wordBtn.onclick = function() { toggleWord(i, w); };
+          editor.appendChild(wordBtn);
+
+          const gapWrap = document.createElement('span');
+          gapWrap.className = 'gap-wrap';
+
+          const gap = qState.gaps[w + 1];
+          for (let s = 0; s < gap.length; s++) {
+            const slotBtn = document.createElement('button');
+            slotBtn.className = 'gap-slot' + (gap[s] === ' ' ? ' gap-space' : '');
+            slotBtn.textContent = gap[s] === ' ' ? '␠' : gap[s];
+            slotBtn.title = 'Tap to cycle space . , "';
+            slotBtn.onclick = function() { cycleGapSlot(i, w + 1, s); };
+            gapWrap.appendChild(slotBtn);
+          }
+
+          editor.appendChild(gapWrap);
+        });
+
+        card.appendChild(editor);
+
+        const preview = document.createElement('div');
+        preview.className = 'line';
+        preview.textContent = currentSentenceText(i);
+        preview.onclick = function() { speak(currentSentenceText(i)); };
+        preview.style.cursor = 'pointer';
+        card.appendChild(preview);
+
+        const btn = document.createElement('button');
+        btn.className = 'check-btn check-icon-btn';
+        btn.textContent = '✓';
+        btn.title = 'Validate sentence';
+        btn.setAttribute('aria-label', 'Validate sentence');
+        btn.onclick = function() { checkPartB(i); };
+        card.appendChild(btn);
+
+        const hasTouched = state.partB[i].correct || currentSentenceText(i) !== q.raw;
+        if (hasTouched) {
+          card.appendChild(makeFeedback(
+            state.partB[i].correct,
+            'Perfect. Capitalization and punctuation are all correct.',
+            'Validate every mark and capital letter exactly, including quotation marks and commas.'
+          ));
+        }
+
+        app.appendChild(card);
+      });
+    }
+
+    function renderPartC(app) {
+      const header = document.createElement('div');
+      header.className = 'section-header section-c';
+      header.textContent = 'Part C - Rewrite as Direct Quotations';
+      header.onclick = function() {
+        speak('Part C. Type each direct quotation and tap validate.');
+      };
+      app.appendChild(header);
+
+      const sourceLines = [
+        '1. I told my friends that I was glad they came.',
+        '2. John asked me what I thought of the movie.'
+      ];
+
+      sourceLines.forEach((txt) => {
+        const src = document.createElement('div');
+        src.className = 'line';
+        src.textContent = txt;
+        src.onclick = function() { speak(txt); };
+        src.style.cursor = 'pointer';
+        app.appendChild(src);
+      });
+
+      partCItems.forEach((q, i) => {
+        const card = document.createElement('div');
+        card.className = 'card' + (state.partC[i].correct ? ' correct' : '');
+
+        const top = document.createElement('div');
+        top.className = 'row-top';
+        top.innerHTML = '<div class="num">' + (i + 1) + '.</div>';
+
+        const play = document.createElement('button');
+        play.className = 'play-btn';
+        play.textContent = '▶';
+        play.title = 'Read your current answer';
+        play.onclick = function() { speak(state.partC[i].text || 'No answer yet.'); };
+        top.appendChild(play);
+        card.appendChild(top);
+
+        const ta = document.createElement('textarea');
+        ta.className = 'typed-input';
+        ta.value = state.partC[i].text;
+        ta.placeholder = q.prompt;
+        ta.oninput = function() {
+          state.partC[i].text = ta.value;
+          state.partC[i].correct = false;
+          saveState();
+        };
+        card.appendChild(ta);
+
+        const btn = document.createElement('button');
+        btn.className = 'check-btn check-icon-btn';
+        btn.textContent = '✓';
+        btn.title = 'Validate answer';
+        btn.setAttribute('aria-label', 'Validate answer');
+        btn.onclick = function() { checkPartC(i); };
+        card.appendChild(btn);
+
+        const touched = state.partC[i].correct || state.partC[i].text.trim().length > 0;
+        if (touched) {
+          card.appendChild(makeFeedback(
+            state.partC[i].correct,
+            'Exactly right.',
+            'Match the direct quotation exactly, including comma placement and quotation marks.'
+          ));
+        }
+
+        app.appendChild(card);
+      });
+    }
+
+    function renderProgress(app) {
+      const progressCard = document.createElement('div');
+      progressCard.className = 'progress-card';
+
+      const pips = document.createElement('div');
+      pips.className = 'pips';
+      const total = totalItems();
+      const done = totalAnswered();
+
+      for (let i = 0; i < total; i++) {
+        const pip = document.createElement('span');
+        pip.className = 'pip' + (i < done ? ' done' : '');
+        pips.appendChild(pip);
+      }
+
+      const text = document.createElement('div');
+      text.className = 'progress-text';
+      text.textContent = done + ' / ' + total + ' complete';
+
+      progressCard.appendChild(pips);
+      progressCard.appendChild(text);
+      app.appendChild(progressCard);
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      app.innerHTML = '';
+
+      const title = document.createElement('div');
+      title.className = 'title-card';
+      title.innerHTML =
+        '<h1>Dialogue and Quotations</h1>' +
+        '<p class="subtitle">Direct vs indirect quotations, punctuation, capitalization, and rewrite practice.</p>';
+      app.appendChild(title);
+
+      const directions = document.createElement('div');
+      directions.className = 'instructions';
+      directions.textContent = '🔊 Tap for directions';
+      directions.onclick = function() {
+        speak('Part A: choose direct or indirect for sentence a and b. Part B: tap words to toggle capitals and tap any space slot, including start and end, to cycle space, period, comma, and quotation mark. Validate each full sentence exactly. Part C: type the direct quotations and validate.');
+      };
+      app.appendChild(directions);
+
+      renderProgress(app);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      actions.innerHTML =
+        '<button class="clear-btn" id="clearBtn" onclick="clearAllResponses()">🗑️ Clear all responses</button>' +
+        '&nbsp;' +
+        '<button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>';
+      app.appendChild(actions);
+
+      renderPartA(app);
+      renderPartB(app);
+      renderPartC(app);
+    }
+
+    loadState();
+    render();
+  </script>
+</body>
+</html>

@@ -177,6 +177,36 @@ function renderGapLine(container, q, i) {
 
 **Do not auto-read on completion.** See the note under Auto-read after answer selection above.
 
+### Whitespace-Insensitive Validation (Punctuation Builders)
+
+When punctuation is edited via tappable space slots (for example cycling `space -> . -> , -> "`), students may arrive at the same punctuation/capitalization result with different temporary spacing around symbols. In these cases, validate by comparing versions of both strings with whitespace removed.
+
+```javascript
+function normalizeNoWhitespace(text) {
+  return text.replace(/\s+/g, '');
+}
+
+function checkAnswer(i) {
+  const built = buildCurrentSentence(i);      // includes user punctuation and caps
+  const target = questions[i].target;
+  const pass = normalizeNoWhitespace(built) === normalizeNoWhitespace(target);
+  // set feedback/card state
+}
+```
+
+Use this only when spacing is not the learning objective. Keep exact character checks for punctuation and capitalization.
+
+### Play Button Reads Target Model (Punctuation Builders)
+
+For sentence-repair punctuation sections, the per-card play button should read the correct target sentence, not the currently assembled sentence. This gives a reliable audio model while the student edits.
+
+```javascript
+playBtn.title = 'Read target sentence';
+playBtn.onclick = function() {
+  speak(questions[i].target);
+};
+```
+
 ### Section-local Question Numbering (Multi-part Worksheets)
 
 For worksheets split into labeled parts (for example Part A, Part B, Part C), question numbers should restart within each part instead of continuing globally.
@@ -454,6 +484,62 @@ function updateProgress() {
   section.classList.toggle('complete', answered === questions.length && state.checked && allCorrect);
 }
 ```
+
+### Per-Card Deferred Feedback (Single Check Button)
+
+Use this for card-based two-choice dropdown tasks where immediate hinting on selection causes guessing behavior. The card should show no hint/correct badge until its check button is tapped.
+
+```javascript
+// state per card: { pickA: '', pickB: '', checked: false, correct: false }
+
+function onDropdownChange(i, key, val) {
+  state[i][key] = val;
+  state[i].checked = false;  // hide stale feedback after edits
+  state[i].correct = false;
+  saveState();
+  render();
+}
+
+function checkCard(i) {
+  state[i].checked = true;
+  state[i].correct = (state[i].pickA === answerKey[i].a && state[i].pickB === answerKey[i].b);
+  saveState();
+  render();
+}
+
+// Render feedback only when checked === true
+if (state[i].checked) showFeedback(...);
+```
+
+Do not show hint text merely because a dropdown has a value.
+
+### Free-Text Validation With Multiple Accepted Targets
+
+When multiple phrasings are instructionally equivalent (for example contractions vs expanded forms), define an accepted list and compare against all normalized targets.
+
+```javascript
+const q = {
+  accepted: [
+    'I told my friends, "I\'m glad you came."',
+    'I told my friends, "I am glad you came."'
+  ]
+};
+
+function normalizeFreeText(text) {
+  return text
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const got = normalizeFreeText(userText);
+const pass = q.accepted
+  .map(normalizeFreeText)
+  .includes(got);
+```
+
+If this pattern is used, avoid rendering a visible target line below the input unless explicitly requested.
 
 ### Retry-Until-Correct Pattern
 
