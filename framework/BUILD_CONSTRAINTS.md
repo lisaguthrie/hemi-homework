@@ -149,6 +149,7 @@ Review the output before proceeding. Any mismatch must be corrected in the data,
 - Do not include setup instructions, "open in browser" notes, or other operational guidance in responses
 - Parse worksheet content from the uploaded image/PDF directly — do not ask the user to transcribe it
 - When a worksheet contains multiple distinct exercise sections, default to creating one file per section (see Multi-Section / Multi-Page Splitting Rule above)
+- For Activity 1 proofreading outputs (`activities/proofreading/{child}/...`), treat `activities/proofreading/template.html` as immutable: edit only the top `#worksheetData` JSON block in the copied output file.
 
 ---
 

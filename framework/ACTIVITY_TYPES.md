@@ -4,6 +4,8 @@ Activities are different from worksheets. A worksheet's interaction model varies
 
 When you need to create a new proofreading activity, do not rebuild the container — fill in the template.
 
+**Non-negotiable template rule:** For `activities/proofreading/*.html` outputs, copy `activities/proofreading/template.html` as-is and edit only the top `#worksheetData` JSON block. Do not modify HTML structure, CSS, JS logic, or print/export layout outside that JSON block.
+
 ---
 
 ## Activity 1: Proofreading + Comprehension
@@ -17,7 +19,7 @@ The student works through a passage sentence by sentence using standard proofrea
 1. **Proofreading phase** — passage panel always visible at top; one sentence work card active at a time. First pass, then automatic second pass for any missed sentences.
 2. **Comprehension phase** — proofreading UI hides; corrected passage card + open-response questions appear.
 
-The interaction model is identical every time. Only the data arrays at the top of the file change.
+The interaction model is identical every time. Only the top JSON data block changes.
 
 ---
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish worksheets and tools to docs/ for GitHub Pages.
+"""Publish worksheets, tools, and activities to docs/ for GitHub Pages.
 
 Scans worksheets/<child>/ for HTML files (regardless of how they were
 created), copies them flat into docs/, copies any archive/ subfolder into
@@ -7,6 +7,9 @@ docs/archive/, and regenerates docs/index.html and docs/archive/index.html.
 
 Also mirrors tools/ → docs/tools/ (all files, preserving subdirectory
 structure). No index is generated for tools/.
+
+Also mirrors activities/ → docs/activities/ (all files, preserving
+subdirectory structure) and regenerates docs/activities/index.html.
 
 Usage:
     python runners/publish.py            # copy + regenerate index
@@ -30,6 +33,7 @@ from dotenv import load_dotenv
 ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = ROOT / "docs"
 WORKSHEETS_DOCS_DIR = DOCS_DIR / "worksheets"
+ACTIVITIES_DOCS_DIR = DOCS_DIR / "activities"
 
 
 # ---------------------------------------------------------------------------
@@ -132,6 +136,44 @@ def regenerate_archive_index(archive_files: list[Path]) -> None:
     print(f"📄 Archive index written: {archive_index.relative_to(ROOT).as_posix()}")
 
 
+def regenerate_activities_index(activity_html_files: list[Path]) -> None:
+    entries = sorted(activity_html_files, key=lambda p: p.as_posix())
+    if entries:
+        items = "\n".join(
+            f'    <li><a href="{p.as_posix()}">{slug_to_label(p.stem)} <span style="color:#666;">({p.parent.as_posix()})</span></a></li>'
+            for p in entries
+        )
+    else:
+        items = "    <li>No activities published yet.</li>"
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activities</title>
+    <style>
+        body {{ font-family: sans-serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; }}
+        h1 {{ font-size: 1.4rem; margin-bottom: 1rem; }}
+        ul {{ list-style: none; padding: 0; }}
+        li {{ margin: 0.5rem 0; }}
+        a {{ color: #0066cc; text-decoration: none; }}
+        a:hover {{ text-decoration: underline; }}
+    </style>
+</head>
+<body>
+    <h1>Activities</h1>
+    <ul>
+{items}
+    </ul>
+</body>
+</html>"""
+    index_path = ACTIVITIES_DOCS_DIR / "index.html"
+    index_path.parent.mkdir(parents=True, exist_ok=True)
+    index_path.write_text(html, encoding="utf8")
+    print(f"📄 Activities index written: {index_path.relative_to(ROOT).as_posix()}")
+
+
 def commit_and_push(root: Path) -> None:
     commands = [
         ["git", "-C", str(root), "add", "docs/"],
@@ -152,7 +194,7 @@ def commit_and_push(root: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Publish worksheets to docs/ for GitHub Pages.")
+    parser = argparse.ArgumentParser(description="Publish worksheets, tools, and activities to docs/ for GitHub Pages.")
     parser.add_argument(
         "--child", "-c",
         default=None,
@@ -273,6 +315,38 @@ def main() -> int:
             tools_copied += 1
         if tools_copied:
             print(f"  🔧 {tools_copied} tool file(s) synced to docs/tools/")
+
+    # Sync activities/ → docs/activities/
+    activities_source = ROOT / "activities"
+    if activities_source.exists():
+        if not args.preserve and ACTIVITIES_DOCS_DIR.exists():
+            for stale in sorted(ACTIVITIES_DOCS_DIR.rglob("*"), key=lambda p: len(p.parts), reverse=True):
+                if stale.is_file():
+                    stale.unlink()
+
+        activities_copied = 0
+        activity_html_files: list[Path] = []
+
+        for src in sorted(activities_source.rglob("*")):
+            if src.is_dir():
+                continue
+
+            rel = src.relative_to(activities_source)
+            dest = ACTIVITIES_DOCS_DIR / rel
+            dest.parent.mkdir(parents=True, exist_ok=True)
+
+            if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
+                pass
+            else:
+                dest.write_bytes(src.read_bytes())
+                print(f"  🧩 Activity: {rel.as_posix()}")
+                activities_copied += 1
+
+            if src.suffix.lower() == ".html" and rel.name.lower() != "index.html":
+                activity_html_files.append(rel)
+
+        regenerate_activities_index(activity_html_files)
+        print(f"  🧩 {activities_copied} activit(y/ies) synced to docs/activities/")
 
     if should_push:
         commit_and_push(ROOT)
