@@ -417,21 +417,81 @@
     ];
 
     const adjectivesB = [
-      { id: 'b1', sentence: 'Alice visited an interesting museum.', answerAdj: 'interesting', answerNoun: 'museum', adjectiveOptions: ['interesting', 'Alice', 'visited'], nounOptions: ['museum', 'Alice', 'art'] },
-      { id: 'b2', sentence: 'The museum was filled with fascinating art.', answerAdj: 'fascinating', answerNoun: 'art', adjectiveOptions: ['fascinating', 'filled', 'museum'], nounOptions: ['art', 'museum', 'guide'] },
-      { id: 'b3', sentence: 'The guide provided detailed descriptions.', answerAdj: 'detailed', answerNoun: 'descriptions', adjectiveOptions: ['detailed', 'guide', 'provided'], nounOptions: ['descriptions', 'guide', 'museum'] },
-      { id: 'b4', sentence: 'The bronze statue was her favorite.', answerAdj: 'bronze', answerNoun: 'statue', adjectiveOptions: ['bronze', 'favorite', 'her'], nounOptions: ['statue', 'favorite', 'bronze'] },
-      { id: 'b5', sentence: 'One entire floor was devoted to bright paintings of blue flowers.', answerAdj: 'entire', answerNoun: 'floor', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] },
-      { id: 'b6', sentence: 'One entire floor was devoted to bright paintings of blue flowers.', answerAdj: 'bright', answerNoun: 'paintings', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] },
-      { id: 'b7', sentence: 'One entire floor was devoted to bright paintings of blue flowers.', answerAdj: 'blue', answerNoun: 'flowers', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] },
-      { id: 'b8', sentence: 'The top floor contained ten enormous sculptures.', answerAdj: 'top', answerNoun: 'floor', adjectiveOptions: ['top', 'ten', 'enormous'], nounOptions: ['floor', 'sculptures', 'museum'] },
-      { id: 'b9', sentence: 'The top floor contained ten enormous sculptures.', answerAdj: 'enormous', answerNoun: 'sculptures', adjectiveOptions: ['top', 'ten', 'enormous'], nounOptions: ['floor', 'sculptures', 'guide'] },
-      { id: 'b10', sentence: 'The museum is a popular tourist stop.', answerAdj: 'popular', answerNoun: 'stop', adjectiveOptions: ['popular', 'tourist', 'museum'], nounOptions: ['stop', 'museum', 'visitors'] },
-      { id: 'b11', sentence: 'The museum is a popular tourist stop.', answerAdj: 'tourist', answerNoun: 'stop', adjectiveOptions: ['popular', 'tourist', 'museum'], nounOptions: ['stop', 'tourist', 'museum'] },
-      { id: 'b12', sentence: 'Visitors can buy a delicious lunch in the cafeteria.', answerAdj: 'delicious', answerNoun: 'lunch', adjectiveOptions: ['delicious', 'Visitors', 'cafeteria'], nounOptions: ['lunch', 'Visitors', 'cafeteria'] },
-      { id: 'b13', sentence: 'Beautiful gifts are sold in the shop.', answerAdj: 'Beautiful', answerNoun: 'gifts', adjectiveOptions: ['Beautiful', 'sold', 'shop'], nounOptions: ['gifts', 'shop', 'Beautiful'] },
-      { id: 'b14', sentence: 'Many visitors spend a full day in the museum.', answerAdj: 'Many', answerNoun: 'visitors', adjectiveOptions: ['Many', 'full', 'museum'], nounOptions: ['visitors', 'day', 'museum'] },
-      { id: 'b15', sentence: 'Many visitors spend a full day in the museum.', answerAdj: 'full', answerNoun: 'day', adjectiveOptions: ['Many', 'full', 'museum'], nounOptions: ['visitors', 'day', 'museum'] }
+      {
+        id: 'b1',
+        sentence: 'Alice visited an interesting museum.',
+        pairs: [
+          { answerAdj: 'interesting', answerNoun: 'museum', adjectiveOptions: ['interesting', 'Alice', 'visited'], nounOptions: ['museum', 'Alice', 'art'] }
+        ]
+      },
+      {
+        id: 'b2',
+        sentence: 'The museum was filled with fascinating art.',
+        pairs: [
+          { answerAdj: 'fascinating', answerNoun: 'art', adjectiveOptions: ['fascinating', 'filled', 'museum'], nounOptions: ['art', 'museum', 'guide'] }
+        ]
+      },
+      {
+        id: 'b3',
+        sentence: 'The guide provided detailed descriptions.',
+        pairs: [
+          { answerAdj: 'detailed', answerNoun: 'descriptions', adjectiveOptions: ['detailed', 'guide', 'provided'], nounOptions: ['descriptions', 'guide', 'museum'] }
+        ]
+      },
+      {
+        id: 'b4',
+        sentence: 'The bronze statue was her favorite.',
+        pairs: [
+          { answerAdj: 'bronze', answerNoun: 'statue', adjectiveOptions: ['bronze', 'favorite', 'her'], nounOptions: ['statue', 'favorite', 'bronze'] }
+        ]
+      },
+      {
+        id: 'b5',
+        sentence: 'One entire floor was devoted to bright paintings of blue flowers.',
+        pairs: [
+          { answerAdj: 'entire', answerNoun: 'floor', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] },
+          { answerAdj: 'bright', answerNoun: 'paintings', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] },
+          { answerAdj: 'blue', answerNoun: 'flowers', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] }
+        ]
+      },
+      {
+        id: 'b6',
+        sentence: 'The top floor contained ten enormous sculptures.',
+        pairs: [
+          { answerAdj: 'top', answerNoun: 'floor', adjectiveOptions: ['top', 'ten', 'enormous'], nounOptions: ['floor', 'sculptures', 'museum'] },
+          { answerAdj: 'enormous', answerNoun: 'sculptures', adjectiveOptions: ['top', 'ten', 'enormous'], nounOptions: ['floor', 'sculptures', 'guide'] }
+        ]
+      },
+      {
+        id: 'b7',
+        sentence: 'The museum is a popular tourist stop.',
+        pairs: [
+          { answerAdj: 'popular', answerNoun: 'stop', adjectiveOptions: ['popular', 'tourist', 'museum'], nounOptions: ['stop', 'museum', 'visitors'] },
+          { answerAdj: 'tourist', answerNoun: 'stop', adjectiveOptions: ['popular', 'tourist', 'museum'], nounOptions: ['stop', 'tourist', 'museum'] }
+        ]
+      },
+      {
+        id: 'b8',
+        sentence: 'Visitors can buy a delicious lunch in the cafeteria.',
+        pairs: [
+          { answerAdj: 'delicious', answerNoun: 'lunch', adjectiveOptions: ['delicious', 'Visitors', 'cafeteria'], nounOptions: ['lunch', 'Visitors', 'cafeteria'] }
+        ]
+      },
+      {
+        id: 'b9',
+        sentence: 'Beautiful gifts are sold in the shop.',
+        pairs: [
+          { answerAdj: 'Beautiful', answerNoun: 'gifts', adjectiveOptions: ['Beautiful', 'sold', 'shop'], nounOptions: ['gifts', 'shop', 'Beautiful'] }
+        ]
+      },
+      {
+        id: 'b10',
+        sentence: 'Many visitors spend a full day in the museum.',
+        pairs: [
+          { answerAdj: 'Many', answerNoun: 'visitors', adjectiveOptions: ['Many', 'full', 'museum'], nounOptions: ['visitors', 'day', 'museum'] },
+          { answerAdj: 'full', answerNoun: 'day', adjectiveOptions: ['Many', 'full', 'museum'], nounOptions: ['visitors', 'day', 'museum'] }
+        ]
+      }
     ];
 
     const prepositionsA = [
@@ -490,7 +550,7 @@
     function buildDefaultState() {
       return {
         adjA: adjectivesA.map(() => ({ v1: '', v2: '' })),
-        adjB: adjectivesB.map(() => ({ adj: '', noun: '' })),
+        adjB: adjectivesB.map((group) => group.pairs.map(() => ({ adj: '', noun: '' }))),
         prepA: prepositionsA.map(() => ({ phrase: '', type: '' })),
         prepB: prepositionsB.map(() => ({ phrase: '', prep: '' })),
         checked: {
@@ -508,9 +568,38 @@
         if (!raw) return buildDefaultState();
         const parsed = JSON.parse(raw);
         const clean = buildDefaultState();
+
+        function mapLegacyAdjB(rawAdjB) {
+          const mapped = adjectivesB.map((group) => group.pairs.map(() => ({ adj: '', noun: '' })));
+          if (!Array.isArray(rawAdjB) || !rawAdjB.length) return mapped;
+
+          if (Array.isArray(rawAdjB[0])) {
+            return adjectivesB.map((group, groupIdx) => {
+              const rawGroup = Array.isArray(rawAdjB[groupIdx]) ? rawAdjB[groupIdx] : [];
+              return group.pairs.map((_, pairIdx) => {
+                const rawPair = rawGroup[pairIdx] || {};
+                return {
+                  adj: rawPair.adj || '',
+                  noun: rawPair.noun || ''
+                };
+              });
+            });
+          }
+
+          let flatIdx = 0;
+          return adjectivesB.map((group) => group.pairs.map(() => {
+            const rawPair = rawAdjB[flatIdx] || {};
+            flatIdx += 1;
+            return {
+              adj: rawPair.adj || '',
+              noun: rawPair.noun || ''
+            };
+          }));
+        }
+
         if (parsed && parsed.adjA && parsed.adjB && parsed.prepA && parsed.prepB) {
           clean.adjA = parsed.adjA;
-          clean.adjB = parsed.adjB;
+          clean.adjB = mapLegacyAdjB(parsed.adjB);
           clean.prepA = parsed.prepA;
           clean.prepB = parsed.prepB;
           if (parsed.checked) {
@@ -559,7 +648,7 @@
       const btn = document.querySelector('.clear-btn');
       if (btn.dataset.confirming === 'true') {
         state.adjA = adjectivesA.map(() => ({ v1: '', v2: '' }));
-        state.adjB = adjectivesB.map(() => ({ adj: '', noun: '' }));
+        state.adjB = adjectivesB.map((group) => group.pairs.map(() => ({ adj: '', noun: '' })));
         state.prepA = prepositionsA.map(() => ({ phrase: '', type: '' }));
         state.prepB = prepositionsB.map(() => ({ phrase: '', prep: '' }));
         state.checked = { adjA: false, adjB: false, prepA: false, prepB: false };
@@ -644,15 +733,14 @@
 
       let adjBHtml = '';
       adjectivesB.forEach((q, i) => {
-        const s = state.adjB[i];
-        let sentenceHtml = escHtml(q.sentence);
-        if (s.adj) {
-          sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(s.adj), singleUnderline(s.adj));
-        }
-        if (s.noun) {
-          sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(s.noun), doubleUnderline(s.noun));
-        }
-        adjBHtml += '<div style="margin:12px 0"><strong>B' + (i+1) + '.</strong> ' + sentenceHtml + '</div>';
+        const groupSelections = state.adjB[i] || [];
+        adjBHtml += '<div style="margin:12px 0"><strong>B' + (i+1) + '.</strong> ' + escHtml(q.sentence) + '</div>';
+        q.pairs.forEach((_, pairIdx) => {
+          const s = groupSelections[pairIdx] || { adj: '', noun: '' };
+          const adjText = s.adj ? singleUnderline(s.adj) : '___';
+          const nounText = s.noun ? doubleUnderline(s.noun) : '___';
+          adjBHtml += '<div style="margin:8px 0 10px 24px">Pair ' + (pairIdx + 1) + ': adjective ' + adjText + ', noun ' + nounText + '</div>';
+        });
       });
 
       let prepAHtml = '';
@@ -746,7 +834,21 @@
     }
 
     function isAdjBComplete(i) {
-      return !!state.adjB[i].adj && !!state.adjB[i].noun;
+      const groupAnswers = state.adjB[i] || [];
+      return groupAnswers.every((pair) => !!pair.adj && !!pair.noun);
+    }
+
+    function isAdjBPairCorrectSet(i) {
+      const selected = (state.adjB[i] || []).map((pair) => {
+        return (pair.adj || '').trim().toLowerCase() + '||' + (pair.noun || '').trim().toLowerCase();
+      }).sort();
+
+      const expected = adjectivesB[i].pairs.map((pair) => {
+        return pair.answerAdj.trim().toLowerCase() + '||' + pair.answerNoun.trim().toLowerCase();
+      }).sort();
+
+      if (selected.length !== expected.length) return false;
+      return selected.every((key, idx) => key === expected[idx]);
     }
 
     function isPrepAComplete(i) {
@@ -758,13 +860,18 @@
     }
 
     function getTotalCount() {
-      return adjectivesA.length + adjectivesB.length + prepositionsA.length + prepositionsB.length;
+      const adjBTotal = adjectivesB.reduce((total, group) => total + group.pairs.length, 0);
+      return adjectivesA.length + adjBTotal + prepositionsA.length + prepositionsB.length;
     }
 
     function getDoneCount() {
       let done = 0;
       adjectivesA.forEach((_, i) => { if (isAdjAComplete(i)) done += 1; });
-      adjectivesB.forEach((_, i) => { if (isAdjBComplete(i)) done += 1; });
+      adjectivesB.forEach((group, i) => {
+        (state.adjB[i] || []).forEach((pair) => {
+          if (pair.adj && pair.noun) done += 1;
+        });
+      });
       prepositionsA.forEach((_, i) => { if (isPrepAComplete(i)) done += 1; });
       prepositionsB.forEach((_, i) => { if (isPrepBComplete(i)) done += 1; });
       return done;
@@ -987,9 +1094,10 @@
 
     function buildAdjBCard(q, i) {
       const card = buildCardShell('B' + (i + 1), function () {
-        const s = state.adjB[i];
-        if (s.adj && s.noun) return q.sentence + ' You picked: ' + s.adj + ' describes ' + s.noun + '.';
-        return q.sentence;
+        const picks = (state.adjB[i] || []).filter((pair) => pair.adj && pair.noun);
+        if (!picks.length) return q.sentence;
+        const spoken = picks.map((pair) => pair.adj + ' describes ' + pair.noun).join('. ');
+        return q.sentence + ' You picked: ' + spoken + '.';
       });
       if (isAdjBComplete(i)) card.classList.add('done');
 
@@ -999,41 +1107,43 @@
       prompt.onclick = function () { speak(q.sentence); };
       card.appendChild(prompt);
 
-      const grid = document.createElement('div');
-      grid.className = 'answer-grid';
+      q.pairs.forEach((pair, pairIdx) => {
+        const row = document.createElement('div');
+        row.className = 'answer-grid';
 
-      const selAdj = createSelect(q.adjectiveOptions, state.adjB[i].adj, function (e) {
-        state.adjB[i].adj = e.target.value;
-        state.checked.adjB = false;
-        saveState();
-        render();
-      }, '- adjective -');
+        const selAdj = createSelect(pair.adjectiveOptions, state.adjB[i][pairIdx].adj, function (e) {
+          state.adjB[i][pairIdx].adj = e.target.value;
+          state.checked.adjB = false;
+          saveState();
+          render();
+        }, '- adjective -');
 
-      const selNoun = createSelect(q.nounOptions, state.adjB[i].noun, function (e) {
-        state.adjB[i].noun = e.target.value;
-        state.checked.adjB = false;
-        saveState();
-        if (state.adjB[i].adj && state.adjB[i].noun) {
-          setTimeout(function () {
-            speak(state.adjB[i].adj + ' describes ' + state.adjB[i].noun + '.');
-          }, 300);
-        }
-        render();
-      }, '- noun -');
+        const selNoun = createSelect(pair.nounOptions, state.adjB[i][pairIdx].noun, function (e) {
+          state.adjB[i][pairIdx].noun = e.target.value;
+          state.checked.adjB = false;
+          saveState();
+          if (state.adjB[i][pairIdx].adj && state.adjB[i][pairIdx].noun) {
+            setTimeout(function () {
+              speak(state.adjB[i][pairIdx].adj + ' describes ' + state.adjB[i][pairIdx].noun + '.');
+            }, 300);
+          }
+          render();
+        }, '- noun -');
 
-      grid.appendChild(selAdj);
-      grid.appendChild(selNoun);
-      card.appendChild(grid);
+        row.appendChild(selAdj);
+        row.appendChild(selNoun);
+        card.appendChild(row);
+      });
 
       const fb = document.createElement('div');
       fb.className = 'feedback';
       if (state.checked.adjB) {
         if (!isAdjBComplete(i)) {
-          setFeedback(fb, 'hint', '💡 Choose both the adjective and noun, then check again.');
+          setFeedback(fb, 'hint', '💡 Fill every adjective and noun box, then check again.');
         } else {
-          const ok = state.adjB[i].adj === q.answerAdj && state.adjB[i].noun === q.answerNoun;
-          if (ok) setFeedback(fb, 'ok', '✅ Correct match.');
-          else setFeedback(fb, 'hint', '💡 Hint: choose the describing word and what it describes.');
+          const ok = isAdjBPairCorrectSet(i);
+          if (ok) setFeedback(fb, 'ok', '✅ Correct matches. Order does not matter.');
+          else setFeedback(fb, 'hint', '💡 Hint: match each describing word with what it describes.');
         }
       }
       card.appendChild(fb);
