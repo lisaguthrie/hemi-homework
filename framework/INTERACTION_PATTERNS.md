@@ -100,6 +100,145 @@ playBtn.onclick = function() { speak(buildSentence(q, userAnswers[i])); };
 
 **When to use:** Any worksheet where a sentence contains an inline widget (dropdown, input) that breaks the sentence into segments. Prefer this over tapping-reads-full-sentence when the segments are long enough to be independently meaningful.
 
+### Inline Dropdown Tap Scope (Part-Only TTS)
+
+When a sentence includes inline dropdowns, do not attach full-sentence read-aloud to the whole sentence container. Keep full-sentence TTS on the green play button only, and make each visible text segment speak only itself.
+
+**Required behavior:**
+
+- Tapping the green `▶` button reads the full sentence with current selections.
+- Tapping any sentence text segment reads only that segment.
+- Tapping the dropdown opens/changes the control and does not trigger container speech.
+- If a segment is empty after splitting around a placeholder, render it but skip speech for that segment.
+
+```javascript
+// Sentence with one inline placeholder, e.g. "Sometimes ___ we take our cousins."
+const prompt = document.createElement('div');
+prompt.className = 'prompt inline-fill';
+
+const parts = q.prompt.split('___');
+
+const before = document.createElement('span');
+before.className = 'inline-text part-tap';
+before.textContent = parts[0] || '';
+before.onclick = function (e) {
+  e.stopPropagation();
+  if ((parts[0] || '').trim()) speak((parts[0] || '').trim());
+};
+
+const sel = createSelect(q.options, state[i].phrase, onChange, '- phrase -');
+sel.classList.add('inline-select');
+
+const after = document.createElement('span');
+after.className = 'inline-text part-tap';
+after.textContent = parts[1] || '';
+after.onclick = function (e) {
+  e.stopPropagation();
+  if ((parts[1] || '').trim()) speak((parts[1] || '').trim());
+};
+
+prompt.appendChild(before);
+prompt.appendChild(sel);
+prompt.appendChild(after);
+
+// Keep full sentence on play button only
+playBtn.onclick = function () { speak(buildFullSentence(q, state[i])); };
+```
+
+### Inline Dropdown Blank (Fill-in-the-blank default)
+
+For fill-in-the-blank sentence stems, render the dropdown directly at the blank location instead of placing it in a separate row below.
+
+```javascript
+function renderInlineBlank(container, q, i) {
+  // q.before + [dropdown] + q.after
+  const before = document.createElement('span');
+  before.className = 'readable-span';
+  before.textContent = q.before;
+  before.onclick = function() { speak(q.before.trim()); };
+
+  const sel = document.createElement('select');
+  sel.className = 'gap-select';
+  const blank = document.createElement('option');
+  blank.value = ''; blank.textContent = '— pick —';
+  sel.appendChild(blank);
+  q.options.forEach((opt) => {
+    const o = document.createElement('option');
+    o.value = opt; o.textContent = opt;
+    sel.appendChild(o);
+  });
+  sel.value = answers[i] || '';
+  sel.onchange = function() {
+    answers[i] = sel.value;
+    saveState();
+    if (sel.value) setTimeout(() => speak(q.before + sel.value + q.after), 300);
+    render();
+  };
+
+  const after = document.createElement('span');
+  after.className = 'readable-span';
+  after.textContent = q.after;
+  after.onclick = function() { speak(q.after.trim()); };
+
+  container.appendChild(before);
+  container.appendChild(sel);
+  container.appendChild(after);
+}
+```
+
+Use a below-the-line dropdown row only when the user explicitly requests that layout.
+
+### Export/Print Answer Emphasis (single vs double underline)
+
+Use this when a worksheet has an Export/Print view and the printed output should visually preserve which selected words play different grammatical roles.
+
+**Formatting rules:**
+
+- If the directions state that a part of speech should be underlined, use **bold + single underline**.
+- If the directions state that a part of speech should be circled, use **bold + double underline**.
+
+```javascript
+function escHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function singleUnderline(value) {
+  return '<strong><span class="single-underline">' + escHtml(value) + '</span></strong>';
+}
+
+function doubleUnderline(value) {
+  return '<strong><span class="double-underline">' + escHtml(value) + '</span></strong>';
+}
+
+function replaceFirstLiteral(source, needle, replacement) {
+  if (!needle) return source;
+  const idx = source.indexOf(needle);
+  if (idx === -1) return source;
+  return source.slice(0, idx) + replacement + source.slice(idx + needle.length);
+}
+
+/* Print CSS */
+const printCss =
+  '.single-underline{text-decoration-line:underline;text-decoration-thickness:2px}' +
+  '.double-underline{text-decoration-line:underline;text-decoration-style:double;text-decoration-thickness:2px}';
+
+/* Part B sentence example */
+let sentenceHtml = escHtml(sentence);
+sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(selectedAdj), singleUnderline(selectedAdj));
+sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(selectedNoun), doubleUnderline(selectedNoun));
+
+/* Part D answer line example */
+const phraseHtml = selectedPhrase ? singleUnderline(selectedPhrase) : '___';
+const prepHtml = selectedPrep ? doubleUnderline(selectedPrep) : '___';
+```
+
+Keep these markings in the print/export HTML only; on-screen worksheet controls keep the standard interactive styling.
+
 ### Gap-Fill Tappable Segments (Type: `__` delimiter)
 
 Used when a prompt is stored with `__` markers for inline gap dropdowns (e.g. dialogue punctuation worksheets). Split the prompt on `__` and render each text segment as a tappable span; each `__` position becomes a `<select>`.

@@ -27,7 +27,9 @@ function buildFullSentence(q, answer) {
 }
 ```
 
-**Answer control:** Dropdown (`<select>`). Curate options to the plausible set for the worksheet — do not include every word in the class, only those that could be correct for at least one question.
+**Answer control:** Dropdown (`<select>`) rendered inline at the blank position inside the sentence stem (not in a separate row underneath). Curate options to the plausible set for the worksheet — do not include every word in the class, only those that could be correct for at least one question.
+
+**Inline layout rule (required):** Keep fill-in-the-blank controls in context by placing each dropdown directly between `before` and `after` text. Do not move the dropdown below the sentence stem unless the user explicitly requests a separate control row.
 
 **Answer evaluation:** `q.answers.map(a => a.toLowerCase()).includes(val.toLowerCase())`
 

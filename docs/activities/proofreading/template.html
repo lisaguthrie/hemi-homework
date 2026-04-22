@@ -399,8 +399,8 @@ h1 {
         <div class="mark-pill"><span class="mark-symbol">✗</span> Delete</div>
         <div class="mark-pill"><span class="mark-symbol">,</span> Add comma</div>
         <div class="mark-pill"><span class="mark-symbol">sp</span> Fix spelling</div>
-        <div class="mark-pill"><span class="mark-symbol">'</span> Add apostrophe</div>
-        <div class="mark-pill"><span class="mark-symbol">.</span> Add punctuation</div>
+        <div class="mark-pill"><span class="mark-symbol">' "</span> Add apostrophe or quotation mark</div>
+        <div class="mark-pill"><span class="mark-symbol">. ? !</span> Add ending punctuation</div>
         <div class="mark-pill"><span class="mark-symbol">vb</span> Fix verb</div>
       </div>
     </div>
@@ -682,8 +682,8 @@ function buildCard(i) {
     { id: 'delete',     label: '✗ Delete'       },
     { id: 'comma',      label: ', Add comma'    },
     { id: 'spelling',   label: 'sp Fix spelling'},
-    { id: 'apostrophe', label: "' Add apostrophe"},
-    { id: 'punctuation',label: '. Add punctuation'},
+    { id: 'apostrophe', label: "' \" Add apostrophe or quotation mark"},
+    { id: 'punctuation',label: '. ? ! Add ending punctuation'},
     { id: 'verb',       label: 'vb Fix verb'    },
   ];
   markTypes.forEach(mt => {
@@ -1203,8 +1203,8 @@ function exportPrint() {
     delete:      { symbol: '✗', label: 'Delete' },
     comma:       { symbol: ',', label: 'Add comma' },
     spelling:    { symbol: 'sp', label: 'Fix spelling' },
-    apostrophe:  { symbol: "'", label: 'Add apostrophe' },
-    punctuation: { symbol: '.', label: 'Add punctuation' },
+    apostrophe:  { symbol: "' \"", label: 'Add apostrophe or quotation mark' },
+    punctuation: { symbol: '. ? !', label: 'Add ending punctuation' },
     verb:        { symbol: 'vb', label: 'Fix verb' }
   };
 
@@ -1213,7 +1213,7 @@ function exportPrint() {
     const label = (markMeta[error.errorType] || {}).label || 'Fix';
     if (error.correctSpelling) return `${originalWord} -> ${error.correctSpelling} (${label})`;
     if (error.errorType === 'comma') return `Add comma after "${originalWord}"`;
-    if (error.errorType === 'punctuation') return `Add punctuation after "${originalWord}"`;
+    if (error.errorType === 'punctuation') return `Add ending punctuation after "${originalWord}"`;
     if (error.errorType === 'capitalize') return `Capitalize "${originalWord}"`;
     if (error.errorType === 'lowercase') return `Lowercase "${originalWord}"`;
     if (error.errorType === 'apostrophe') return `Fix apostrophe in "${originalWord}"`;
@@ -1324,8 +1324,8 @@ function exportPrint() {
     <span class="chip"><b>✗</b> Delete</span>
     <span class="chip"><b>,</b> Add comma</span>
     <span class="chip"><b>sp</b> Fix spelling</span>
-    <span class="chip"><b>'</b> Add apostrophe</span>
-    <span class="chip"><b>.</b> Add punctuation</span>
+    <span class="chip"><b>' "</b> Add apostrophe or quotation mark</span>
+    <span class="chip"><b>. ? !</b> Add ending punctuation</span>
     <span class="chip"><b>vb</b> Fix verb</span>
   </div>
 </section>

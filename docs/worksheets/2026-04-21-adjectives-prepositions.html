@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adjectives and Prepositions - Combined Practice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-start: #e0f4ff;
+      --bg-end: #f0e8ff;
+      --card-bg: #ffffff;
+      --text-primary: #1a2a3a;
+      --text-muted: #5f7388;
+      --accent-blue: #3b9ede;
+      --accent-blue-dk: #1a6fa8;
+      --btn-play: #5dca7e;
+      --btn-play-dk: #3aaa5a;
+      --feedback-ok-bg: #d0f5e0;
+      --feedback-ok-txt: #1d7a40;
+      --feedback-hint-bg: #ffeedd;
+      --feedback-hint-txt: #c05000;
+      --pip-empty: #dde0e8;
+      --pip-done: #5dca7e;
+      --part-a: #eaf7ff;
+      --part-b: #fff6de;
+      --part-c: #eef9ee;
+      --part-d: #f8edff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      padding: 20px 14px 56px;
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .title-card,
+    .progress-card,
+    .section-header,
+    .card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .title-card {
+      border: 2.5px solid #b8dfff;
+      padding: 16px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-family: 'Fredoka One', cursive;
+      font-size: 2rem;
+      line-height: 1.1;
+      letter-spacing: 0.3px;
+      color: #12354f;
+    }
+
+    .subtitle {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .instructions {
+      margin-top: 10px;
+      background: #e7f3ff;
+      border: 2px solid var(--accent-blue);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 800;
+      color: var(--accent-blue-dk);
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .progress-card {
+      padding: 12px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .pips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .pip {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--pip-empty);
+      transition: background 0.2s;
+    }
+
+    .pip.done { background: var(--pip-done); }
+
+    .progress-text {
+      font-weight: 800;
+      color: #2e4a63;
+    }
+
+    .chip-bank {
+      border: 2px solid #ecd67b;
+      border-radius: 12px;
+      background: #fff9df;
+      padding: 8px 10px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      line-height: 1.4;
+      color: #7a5a00;
+      min-height: 44px;
+      cursor: pointer;
+    }
+
+    .section-header {
+      border: 2px solid rgba(0,0,0,0.08);
+      padding: 10px 12px;
+      font-weight: 800;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .part-a { background: var(--part-a); }
+    .part-b { background: var(--part-b); }
+    .part-c { background: var(--part-c); }
+    .part-d { background: var(--part-d); }
+
+    .card {
+      padding: 14px;
+      border: 2.5px solid transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card.done {
+      border-color: var(--btn-play);
+      background: #f0fff5;
+    }
+
+    .row-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .num {
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+
+    .play-btn {
+      background: var(--btn-play);
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.15rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover { background: var(--btn-play-dk); }
+
+    .prompt {
+      border: 2px solid #dbe9f7;
+      border-radius: 10px;
+      background: #f8fbff;
+      padding: 10px 11px;
+      min-height: 44px;
+      line-height: 1.45;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .prompt.inline-fill {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inline-text {
+      font-weight: 700;
+    }
+
+    .inline-text.part-tap {
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 0 1px;
+      transition: background 0.15s;
+    }
+
+    .inline-text.part-tap:hover {
+      background: #daeeff;
+    }
+
+    .answer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 8px;
+      align-items: start;
+    }
+
+    .answer-select {
+      width: 100%;
+      min-height: 44px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-blue-dk);
+      background: #e8f4ff;
+      border: 2.5px solid var(--accent-blue);
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .answer-select:focus {
+      border-color: var(--accent-blue-dk);
+      background: #d5edff;
+    }
+
+    .inline-select {
+      width: auto;
+      min-width: 130px;
+      max-width: 230px;
+      flex: 0 0 auto;
+    }
+
+    .inline-select.article-select {
+      min-width: 90px;
+    }
+
+    .inline-select.prep-phrase-select {
+      min-width: 220px;
+      max-width: 360px;
+    }
+
+    .feedback {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 0.92rem;
+      font-weight: 800;
+      width: fit-content;
+      min-height: 32px;
+    }
+
+    .feedback.show { display: inline-flex; }
+    .feedback.ok { background: var(--feedback-ok-bg); color: var(--feedback-ok-txt); }
+    .feedback.hint { background: var(--feedback-hint-bg); color: var(--feedback-hint-txt); }
+
+    .speaking-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a6fa8;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 10px 24px;
+      border-radius: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease, background 0.2s;
+      z-index: 100;
+      pointer-events: none;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .speaking-toast.visible {
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    .speaking-toast.visible:hover { background: #c0392b; }
+    .speaking-toast.visible:hover .toast-label::after { content: ' - tap to stop'; }
+
+    .action-buttons {
+      text-align: center;
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 10px;
+    }
+
+    .clear-btn, .export-btn {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      border-radius: 18px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      min-height: 44px;
+      border: 2px solid;
+      padding: 8px 16px;
+    }
+
+    .clear-btn {
+      background: #f0f0f0;
+      color: #888;
+      border-color: #ccc;
+    }
+
+    .clear-btn:hover {
+      background: #ffeedd;
+      color: #c05000;
+      border-color: #c05000;
+    }
+
+    .export-btn {
+      background: #7c5cbf;
+      color: white;
+      border-color: #7c5cbf;
+      box-shadow: 0 2px 8px rgba(124,92,191,0.25);
+    }
+
+    .export-btn:hover {
+      background: #5a3fa0;
+      border-color: #5a3fa0;
+    }
+
+    .section-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -2px;
+      margin-bottom: 8px;
+    }
+
+    .check-btn {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.9rem;
+      min-height: 44px;
+      border-radius: 14px;
+      border: 2px solid #1a6fa8;
+      background: #e8f4ff;
+      color: #1a6fa8;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .check-btn:hover {
+      background: #1a6fa8;
+      color: #ffffff;
+      border-color: #145b8a;
+    }
+
+    @media print {
+      .action-buttons { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.7rem; }
+      .answer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+
+  <div class="action-buttons">
+    <button class="clear-btn" onclick="clearAllResponses()">🗑️ Clear all responses</button>
+    <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
+  </div>
+
+  <div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+    🔊 <span class="toast-label">Reading aloud...</span>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'christina_adjectives_prepositions_2026_04_21_v1';
+
+    const adjectivesA = [
+      { id: 'a1', textBefore: 'a', textAfter: 'game', kind: 'adj-only', options: ['exciting', 'challenging', 'outdoor', 'fun'] },
+      { id: 'a2', textBefore: 'a', textAfter: 'street', kind: 'adj-only', options: ['busy', 'empty', 'icy', 'crowded'] },
+      { id: 'a3', textBefore: 'an', textAfter: 'book', kind: 'adj-only', options: ['interesting', 'old', 'funny', 'boring'] },
+      { id: 'a4', textBefore: 'an', textAfter: 'dog', kind: 'adj-only', options: ['energetic', 'active', 'playful', 'brave'] },
+      { id: 'a5', adjective: 'incredible', kind: 'article-noun', nouns: ['adventure', 'idea', 'performance', 'project'] },
+      { id: 'a6', adjective: 'beautiful', kind: 'article-noun', nouns: ['painting', 'garden', 'song', 'sunset'] },
+      { id: 'a7', adjective: 'exciting', kind: 'article-noun', nouns: ['movie', 'game', 'trip', 'story'] },
+      { id: 'a8', adjective: 'colorful', kind: 'article-noun', nouns: ['kite', 'blanket', 'poster', 'backpack'] }
+    ];
+
+    const adjectivesB = [
+      { id: 'b1', sentence: 'Alice visited an interesting museum.', answerAdj: 'interesting', answerNoun: 'museum', adjectiveOptions: ['interesting', 'Alice', 'visited'], nounOptions: ['museum', 'Alice', 'art'] },
+      { id: 'b2', sentence: 'The museum was filled with fascinating art.', answerAdj: 'fascinating', answerNoun: 'art', adjectiveOptions: ['fascinating', 'filled', 'museum'], nounOptions: ['art', 'museum', 'guide'] },
+      { id: 'b3', sentence: 'The guide provided detailed descriptions.', answerAdj: 'detailed', answerNoun: 'descriptions', adjectiveOptions: ['detailed', 'guide', 'provided'], nounOptions: ['descriptions', 'guide', 'museum'] },
+      { id: 'b4', sentence: 'The bronze statue was her favorite.', answerAdj: 'bronze', answerNoun: 'statue', adjectiveOptions: ['bronze', 'favorite', 'her'], nounOptions: ['statue', 'favorite', 'bronze'] },
+      { id: 'b5', sentence: 'One entire floor was devoted to bright paintings of blue flowers.', answerAdj: 'entire', answerNoun: 'floor', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] },
+      { id: 'b6', sentence: 'One entire floor was devoted to bright paintings of blue flowers.', answerAdj: 'bright', answerNoun: 'paintings', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] },
+      { id: 'b7', sentence: 'One entire floor was devoted to bright paintings of blue flowers.', answerAdj: 'blue', answerNoun: 'flowers', adjectiveOptions: ['entire', 'bright', 'blue'], nounOptions: ['floor', 'paintings', 'flowers'] },
+      { id: 'b8', sentence: 'The top floor contained ten enormous sculptures.', answerAdj: 'top', answerNoun: 'floor', adjectiveOptions: ['top', 'ten', 'enormous'], nounOptions: ['floor', 'sculptures', 'museum'] },
+      { id: 'b9', sentence: 'The top floor contained ten enormous sculptures.', answerAdj: 'enormous', answerNoun: 'sculptures', adjectiveOptions: ['top', 'ten', 'enormous'], nounOptions: ['floor', 'sculptures', 'guide'] },
+      { id: 'b10', sentence: 'The museum is a popular tourist stop.', answerAdj: 'popular', answerNoun: 'stop', adjectiveOptions: ['popular', 'tourist', 'museum'], nounOptions: ['stop', 'museum', 'visitors'] },
+      { id: 'b11', sentence: 'The museum is a popular tourist stop.', answerAdj: 'tourist', answerNoun: 'stop', adjectiveOptions: ['popular', 'tourist', 'museum'], nounOptions: ['stop', 'tourist', 'museum'] },
+      { id: 'b12', sentence: 'Visitors can buy a delicious lunch in the cafeteria.', answerAdj: 'delicious', answerNoun: 'lunch', adjectiveOptions: ['delicious', 'Visitors', 'cafeteria'], nounOptions: ['lunch', 'Visitors', 'cafeteria'] },
+      { id: 'b13', sentence: 'Beautiful gifts are sold in the shop.', answerAdj: 'Beautiful', answerNoun: 'gifts', adjectiveOptions: ['Beautiful', 'sold', 'shop'], nounOptions: ['gifts', 'shop', 'Beautiful'] },
+      { id: 'b14', sentence: 'Many visitors spend a full day in the museum.', answerAdj: 'Many', answerNoun: 'visitors', adjectiveOptions: ['Many', 'full', 'museum'], nounOptions: ['visitors', 'day', 'museum'] },
+      { id: 'b15', sentence: 'Many visitors spend a full day in the museum.', answerAdj: 'full', answerNoun: 'day', adjectiveOptions: ['Many', 'full', 'museum'], nounOptions: ['visitors', 'day', 'museum'] }
+    ];
+
+    const prepositionsA = [
+      {
+        id: 'c1',
+        prompt: 'My family and I live ___.',
+        options: ['during the summer', 'in the afternoon', 'in the ocean', 'to the neighborhood pool', 'in Nebraska'],
+        answerPhrase: 'in Nebraska',
+        answerType: 'where'
+      },
+      {
+        id: 'c2',
+        prompt: 'Swimming is my favorite thing to do ___.',
+        options: ['during the summer', 'in the afternoon', 'in the ocean', 'to the neighborhood pool', 'in Nebraska'],
+        answerPhrase: 'during the summer',
+        answerType: 'when'
+      },
+      {
+        id: 'c3',
+        prompt: 'My friends and I can walk ___.',
+        options: ['during the summer', 'in the afternoon', 'in the ocean', 'to the neighborhood pool', 'in Nebraska'],
+        answerPhrase: 'to the neighborhood pool',
+        answerType: 'where'
+      },
+      {
+        id: 'c4',
+        prompt: 'Sometimes ___ we take our cousins.',
+        options: ['during the summer', 'in the afternoon', 'in the ocean', 'to the neighborhood pool', 'in Nebraska'],
+        answerPhrase: 'in the afternoon',
+        answerType: 'when'
+      },
+      {
+        id: 'c5',
+        prompt: 'My friend, who lives in Miami, swims ___.',
+        options: ['during the summer', 'in the afternoon', 'in the ocean', 'to the neighborhood pool', 'in Nebraska'],
+        answerPhrase: 'in the ocean',
+        answerType: 'where'
+      }
+    ];
+
+    const prepositionsB = [
+      { id: 'd1', sentence: 'Gerard is giving a party for Maria.', phraseOptions: ['a party for Maria', 'is giving a party', 'for Maria'], answerPhrase: 'for Maria', prepOptions: ['for', 'to', 'with'], answerPrep: 'for' },
+      { id: 'd2', sentence: 'Norma sent invitations to all her friends.', phraseOptions: ['sent invitations', 'to all her friends', 'all her friends'], answerPhrase: 'to all her friends', prepOptions: ['to', 'from', 'for'], answerPrep: 'to' },
+      { id: 'd3', sentence: 'The food was made by Josue.', phraseOptions: ['was made', 'made by Josue', 'by Josue'], answerPhrase: 'by Josue', prepOptions: ['by', 'with', 'for'], answerPrep: 'by' },
+      { id: 'd4', sentence: 'Rebecca decorated the room with streamers.', phraseOptions: ['decorated the room', 'the room with streamers', 'with streamers'], answerPhrase: 'with streamers', prepOptions: ['with', 'on', 'from'], answerPrep: 'with' },
+      { id: 'd5', sentence: 'Mela sat next to Danielle.', phraseOptions: ['sat next to Danielle', 'next to Danielle', 'to Danielle'], answerPhrase: 'next to Danielle', prepOptions: ['next to', 'to', 'with'], answerPrep: 'next to' },
+      { id: 'd6', sentence: 'Kama played a song on her guitar.', phraseOptions: ['played a song', 'a song on her guitar', 'on her guitar'], answerPhrase: 'on her guitar', prepOptions: ['on', 'with', 'in'], answerPrep: 'on' },
+      { id: 'd7', sentence: 'Terry arrived late with Deborah.', phraseOptions: ['arrived late', 'late with Deborah', 'with Deborah'], answerPhrase: 'with Deborah', prepOptions: ['with', 'for', 'at'], answerPrep: 'with' },
+      { id: 'd8', sentence: 'Adriane brought a huge chocolate cake from the bakery.', phraseOptions: ['a huge chocolate cake', 'from the bakery', 'brought a huge chocolate cake'], answerPhrase: 'from the bakery', prepOptions: ['from', 'to', 'for'], answerPrep: 'from' },
+      { id: 'd9', sentence: 'The celebration lasted until dinnertime.', phraseOptions: ['The celebration lasted', 'lasted until dinnertime', 'until dinnertime'], answerPhrase: 'until dinnertime', prepOptions: ['until', 'during', 'after'], answerPrep: 'until' },
+      { id: 'd10', sentence: 'Sarah and Joanna took the train home with Liza.', phraseOptions: ['took the train home', 'home with Liza', 'with Liza'], answerPhrase: 'with Liza', prepOptions: ['with', 'to', 'in'], answerPrep: 'with' }
+    ];
+
+    let state = loadState();
+
+    function buildDefaultState() {
+      return {
+        adjA: adjectivesA.map(() => ({ v1: '', v2: '' })),
+        adjB: adjectivesB.map(() => ({ adj: '', noun: '' })),
+        prepA: prepositionsA.map(() => ({ phrase: '', type: '' })),
+        prepB: prepositionsB.map(() => ({ phrase: '', prep: '' })),
+        checked: {
+          adjA: false,
+          adjB: false,
+          prepA: false,
+          prepB: false
+        }
+      };
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return buildDefaultState();
+        const parsed = JSON.parse(raw);
+        const clean = buildDefaultState();
+        if (parsed && parsed.adjA && parsed.adjB && parsed.prepA && parsed.prepB) {
+          clean.adjA = parsed.adjA;
+          clean.adjB = parsed.adjB;
+          clean.prepA = parsed.prepA;
+          clean.prepB = parsed.prepB;
+          if (parsed.checked) {
+            clean.checked.adjA = !!parsed.checked.adjA;
+            clean.checked.adjB = !!parsed.checked.adjB;
+            clean.checked.prepA = !!parsed.checked.prepA;
+            clean.checked.prepB = !!parsed.checked.prepB;
+          }
+        }
+        return clean;
+      } catch (err) {
+        return buildDefaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.88;
+      utter.pitch = 1.05;
+      utter.onstart = showToast;
+      utter.onend = hideToast;
+      utter.onerror = hideToast;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function showToast() {
+      document.getElementById('speakingToast').classList.add('visible');
+    }
+
+    function hideToast() {
+      document.getElementById('speakingToast').classList.remove('visible');
+    }
+
+    function cancelSpeak() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      hideToast();
+    }
+
+    function clearAllResponses() {
+      const btn = document.querySelector('.clear-btn');
+      if (btn.dataset.confirming === 'true') {
+        state.adjA = adjectivesA.map(() => ({ v1: '', v2: '' }));
+        state.adjB = adjectivesB.map(() => ({ adj: '', noun: '' }));
+        state.prepA = prepositionsA.map(() => ({ phrase: '', type: '' }));
+        state.prepB = prepositionsB.map(() => ({ phrase: '', prep: '' }));
+        state.checked = { adjA: false, adjB: false, prepA: false, prepB: false };
+        try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+        render();
+      } else {
+        btn.dataset.confirming = 'true';
+        btn.textContent = '⚠️ Tap again to confirm';
+        btn.style.background = '#ffeedd';
+        btn.style.color = '#c05000';
+        btn.style.borderColor = '#c05000';
+        setTimeout(() => {
+          if (btn.dataset.confirming === 'true') {
+            btn.dataset.confirming = 'false';
+            btn.textContent = '🗑️ Clear all responses';
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+          }
+        }, 3000);
+      }
+    }
+
+    function exportPrint() {
+      const done = getDoneCount();
+      const total = getTotalCount();
+      const htmlDoc = buildPrintDocument(done, total);
+      const blob = new Blob([htmlDoc], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+
+    function buildPrintDocument(completedCount, totalCount) {
+      function escHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function singleUnderline(value) {
+        return '<strong><span class="single-underline">' + escHtml(value) + '</span></strong>';
+      }
+
+      function doubleUnderline(value) {
+        return '<strong><span class="double-underline">' + escHtml(value) + '</span></strong>';
+      }
+
+      function replaceFirstLiteral(source, needle, replacement) {
+        if (!needle) return source;
+        const idx = source.indexOf(needle);
+        if (idx === -1) return source;
+        return source.slice(0, idx) + replacement + source.slice(idx + needle.length);
+      }
+
+      let adjAHtml = '';
+      adjectivesA.forEach((q, i) => {
+        const s = state.adjA[i];
+        let text = '';
+        if (q.kind === 'adj-only') {
+          const adj = s.v1 ? singleUnderline(s.v1) : '___';
+          text = escHtml(q.textBefore) + ' ' + adj + ' ' + escHtml(q.textAfter);
+        } else {
+          const article = s.v1 ? singleUnderline(s.v1) : '___';
+          const noun = s.v2 ? singleUnderline(s.v2) : '___';
+          text = article + ' ' + escHtml(q.adjective) + ' ' + noun;
+        }
+        adjAHtml += '<div style="margin:12px 0"><strong>A' + (i+1) + '.</strong> ' + text + '</div>';
+      });
+
+      let adjBHtml = '';
+      adjectivesB.forEach((q, i) => {
+        const s = state.adjB[i];
+        let sentenceHtml = escHtml(q.sentence);
+        if (s.adj) {
+          sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(s.adj), singleUnderline(s.adj));
+        }
+        if (s.noun) {
+          sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(s.noun), doubleUnderline(s.noun));
+        }
+        adjBHtml += '<div style="margin:12px 0"><strong>B' + (i+1) + '.</strong> ' + sentenceHtml + '</div>';
+      });
+
+      let prepAHtml = '';
+      prepositionsA.forEach((q, i) => {
+        const s = state.prepA[i];
+        const phrase = s.phrase ? singleUnderline(s.phrase) : '___';
+        const type = s.type ? '(' + s.type + ')' : '(_____)';
+        prepAHtml += '<div style="margin:12px 0"><strong>C' + (i+1) + '.</strong> ' + escHtml(q.prompt).replace('___', phrase) + ' ' + escHtml(type) + '</div>';
+      });
+
+      let prepBHtml = '';
+      prepositionsB.forEach((q, i) => {
+        const s = state.prepB[i];
+        let sentenceHtml = escHtml(q.sentence);
+
+        if (s.phrase) {
+          let phraseInner = escHtml(s.phrase);
+          if (s.prep) {
+            phraseInner = replaceFirstLiteral(phraseInner, escHtml(s.prep), doubleUnderline(s.prep));
+          }
+          const phraseWrapped = '<strong><span class="single-underline">' + phraseInner + '</span></strong>';
+          sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(s.phrase), phraseWrapped);
+        } else if (s.prep) {
+          sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(s.prep), doubleUnderline(s.prep));
+        }
+
+        prepBHtml += '<div style="margin:12px 0"><strong>D' + (i+1) + '.</strong> ' + sentenceHtml + '</div>';
+      });
+
+      const printHtml = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Adjectives and Prepositions - Print</title><style>body{font-family:"Nunito",Arial,sans-serif;color:#1a2a3a;max-width:8.5in;margin:0.5in auto;padding:0;line-height:1.6}h1{font-size:1.8rem;color:#12354f;text-align:center;margin:0 0 0.3in}.header-line{display:flex;gap:20px;margin:0.2in 0 0.3in;font-size:0.9rem}.header-line span{display:flex;align-items:flex-end;gap:6px}.line{display:inline-block;width:1.5in;border-bottom:1px solid #333}.section{margin:0.3in 0;page-break-inside:avoid}.section h2{font-size:1.1rem;color:#1a6fa8;margin:0.2in 0 0.15in}.progress{text-align:center;margin:0.2in 0;font-weight:bold}.single-underline{text-decoration-line:underline;text-decoration-thickness:2px}.double-underline{text-decoration-line:underline;text-decoration-style:double;text-decoration-thickness:2px}@media print{body{margin:0;padding:0.5in}button{display:none}}</style></head><body><h1>Adjectives and Prepositions - Print</h1><div class="header-line"><span>Name: <span class="line"></span></span><span>Date: <span class="line"></span></span></div><div class="progress">Completed: ' + completedCount + ' / ' + totalCount + '</div><div class="section"><h2>Part A - Adjectives: Complete the phrases</h2>' + adjAHtml + '</div><div class="section"><h2>Part B - Adjectives: Match adjective to noun</h2>' + adjBHtml + '</div><div class="section"><h2>Part C - Prepositions: Fill in and label where or when</h2>' + prepAHtml + '</div><div class="section"><h2>Part D - Prepositions: Phrase and preposition</h2>' + prepBHtml + '</div><script>window.onload=function(){const printBtn=document.createElement("button");printBtn.textContent="🖨️ Print";printBtn.style.cssText="position:fixed;top:10px;right:10px;padding:10px 20px;background:#7c5cbf;color:white;border:none;border-radius:18px;cursor:pointer;font-weight:bold;font-size:1rem;z-index:1000;";printBtn.onclick=function(){window.print();};document.body.appendChild(printBtn);}<\/script></body></html>';
+      return printHtml;
+    }
+
+    function createSelect(options, value, onChange, placeholder) {
+      const sel = document.createElement('select');
+      sel.className = 'answer-select';
+
+      const blank = document.createElement('option');
+      blank.value = '';
+      blank.textContent = placeholder || '- pick -';
+      sel.appendChild(blank);
+
+      options.forEach((opt) => {
+        const o = document.createElement('option');
+        o.value = opt;
+        o.textContent = opt;
+        sel.appendChild(o);
+      });
+
+      sel.value = value || '';
+      sel.onchange = onChange;
+      ['click', 'mousedown', 'touchstart'].forEach(function (ev) {
+        sel.addEventListener(ev, function (e) { e.stopPropagation(); });
+      });
+      return sel;
+    }
+
+    function setFeedback(el, type, text) {
+      el.className = 'feedback show ' + type;
+      el.textContent = text;
+    }
+
+    function isAdjAComplete(i) {
+      const q = adjectivesA[i];
+      const s = state.adjA[i];
+      if (q.kind === 'adj-only') return !!s.v1;
+      return !!s.v1 && !!s.v2;
+    }
+
+    function startsWithVowelLetter(word) {
+      if (!word) return false;
+      return /^[aeiou]/i.test(word.trim());
+    }
+
+    function isAdjAArticleMatch(i) {
+      const q = adjectivesA[i];
+      const s = state.adjA[i];
+      if (q.kind === 'adj-only') {
+        if (!s.v1) return false;
+        if (q.textBefore === 'a') return !startsWithVowelLetter(s.v1);
+        if (q.textBefore === 'an') return startsWithVowelLetter(s.v1);
+        return true;
+      }
+      if (q.kind === 'article-noun') {
+        if (!s.v1 || !s.v2) return false;
+        if (s.v1 === 'a') return !startsWithVowelLetter(q.adjective);
+        if (s.v1 === 'an') return startsWithVowelLetter(q.adjective);
+        return true;
+      }
+      return true;
+    }
+
+    function isAdjBComplete(i) {
+      return !!state.adjB[i].adj && !!state.adjB[i].noun;
+    }
+
+    function isPrepAComplete(i) {
+      return !!state.prepA[i].phrase && !!state.prepA[i].type;
+    }
+
+    function isPrepBComplete(i) {
+      return !!state.prepB[i].phrase && !!state.prepB[i].prep;
+    }
+
+    function getTotalCount() {
+      return adjectivesA.length + adjectivesB.length + prepositionsA.length + prepositionsB.length;
+    }
+
+    function getDoneCount() {
+      let done = 0;
+      adjectivesA.forEach((_, i) => { if (isAdjAComplete(i)) done += 1; });
+      adjectivesB.forEach((_, i) => { if (isAdjBComplete(i)) done += 1; });
+      prepositionsA.forEach((_, i) => { if (isPrepAComplete(i)) done += 1; });
+      prepositionsB.forEach((_, i) => { if (isPrepBComplete(i)) done += 1; });
+      return done;
+    }
+
+    function buildAdjARead(q, s) {
+      if (q.kind === 'adj-only') return q.textBefore + ' ' + (s.v1 || 'blank') + ' ' + q.textAfter;
+      return (s.v1 || 'blank article') + ' ' + q.adjective + ' ' + (s.v2 || 'blank noun');
+    }
+
+    function addSectionCheckButton(parent, sectionKey, sectionLabel) {
+      const actionWrap = document.createElement('div');
+      actionWrap.className = 'section-actions';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'check-btn';
+      btn.textContent = 'Check Answers';
+      btn.setAttribute('aria-label', 'Check answers for ' + sectionLabel);
+      btn.onclick = function () {
+        state.checked[sectionKey] = true;
+        saveState();
+        render();
+      };
+
+      actionWrap.appendChild(btn);
+      parent.appendChild(actionWrap);
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      app.innerHTML = '';
+
+      const title = document.createElement('div');
+      title.className = 'title-card';
+      title.innerHTML = '' +
+        '<h1>Adjectives + Prepositions</h1>' +
+        '<p class="subtitle">One combined worksheet app for both pages. Name: Tina #18</p>';
+
+      const ins = document.createElement('div');
+      ins.className = 'instructions';
+      ins.textContent = '🔊 Tap to hear directions: complete each card with dropdowns, then use the green button to hear each sentence.';
+      ins.onclick = function () {
+        speak('Complete each card by choosing the best words. You can tap any prompt to hear it, and tap the green button to hear the full sentence.');
+      };
+      title.appendChild(ins);
+
+      app.appendChild(title);
+
+      const progress = document.createElement('div');
+      progress.className = 'progress-card';
+      const done = getDoneCount();
+      const total = getTotalCount();
+      const pips = document.createElement('div');
+      pips.className = 'pips';
+      for (let i = 0; i < total; i += 1) {
+        const pip = document.createElement('span');
+        pip.className = 'pip' + (i < done ? ' done' : '');
+        pips.appendChild(pip);
+      }
+      const txt = document.createElement('div');
+      txt.className = 'progress-text';
+      txt.textContent = done + ' / ' + total + ' completed';
+      progress.appendChild(pips);
+      progress.appendChild(txt);
+      app.appendChild(progress);
+
+      const phraseBank = document.createElement('div');
+      phraseBank.className = 'chip-bank';
+      phraseBank.textContent = '🔊 Phrase bank for Prepositions A: during the summer, in the afternoon, in the ocean, to the neighborhood pool, in Nebraska';
+      phraseBank.onclick = function () {
+        speak('Phrase bank: during the summer, in the afternoon, in the ocean, to the neighborhood pool, in Nebraska.');
+      };
+      app.appendChild(phraseBank);
+
+      addSectionHeader(app, 'Part A - Adjectives: Complete the phrases', 'part-a', 'Choose adjectives, articles, and nouns to complete each phrase.');
+      adjectivesA.forEach((q, i) => app.appendChild(buildAdjACard(q, i)));
+      addSectionCheckButton(app, 'adjA', 'Part A');
+
+      addSectionHeader(app, 'Part B - Adjectives: Match adjective to noun', 'part-b', 'In each item, choose the adjective and the noun it describes.');
+      adjectivesB.forEach((q, i) => app.appendChild(buildAdjBCard(q, i)));
+      addSectionCheckButton(app, 'adjB', 'Part B');
+
+      addSectionHeader(app, 'Part C - Prepositions: Fill in and label where or when', 'part-c', 'Pick one phrase and then choose whether it tells where or when.');
+      prepositionsA.forEach((q, i) => app.appendChild(buildPrepACard(q, i)));
+      addSectionCheckButton(app, 'prepA', 'Part C');
+
+      addSectionHeader(app, 'Part D - Prepositions: Phrase and preposition', 'part-d', 'Choose the prepositional phrase, then choose the preposition.');
+      prepositionsB.forEach((q, i) => app.appendChild(buildPrepBCard(q, i)));
+      addSectionCheckButton(app, 'prepB', 'Part D');
+    }
+
+    function addSectionHeader(parent, text, className, speechText) {
+      const el = document.createElement('div');
+      el.className = 'section-header ' + className;
+      el.textContent = text;
+      el.onclick = function () { speak(speechText); };
+      parent.appendChild(el);
+    }
+
+    function buildCardShell(idxText, spokenText) {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      const top = document.createElement('div');
+      top.className = 'row-top';
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = idxText;
+      const play = document.createElement('button');
+      play.className = 'play-btn';
+      play.type = 'button';
+      play.textContent = '▶';
+      play.title = 'Read sentence';
+      play.onclick = function () { speak(spokenText()); };
+
+      top.appendChild(num);
+      top.appendChild(play);
+      card.appendChild(top);
+      return card;
+    }
+
+    function buildAdjACard(q, i) {
+      const card = buildCardShell('A' + (i + 1), function () { return buildAdjARead(q, state.adjA[i]); });
+      if (isAdjAComplete(i)) card.classList.add('done');
+
+      const prompt = document.createElement('div');
+      prompt.className = 'prompt inline-fill';
+      card.appendChild(prompt);
+
+      const s = state.adjA[i];
+      if (q.kind === 'adj-only') {
+        const before = document.createElement('span');
+        before.className = 'inline-text part-tap';
+        before.textContent = q.textBefore;
+        before.title = 'Tap to hear just this part';
+        before.onclick = function (e) {
+          e.stopPropagation();
+          speak(q.textBefore);
+        };
+
+        const selAdj = createSelect(q.options, s.v1, function (e) {
+          state.adjA[i].v1 = e.target.value;
+          state.checked.adjA = false;
+          saveState();
+          if (state.adjA[i].v1) {
+            setTimeout(function () { speak(buildAdjARead(q, state.adjA[i])); }, 300);
+          }
+          render();
+        }, '- adjective -');
+        selAdj.classList.add('inline-select');
+
+        const after = document.createElement('span');
+        after.className = 'inline-text part-tap';
+        after.textContent = q.textAfter;
+        after.title = 'Tap to hear just this part';
+        after.onclick = function (e) {
+          e.stopPropagation();
+          speak(q.textAfter);
+        };
+
+        prompt.appendChild(before);
+        prompt.appendChild(selAdj);
+        prompt.appendChild(after);
+      } else {
+        const selArt = createSelect(['a', 'an'], s.v1, function (e) {
+          state.adjA[i].v1 = e.target.value;
+          state.checked.adjA = false;
+          saveState();
+          if (state.adjA[i].v1 && state.adjA[i].v2) {
+            setTimeout(function () { speak(buildAdjARead(q, state.adjA[i])); }, 300);
+          }
+          render();
+        }, '- article -');
+        selArt.classList.add('inline-select', 'article-select');
+
+        const adjective = document.createElement('span');
+        adjective.className = 'inline-text part-tap';
+        adjective.textContent = q.adjective;
+        adjective.title = 'Tap to hear just this part';
+        adjective.onclick = function (e) {
+          e.stopPropagation();
+          speak(q.adjective);
+        };
+
+        const selNoun = createSelect(q.nouns, s.v2, function (e) {
+          state.adjA[i].v2 = e.target.value;
+          state.checked.adjA = false;
+          saveState();
+          if (state.adjA[i].v1 && state.adjA[i].v2) {
+            setTimeout(function () { speak(buildAdjARead(q, state.adjA[i])); }, 300);
+          }
+          render();
+        }, '- noun -');
+        selNoun.classList.add('inline-select');
+
+        prompt.appendChild(selArt);
+        prompt.appendChild(adjective);
+        prompt.appendChild(selNoun);
+      }
+
+      const fb = document.createElement('div');
+      fb.className = 'feedback';
+      if (state.checked.adjA) {
+        if (!isAdjAComplete(i)) {
+          setFeedback(fb, 'hint', '💡 Finish all blanks in this item, then check again.');
+        } else {
+        if (isAdjAArticleMatch(i)) {
+          setFeedback(fb, 'ok', '✅ Nice phrase. The article and adjective match.');
+        } else {
+          const articleText = q.kind === 'adj-only' ? q.textBefore : state.adjA[i].v1;
+          const expected = articleText === 'a' ? 'consonant' : 'vowel';
+          setFeedback(fb, 'hint', '💡 Hint: after "' + articleText + '", choose a word that starts with a ' + expected + '.');
+        }
+        }
+      }
+      card.appendChild(fb);
+      return card;
+    }
+
+    function buildAdjBCard(q, i) {
+      const card = buildCardShell('B' + (i + 1), function () {
+        const s = state.adjB[i];
+        if (s.adj && s.noun) return q.sentence + ' You picked: ' + s.adj + ' describes ' + s.noun + '.';
+        return q.sentence;
+      });
+      if (isAdjBComplete(i)) card.classList.add('done');
+
+      const prompt = document.createElement('div');
+      prompt.className = 'prompt';
+      prompt.textContent = q.sentence;
+      prompt.onclick = function () { speak(q.sentence); };
+      card.appendChild(prompt);
+
+      const grid = document.createElement('div');
+      grid.className = 'answer-grid';
+
+      const selAdj = createSelect(q.adjectiveOptions, state.adjB[i].adj, function (e) {
+        state.adjB[i].adj = e.target.value;
+        state.checked.adjB = false;
+        saveState();
+        render();
+      }, '- adjective -');
+
+      const selNoun = createSelect(q.nounOptions, state.adjB[i].noun, function (e) {
+        state.adjB[i].noun = e.target.value;
+        state.checked.adjB = false;
+        saveState();
+        if (state.adjB[i].adj && state.adjB[i].noun) {
+          setTimeout(function () {
+            speak(state.adjB[i].adj + ' describes ' + state.adjB[i].noun + '.');
+          }, 300);
+        }
+        render();
+      }, '- noun -');
+
+      grid.appendChild(selAdj);
+      grid.appendChild(selNoun);
+      card.appendChild(grid);
+
+      const fb = document.createElement('div');
+      fb.className = 'feedback';
+      if (state.checked.adjB) {
+        if (!isAdjBComplete(i)) {
+          setFeedback(fb, 'hint', '💡 Choose both the adjective and noun, then check again.');
+        } else {
+          const ok = state.adjB[i].adj === q.answerAdj && state.adjB[i].noun === q.answerNoun;
+          if (ok) setFeedback(fb, 'ok', '✅ Correct match.');
+          else setFeedback(fb, 'hint', '💡 Hint: choose the describing word and what it describes.');
+        }
+      }
+      card.appendChild(fb);
+
+      return card;
+    }
+
+    function prepAFullSentence(q, phrase) {
+      return q.prompt.replace('___', phrase || 'blank');
+    }
+
+    function buildPrepACard(q, i) {
+      const card = buildCardShell('C' + (i + 1), function () {
+        return prepAFullSentence(q, state.prepA[i].phrase);
+      });
+      if (isPrepAComplete(i)) card.classList.add('done');
+
+      const prompt = document.createElement('div');
+      prompt.className = 'prompt inline-fill';
+
+      const parts = q.prompt.split('___');
+      const before = document.createElement('span');
+      before.className = 'inline-text part-tap';
+      before.textContent = parts[0] || '';
+      before.title = 'Tap to hear just this part';
+      before.onclick = function (e) {
+        e.stopPropagation();
+        if ((parts[0] || '').trim()) speak((parts[0] || '').trim());
+      };
+
+      const selPhrase = createSelect(q.options, state.prepA[i].phrase, function (e) {
+        state.prepA[i].phrase = e.target.value;
+        state.checked.prepA = false;
+        saveState();
+        if (state.prepA[i].phrase) {
+          setTimeout(function () { speak(prepAFullSentence(q, state.prepA[i].phrase)); }, 300);
+        }
+        render();
+      }, '- prepositional phrase -');
+      selPhrase.classList.add('inline-select', 'prep-phrase-select');
+
+      const after = document.createElement('span');
+      after.className = 'inline-text part-tap';
+      after.textContent = parts[1] || '';
+      after.title = 'Tap to hear just this part';
+      after.onclick = function (e) {
+        e.stopPropagation();
+        if ((parts[1] || '').trim()) speak((parts[1] || '').trim());
+      };
+
+      prompt.appendChild(before);
+      prompt.appendChild(selPhrase);
+      prompt.appendChild(after);
+      card.appendChild(prompt);
+
+      const grid = document.createElement('div');
+      grid.className = 'answer-grid';
+
+      const selType = createSelect(['where', 'when'], state.prepA[i].type, function (e) {
+        state.prepA[i].type = e.target.value;
+        state.checked.prepA = false;
+        saveState();
+        render();
+      }, '- where or when -');
+
+      grid.appendChild(selType);
+      card.appendChild(grid);
+
+      const fb = document.createElement('div');
+      fb.className = 'feedback';
+      if (state.checked.prepA) {
+        if (!isPrepAComplete(i)) {
+          setFeedback(fb, 'hint', '💡 Pick a phrase and where/when, then check again.');
+        } else {
+          const ok = state.prepA[i].phrase === q.answerPhrase && state.prepA[i].type === q.answerType;
+          if (ok) setFeedback(fb, 'ok', '✅ Great. That phrase and label match.');
+          else setFeedback(fb, 'hint', '💡 Hint: listen to the sentence and decide location or time.');
+        }
+      }
+      card.appendChild(fb);
+      return card;
+    }
+
+    function buildPrepBCard(q, i) {
+      const card = buildCardShell('D' + (i + 1), function () {
+        const s = state.prepB[i];
+        if (s.phrase && s.prep) return q.sentence + ' You picked phrase ' + s.phrase + ', preposition ' + s.prep + '.';
+        return q.sentence;
+      });
+      if (isPrepBComplete(i)) card.classList.add('done');
+
+      const prompt = document.createElement('div');
+      prompt.className = 'prompt';
+      prompt.textContent = q.sentence;
+      prompt.onclick = function () { speak(q.sentence); };
+      card.appendChild(prompt);
+
+      const grid = document.createElement('div');
+      grid.className = 'answer-grid';
+
+      const selPhrase = createSelect(q.phraseOptions, state.prepB[i].phrase, function (e) {
+        state.prepB[i].phrase = e.target.value;
+        state.checked.prepB = false;
+        saveState();
+        render();
+      }, '- prepositional phrase -');
+
+      const selPrep = createSelect(q.prepOptions, state.prepB[i].prep, function (e) {
+        state.prepB[i].prep = e.target.value;
+        state.checked.prepB = false;
+        saveState();
+        if (state.prepB[i].phrase && state.prepB[i].prep) {
+          setTimeout(function () {
+            speak('Phrase: ' + state.prepB[i].phrase + '. Preposition: ' + state.prepB[i].prep + '.');
+          }, 300);
+        }
+        render();
+      }, '- preposition -');
+
+      grid.appendChild(selPhrase);
+      grid.appendChild(selPrep);
+      card.appendChild(grid);
+
+      const fb = document.createElement('div');
+      fb.className = 'feedback';
+      if (state.checked.prepB) {
+        if (!isPrepBComplete(i)) {
+          setFeedback(fb, 'hint', '💡 Choose the phrase and preposition, then check again.');
+        } else {
+          const ok = state.prepB[i].phrase === q.answerPhrase && state.prepB[i].prep === q.answerPrep;
+          if (ok) setFeedback(fb, 'ok', '✅ Correct phrase and preposition.');
+          else setFeedback(fb, 'hint', '💡 Hint: the phrase starts with the preposition and includes its object.');
+        }
+      }
+      card.appendChild(fb);
+
+      return card;
+    }
+
+    render();
+  </script>
+</body>
+</html>
