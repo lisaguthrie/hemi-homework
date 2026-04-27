@@ -734,13 +734,16 @@
       let adjBHtml = '';
       adjectivesB.forEach((q, i) => {
         const groupSelections = state.adjB[i] || [];
-        adjBHtml += '<div style="margin:12px 0"><strong>B' + (i+1) + '.</strong> ' + escHtml(q.sentence) + '</div>';
-        q.pairs.forEach((_, pairIdx) => {
-          const s = groupSelections[pairIdx] || { adj: '', noun: '' };
-          const adjText = s.adj ? singleUnderline(s.adj) : '___';
-          const nounText = s.noun ? doubleUnderline(s.noun) : '___';
-          adjBHtml += '<div style="margin:8px 0 10px 24px">Pair ' + (pairIdx + 1) + ': adjective ' + adjText + ', noun ' + nounText + '</div>';
+        let sentenceHtml = escHtml(q.sentence);
+        groupSelections.forEach((s) => {
+          if (s.adj) {
+            sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(s.adj), singleUnderline(s.adj));
+          }
+          if (s.noun) {
+            sentenceHtml = replaceFirstLiteral(sentenceHtml, escHtml(s.noun), doubleUnderline(s.noun));
+          }
         });
+        adjBHtml += '<div style="margin:12px 0"><strong>B' + (i+1) + '.</strong> ' + sentenceHtml + '</div>';
       });
 
       let prepAHtml = '';

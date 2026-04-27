@@ -2,9 +2,9 @@
 
 Activities are different from worksheets. A worksheet's interaction model varies by type — the container is rebuilt each time from a type pattern. An activity has a **fixed, reusable container** that ships as a template. Only the content changes (passage, error data, corrected sentences, comprehension questions). The engine, CSS, and all interaction logic are identical across every instance of the same activity type.
 
-When you need to create a new proofreading activity, do not rebuild the container — fill in the template.
+When you need to create a new proofreading activity, do not rebuild the container — fill in the template. NEVER use a prior instance of the same activity type as a base — fill in the template. 
 
-**Non-negotiable template rule:** For `activities/proofreading/*.html` outputs, copy `activities/proofreading/template.html` as-is and edit only the top `#worksheetData` JSON block. Do not modify HTML structure, CSS, JS logic, or print/export layout outside that JSON block.
+**Non-negotiable template rule:** For `activities/proofreading/*.html` outputs, copy `activities/proofreading/template.html` as-is and edit only the top `#worksheetData` JSON block. Do not modify HTML structure, CSS, JS logic, or print/export layout outside that JSON block. Do not use any other files as a template.
 
 ---
 
@@ -139,9 +139,3 @@ activities/proofreading/{child}/YYYY-MM-DD-{subject}.html
 ```
 
 Example: `activities/proofreading/christina/2026-04-20-polar-bears.html`
-
----
-
-### Reference implementation
-
-`worksheets/reference/2026-03-30-in-like-a-lion.html` — full working example, "In Like a Lion, Out Like a Lamb" (March weather / spring passage), 11 sentences, 4 comprehension questions.

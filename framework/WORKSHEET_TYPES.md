@@ -246,7 +246,7 @@ function navigateTo(i) {
 
 Proofreading / Error Correction is no longer a worksheet type. It is **Activity 1** in `framework/ACTIVITY_TYPES.md`.
 
-Use the reusable template at `activities/proofreading/template.html` — fill in `sentences`, `correctedSentences`, `compQuestions`, and `STORAGE_KEY`. Do not rebuild the container.
+Use the reusable template at `activities/proofreading/template.html` — fill in `sentences`, `correctedSentences`, `compQuestions`, and `STORAGE_KEY`. Do not rebuild the container. Do not use any previous instance of proofreading worksheets as the base. Only use the template.html file.
 
 ---
 

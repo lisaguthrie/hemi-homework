@@ -8,8 +8,9 @@ docs/archive/, and regenerates docs/index.html and docs/archive/index.html.
 Also mirrors tools/ → docs/tools/ (all files, preserving subdirectory
 structure). No index is generated for tools/.
 
-Also mirrors activities/ → docs/activities/ (all files, preserving
-subdirectory structure) and regenerates docs/activities/index.html.
+Publishes the selected child's activity HTML files into
+docs/activities/<activity-type>/ (no child subdirectory), including
+archive/ subdirectories, then regenerates docs/activities/index.html.
 
 Usage:
     python runners/publish.py            # copy + regenerate index
@@ -136,7 +137,7 @@ def regenerate_archive_index(archive_files: list[Path]) -> None:
     print(f"📄 Archive index written: {archive_index.relative_to(ROOT).as_posix()}")
 
 
-def regenerate_activities_index(activity_html_files: list[Path]) -> None:
+def regenerate_activities_index(activity_html_files: list[Path], has_archive: bool = False) -> None:
     entries = sorted(activity_html_files, key=lambda p: p.as_posix())
     if entries:
         items = "\n".join(
@@ -145,6 +146,10 @@ def regenerate_activities_index(activity_html_files: list[Path]) -> None:
         )
     else:
         items = "    <li>No activities published yet.</li>"
+
+    archive_footer = """
+    <hr style="margin-top:2rem;border:none;border-top:1px solid #ddd;">
+    <p style="font-size:.9rem;"><a href="archive/index.html">Older activities &rarr;</a></p>""" if has_archive else ""
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -165,13 +170,53 @@ def regenerate_activities_index(activity_html_files: list[Path]) -> None:
     <h1>Activities</h1>
     <ul>
 {items}
-    </ul>
+    </ul>{archive_footer}
 </body>
 </html>"""
     index_path = ACTIVITIES_DOCS_DIR / "index.html"
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(html, encoding="utf8")
     print(f"📄 Activities index written: {index_path.relative_to(ROOT).as_posix()}")
+
+
+def regenerate_activities_archive_index(archive_files: list[Path]) -> None:
+    entries = sorted(archive_files, key=lambda p: p.as_posix(), reverse=True)
+    if entries:
+        items = "\n".join(
+            f'    <li><a href="../{p.as_posix()}">{slug_to_label(p.stem)} <span style="color:#666;">({p.parent.as_posix()})</span></a></li>'
+            for p in entries
+        )
+    else:
+        items = "    <li>No archived activities published yet.</li>"
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archived Activities</title>
+    <style>
+        body {{ font-family: sans-serif; max-width: 700px; margin: 2rem auto; padding: 0 1rem; }}
+        h1 {{ font-size: 1.4rem; margin-bottom: 1rem; }}
+        ul {{ list-style: none; padding: 0; }}
+        li {{ margin: 0.5rem 0; }}
+        a {{ color: #0066cc; text-decoration: none; }}
+        a:hover {{ text-decoration: underline; }}
+    </style>
+</head>
+<body>
+    <h1>Archived Activities</h1>
+    <ul>
+{items}
+    </ul>
+    <hr style="margin-top:2rem;border:none;border-top:1px solid #ddd;">
+    <p style="font-size:.9rem;"><a href="../index.html">&larr; Back</a></p>
+</body>
+</html>"""
+    archive_index = ACTIVITIES_DOCS_DIR / "archive" / "index.html"
+    archive_index.parent.mkdir(parents=True, exist_ok=True)
+    archive_index.write_text(html, encoding="utf8")
+    print(f"📄 Activities archive index written: {archive_index.relative_to(ROOT).as_posix()}")
 
 
 def commit_and_push(root: Path) -> None:
@@ -319,34 +364,80 @@ def main() -> int:
     # Sync activities/ → docs/activities/
     activities_source = ROOT / "activities"
     if activities_source.exists():
+        ACTIVITIES_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+
         if not args.preserve and ACTIVITIES_DOCS_DIR.exists():
-            for stale in sorted(ACTIVITIES_DOCS_DIR.rglob("*"), key=lambda p: len(p.parts), reverse=True):
-                if stale.is_file():
+            # Mirror worksheet behavior by clearing published activity files
+            # under each type directory before republishing.
+            for docs_activity_type_dir in sorted(ACTIVITIES_DOCS_DIR.iterdir()):
+                if not docs_activity_type_dir.is_dir():
+                    continue
+
+                # New flat layout: docs/activities/<type>/*.html
+                for stale in docs_activity_type_dir.glob("*.html"):
                     stale.unlink()
+                docs_archive_dir = docs_activity_type_dir / "archive"
+                if docs_archive_dir.exists():
+                    for stale in docs_archive_dir.glob("*.html"):
+                        stale.unlink()
+
+                # Legacy layout cleanup: docs/activities/<type>/<child>/...
+                legacy_child_dir = docs_activity_type_dir / child
+                if legacy_child_dir.exists():
+                    for stale in legacy_child_dir.rglob("*.html"):
+                        stale.unlink()
 
         activities_copied = 0
+        activities_archived = 0
         activity_html_files: list[Path] = []
+        archived_activity_html_files: list[Path] = []
 
-        for src in sorted(activities_source.rglob("*")):
-            if src.is_dir():
+        for activity_type_dir in sorted(activities_source.iterdir()):
+            if not activity_type_dir.is_dir():
                 continue
 
-            rel = src.relative_to(activities_source)
-            dest = ACTIVITIES_DOCS_DIR / rel
-            dest.parent.mkdir(parents=True, exist_ok=True)
+            docs_activity_type_dir = ACTIVITIES_DOCS_DIR / activity_type_dir.name
+            docs_activity_type_dir.mkdir(parents=True, exist_ok=True)
 
-            if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
-                pass
-            else:
+            child_source_dir = activity_type_dir / child
+            if not child_source_dir.exists():
+                continue
+
+            for src in sorted(child_source_dir.glob("*.html")):
+                dest = docs_activity_type_dir / src.name
+                rel = dest.relative_to(ACTIVITIES_DOCS_DIR)
+                activity_html_files.append(rel)
+                if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
+                    continue
                 dest.write_bytes(src.read_bytes())
                 print(f"  🧩 Activity: {rel.as_posix()}")
                 activities_copied += 1
 
-            if src.suffix.lower() == ".html" and rel.name.lower() != "index.html":
-                activity_html_files.append(rel)
+            archive_source_dir = child_source_dir / "archive"
+            if archive_source_dir.exists():
+                archive_dest_dir = docs_activity_type_dir / "archive"
+                archive_dest_dir.mkdir(parents=True, exist_ok=True)
 
-        regenerate_activities_index(activity_html_files)
-        print(f"  🧩 {activities_copied} activit(y/ies) synced to docs/activities/")
+                for src in sorted(archive_source_dir.glob("*.html")):
+                    dest = archive_dest_dir / src.name
+                    rel = dest.relative_to(ACTIVITIES_DOCS_DIR)
+                    archived_activity_html_files.append(rel)
+                    if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
+                        continue
+                    dest.write_bytes(src.read_bytes())
+                    print(f"  🧩 Activity archive: {rel.as_posix()}")
+                    activities_archived += 1
+
+        if archived_activity_html_files:
+            regenerate_activities_archive_index(archived_activity_html_files)
+        elif not args.preserve:
+            archive_index = ACTIVITIES_DOCS_DIR / "archive" / "index.html"
+            if archive_index.exists():
+                archive_index.unlink()
+
+        regenerate_activities_index(activity_html_files, has_archive=bool(archived_activity_html_files))
+        archive_note = f", {activities_archived} archived" if activities_archived else ""
+        print(f"  🧩 {activities_copied} activit(y/ies) synced to docs/activities/{archive_note}")
 
     if should_push:
         commit_and_push(ROOT)
