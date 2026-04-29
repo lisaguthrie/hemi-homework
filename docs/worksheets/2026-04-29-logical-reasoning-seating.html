@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Use Logical Reasoning — Seating Puzzle</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-start:         #e0f4ff;
+  --bg-end:           #f0e8ff;
+  --card-bg:          #ffffff;
+  --text-primary:     #1a2a3a;
+  --text-muted:       #6a8299;
+  --accent-blue:      #3b9ede;
+  --accent-blue-dk:   #1a6fa8;
+  --btn-play:         #5dca7e;
+  --btn-play-dk:      #3aaa5a;
+  --feedback-ok-bg:   #d0f5e0;
+  --feedback-ok-txt:  #1d7a40;
+  --feedback-hint-bg: #ffeedd;
+  --feedback-hint-txt:#c05000;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+  min-height: 100vh;
+  color: var(--text-primary);
+  padding: 20px 16px 80px;
+}
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  color: var(--accent-blue-dk);
+  text-align: center;
+  align-self: stretch;
+}
+
+/* Puzzle card */
+.puzzle-card {
+  background: var(--card-bg);
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  padding: 24px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  align-self: stretch;
+}
+.sub-hint {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Table scene — fixed 320×320 */
+.table-scene {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  flex-shrink: 0;
+}
+
+/* Wooden table surface, centered */
+.table-surface {
+  position: absolute;
+  top: 117px; left: 100px;
+  width: 120px; height: 86px;
+  background: #f5e6cc;
+  border: 3px solid #c8a96e;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.78rem;
+  color: #8a6030;
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Seats: 76×76 circles positioned around the table */
+/* Scene center = 160,160 ; seat half = 38 */
+/* top    center=(160, 38)  → top:0,   left:122 */
+/* right  center=(282,160)  → top:122, left:244 */
+/* bottom center=(160,282)  → top:244, left:122 */
+/* left   center=(38, 160)  → top:122, left:0   */
+.seat {
+  position: absolute;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: #eef4ff;
+  border: 3px solid #b0c8e8;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.seat:active { transform: scale(0.9); }
+.seat.filled {
+  background: #dbeeff;
+  border-color: var(--accent-blue);
+  color: var(--accent-blue-dk);
+}
+.seat-top    { top: 0;    left: 122px; }
+.seat-right  { top: 122px; left: 244px; }
+.seat-bottom { top: 244px; left: 122px; }
+.seat-left   { top: 122px; left: 0;    }
+
+.empty-label {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Direction compass label */
+.compass {
+  position: absolute;
+  bottom: 0; right: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
+}
+.compass-arrow {
+  font-size: 1rem;
+}
+
+/* Feedback */
+.feedback {
+  display: none;
+  border-radius: 14px;
+  padding: 13px 16px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  align-self: stretch;
+}
+.feedback.show { display: block; }
+.feedback.ok {
+  background: var(--feedback-ok-bg);
+  color: var(--feedback-ok-txt);
+}
+.feedback.hint {
+  background: var(--feedback-hint-bg);
+  color: var(--feedback-hint-txt);
+}
+
+/* Check button */
+.check-btn {
+  background: var(--btn-play);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 40px;
+  min-height: 50px;
+  min-width: 210px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, opacity 0.2s;
+}
+.check-btn:hover:not(:disabled) { background: var(--btn-play-dk); }
+.check-btn:active:not(:disabled) { opacity: 0.85; }
+.check-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* Export/Print button */
+.export-btn {
+  background: transparent;
+  color: var(--accent-blue-dk);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: 2px solid var(--accent-blue);
+  border-radius: 50px;
+  padding: 10px 28px;
+  min-height: 44px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, color 0.2s;
+}
+.export-btn:hover { background: var(--accent-blue); color: white; }
+
+/* Print overlay */
+.print-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: white;
+  z-index: 200;
+  padding: 32px 24px;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  overflow-y: auto;
+}
+.print-overlay.open { display: flex; }
+.print-overlay-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4rem;
+  color: var(--accent-blue-dk);
+  text-align: center;
+}
+.print-overlay-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: -12px;
+}
+
+.print-worksheet-header {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.print-worksheet-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem;
+  color: var(--accent-blue-dk);
+  text-align: center;
+}
+.print-name-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.print-name-blank {
+  flex: 1;
+  border-bottom: 2px solid #d5e4f5;
+  min-width: 220px;
+  height: 1.2em;
+}
+.print-problem-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.print-problem-number {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2.2rem;
+  line-height: 1;
+  color: var(--accent-blue-dk);
+  padding-top: 2px;
+}
+.print-problem-text {
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+/* Seating grid */
+.seating-grid {
+  border-collapse: collapse;
+  font-family: 'Nunito', sans-serif;
+}
+.seating-grid td {
+  width: 110px;
+  height: 90px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.grid-seat {
+  border: 3px solid var(--accent-blue);
+  border-radius: 50%;
+  background: #dbeeff;
+  color: var(--accent-blue-dk);
+  font-size: 1rem;
+  font-weight: 800;
+  padding: 8px 4px;
+}
+.grid-seat.empty {
+  border-style: dashed;
+  border-color: #b0c8e8;
+  background: #f4f8ff;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+.grid-table-cell {
+  border: 3px solid #c8a96e;
+  border-radius: 12px;
+  background: #f5e6cc;
+  color: #8a6030;
+  font-family: 'Fredoka One', cursive;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+}
+.grid-empty {
+  border: none;
+}
+
+.print-overlay-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.print-action-btn {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-radius: 50px;
+  padding: 12px 32px;
+  min-height: 48px;
+  cursor: pointer;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, opacity 0.2s;
+}
+.print-action-btn.primary {
+  background: var(--btn-play);
+  color: white;
+}
+.print-action-btn.primary:hover { background: var(--btn-play-dk); }
+.print-action-btn.secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 2px solid #ccc;
+}
+.print-action-btn.secondary:hover { border-color: var(--accent-blue); color: var(--accent-blue-dk); }
+
+@media (min-width: 900px) {
+  .container {
+    max-width: 760px;
+  }
+}
+
+@media print {
+  body > .container, .speaking-toast { display: none !important; }
+  .print-overlay { display: flex !important; position: static; padding: 0; }
+  .print-overlay-actions { display: none !important; }
+}
+
+/* Speaking toast */
+.speaking-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--accent-blue-dk);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 10px 24px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease, background 0.2s;
+  z-index: 100;
+  pointer-events: none;
+  cursor: pointer;
+  user-select: none;
+}
+.speaking-toast.visible {
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.speaking-toast.visible:hover { background: #c0392b; }
+.speaking-toast.visible:hover .toast-label::after { content: ' — tap to stop'; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Use Logical Reasoning</h1>
+
+  <div class="puzzle-card">
+    <p class="sub-hint">Tap a seat to cycle through players.</p>
+
+    <div class="table-scene">
+      <!-- Table surface -->
+      <div class="table-surface">TABLE</div>
+
+      <!-- Four seats -->
+      <button class="seat seat-top"    id="seat-top"    onclick="cycleSeat('top')"   ><span class="empty-label">tap</span></button>
+      <button class="seat seat-right"  id="seat-right"  onclick="cycleSeat('right')" ><span class="empty-label">tap</span></button>
+      <button class="seat seat-bottom" id="seat-bottom" onclick="cycleSeat('bottom')"><span class="empty-label">tap</span></button>
+      <button class="seat seat-left"   id="seat-left"   onclick="cycleSeat('left')"  ><span class="empty-label">tap</span></button>
+
+      <!-- Direction indicator: arrow pointing right -->
+      <div class="compass">
+        <span class="compass-arrow">→</span>
+        <span>right</span>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="check-btn" id="checkBtn" onclick="checkAnswer()" disabled>
+      Check Answer
+    </button>
+    <button class="export-btn" onclick="resetSeats()" style="border-color:#ccc;color:var(--text-muted);">
+      ↺ Reset
+    </button>
+    <button class="export-btn" onclick="openPrintView()">
+      📄 Export / Print
+    </button>
+  </div>
+</div>
+
+<!-- Print overlay -->
+<div class="print-overlay" id="printOverlay">
+  <div class="print-worksheet-header">
+    <p class="print-worksheet-title">Use Logical Reasoning</p>
+    <p class="print-name-line"><span>Name: Tina #18</span><span class="print-name-blank" aria-hidden="true"></span></p>
+    <div class="print-problem-row">
+      <p class="print-problem-number">21.</p>
+      <p class="print-problem-text">
+        Bill, his sister Martha, and Ann are sitting down to learn a new game from Phil Hill.
+        Each player has a partner and the partners are seated across the table from each other.
+        Bill Dill is sitting to the right of Phil's sister.
+        Phil Hill is sitting to the right of Bill's sister's partner.
+        Where is each player sitting at the table?
+      </p>
+    </div>
+  </div>
+  <p class="print-overlay-title">Seating Arrangement</p>
+  <table class="seating-grid" id="seatingGrid">
+    <tr>
+      <td class="grid-empty"></td>
+      <td><div id="print-top" class="grid-seat empty">—</div></td>
+      <td class="grid-empty"></td>
+    </tr>
+    <tr>
+      <td><div id="print-left" class="grid-seat empty">—</div></td>
+      <td><div class="grid-table-cell">TABLE</div></td>
+      <td><div id="print-right" class="grid-seat empty">—</div></td>
+    </tr>
+    <tr>
+      <td class="grid-empty"></td>
+      <td><div id="print-bottom" class="grid-seat empty">—</div></td>
+      <td class="grid-empty"></td>
+    </tr>
+  </table>
+  <div class="print-overlay-actions">
+    <button class="print-action-btn primary" onclick="window.print()">🖨️ Print</button>
+    <button class="print-action-btn secondary" onclick="closePrintView()">← Back</button>
+  </div>
+</div>
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+  🔊 <span class="toast-label">Reading aloud…</span>
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+const NAMES = ['Bill', 'Martha', 'Ann', 'Phil'];
+
+// Counter-clockwise in top-down view = each player's right (looking toward table center)
+const POSITIONS = ['top', 'left', 'bottom', 'right'];
+
+// Required sequence going each player's right: Ann → Bill → Phil → Martha (any rotation valid)
+const CYCLE = ['Ann', 'Bill', 'Phil', 'Martha'];
+
+// state: index into NAMES, or -1 for empty
+const state = { top: -1, right: -1, bottom: -1, left: -1 };
+
+// ── Persistence ───────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'seating-2026-04-29';
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved && typeof saved === 'object') {
+      Object.assign(state, saved);
+      POSITIONS.concat(['top','right','bottom','left']).filter((v,i,a)=>a.indexOf(v)===i)
+        .forEach(pos => renderSeat(pos));
+      updateCheckBtn();
+    }
+  } catch(e) {}
+}
+
+// ── Seat cycling ─────────────────────────────────────────────────────────────
+function cycleSeat(pos) {
+  // advance: -1 → 0 → 1 → 2 → 3 → -1 → …
+  state[pos] = state[pos] < NAMES.length - 1 ? state[pos] + 1 : -1;
+  renderSeat(pos);
+  updateCheckBtn();
+  hideFeedback();
+  saveState();
+}
+
+function renderSeat(pos) {
+  const btn = document.getElementById('seat-' + pos);
+  const idx  = state[pos];
+  if (idx === -1) {
+    btn.innerHTML = '<span class="empty-label">tap</span>';
+    btn.classList.remove('filled');
+  } else {
+    btn.textContent = NAMES[idx];
+    btn.classList.add('filled');
+  }
+}
+
+function updateCheckBtn() {
+  const allFilled = Object.values(state).every(v => v !== -1);
+  document.getElementById('checkBtn').disabled = !allFilled;
+}
+
+// ── Answer check ─────────────────────────────────────────────────────────────
+function checkAnswer() {
+  const placement = {};
+  POSITIONS.forEach((pos, i) => {
+    if (state[pos] !== -1) placement[NAMES[state[pos]]] = i;
+  });
+
+  let correct = true;
+  for (let i = 0; i < CYCLE.length; i++) {
+    const curr = CYCLE[i];
+    const next = CYCLE[(i + 1) % CYCLE.length];
+    if (placement[next] !== (placement[curr] + 1) % 4) {
+      correct = false;
+      break;
+    }
+  }
+  showFeedback(correct);
+}
+
+function showFeedback(correct) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback show ' + (correct ? 'ok' : 'hint');
+  fb.textContent = correct
+    ? '✅ That\'s it! Everyone is in the right seat.'
+    : '💡 Hint: Re-read the clues — think carefully about who sits across from whom, then use the "right of" clues to place each person.';
+}
+
+function hideFeedback() {
+  document.getElementById('feedback').className = 'feedback';
+}
+
+// ── Speech ───────────────────────────────────────────────────────────────────
+const INSTRUCTIONS_TEXT =
+  'Bill, his sister Martha, and Ann are sitting down to learn a new game from Phil Hill. ' +
+  'Each player has a partner and the partners are seated across the table from each other. ' +
+  'Bill Dill is sitting to the right of Phil\'s sister. ' +
+  'Phil Hill is sitting to the right of Bill\'s sister\'s partner. ' +
+  'Where is each player sitting at the table?';
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate  = 0.88;
+  utter.pitch = 1.05;
+  utter.onstart = showToast;
+  utter.onend   = hideToast;
+  utter.onerror = hideToast;
+  window.speechSynthesis.speak(utter);
+}
+
+function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+
+function readInstructions() { speak(INSTRUCTIONS_TEXT); }
+
+// ── Print view ───────────────────────────────────────────────────────────────
+function openPrintView() {
+  ['top', 'right', 'bottom', 'left'].forEach(pos => {
+    const el = document.getElementById('print-' + pos);
+    const idx = state[pos];
+    if (idx === -1) {
+      el.textContent = '—';
+      el.className = 'grid-seat empty';
+    } else {
+      el.textContent = NAMES[idx];
+      el.className = 'grid-seat';
+    }
+  });
+  document.getElementById('printOverlay').classList.add('open');
+}
+
+function closePrintView() {
+  document.getElementById('printOverlay').classList.remove('open');
+}
+
+// ── Reset ───────────────────────────────────────────────────────────────────
+function resetSeats() {
+  POSITIONS.forEach(pos => { state[pos] = -1; renderSeat(pos); });
+  updateCheckBtn();
+  hideFeedback();
+  saveState();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+loadState();
+</script>
+</body>
+</html>
