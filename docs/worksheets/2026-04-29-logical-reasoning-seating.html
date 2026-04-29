@@ -45,6 +45,52 @@ h1 {
   align-self: stretch;
 }
 
+/* Live instructions */
+.instructions-card {
+  background: var(--card-bg);
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+  padding: 18px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  align-self: stretch;
+}
+.instructions-text {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  padding-top: 2px;
+}
+.sentence {
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 1px 3px;
+  margin: 0 -3px;
+  transition: background 0.15s;
+}
+.sentence:hover  { background: rgba(59,158,222,0.13); }
+.sentence:active { background: rgba(59,158,222,0.28); }
+
+.instructions-read-btn {
+  background: var(--btn-play);
+  color: white;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 50%;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s, opacity 0.2s;
+}
+.instructions-read-btn:hover { background: var(--btn-play-dk); }
+.instructions-read-btn:active { opacity: 0.85; }
+
 /* Puzzle card */
 .puzzle-card {
   background: var(--card-bg);
@@ -401,6 +447,17 @@ h1 {
 <div class="container">
   <h1>Use Logical Reasoning</h1>
 
+  <div class="instructions-card">
+    <p class="instructions-text">
+      <span class="sentence" onclick="speakSentence(event, 'Bill, his sister Martha, and Ann are sitting down to learn a new game from Phil Hill.')">Bill, his sister Martha, and Ann are sitting down to learn a new game from Phil Hill.</span>
+      <span class="sentence" onclick="speakSentence(event, 'Each player has a partner and the partners are seated across the table from each other.')">Each player has a partner and the partners are seated across the table from each other.</span>
+      <span class="sentence" onclick="speakSentence(event, 'Bill Dill is sitting to the right of Phil\'s sister.')">Bill Dill is sitting to the right of Phil's sister.</span>
+      <span class="sentence" onclick="speakSentence(event, 'Phil Hill is sitting to the right of Bill\'s sister\'s partner.')">Phil Hill is sitting to the right of Bill's sister's partner.</span>
+      <span class="sentence" onclick="speakSentence(event, 'Where is each player sitting at the table?')">Where is each player sitting at the table?</span>
+    </p>
+    <button class="instructions-read-btn" onclick="readInstructions()" aria-label="Read all instructions" title="Read all instructions">▶</button>
+  </div>
+
   <div class="puzzle-card">
     <p class="sub-hint">Tap a seat to cycle through players.</p>
 
@@ -592,6 +649,11 @@ function hideToast() { document.getElementById('speakingToast').classList.remove
 function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
 
 function readInstructions() { speak(INSTRUCTIONS_TEXT); }
+
+function speakSentence(evt, text) {
+  evt.stopPropagation();
+  speak(text);
+}
 
 // ── Print view ───────────────────────────────────────────────────────────────
 function openPrintView() {
