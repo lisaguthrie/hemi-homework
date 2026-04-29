@@ -44,6 +44,8 @@ Each subject folder contains an `index.html` (child-friendly launcher listing al
 
 When a worksheet contains multiple distinct exercise sections (e.g. Part A and Part B on one page, or multiple pages), default to **one file per distinct exercise section**, not one file per physical worksheet page.
 
+**Type-mapping rule (required):** Printed parts map to separate worksheet types in `framework/WORKSHEET_TYPES.md`. Even when a user asks for one combined app file, keep each part modeled as its own type pattern internally.
+
 **Rationale:** Each section typically has a different interaction model, progress tracking scope, and cognitive demand. Combining them in one file creates a longer scroll and conflates progress across different skills. Separate files allow each section to be assigned, completed, and reviewed independently.
 
 **Naming convention:**
@@ -59,6 +61,7 @@ When a worksheet image contains two or more distinct skill sections (e.g. Commas
 - Show one section at a time — hide non-active sections.
 - Persist the active section index in `localStorage` alongside other answer state.
 - Bump the storage key (`_v2`, `_v3`, etc.) if the section structure changes between builds.
+- Keep section logic separated by type pattern (one type per printed part), even though delivery is one file.
 
 **When to split into separate files instead:** Only when the user explicitly requests separate files, or when sections have incompatible interaction models that would make shared state error-prone.
 
@@ -71,6 +74,8 @@ When a worksheet image contains two or more distinct skill sections (e.g. Commas
 - No text selection required for any interaction
 - Tappable content must be visually distinct (background + border, not underline alone)
 - **Do not add microphone buttons to number-only input fields** — they provide no benefit and add visual clutter
+- **Do not full re-render on every keystroke/change in editable controls** (`input`, `textarea`, `select`). Update progress/status text in place so focus and caret remain stable during typing and speech-to-text.
+- If a full render is unavoidable, implement focus/caret capture-and-restore around render.
 
 ### Selective Read-Aloud
 
@@ -152,6 +157,7 @@ Review the output before proceeding. Any mismatch must be corrected in the data,
 - Do not include setup instructions, "open in browser" notes, or other operational guidance in responses
 - Parse worksheet content from the uploaded image/PDF directly — do not ask the user to transcribe it
 - When a worksheet contains multiple distinct exercise sections, default to creating one file per section (see Multi-Section / Multi-Page Splitting Rule above)
+- Regardless of file packaging, map each printed section to a separate worksheet type pattern (do not merge Part A/B/C into one type definition)
 - For Activity 1 proofreading outputs (`activities/proofreading/{child}/...`), treat `activities/proofreading/template.html` as immutable: edit only the top `#worksheetData` JSON block in the copied output file.
 
 ---

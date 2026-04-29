@@ -4,6 +4,14 @@ Each entry documents a worksheet type that has been successfully implemented. Wh
 
 When processing a new worksheet, scan this list first. If the type matches, apply the pattern directly without re-inventing it.
 
+## Taxonomy Rule: Printed Parts Map to Separate Types
+
+If a printed worksheet is divided into distinct labeled parts (for example, Part A / Part B / Part C), treat each part as its own worksheet type in this taxonomy.
+
+- Keep type definitions part-specific (one interaction model per type).
+- Do not bundle multiple printed parts into a single type entry.
+- This taxonomy rule is independent of delivery format: a build may still combine multiple types into one app when the user explicitly asks for a single combined app.
+
 ---
 
 ## Type 1: Fill-in-the-blank — Word Class Replacement
@@ -250,31 +258,58 @@ Use the reusable template at `activities/proofreading/template.html` — fill in
 
 ---
 
-## Type 8: Two-Step Word Identification (Tap Pronoun → Tap Noun)
+## Type 8: Two-Step Word Identification (Tap Target Word → Tap Related Word)
 
-*A sentence is rendered word by word. The student first taps the target word (e.g. the possessive pronoun), which highlights it and prompts step 2. Then the student taps a second related word (e.g. the noun it describes). Both words highlight on completion; wrong taps flash red briefly.*
+*A sentence is rendered word by word. The student first taps the target word, which highlights it and prompts step 2. Then the student taps a second related word. Both words highlight on completion; wrong taps flash red briefly.*
+
+**Examples:**
+- First tap the possessive pronoun, then tap the noun it describes
+- First tap the adjective, then tap the noun it describes
+- First tap the adverb, then tap the verb it describes
 
 **Data shape:**
 ```javascript
+// Single target word:
 {
-  text:    "My family is moving next summer, so we're cleaning out the house.",
-  pronoun: "My",       // the word to find in step 1
-  noun:    "family"    // the word to find in step 2
+  text:      "My family is moving next summer, so we're cleaning out the house.",
+  target:    "My",     // string — the word to find in step 1
+  described: "family"  // the word to find in step 2
+}
+
+// Multiple target words (e.g. adjective exercises):
+{
+  text:      "The big brown dog went for a swim.",
+  target:    ["big", "brown"],  // array — all must be found before step 2
+  described: "dog"
 }
 ```
 
-**State shape:** Integer per question: `0` = untouched, `1` = step 1 complete, `2` = both steps complete. Store as array of integers (not booleans — bump storage key if migrating from boolean saves).
+Normalize on load so the rest of the code always works with an array:
+```javascript
+const targets = [].concat(q.target); // works for both string and array
+```
+
+**State shape:** Object per question (replaces the old integer encoding — bump storage key when migrating existing exercises):
+```javascript
+{ foundTargets: [], complete: false }
+// foundTargets: array of target words found so far (lowercase)
+// complete: true when all targets found AND described word tapped
+```
 
 **Interaction decisions:**
-- Step 1 correct tap: word highlights gold (`.pronoun-found`), a purple step-hint banner appears below the sentence: "👆 Now tap the noun it describes"
+- Step 1 correct tap: that word highlights gold (`.target-found`); banner updates to name what's still needed:
+  - All targets now found → `"👆 Now tap the [part of speech] it describes"` — author this text per exercise
+  - More targets remain → `"👆 Now tap the other [part of speech]"` (or enumerate remaining)
 - Step 1 wrong tap: flash red animation, speak the tapped word, no state change
-- Step 2 correct tap: noun highlights gold+green (`.pronoun-found.answered`), pronoun also gains `.answered`, banner hides, card turns green, speaks confirmation e.g. *"their describes honeymoon. Well done!"*
-- Step 2 wrong tap: flash red, speak the tapped word, no state change; tapping the pronoun again in step 2 just speaks it
+- Re-tapping an already-found target word in step 1 is harmless — speak it, do not duplicate state
+- Step 2 prompt appears only after all targets are found (`foundTargets.length >= targets.length`)
+- Step 2 correct tap: described word highlights gold+green (`.target-found.answered`), all target words also gain `.answered`, banner hides, card turns green. Confirmation speaks all targets: e.g. *"big and brown describe dog. Well done!"*; for a single target: *"quickly describes jumped. Well done!"*
+- Step 2 wrong tap: flash red, speak the tapped word, no state change; tapping a target word again in step 2 just speaks it
 - Tapping the whole sentence area (non-word zone) reads the full sentence at any time
 - Per-card ▶ play button reads the full sentence
-- Cards lock (state 2) and cannot be un-done
+- Cards lock (`complete: true`) and cannot be un-done
 
-**Progress tracking:** Pips and count key off `state === 2` only — step-1-only progress does not advance pips.
+**Progress tracking:** Pips and count key off `state.complete === true` only — partial step-1 progress does not advance pips.
 
 **Reference implementation:** `worksheets/reference/2026-03-24-possessive-pronouns.html`, Section 1 (Part A)
 
@@ -392,28 +427,46 @@ For subject-verb agreement worksheets that include a **verb-form selection subpa
 
 ---
 
-## Type 11: Dialogue and Quotations (Quote Scope + Punctuation Repair)
+## Type 11: Dialogue Quote Scope Identification
 
-*A dialogue worksheet where the student restores quotation punctuation. In Part A, the student first marks exactly which words were spoken. In later parts, the student selects the correctly punctuated full line.*
+*The student marks exactly which words in a sentence are spoken dialogue, then verifies the selection.*
 
-**Use case:** Multi-part dialogue worksheets with mixed direct speech and dialogue tags (for example, lines like `What's for lunch? Bob asked.`).
+**Use case:** Quote-scope practice where a sentence mixes quoted speech and a dialogue tag (for example, lines like `What's for lunch? Bob asked.`).
 
-**Data shape (Part A quote-scope cards):**
+**Data shape:**
 
 ```javascript
 {
-  section: "A",
   prompt: "What's for lunch? Bob asked.",
   spokenWordIndexes: [0, 1, 2],
   correctedSentence: '"What\'s for lunch?" Bob asked.'
 }
 ```
 
-**Data shape (Parts B/C punctuation-repair cards):**
+**Answer control:** Inline tappable words + compact `✓` verify button at the right edge of the sentence.
+
+**Interaction decisions:**
+
+- Tokens should appear as regular text (not chip bubbles) while remaining tappable
+- Verify pass auto-rewrites the line to the corrected quoted sentence
+- Verify fail keeps controls live and shows a concept hint
+- Green ▶ play button is always present per card; it reads original text until verification, then reads corrected text
+- Progress pips advance only when the card is verified
+
+**Reference implementation:** `worksheets/christina/2026-04-07-dialogue-quotations.html` (Part A behavior)
+
+---
+
+## Type 12: Dialogue Punctuation Repair (Constrained Choice)
+
+*The student selects the correctly punctuated dialogue sentence from constrained full-sentence options.*
+
+**Use case:** Dialogue punctuation repair where placeholders or malformed punctuation must be corrected by selecting the best full line.
+
+**Data shape:**
 
 ```javascript
 {
-  section: "B",
   prompt: '"Was Duke Ellington famous__" Punkin asked__',
   answer: '"Was Duke Ellington famous?" Punkin asked.',
   options: [
@@ -425,30 +478,25 @@ For subject-verb agreement worksheets that include a **verb-form selection subpa
 }
 ```
 
-**Answer controls:**
-
-- Part A: inline tappable words + compact `✓` verify button at the right edge of the sentence
-- Parts B/C: constrained dropdown with full-sentence options
+**Answer control:** Dropdown with full-sentence options.
 
 **Interaction decisions:**
 
-- Part A tokens should appear as regular text (not chip bubbles) while remaining tappable
-- Part A verify pass auto-rewrites the line to the corrected quoted sentence
-- Part A verify fail keeps controls live and shows a concept hint
-- Green ▶ play button is always present per card; it reads original text until Part A is verified, then reads corrected text
-- Progress pips advance only when the card is verified (Part A) or answered (Parts B/C)
+- Green ▶ play button is present per card and reads the currently selected full sentence
+- Feedback names the punctuation rule being checked (quote boundary and tag ending)
+- Progress pips advance when each item is answered
 
-**Reference implementation:** `worksheets/christina/2026-04-07-dialogue-quotations.html`
+**Reference implementation:** `worksheets/christina/2026-04-07-dialogue-quotations.html` (Parts B/C behavior)
 
 ---
 
-## Type 12: Dialogue and Quotations (Direct/Indirect + Punctuation Builder + Rewrite)
+## Type 13: Direct vs Indirect Quotation Classification
 
-*A three-part dialogue worksheet: classify direct vs indirect quotations, repair punctuation/capitalization by tapping words and spaces, then rewrite indirect quotations as direct quotations in free text.*
+*The student classifies paired sentences as direct or indirect quotations.*
 
-**Use case:** Mixed-skills dialogue worksheets where one page combines quote-type identification, quote punctuation editing, and direct-quotation rewriting.
+**Use case:** Quote-type identification where each card presents two related sentences.
 
-**Part A data shape (paired sentence classification):**
+**Data shape:**
 
 ```javascript
 {
@@ -459,7 +507,24 @@ For subject-verb agreement worksheets that include a **verb-form selection subpa
 }
 ```
 
-**Part B data shape (word + space-slot sentence builder):**
+**Answer control:** Two dropdowns per item (`direct` / `indirect`) plus compact per-card check button.
+
+**Interaction decisions:**
+
+- Feedback is deferred: show hints/correctness only after tapping the card check button
+- Progress pips advance only after a card is explicitly checked
+
+**Reference implementation:** `worksheets/reference/2026-04-07-dialogue-quotations-direct-indirect.html` (Part A behavior)
+
+---
+
+## Type 14: Dialogue Punctuation Builder (Word + Space Slots)
+
+*The student repairs dialogue punctuation/capitalization by tapping words and space slots, then checks against a target sentence.*
+
+**Use case:** Constructive punctuation editing where the student actively builds the corrected line instead of choosing from options.
+
+**Data shape:**
 
 ```javascript
 {
@@ -468,7 +533,33 @@ For subject-verb agreement worksheets that include a **verb-form selection subpa
 }
 ```
 
-**Part C data shape (free-text with accepted variants):**
+**Answer control:** Tappable words (toggle capitalization) + tappable space slots cycling `space -> . -> , -> "` + compact per-card check button.
+
+**Interaction decisions:**
+
+- Allows punctuation stacking in a single original gap by auto-maintaining a trailing space slot after punctuation
+- Validation compares target and built sentence with whitespace removed; punctuation/capitalization must still match exactly
+- Play button reads the target sentence (audio model), not the in-progress built sentence
+- `SPACE_SLOT_VALUES` is exercise-specific: for commas/colons use `[' ', ',', ':']`; for dialogue use `[' ', '.', ',', '"']`; always include `' '` first as reset
+- Comma renders with trailing space; colon/period render tight:
+  ```javascript
+  if (slot === ',') built += ', ' + nextWord;   // comma: space after
+  else if (slot === ':') built += ':' + nextWord; // colon: no space
+  else built += ' ' + nextWord;                  // default: word space
+  ```
+- Slot toggle must NOT call `speak()`; only the ▶ play button reads the sentence
+
+**Reference implementation:** `worksheets/reference/2026-04-07-dialogue-quotations-direct-indirect.html` (Part B behavior)
+
+---
+
+## Type 15: Indirect-to-Direct Rewrite (Free Text)
+
+*The student rewrites an indirect quotation as a direct quotation in free text and validates against accepted variants.*
+
+**Use case:** Open-ended dialogue rewriting with constrained correctness checking.
+
+**Data shape:**
 
 ```javascript
 {
@@ -479,30 +570,15 @@ For subject-verb agreement worksheets that include a **verb-form selection subpa
 }
 ```
 
-**Answer controls:**
-
-- Part A: two dropdowns per item (`direct` / `indirect`) plus compact per-card check button
-- Part B: tappable words (toggle capitalization) + tappable space slots cycling `space -> . -> , -> "` + compact per-card check button
-- Part C: free-text area + per-card validate button
+**Answer control:** Free-text area + per-card validate button.
 
 **Interaction decisions:**
 
-- Part A feedback is deferred: show hints/correctness only after tapping the card check button
-- Part B allows punctuation stacking in a single original gap by auto-maintaining a trailing space slot after punctuation
-- Part B validation compares target and built sentence with whitespace removed; punctuation/capitalization must still match exactly
-- Part B play button reads the target sentence (audio model), not the in-progress built sentence
-- Part B `SPACE_SLOT_VALUES` is exercise-specific — for commas/colons use `[' ', ',', ':']`; for dialogue use `[' ', '.', ',', '"']`. Always include `' '` (single space) as the first/reset value.
-- Part B comma renders with trailing space; colon/period render tight. When building the display sentence:
-  ```javascript
-  if (slot === ',') built += ', ' + nextWord;   // comma: space after
-  else if (slot === ':') built += ':' + nextWord; // colon: no space
-  else built += ' ' + nextWord;                  // default: word space
-  ```
-- Part B slot toggle must NOT call `speak()` — no auto-read on tap. Only the ▶ play button reads the sentence.
-- Part C accepts multiple equivalent correct phrasings via an `accepted` array
-- Part C should not show a visible target-answer line unless explicitly requested
+- Accept multiple equivalent correct phrasings via an `accepted` array
+- Do not show a visible target-answer line unless explicitly requested
+- Progress pips advance on successful validation
 
-**Reference implementation:** `worksheets/reference/2026-04-07-dialogue-quotations-direct-indirect.html`
+**Reference implementation:** `worksheets/reference/2026-04-07-dialogue-quotations-direct-indirect.html` (Part C behavior)
 
 ---
 

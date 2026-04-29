@@ -2,6 +2,8 @@
 
 Activities are different from worksheets. A worksheet's interaction model varies by type — the container is rebuilt each time from a type pattern. An activity has a **fixed, reusable container** that ships as a template. Only the content changes (passage, error data, corrected sentences, comprehension questions). The engine, CSS, and all interaction logic are identical across every instance of the same activity type.
 
+For worksheet taxonomy behavior (including the rule that printed Part A / Part B / Part C sections map to separate worksheet types), follow `framework/WORKSHEET_TYPES.md` and `framework/BUILD_CONSTRAINTS.md`. This file defines activity templates only.
+
 When you need to create a new proofreading activity, do not rebuild the container — fill in the template. NEVER use a prior instance of the same activity type as a base — fill in the template. 
 
 **Non-negotiable template rule:** For `activities/proofreading/*.html` outputs, copy `activities/proofreading/template.html` as-is and edit only the top `#worksheetData` JSON block. Do not modify HTML structure, CSS, JS logic, or print/export layout outside that JSON block. Do not use any other files as a template.

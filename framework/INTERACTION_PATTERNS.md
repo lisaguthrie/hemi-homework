@@ -100,6 +100,56 @@ playBtn.onclick = function() { speak(buildSentence(q, userAnswers[i])); };
 
 **When to use:** Any worksheet where a sentence contains an inline widget (dropdown, input) that breaks the sentence into segments. Prefer this over tapping-reads-full-sentence when the segments are long enough to be independently meaningful.
 
+### Focus-Safe Rendering (typing and dictation)
+
+For editable controls (`input`, `textarea`, `select`), do not trigger a full `render()` on every keystroke/change just to update progress text. Re-rendering replaces DOM nodes and can drop focus/caret, which breaks typing and speech-to-text.
+
+Use this two-layer approach:
+
+- **Primary:** update progress counters in place (DOM text update only)
+- **Fallback:** if a full `render()` happens, capture and restore focused control + caret
+
+```javascript
+function captureFocusState() {
+  const active = document.activeElement;
+  if (!active || !active.id) return null;
+  if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(active.tagName)) return null;
+
+  const state = { id: active.id };
+  if (typeof active.selectionStart === 'number' && typeof active.selectionEnd === 'number') {
+    state.selectionStart = active.selectionStart;
+    state.selectionEnd = active.selectionEnd;
+  }
+  return state;
+}
+
+function restoreFocusState(state) {
+  if (!state || !state.id) return;
+  const next = document.getElementById(state.id);
+  if (!next) return;
+
+  try { next.focus({ preventScroll: true }); } catch (e) { next.focus(); }
+
+  if (typeof state.selectionStart !== 'number' || typeof state.selectionEnd !== 'number') return;
+  if (typeof next.setSelectionRange !== 'function') return;
+
+  const len = typeof next.value === 'string' ? next.value.length : 0;
+  const start = Math.max(0, Math.min(state.selectionStart, len));
+  const end = Math.max(0, Math.min(state.selectionEnd, len));
+  try { next.setSelectionRange(start, end); } catch (e) {}
+}
+
+function render() {
+  const focusState = captureFocusState();
+  // ...build HTML...
+  app.innerHTML = html;
+  wireDynamicControls();
+  restoreFocusState(focusState);
+}
+```
+
+Also update dynamic widgets directly where possible instead of re-rendering whole cards (for example, update a punctuation slot button label/class and the related "Built sentence" line in place).
+
 ### Inline Dropdown Tap Scope (Part-Only TTS)
 
 When a sentence includes inline dropdowns, do not attach full-sentence read-aloud to the whole sentence container. Keep full-sentence TTS on the green play button only, and make each visible text segment speak only itself.

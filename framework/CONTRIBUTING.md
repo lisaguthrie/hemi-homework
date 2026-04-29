@@ -115,3 +115,19 @@ The `📋 Update Suggested` blocks from earlier in the conversation serve as you
 - Changes that only make sense for one specific worksheet (those belong in the worksheet HTML itself)
 - Changes you haven't confirmed working (don't propagate from a plan, only from a verified outcome)
 - Stylistic preferences that don't generalize (if you just wanted a different color once, that's not a framework change)
+
+---
+
+## Regression Checklist (Interactive Inputs)
+
+Before marking an interaction update as confirmed, run this quick check on any worksheet with editable controls (`input`, `textarea`, `select`):
+
+- Typing does not drop focus or caret position after each character.
+- Speech-to-text can append multiple chunks without losing focus.
+- Progress/status updates while editing do not require full-page or full-section re-render.
+- If a full `render()` path still exists, focus/caret capture-and-restore is implemented and verified.
+
+If this checklist catches a failure, propagate fixes to:
+
+- `framework/INTERACTION_PATTERNS.md` for reusable implementation patterns.
+- `framework/BUILD_CONSTRAINTS.md` for mandatory guardrails.
