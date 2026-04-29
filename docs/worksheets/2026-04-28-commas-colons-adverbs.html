@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Commas, Colons, and Adverbs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-start: #e0f4ff;
+      --bg-end: #f0e8ff;
+      --card-bg: #ffffff;
+      --text-primary: #1a2a3a;
+      --text-muted: #6a8299;
+      --accent-blue: #3b9ede;
+      --accent-blue-dk: #1a6fa8;
+      --phrase-bg: #fff3c4;
+      --phrase-border: #e6c800;
+      --phrase-text: #5a3a00;
+      --btn-play: #5dca7e;
+      --btn-play-dk: #3aaa5a;
+      --feedback-ok-bg: #d0f5e0;
+      --feedback-ok-txt: #1d7a40;
+      --feedback-hint-bg: #ffeedd;
+      --feedback-hint-txt: #c05000;
+      --pip-empty: #dde0e8;
+      --pip-done: #5dca7e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-end) 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      padding: 18px 14px 70px;
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .header {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 14px 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.7rem;
+      letter-spacing: 0.4px;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tool-btn {
+      min-height: 44px;
+      border: 2px solid var(--accent-blue);
+      background: #fff;
+      color: var(--accent-blue-dk);
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.92rem;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .tool-btn:hover { background: #e8f4ff; }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 14px 16px;
+      border: 2.5px solid transparent;
+    }
+
+    .concept-box,
+    .instructions {
+      min-height: 44px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.35;
+      padding: 10px 12px;
+    }
+
+    .concept-box {
+      background: #fff5cd;
+      border: 2px solid #e6c800;
+      color: #5a3a00;
+    }
+
+    .instructions {
+      background: #e8f4ff;
+      border: 2px solid #3b9ede;
+      color: #1a6fa8;
+    }
+
+    .section-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .section-card {
+      min-height: 130px;
+      border-radius: 16px;
+      border: 2px solid #d9e6f4;
+      padding: 12px;
+      cursor: pointer;
+      background: linear-gradient(150deg, #ffffff 0%, #f6fbff 100%);
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .section-card:hover { border-color: var(--accent-blue); }
+
+    .section-title {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.05rem;
+      line-height: 1.2;
+    }
+
+    .section-sub {
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .progress-pips {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .pip {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--pip-empty);
+    }
+
+    .pip.done { background: var(--pip-done); }
+
+    .progress-count {
+      font-weight: 800;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .hidden { display: none !important; }
+
+    .question-card {
+      background: var(--card-bg);
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 14px;
+      border: 2.5px solid transparent;
+      display: grid;
+      gap: 10px;
+    }
+
+    .question-card.correct {
+      border-color: var(--btn-play);
+      background: #f0fff5;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 10px;
+    }
+
+    .q-num {
+      font-family: 'Fredoka One', cursive;
+      color: #23445f;
+      font-size: 1.05rem;
+    }
+
+    .play-btn {
+      background: var(--btn-play);
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(93,202,126,0.4);
+    }
+
+    .play-btn:hover { background: var(--btn-play-dk); }
+
+    .sentence {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.42;
+    }
+
+    .part-tap {
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 1px 3px;
+      transition: background 0.15s;
+    }
+
+    .part-tap:hover { background: #daeeff; }
+
+    .answer-select,
+    .small-select,
+    .text-input,
+    .answer-textarea,
+    .time-input {
+      font-family: 'Nunito', sans-serif;
+      border-radius: 10px;
+      border: 2.5px solid var(--accent-blue);
+      min-height: 44px;
+      outline: none;
+    }
+
+    .answer-select,
+    .small-select,
+    .time-input,
+    .text-input {
+      font-weight: 700;
+      color: var(--accent-blue-dk);
+      background: #e8f4ff;
+      padding: 6px 10px;
+      font-size: 1rem;
+    }
+
+    .text-input { width: 100%; color: var(--text-primary); background: #f8fbff; }
+
+    .time-input { width: 150px; }
+
+    .answer-textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      padding: 10px 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      background: #f8fbff;
+    }
+
+    .inline-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .feedback {
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 800;
+      font-size: 0.94rem;
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .feedback.show { display: inline-flex; }
+
+    .feedback.correct {
+      background: var(--feedback-ok-bg);
+      color: var(--feedback-ok-txt);
+    }
+
+    .feedback.hint {
+      background: var(--feedback-hint-bg);
+      color: var(--feedback-hint-txt);
+    }
+
+    .fb-play-btn,
+    .mini-btn,
+    .check-btn,
+    .mic-btn,
+    .read-btn {
+      min-height: 44px;
+      min-width: 44px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .fb-play-btn { background: transparent; min-width: 32px; min-height: 32px; font-size: 1rem; }
+    .mini-btn { background: #e8f4ff; color: #1a6fa8; border: 2px solid #3b9ede; padding: 0 10px; }
+    .check-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 16px;
+      min-width: 170px;
+      background: linear-gradient(180deg, #ffe89b 0%, #ffd866 100%);
+      color: #5f4700;
+      border: 2px solid #d9a800;
+      box-shadow: 0 3px 10px rgba(217,168,0,0.22);
+    }
+    .check-btn:hover { transform: translateY(-1px); }
+    .check-btn.done {
+      background: linear-gradient(180deg, #7be09a 0%, #5dca7e 100%);
+      border-color: #3aaa5a;
+      color: white;
+      box-shadow: 0 3px 10px rgba(58,170,90,0.24);
+    }
+
+    .check-btn-icon {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .mic-btn {
+      background: #3b9ede;
+      color: #fff;
+      font-size: 1.15rem;
+    }
+
+    .mic-btn.listening { background: #ff7eb3; }
+
+    .read-btn {
+      background: #5dca7e;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .section-shell {
+      display: grid;
+      gap: 12px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.25rem;
+    }
+
+    .pair-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .label {
+      font-weight: 800;
+      color: #345;
+      font-size: 0.92rem;
+    }
+
+    .small {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .table-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .table-row.correct {
+      background: #f0fff5;
+      border: 2px solid #7be09a;
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .table-head {
+      font-weight: 800;
+      color: #23445f;
+      padding: 4px 6px;
+      background: #edf6ff;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .word-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      border-radius: 8px;
+      border: 2px solid var(--phrase-border);
+      background: var(--phrase-bg);
+      color: var(--phrase-text);
+      font-weight: 800;
+      padding: 4px 10px;
+    }
+
+    .builder-line {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 2px;
+      line-height: 1.8;
+      font-size: 1.02rem;
+      font-weight: 800;
+    }
+
+    .builder-word {
+      cursor: pointer;
+      border-radius: 6px;
+      padding: 2px 3px;
+      transition: background 0.15s;
+    }
+
+    .builder-word:hover { background: #daeeff; }
+
+    .space-slot {
+      min-width: 26px;
+      min-height: 44px;
+      border-radius: 7px;
+      border: 2px solid #d0deec;
+      background: #f4f9ff;
+      color: #1a6fa8;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      white-space: pre;
+    }
+
+    .space-slot.slot-blank { background: #f7fbff; color: transparent; }
+    .space-slot.slot-comma { background: #fff3c4; color: #7a5b00; border-color: #e6c800; }
+    .space-slot.slot-colon { background: #ffe4d9; color: #a2441a; border-color: #f08a5d; }
+
+    .nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .clear-btn,
+    .export-btn {
+      min-height: 44px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 8px 16px;
+    }
+
+    .clear-btn {
+      background: #f0f0f0;
+      color: #666;
+      border: 2px solid #ccc;
+    }
+
+    .export-btn {
+      background: #3b9ede;
+      color: #fff;
+      border: 2px solid #2f87c2;
+    }
+
+    .speaking-toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a6fa8;
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 10px 22px;
+      border-radius: 30px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease, background 0.2s;
+      z-index: 100;
+      pointer-events: none;
+      cursor: pointer;
+    }
+
+    .speaking-toast.visible {
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    .speaking-toast.visible:hover { background: #c0392b; }
+    .speaking-toast.visible:hover .toast-label::after { content: ' - tap to stop'; }
+
+    @media (max-width: 600px) {
+      .table-row { grid-template-columns: 1fr; }
+      .time-input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app"></div>
+
+  <div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+    🔊 <span class="toast-label">Reading aloud...</span>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'worksheet_commas_colons_adverbs_2026_04_28_v1';
+
+    const feedbackTexts = {};
+
+    const sectionMeta = {
+      home: { title: 'Sections' },
+      commasA: { title: 'Commas and Colons - Part A' },
+      commasB: { title: 'Commas and Colons - Part B' },
+      adverbsA: { title: 'Adverbs - Part A' },
+      adverbsB: { title: 'Adverbs - Part B' }
+    };
+
+    const commasAQuestions = [
+      {
+        prompt: 'Write your name and the names of two classmates as they would appear on an official document.',
+        type: 'textarea',
+        key: 'names'
+      },
+      {
+        prompt: 'What is your date of birth?',
+        type: 'text',
+        key: 'dob',
+        placeholder: 'Month day, year'
+      },
+      {
+        prompt: 'What time does your school begin? What time does it end?',
+        type: 'timepair',
+        key: 'schoolTimes'
+      }
+    ];
+
+    const commasBQuestions = [
+      {
+        raw: 'Luke Sam and Nick are putting on a play.',
+        target: 'Luke, Sam, and Nick are putting on a play.',
+        hint: 'Use commas to separate items in a series.'
+      },
+      {
+        raw: 'The play will begin at 8 00 PM.',
+        target: 'The play will begin at 8:00 P.M.',
+        hint: 'Use a colon to separate hours and minutes.'
+      },
+      {
+        raw: 'Yalixa his sister wrote the play.',
+        target: 'Yalixa, his sister, wrote the play.',
+        hint: 'Set off an appositive with commas.'
+      },
+      {
+        raw: 'They will perform the play Wednesday and Thursday.',
+        target: 'They will perform the play Wednesday and Thursday.',
+        hint: 'This sentence is already correct.'
+      },
+      {
+        raw: 'Amy can you make the costumes?',
+        target: 'Amy, can you make the costumes?',
+        hint: 'Use a comma for direct address.'
+      },
+      {
+        raw: 'Like her mom Luisa is a good singer.',
+        target: 'Like her mom, Luisa is a good singer.',
+        hint: 'Use a comma after an introductory phrase.'
+      },
+      {
+        raw: 'Our flag is red white and blue.',
+        target: 'Our flag is red, white, and blue.',
+        hint: 'Use commas in a series of three items.'
+      },
+      {
+        raw: 'Michael plays baseball and soccer.',
+        target: 'Michael plays baseball and soccer.',
+        hint: 'Two items joined by and usually do not need a comma.'
+      },
+      {
+        raw: 'Nathan will visit on March 28 2004.',
+        target: 'Nathan will visit on March 28, 2004.',
+        hint: 'Use a comma between the day and year in a date.'
+      },
+      {
+        raw: 'We are always happy when he comes but sad when he leaves.',
+        target: 'We are always happy when he comes, but sad when he leaves.',
+        hint: 'Use a comma before but in this compound predicate idea.'
+      }
+    ];
+
+    const SPACE_SLOT_VALUES = [' ', ',', ':'];
+
+    const adverbChartRows = [
+      { adverb: 'slowly', comparative: 'more slowly', superlative: 'most slowly' },
+      { adverb: 'gracefully', comparative: 'more gracefully', superlative: 'most gracefully' },
+      { adverb: 'fiercely', comparative: 'more fiercely', superlative: 'most fiercely' },
+      { adverb: 'swiftly', comparative: 'more swiftly', superlative: 'most swiftly' }
+    ];
+
+    const adverbCompQuestions = [
+      {
+        before: 'A dolphin swims ',
+        after: ' than a turtle.',
+        answers: ['more swiftly'],
+        options: ['more slowly', 'most slowly', 'more swiftly', 'most swiftly'],
+        hint: 'Use the comparative form for two things.'
+      },
+      {
+        before: 'A turtle moves ',
+        after: ' than a dolphin.',
+        answers: ['more slowly'],
+        options: ['more slowly', 'most slowly', 'more fiercely', 'most fiercely'],
+        hint: 'Use the comparative form and match the meaning.'
+      },
+      {
+        before: 'Tyrannosaurus rex roared ',
+        after: ' than a kitten.',
+        answers: ['more fiercely'],
+        options: ['more fiercely', 'most fiercely', 'more gracefully', 'most gracefully'],
+        hint: 'Choose the adverb that fits roaring.'
+      }
+    ];
+
+    const adverbsBQuestions = [
+      { sentence: 'Anna jumped quickly into the pool.', adverb: 'quickly', verb: 'jumped' },
+      { sentence: 'Danny sat quietly on the sidelines.', adverb: 'quietly', verb: 'sat' },
+      { sentence: 'The dog gently pushed open the door.', adverb: 'gently', verb: 'pushed' },
+      { sentence: 'The animal waited patiently to be fed.', adverb: 'patiently', verb: 'waited' },
+      { sentence: 'Laurie tenderly petted the puppy.', adverb: 'tenderly', verb: 'petted' },
+      { sentence: 'The crowd cheered loudly when the team scored a goal.', adverb: 'loudly', verb: 'cheered' },
+      { sentence: 'Joseph told him later about the party.', adverb: 'later', verb: 'told' },
+      { sentence: 'Lucy immediately volunteered to make invitations.', adverb: 'immediately', verb: 'volunteered' },
+      { sentence: 'The cat boldly climbed the tree.', adverb: 'boldly', verb: 'climbed' }
+    ];
+
+    let state = {
+      activeSection: 'home',
+      commasA: {
+        names: '',
+        dob: '',
+        schoolStart: '',
+        schoolEnd: ''
+      },
+      commasB: commasBQuestions.map((q) => ({ slots: initialCommaSlots(q.raw), checked: false })),
+      adverbsA: {
+        chart: adverbChartRows.map(() => ({ comparative: '', superlative: '' })),
+        comp: adverbCompQuestions.map(() => ''),
+        chartChecked: false,
+        compChecked: adverbCompQuestions.map(() => false)
+      },
+      adverbsB: adverbsBQuestions.map(() => ({ adverb: '', verb: '', checked: false }))
+    };
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 0.88;
+      utter.pitch = 1.05;
+      utter.onstart = showToast;
+      utter.onend = hideToast;
+      utter.onerror = hideToast;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function showToast() { document.getElementById('speakingToast').classList.add('visible'); }
+    function hideToast() { document.getElementById('speakingToast').classList.remove('visible'); }
+    function cancelSpeak() { window.speechSynthesis.cancel(); hideToast(); }
+
+    function initMic(btn, taEl) {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        btn.disabled = true;
+        btn.title = 'Speech input not available in this browser';
+        btn.style.opacity = '0.4';
+        return;
+      }
+
+      let rec = null;
+      let listening = false;
+
+      function startListening() {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        rec = new SR();
+        rec.continuous = true;
+        rec.interimResults = false;
+        rec.lang = 'en-US';
+
+        rec.onstart = () => {
+          listening = true;
+          btn.textContent = '⏹';
+          btn.classList.add('listening');
+        };
+
+        rec.onresult = (e) => {
+          let transcript = '';
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal) transcript += e.results[i][0].transcript + ' ';
+          }
+          transcript = transcript.trim();
+          if (transcript) taEl.value += (taEl.value ? ' ' : '') + transcript;
+          saveProgress();
+          updateAllProgress();
+        };
+
+        rec.onend = () => {
+          if (listening) {
+            try { rec.start(); return; } catch (err) {}
+          }
+          listening = false;
+          btn.textContent = '🎤';
+          btn.classList.remove('listening');
+          rec = null;
+        };
+
+        rec.onerror = (e) => {
+          if (e.error === 'no-speech') return;
+          listening = false;
+          btn.textContent = '🎤';
+          btn.classList.remove('listening');
+          rec = null;
+        };
+
+        try { rec.start(); } catch (err) {}
+      }
+
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        if (listening) {
+          listening = false;
+          if (rec) { try { rec.stop(); } catch (err) {} }
+        } else {
+          startListening();
+        }
+      };
+    }
+
+    function showFeedback(id, pass, text) {
+      feedbackTexts[id] = text;
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.className = 'feedback show ' + (pass ? 'correct' : 'hint');
+      el.innerHTML = (pass ? '✅ ' : '💡 Hint: ') + text +
+        ' <button class="fb-play-btn" onclick="speak(feedbackTexts[\'' + id + '\'])" title="Read aloud">🔊</button>';
+    }
+
+    function clearFeedback(id) {
+      const el = document.getElementById(id);
+      if (el) el.className = 'feedback';
+    }
+
+    function initialCommaSlots(raw) {
+      return raw.split(/\s+/).slice(0, -1).map(() => ' ');
+    }
+
+    function normalizeNoWhitespace(text) {
+      return text.replace(/\s+/g, '');
+    }
+
+    function buildCommaSentence(i) {
+      const q = commasBQuestions[i];
+      const st = state.commasB[i];
+      const parts = q.raw.split(/\s+/);
+      let built = parts[0] || '';
+      for (let s = 0; s < st.slots.length; s++) {
+        const slot = st.slots[s] || ' ';
+        if (slot === ',') built += ', ' + (parts[s + 1] || '');
+        else if (slot === ':') built += ':' + (parts[s + 1] || '');
+        else built += ' ' + (parts[s + 1] || '');
+      }
+      return built;
+    }
+
+    function commaSlotClass(value) {
+      if (value === ',') return 'slot-comma';
+      if (value === ':') return 'slot-colon';
+      return 'slot-blank';
+    }
+
+    function saveProgress() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    function loadProgress() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        const parsed = JSON.parse(saved);
+        if (!parsed) return;
+
+        if (parsed.commasB && parsed.commasB.length === commasBQuestions.length) {
+          state.commasB = commasBQuestions.map((q, i) => {
+            const saved = parsed.commasB[i];
+            if (saved && Array.isArray(saved.slots) && saved.slots.length === initialCommaSlots(q.raw).length) {
+              return { slots: saved.slots.map((v) => SPACE_SLOT_VALUES.includes(v) ? v : ' '), checked: !!saved.checked };
+            }
+            if (typeof saved === 'string') {
+              return { slots: initialCommaSlots(q.raw), checked: false };
+            }
+            return { slots: initialCommaSlots(q.raw), checked: false };
+          });
+        }
+        if (parsed.adverbsB && parsed.adverbsB.length === adverbsBQuestions.length) state.adverbsB = parsed.adverbsB;
+        if (parsed.adverbsA && parsed.adverbsA.comp && parsed.adverbsA.comp.length === adverbCompQuestions.length) {
+          state.adverbsA.comp = parsed.adverbsA.comp;
+        }
+        if (parsed.adverbsA && parsed.adverbsA.compChecked && parsed.adverbsA.compChecked.length === adverbCompQuestions.length) {
+          state.adverbsA.compChecked = parsed.adverbsA.compChecked.map((v) => !!v);
+        }
+        if (parsed.adverbsA && parsed.adverbsA.chart && parsed.adverbsA.chart.length === adverbChartRows.length) {
+          state.adverbsA.chart = parsed.adverbsA.chart;
+        }
+        if (parsed.adverbsA && typeof parsed.adverbsA.chartChecked === 'boolean') {
+          state.adverbsA.chartChecked = parsed.adverbsA.chartChecked;
+        }
+        if (parsed.commasA) {
+          state.commasA.names = parsed.commasA.names || '';
+          state.commasA.dob = parsed.commasA.dob || '';
+          state.commasA.schoolStart = parsed.commasA.schoolStart || '';
+          state.commasA.schoolEnd = parsed.commasA.schoolEnd || '';
+        }
+        if (parsed.activeSection && sectionMeta[parsed.activeSection]) state.activeSection = parsed.activeSection;
+      } catch (e) {}
+    }
+
+    function sectionProgressData() {
+      const commasADone = [
+        state.commasA.names.trim(),
+        state.commasA.dob.trim(),
+        state.commasA.schoolStart && state.commasA.schoolEnd
+      ].filter(Boolean).length;
+
+      const commasBDone = state.commasB.filter((v) => v.checked).length;
+
+      const adverbAChartDone = state.adverbsA.chart.filter((r) => r.comparative && r.superlative).length;
+      const adverbACompDone = state.adverbsA.comp.filter((v) => v).length;
+
+      const adverbBDone = state.adverbsB.filter((r) => r.checked).length;
+
+      return {
+        commasA: { done: commasADone, total: commasAQuestions.length },
+        commasB: { done: commasBDone, total: commasBQuestions.length },
+        adverbsA: { done: adverbAChartDone + adverbACompDone, total: adverbChartRows.length + adverbCompQuestions.length },
+        adverbsB: { done: adverbBDone, total: adverbsBQuestions.length }
+      };
+    }
+
+    function makePips(done, total) {
+      let html = '';
+      for (let i = 0; i < total; i++) html += '<span class="pip ' + (i < done ? 'done' : '') + '"></span>';
+      return html;
+    }
+
+    function textToWordOptions(sentence) {
+      const words = sentence.replace(/[.,?!"]/g, '').split(/\s+/).filter(Boolean);
+      const unique = [];
+      words.forEach((w) => {
+        const clean = w.toLowerCase();
+        if (!unique.includes(clean)) unique.push(clean);
+      });
+      return unique;
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      const progress = sectionProgressData();
+
+      const top = `
+        <div class="header">
+          <h1>Commas and Colons + Adverbs</h1>
+          <p class="subtitle">Tina #18 · Tap text to hear it · Card-by-card sections</p>
+        </div>
+        <div class="toolbar">
+          <button class="tool-btn" onclick="goHome()">🏠 Home</button>
+          <button class="clear-btn" onclick="clearAllResponses()">🗑️ Clear all responses</button>
+          <button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button>
+        </div>
+      `;
+
+      let body = '';
+      if (state.activeSection === 'home') {
+        body += `
+          <div class="card concept-box" onclick="speak('Commas are used for lists, direct address, dates, and phrases. Colons are used for time and lists.')">🔊 Reteaching: Commas separate items in a series, parts of dates, and names in direct address. Colons separate hours and minutes in time.</div>
+          <div class="card instructions" onclick="speak('Tap a section card to work on one part at a time.')">🔊 Tap one section card to begin. Only one section opens at a time.</div>
+          <div class="card section-grid">
+            ${renderSectionCard('commasA', '✍️ Commas and Colons - Part A', 'Answer short prompts with support controls.', progress.commasA)}
+            ${renderSectionCard('commasB', '🧩 Commas and Colons - Part B', 'Tap space slots to toggle comma, colon, or space.', progress.commasB)}
+            ${renderSectionCard('adverbsA', '📊 Adverbs - Part A', 'Build comparative and superlative forms.', progress.adverbsA)}
+            ${renderSectionCard('adverbsB', '🔎 Adverbs - Part B', 'Identify each adverb and the verb it describes.', progress.adverbsB)}
+          </div>
+        `;
+      } else if (state.activeSection === 'commasA') {
+        body += renderCommasA(progress.commasA);
+      } else if (state.activeSection === 'commasB') {
+        body += renderCommasB(progress.commasB);
+      } else if (state.activeSection === 'adverbsA') {
+        body += renderAdverbsA(progress.adverbsA);
+      } else if (state.activeSection === 'adverbsB') {
+        body += renderAdverbsB(progress.adverbsB);
+      }
+
+      app.innerHTML = top + body;
+      wireDynamicControls();
+    }
+
+    function renderSectionCard(key, title, sub, prog) {
+      return `
+        <button class="section-card" onclick="openSection('${key}')" title="Open ${title}">
+          <div class="section-title">${title}</div>
+          <div class="section-sub">${sub}</div>
+          <div class="progress-row">
+            <span class="progress-pips">${makePips(prog.done, prog.total)}</span>
+            <span class="progress-count">${prog.done} / ${prog.total}</span>
+          </div>
+        </button>
+      `;
+    }
+
+    function renderCommasA(prog) {
+      return `
+        <div class="section-shell">
+          <div class="section-header card">
+            <h2>Commas and Colons - Part A</h2>
+            <div class="progress-row">
+              <span class="progress-pips">${makePips(prog.done, prog.total)}</span>
+              <span class="progress-count">${prog.done} / ${prog.total} answered</span>
+            </div>
+          </div>
+
+          <div class="card instructions" onclick="speak('Answer each question. You can type, use the microphone in the big text box, or tap read buttons to hear your response.')">🔊 Answer the questions and use read buttons to check your wording.</div>
+
+          ${commasAQuestions.map((q, i) => {
+            const n = i + 1;
+            const play = q.prompt.replace(/\?/g, '.');
+            let controls = '';
+            if (q.type === 'textarea') {
+              controls = `
+                <textarea id="ca-names" class="answer-textarea" placeholder="Type names as they would appear on a document">${esc(state.commasA.names)}</textarea>
+                <div class="inline-row">
+                  <button class="mic-btn" id="mic-ca-names" title="Speech to text">🎤</button>
+                  <button class="read-btn" onclick="speak(document.getElementById('ca-names').value || 'No answer yet')" title="Read answer">🔊</button>
+                </div>
+              `;
+            } else if (q.type === 'text') {
+              controls = `<input id="ca-dob" class="text-input" value="${esc(state.commasA.dob)}" placeholder="${esc(q.placeholder)}" />`;
+            } else {
+              controls = `
+                <div class="pair-grid">
+                  <label>
+                    <div class="label">School begins</div>
+                    <input id="ca-start" type="time" class="time-input" value="${esc(state.commasA.schoolStart)}" />
+                  </label>
+                  <label>
+                    <div class="label">School ends</div>
+                    <input id="ca-end" type="time" class="time-input" value="${esc(state.commasA.schoolEnd)}" />
+                  </label>
+                </div>
+                <div class="inline-row">
+                  <button class="mini-btn" onclick="readSchoolTimes()">🔊 Read times</button>
+                </div>
+              `;
+            }
+
+            return `
+              <div class="question-card" id="ca-card-${i}">
+                <div class="card-top">
+                  <div class="q-num">${n}.</div>
+                  <button class="play-btn" onclick="speak('${escJs(play)}')" title="Read prompt">▶</button>
+                </div>
+                <div class="sentence part-tap" onclick="speak('${escJs(q.prompt)}')">${escHtml(q.prompt)}</div>
+                ${controls}
+              </div>
+            `;
+          }).join('')}
+
+          <div class="nav-row card">
+            <button class="tool-btn" onclick="goHome()">⬅ Back to Section Cards</button>
+            <button class="tool-btn" onclick="openSection('commasB')">Next Section ➜</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCommasB(prog) {
+      return `
+        <div class="section-shell">
+          <div class="section-header card">
+            <h2>Commas and Colons - Part B</h2>
+            <div class="progress-row">
+              <span class="progress-pips">${makePips(prog.done, prog.total)}</span>
+              <span class="progress-count">${prog.done} / ${prog.total} answered</span>
+            </div>
+          </div>
+
+          <div class="card instructions" onclick="speak('Read each sentence. Tap the spaces between words to switch between comma, colon, and nothing. Then tap check.')">🔊 Tap the spaces between words to toggle comma, colon, or nothing. Then tap check.</div>
+
+          ${commasBQuestions.map((q, i) => {
+            const st = state.commasB[i];
+            const built = buildCommaSentence(i);
+            const pass = st.checked && normalizeNoWhitespace(built) === normalizeNoWhitespace(q.target);
+            const parts = q.raw.split(/\s+/);
+            return `
+              <div class="question-card ${pass ? 'correct' : ''}" id="cb-card-${i}">
+                <div class="card-top">
+                  <div class="q-num">${i + 1}.</div>
+                  <button class="play-btn" onclick="speak('${escJs(q.target)}')" title="Read target sentence">▶</button>
+                </div>
+                <div class="builder-line" id="cb-line-${i}">
+                  ${parts.map((word, wi) => {
+                    const wordHtml = '<span class="builder-word" onclick="speak(\'' + escJs(word) + '\')">' + escHtml(word) + '</span>';
+                    if (wi === parts.length - 1) return wordHtml;
+                    const slotVal = st.slots[wi] || ' ';
+                    const slotLabel = slotVal === ' ' ? ' ' : slotVal;
+                    return wordHtml + '<button class="space-slot ' + commaSlotClass(slotVal) + '" id="cb-slot-' + i + '-' + wi + '" onclick="toggleCommaSlot(' + i + ', ' + wi + ')" title="Tap to change punctuation">' + escHtml(slotLabel) + '</button>';
+                  }).join('')}
+                </div>
+                <div class="small">Built sentence: ${escHtml(built)}</div>
+                <div class="inline-row">
+                  <button class="check-btn ${st.checked ? 'done' : ''}" id="cb-check-${i}" onclick="checkCommaBuilder(${i})"><span class="check-btn-icon">📝</span><span>Check answers</span></button>
+                  <div class="feedback" id="cb-fb-${i}"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+
+          <div class="nav-row card">
+            <button class="tool-btn" onclick="openSection('commasA')">⬅ Previous Section</button>
+            <button class="tool-btn" onclick="openSection('adverbsA')">Next Section ➜</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdverbsA(prog) {
+      return `
+        <div class="section-shell">
+          <div class="section-header card">
+            <h2>Adverbs - Part A</h2>
+            <div class="progress-row">
+              <span class="progress-pips">${makePips(prog.done, prog.total)}</span>
+              <span class="progress-count">${prog.done} / ${prog.total} answered</span>
+            </div>
+          </div>
+
+          <div class="card concept-box" onclick="speak('An adverb describes a verb, an adjective, or another adverb. Some adverbs tell when or where something happens.')">🔊 Reteaching: An adverb describes a verb, an adjective, or another adverb.</div>
+
+          <div class="card instructions" onclick="speak('Fill the chart with comparative and superlative adverbs. Then complete each sentence with an adverb comparison.')">🔊 Complete the chart, then fill the sentence blanks.</div>
+
+          <div class="question-card">
+            <div class="q-num">Chart</div>
+            <div class="table-grid">
+              <div class="table-row">
+                <div class="table-head">Adverb</div>
+                <div class="table-head">Comparative</div>
+                <div class="table-head">Superlative</div>
+              </div>
+              ${adverbChartRows.map((row, i) => {
+                const st = state.adverbsA.chart[i];
+                return `
+                  <div class="table-row" id="adv-chart-${i}">
+                    <div class="word-chip part-tap" onclick="speak('${escJs(row.adverb)}')">🔊 ${escHtml(row.adverb)}</div>
+                    <select class="small-select" id="adv-comp-${i}">
+                      <option value="">- pick -</option>
+                      <option value="more ${row.adverb}" ${st.comparative === 'more ' + row.adverb ? 'selected' : ''}>more ${row.adverb}</option>
+                      <option value="most ${row.adverb}" ${st.comparative === 'most ' + row.adverb ? 'selected' : ''}>most ${row.adverb}</option>
+                    </select>
+                    <select class="small-select" id="adv-sup-${i}">
+                      <option value="">- pick -</option>
+                      <option value="more ${row.adverb}" ${st.superlative === 'more ' + row.adverb ? 'selected' : ''}>more ${row.adverb}</option>
+                      <option value="most ${row.adverb}" ${st.superlative === 'most ' + row.adverb ? 'selected' : ''}>most ${row.adverb}</option>
+                    </select>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <div class="inline-row">
+              <button class="check-btn ${state.adverbsA.chartChecked ? 'done' : ''}" id="adv-chart-check" onclick="checkAdverbChart()"><span class="check-btn-icon">📝</span><span>Check answers</span></button>
+              <div class="feedback" id="adv-chart-fb"></div>
+            </div>
+          </div>
+
+          ${adverbCompQuestions.map((q, i) => {
+            const selected = state.adverbsA.comp[i] || '';
+            const checked = !!state.adverbsA.compChecked[i];
+            const pass = checked && selected && q.answers.map((a) => a.toLowerCase()).includes(selected.toLowerCase());
+            return `
+              <div class="question-card ${pass ? 'correct' : ''}" id="aca-card-${i}">
+                <div class="card-top">
+                  <div class="q-num">${i + 1}.</div>
+                  <button class="play-btn" onclick="speak('${escJs(q.before + (selected || 'blank') + q.after)}')" title="Read sentence">▶</button>
+                </div>
+                <div class="sentence">
+                  <span class="part-tap" onclick="speak('${escJs(q.before.trim())}')">${escHtml(q.before)}</span>
+                  <select class="answer-select" id="aca-sel-${i}">
+                    <option value="">- pick -</option>
+                    ${q.options.map((o) => '<option value="' + esc(o) + '" ' + (selected === o ? 'selected' : '') + '>' + escHtml(o) + '</option>').join('')}
+                  </select>
+                  <span class="part-tap" onclick="speak('${escJs(q.after.trim())}')">${escHtml(q.after)}</span>
+                </div>
+                <div class="inline-row">
+                  <button class="check-btn ${checked ? 'done' : ''}" id="aca-check-${i}" onclick="checkAdverbSentence(${i})"><span class="check-btn-icon">📝</span><span>Check answers</span></button>
+                  <div class="feedback" id="aca-fb-${i}"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+
+          <div class="nav-row card">
+            <button class="tool-btn" onclick="openSection('commasB')">⬅ Previous Section</button>
+            <button class="tool-btn" onclick="openSection('adverbsB')">Next Section ➜</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdverbsB(prog) {
+      return `
+        <div class="section-shell">
+          <div class="section-header card">
+            <h2>Adverbs - Part B</h2>
+            <div class="progress-row">
+              <span class="progress-pips">${makePips(prog.done, prog.total)}</span>
+              <span class="progress-count">${prog.done} / ${prog.total} checked</span>
+            </div>
+          </div>
+
+          <div class="card instructions" onclick="speak('For each sentence, choose the adverb and the verb it describes. Then tap check.')">🔊 Underline the adverb and circle the verb it describes: choose both, then tap check.</div>
+
+          ${adverbsBQuestions.map((q, i) => {
+            const st = state.adverbsB[i];
+            const options = textToWordOptions(q.sentence);
+            const checked = st.checked;
+            const pass = checked && st.adverb.toLowerCase() === q.adverb.toLowerCase() && st.verb.toLowerCase() === q.verb.toLowerCase();
+            return `
+              <div class="question-card ${pass ? 'correct' : ''}" id="ab-card-${i}">
+                <div class="card-top">
+                  <div class="q-num">${i + 1}.</div>
+                  <button class="play-btn" onclick="speak('${escJs(q.sentence)}')" title="Read sentence">▶</button>
+                </div>
+                <div class="sentence part-tap" onclick="speak('${escJs(q.sentence)}')">${escHtml(q.sentence)}</div>
+                <div class="pair-grid">
+                  <label>
+                    <div class="label">Adverb</div>
+                    <select class="answer-select" id="ab-adv-${i}">
+                      <option value="">- pick -</option>
+                      ${options.map((o) => '<option value="' + esc(o) + '" ' + (st.adverb === o ? 'selected' : '') + '>' + escHtml(o) + '</option>').join('')}
+                    </select>
+                  </label>
+                  <label>
+                    <div class="label">Verb it describes</div>
+                    <select class="answer-select" id="ab-verb-${i}">
+                      <option value="">- pick -</option>
+                      ${options.map((o) => '<option value="' + esc(o) + '" ' + (st.verb === o ? 'selected' : '') + '>' + escHtml(o) + '</option>').join('')}
+                    </select>
+                  </label>
+                </div>
+                <div class="inline-row">
+                  <button class="check-btn ${checked ? 'done' : ''}" id="ab-check-${i}" onclick="checkAdverbPair(${i})"><span class="check-btn-icon">📝</span><span>Check answers</span></button>
+                  <div class="feedback" id="ab-fb-${i}"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+
+          <div class="nav-row card">
+            <button class="tool-btn" onclick="openSection('adverbsA')">⬅ Previous Section</button>
+            <button class="tool-btn" onclick="goHome()">🏠 Section Cards</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function wireDynamicControls() {
+      if (state.activeSection === 'commasA') {
+        const names = document.getElementById('ca-names');
+        const dob = document.getElementById('ca-dob');
+        const start = document.getElementById('ca-start');
+        const end = document.getElementById('ca-end');
+        if (names) {
+          names.oninput = () => {
+            state.commasA.names = names.value;
+            saveProgress();
+            updateAllProgress();
+          };
+          const micBtn = document.getElementById('mic-ca-names');
+          if (micBtn) initMic(micBtn, names);
+        }
+        if (dob) dob.oninput = () => { state.commasA.dob = dob.value; saveProgress(); updateAllProgress(); };
+        if (start) start.oninput = () => { state.commasA.schoolStart = start.value; saveProgress(); updateAllProgress(); };
+        if (end) end.oninput = () => { state.commasA.schoolEnd = end.value; saveProgress(); updateAllProgress(); };
+      }
+
+      if (state.activeSection === 'commasB') {
+        commasBQuestions.forEach((q, i) => {
+          if (state.commasB[i] && state.commasB[i].checked) {
+            const pass = normalizeNoWhitespace(buildCommaSentence(i)) === normalizeNoWhitespace(q.target);
+            showFeedback('cb-fb-' + i, pass, pass ? 'Great punctuation repair.' : q.hint);
+            const card = document.getElementById('cb-card-' + i);
+            if (card) card.classList.toggle('correct', pass);
+            const btn = document.getElementById('cb-check-' + i);
+            if (btn) btn.classList.add('done');
+          }
+        });
+      }
+
+      if (state.activeSection === 'adverbsA') {
+        adverbChartRows.forEach((row, i) => {
+          const comp = document.getElementById('adv-comp-' + i);
+          const sup = document.getElementById('adv-sup-' + i);
+          if (comp) {
+            comp.onchange = () => {
+              state.adverbsA.chart[i].comparative = comp.value;
+              state.adverbsA.chartChecked = false;
+              saveProgress();
+              updateAllProgress();
+              clearFeedback('adv-chart-fb');
+              const btn = document.getElementById('adv-chart-check');
+              if (btn) btn.classList.remove('done');
+              const rowEl = document.getElementById('adv-chart-' + i);
+              if (rowEl) rowEl.classList.remove('correct');
+            };
+          }
+          if (sup) {
+            sup.onchange = () => {
+              state.adverbsA.chart[i].superlative = sup.value;
+              state.adverbsA.chartChecked = false;
+              saveProgress();
+              updateAllProgress();
+              clearFeedback('adv-chart-fb');
+              const btn = document.getElementById('adv-chart-check');
+              if (btn) btn.classList.remove('done');
+              const rowEl = document.getElementById('adv-chart-' + i);
+              if (rowEl) rowEl.classList.remove('correct');
+            };
+          }
+        });
+
+        if (state.adverbsA.chartChecked) {
+          const chartEval = evaluateAdverbChart();
+          showFeedback('adv-chart-fb', chartEval.allCorrect, chartEval.message);
+          const btn = document.getElementById('adv-chart-check');
+          if (btn) btn.classList.add('done');
+          adverbChartRows.forEach((row, i) => {
+            const rowEl = document.getElementById('adv-chart-' + i);
+            if (rowEl) rowEl.classList.toggle('correct', chartEval.rows[i]);
+          });
+        }
+
+        adverbCompQuestions.forEach((q, i) => {
+          const sel = document.getElementById('aca-sel-' + i);
+          if (!sel) return;
+          sel.onchange = () => {
+            state.adverbsA.comp[i] = sel.value;
+            state.adverbsA.compChecked[i] = false;
+            saveProgress();
+            updateAllProgress();
+            clearFeedback('aca-fb-' + i);
+            const card = document.getElementById('aca-card-' + i);
+            if (card) card.classList.remove('correct');
+            const btn = document.getElementById('aca-check-' + i);
+            if (btn) btn.classList.remove('done');
+          };
+          if (state.adverbsA.compChecked[i] && state.adverbsA.comp[i]) {
+            const pass = q.answers.map((a) => a.toLowerCase()).includes(state.adverbsA.comp[i].toLowerCase());
+            showFeedback('aca-fb-' + i, pass, pass ? 'Yes, that comparative adverb fits.' : q.hint);
+            const card = document.getElementById('aca-card-' + i);
+            if (card) card.classList.toggle('correct', pass);
+            const btn = document.getElementById('aca-check-' + i);
+            if (btn) btn.classList.add('done');
+          }
+        });
+      }
+
+      if (state.activeSection === 'adverbsB') {
+        adverbsBQuestions.forEach((q, i) => {
+          const selA = document.getElementById('ab-adv-' + i);
+          const selV = document.getElementById('ab-verb-' + i);
+          if (selA) {
+            selA.onchange = () => {
+              state.adverbsB[i].adverb = selA.value;
+              state.adverbsB[i].checked = false;
+              saveProgress();
+              updateAllProgress();
+              clearFeedback('ab-fb-' + i);
+              const card = document.getElementById('ab-card-' + i);
+              if (card) card.classList.remove('correct');
+              const btn = document.getElementById('ab-check-' + i);
+              if (btn) btn.classList.remove('done');
+            };
+          }
+          if (selV) {
+            selV.onchange = () => {
+              state.adverbsB[i].verb = selV.value;
+              state.adverbsB[i].checked = false;
+              saveProgress();
+              updateAllProgress();
+              clearFeedback('ab-fb-' + i);
+              const card = document.getElementById('ab-card-' + i);
+              if (card) card.classList.remove('correct');
+              const btn = document.getElementById('ab-check-' + i);
+              if (btn) btn.classList.remove('done');
+            };
+          }
+
+          if (state.adverbsB[i].checked) {
+            const pass = state.adverbsB[i].adverb.toLowerCase() === q.adverb.toLowerCase() && state.adverbsB[i].verb.toLowerCase() === q.verb.toLowerCase();
+            showFeedback('ab-fb-' + i, pass, pass ? 'You matched the adverb and verb.' : 'Think: which word tells how or when, and which action it describes.');
+            const card = document.getElementById('ab-card-' + i);
+            if (card) card.classList.toggle('correct', pass);
+            const btn = document.getElementById('ab-check-' + i);
+            if (btn) btn.classList.add('done');
+          }
+        });
+      }
+    }
+
+    function checkAdverbPair(i) {
+      const st = state.adverbsB[i];
+      if (!st.adverb || !st.verb) return;
+      const q = adverbsBQuestions[i];
+      st.checked = true;
+      const pass = st.adverb.toLowerCase() === q.adverb.toLowerCase() && st.verb.toLowerCase() === q.verb.toLowerCase();
+      showFeedback('ab-fb-' + i, pass, pass ? 'You matched the adverb and verb.' : 'Think: which word tells how or when, and which action it describes.');
+      const card = document.getElementById('ab-card-' + i);
+      if (card) card.classList.toggle('correct', pass);
+      const btn = document.getElementById('ab-check-' + i);
+      if (btn) btn.classList.add('done');
+      saveProgress();
+      updateAllProgress();
+      setTimeout(() => speak(q.sentence), 250);
+    }
+
+    function checkAdverbSentence(i) {
+      const q = adverbCompQuestions[i];
+      const selected = state.adverbsA.comp[i] || '';
+      if (!selected) {
+        showFeedback('aca-fb-' + i, false, 'Pick an answer first.');
+        return;
+      }
+      state.adverbsA.compChecked[i] = true;
+      const pass = q.answers.map((a) => a.toLowerCase()).includes(selected.toLowerCase());
+      showFeedback('aca-fb-' + i, pass, pass ? 'Yes, that comparative adverb fits.' : q.hint);
+      const card = document.getElementById('aca-card-' + i);
+      if (card) card.classList.toggle('correct', pass);
+      const btn = document.getElementById('aca-check-' + i);
+      if (btn) btn.classList.add('done');
+      saveProgress();
+      updateAllProgress();
+      setTimeout(() => speak(q.before + selected + q.after), 250);
+    }
+
+    function evaluateAdverbChart() {
+      const rows = adverbChartRows.map((row, i) => {
+        const st = state.adverbsA.chart[i] || { comparative: '', superlative: '' };
+        const compOk = st.comparative.toLowerCase() === ('more ' + row.adverb).toLowerCase();
+        const supOk = st.superlative.toLowerCase() === ('most ' + row.adverb).toLowerCase();
+        return compOk && supOk;
+      });
+      const answered = state.adverbsA.chart.filter((r) => r.comparative && r.superlative).length;
+      const correctCount = rows.filter(Boolean).length;
+      const allCorrect = correctCount === adverbChartRows.length;
+      const allAnswered = answered === adverbChartRows.length;
+      let message = '';
+      if (allCorrect) message = 'Great work. Every chart row is correct.';
+      else if (!allAnswered) message = 'Finish every row, then check again.';
+      else message = 'Some rows need changes. Comparative uses more, and superlative uses most.';
+      return { rows, allCorrect, message };
+    }
+
+    function checkAdverbChart() {
+      const chartEval = evaluateAdverbChart();
+      state.adverbsA.chartChecked = true;
+      showFeedback('adv-chart-fb', chartEval.allCorrect, chartEval.message);
+      const btn = document.getElementById('adv-chart-check');
+      if (btn) btn.classList.add('done');
+      adverbChartRows.forEach((row, i) => {
+        const rowEl = document.getElementById('adv-chart-' + i);
+        if (rowEl) rowEl.classList.toggle('correct', chartEval.rows[i]);
+      });
+      saveProgress();
+      updateAllProgress();
+    }
+
+    function toggleCommaSlot(i, slotIndex) {
+      const current = state.commasB[i].slots[slotIndex] || ' ';
+      const next = SPACE_SLOT_VALUES[(SPACE_SLOT_VALUES.indexOf(current) + 1) % SPACE_SLOT_VALUES.length];
+      state.commasB[i].slots[slotIndex] = next;
+      state.commasB[i].checked = false;
+      saveProgress();
+      updateAllProgress();
+      clearFeedback('cb-fb-' + i);
+      const card = document.getElementById('cb-card-' + i);
+      if (card) card.classList.remove('correct');
+      const btn = document.getElementById('cb-check-' + i);
+      if (btn) btn.classList.remove('done');
+    }
+
+    function checkCommaBuilder(i) {
+      const q = commasBQuestions[i];
+      const built = buildCommaSentence(i);
+      const pass = normalizeNoWhitespace(built) === normalizeNoWhitespace(q.target);
+      state.commasB[i].checked = true;
+      showFeedback('cb-fb-' + i, pass, pass ? 'Great punctuation repair.' : q.hint);
+      const card = document.getElementById('cb-card-' + i);
+      if (card) card.classList.toggle('correct', pass);
+      const btn = document.getElementById('cb-check-' + i);
+      if (btn) btn.classList.add('done');
+      saveProgress();
+      updateAllProgress();
+    }
+
+    function readSchoolTimes() {
+      const start = state.commasA.schoolStart || 'not set';
+      const end = state.commasA.schoolEnd || 'not set';
+      speak('School begins at ' + start + '. School ends at ' + end + '.');
+    }
+
+    function openSection(key) {
+      state.activeSection = key;
+      saveProgress();
+      render();
+    }
+
+    function goHome() {
+      state.activeSection = 'home';
+      saveProgress();
+      render();
+    }
+
+    function updateAllProgress() {
+      if (state.activeSection === 'home') render();
+      else {
+        const current = state.activeSection;
+        render();
+        state.activeSection = current;
+      }
+    }
+
+    function clearAllResponses() {
+      const btn = document.querySelector('.clear-btn');
+      if (!btn) return;
+      if (btn.dataset.confirming === 'true') {
+        state = {
+          activeSection: state.activeSection,
+          commasA: { names: '', dob: '', schoolStart: '', schoolEnd: '' },
+          commasB: commasBQuestions.map((q) => ({ slots: initialCommaSlots(q.raw), checked: false })),
+          adverbsA: {
+            chart: adverbChartRows.map(() => ({ comparative: '', superlative: '' })),
+            comp: adverbCompQuestions.map(() => ''),
+            chartChecked: false,
+            compChecked: adverbCompQuestions.map(() => false)
+          },
+          adverbsB: adverbsBQuestions.map(() => ({ adverb: '', verb: '', checked: false }))
+        };
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+        btn.dataset.confirming = 'false';
+        btn.textContent = '🗑️ Clear all responses';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+        render();
+      } else {
+        btn.dataset.confirming = 'true';
+        btn.textContent = '⚠️ Tap again to confirm';
+        btn.style.background = '#ffeedd';
+        btn.style.color = '#c05000';
+        btn.style.borderColor = '#c05000';
+        setTimeout(() => {
+          if (btn.dataset.confirming === 'true') {
+            btn.dataset.confirming = 'false';
+            btn.textContent = '🗑️ Clear all responses';
+            btn.style.background = '';
+            btn.style.color = '';
+            btn.style.borderColor = '';
+          }
+        }, 3000);
+      }
+    }
+
+    function exportPrint() {
+      const progress = sectionProgressData();
+      const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Export - Commas and Adverbs</title>
+<style>
+body{font-family:Arial,sans-serif;padding:20px;color:#222}
+h1,h2{margin:0 0 8px}
+.name-line{display:flex;gap:20px;margin:12px 0 18px;font-size:0.95rem}
+.name-line span{display:flex;align-items:flex-end;gap:6px}
+.name-line .line{display:inline-block;width:220px;border-bottom:1.5px solid #333}
+.block{border:1px solid #bbb;border-radius:10px;padding:10px;margin:10px 0}
+.print-table{width:100%;border-collapse:collapse;margin:10px 0}
+.print-table th,.print-table td{border:1px solid #bbb;padding:8px 10px;text-align:left;vertical-align:top}
+.print-table th{background:#f3f3f3;font-weight:700}
+.small{color:#555;font-size:0.9rem}
+button{margin-top:18px;padding:8px 14px}
+@media print{button{display:none}}
+</style></head><body>
+<h1>Commas and Colons + Adverbs</h1>
+<div class="name-line"><span>Name:<span class="line">Tina #18</span></span><span>Date:<span class="line">2026-04-28</span></span></div>
+<div class="small">Section progress: A ${progress.commasA.done}/${progress.commasA.total} · B ${progress.commasB.done}/${progress.commasB.total} · C ${progress.adverbsA.done}/${progress.adverbsA.total} · D ${progress.adverbsB.done}/${progress.adverbsB.total}</div>
+<h2>Commas and Colons - Part A</h2>
+<div class="block"><strong>1.</strong> ${escHtml(state.commasA.names || '___')}</div>
+<div class="block"><strong>2.</strong> ${escHtml(state.commasA.dob || '___')}</div>
+<div class="block"><strong>3.</strong> Begins: ${escHtml(state.commasA.schoolStart || '___')} &nbsp; Ends: ${escHtml(state.commasA.schoolEnd || '___')}</div>
+<h2>Commas and Colons - Part B</h2>
+${commasBQuestions.map((q,i)=>'<div class="block"><strong>'+(i+1)+'.</strong> '+escHtml(buildCommaSentence(i) || '___')+'</div>').join('')}
+<h2>Adverbs - Part A</h2>
+<table class="print-table" aria-label="Adverbs Part A chart">
+  <thead>
+    <tr>
+      <th>Adverb</th>
+      <th>Comparative</th>
+      <th>Superlative</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${adverbChartRows.map((r,i)=>'<tr><td>'+escHtml(r.adverb)+'</td><td>'+escHtml(state.adverbsA.chart[i].comparative || '___')+'</td><td>'+escHtml(state.adverbsA.chart[i].superlative || '___')+'</td></tr>').join('')}
+  </tbody>
+</table>
+${adverbCompQuestions.map((q,i)=>'<div class="block"><strong>'+(i+1)+'.</strong> '+escHtml(q.before)+escHtml(state.adverbsA.comp[i] || '___')+escHtml(q.after)+'</div>').join('')}
+<h2>Adverbs - Part B</h2>
+${adverbsBQuestions.map((q,i)=>'<div class="block"><strong>'+(i+1)+'.</strong> adverb: '+escHtml(state.adverbsB[i].adverb || '___')+' | verb: '+escHtml(state.adverbsB[i].verb || '___')+'</div>').join('')}
+<button onclick="window.print()">Print</button>
+</body></html>`;
+
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    }
+
+    function esc(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function escHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function escJs(str) {
+      return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, ' ');
+    }
+
+    loadProgress();
+    render();
+  </script>
+</body>
+</html>

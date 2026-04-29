@@ -170,7 +170,47 @@ Use the yellow `.phrase-chip` when the chip is independently tappable and reads 
   from { transform: scale(1); }
   to   { transform: scale(1.12); }
 }
+
+/* Check button — per-card answer submission */
+.check-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  min-width: 170px;
+  min-height: 44px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  background: linear-gradient(180deg, #ffe89b 0%, #ffd866 100%);
+  color: #5f4700;
+  border: 2px solid #d9a800;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(217,168,0,0.22);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.check-btn:hover { background: linear-gradient(180deg, #ffd866 0%, #f5c400 100%); }
+.check-btn.done {
+  background: linear-gradient(180deg, #7be09a 0%, #5dca7e 100%);
+  border-color: #3aaa5a;
+  color: white;
+}
 ```
+
+**HTML convention:**
+```html
+<button class="check-btn" onclick="checkCard(i)">
+  <span class="check-btn-icon">📝</span><span>Check answers</span>
+</button>
+```
+
+- Always include visible text ("Check answers"), not just an icon or checkmark symbol.
+- Transitions to green (`.done`) after a correct submission — keeps it visually distinct from unchecked state.
+- Do not reuse the play button's green color here; use the gradient yellow → green pattern above.
+
+```css
 
 ---
 
@@ -194,6 +234,39 @@ Use the yellow `.phrase-chip` when the chip is independently tappable and reads 
 .answer-select:focus { border-color: var(--accent-blue-dk); background: #d0eaff; }
 ```
 First option always: `<option value="">— pick —</option>`
+
+### Space Slot (Punctuation Builder)
+
+Used in sentence-repair exercises where students tap between words to insert punctuation. Canonical sizing confirmed across Type 12 and derivatives.
+
+```css
+/* Space slot — tappable punctuation insert point */
+.space-slot {
+  min-width: 26px;
+  min-height: 44px;
+  padding: 0 4px;
+  border-radius: 7px;
+  border: 2px solid #d0deec;
+  background: #f4f9ff;
+  color: #1a6fa8;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: pre;
+}
+/* State variants — extend per exercise as needed */
+.space-slot.slot-blank  { background: #f7fbff; color: transparent; }  /* no punctuation chosen */
+.space-slot.slot-comma  { background: #fff3c4; color: #7a5b00; border-color: #e6c800; }
+.space-slot.slot-colon  { background: #ffe4d9; color: #a2441a; border-color: #f08a5d; }
+.space-slot.slot-period { background: #e8f5e9; color: #1b5e20; border-color: #66bb6a; }
+.space-slot.slot-quote  { background: #ede7f6; color: #4a148c; border-color: #9c69d0; }
+```
+
+**Key sizing rule:** `min-width: 26px` — do not inflate to `44px`. The `min-height: 44px` satisfies the tap-target floor without making slots visually blocky. The `slot-blank` state uses `color: transparent` so the slot appears visually empty without collapsing its width.
 
 ### Free-text area
 ```css

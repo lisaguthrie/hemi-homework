@@ -48,16 +48,19 @@ When a worksheet contains multiple distinct exercise sections (e.g. Part A and P
 
 **Naming convention:**
 ```
-worksheets/{child}/YYYY-MM-DD-{subject-slug}-{section}.html
+worksheets/{child}/YYYY-MM-DD-{subject-slug}.html
 ```
-Where `{section}` is a lowercase letter (a, b, c) or a short descriptor (e.g. `-pairs`, `-label`, `-choose`).
 
-**Example:** A worksheet with Part A (identify antecedent), Part B (label S/O), and a second page (choose correct pronoun) becomes three files:
-- `2026-03-16-subj-obj-pronouns-a.html`
-- `2026-03-16-subj-obj-pronouns-b.html`
-- `2026-03-16-subj-obj-pronouns-c.html`
+### Multi-Section Single-App Layout (Card Navigation)
 
-**Override:** If the user explicitly requests a single file, or if the sections are closely interdependent (e.g. Part B refers to answers from Part A), combine them and use section headers within the page.
+When a worksheet image contains two or more distinct skill sections (e.g. Commas + Adverbs) and the user requests a **single combined app**, use card-based tab navigation between sections rather than a long scroll:
+
+- Render a fixed header bar with one named tab per section.
+- Show one section at a time — hide non-active sections.
+- Persist the active section index in `localStorage` alongside other answer state.
+- Bump the storage key (`_v2`, `_v3`, etc.) if the section structure changes between builds.
+
+**When to split into separate files instead:** Only when the user explicitly requests separate files, or when sections have incompatible interaction models that would make shared state error-prone.
 
 ---
 

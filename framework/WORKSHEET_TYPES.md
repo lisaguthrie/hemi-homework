@@ -491,6 +491,14 @@ For subject-verb agreement worksheets that include a **verb-form selection subpa
 - Part B allows punctuation stacking in a single original gap by auto-maintaining a trailing space slot after punctuation
 - Part B validation compares target and built sentence with whitespace removed; punctuation/capitalization must still match exactly
 - Part B play button reads the target sentence (audio model), not the in-progress built sentence
+- Part B `SPACE_SLOT_VALUES` is exercise-specific — for commas/colons use `[' ', ',', ':']`; for dialogue use `[' ', '.', ',', '"']`. Always include `' '` (single space) as the first/reset value.
+- Part B comma renders with trailing space; colon/period render tight. When building the display sentence:
+  ```javascript
+  if (slot === ',') built += ', ' + nextWord;   // comma: space after
+  else if (slot === ':') built += ':' + nextWord; // colon: no space
+  else built += ' ' + nextWord;                  // default: word space
+  ```
+- Part B slot toggle must NOT call `speak()` — no auto-read on tap. Only the ▶ play button reads the sentence.
 - Part C accepts multiple equivalent correct phrasings via an `accepted` array
 - Part C should not show a visible target-answer line unless explicitly requested
 
