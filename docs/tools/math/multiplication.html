@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Multiplication Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --border: #d0d8f0;
+    --text: #1a2a3a;
+    --muted: #8a9ab0;
+    --accent: #3b7dd8;
+    --accent-light: #e8f0ff;
+    --correct: #22c55e;
+    --correct-light: #dcfce7;
+    --wrong: #ef4444;
+    --wrong-light: #fee2e2;
+    --input-bg: #f7f9ff;
+    --decomp-bg: #fff7e8;
+    --decomp-border: #f59e0b;
+    --separator: #6b7280;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 80px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 760px;
+  }
+
+  header {
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 6px 28px rgba(59, 125, 216, 0.12);
+    padding: 22px;
+    margin-bottom: 16px;
+  }
+
+  .setup-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .op {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--accent);
+    width: 26px;
+    text-align: center;
+  }
+
+  .main-input {
+    width: 100%;
+    max-width: 220px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--input-bg);
+    color: var(--text);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.9rem;
+    line-height: 1;
+    padding: 12px 14px;
+    text-align: center;
+    outline: none;
+  }
+
+  .main-input:focus {
+    border-color: var(--accent);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #2a5fb0;
+  }
+
+  .btn-outline {
+    background: #fff;
+    color: var(--muted);
+    border: 2px solid var(--border);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+
+  .btn-outline:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .problem-card {
+    display: none;
+  }
+
+  .problem-card.visible {
+    display: block;
+  }
+
+  .problem-title {
+    font-family: 'Fredoka One', cursive;
+    color: var(--accent);
+    font-size: 1.35rem;
+    margin-bottom: 8px;
+  }
+
+  .problem-help {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .model-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .area-grid {
+    display: grid;
+    gap: 8px;
+    min-width: max-content;
+  }
+
+  .corner-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 78px;
+    min-height: 54px;
+    border-radius: 10px;
+    background: var(--accent-light);
+    border: 2px solid var(--border);
+    font-family: 'Fredoka One', cursive;
+    color: var(--accent);
+    font-size: 1.6rem;
+  }
+
+  .model-input {
+    width: 100%;
+    min-height: 54px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--text);
+    padding: 10px 8px;
+    text-align: center;
+    font-weight: 800;
+    font-size: 1.05rem;
+    outline: none;
+  }
+
+  .model-input:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  .row-label {
+    width: 78px;
+  }
+
+  .decomp-input {
+    background: var(--decomp-bg);
+    border: 3px solid var(--decomp-border);
+    font-size: 1.1rem;
+    font-weight: 900;
+  }
+
+  .col-label,
+  .product-cell {
+    width: 112px;
+  }
+
+  .top-separator {
+    border-bottom: 4px solid var(--separator);
+  }
+
+  .left-separator {
+    border-right: 4px solid var(--separator);
+  }
+
+  .status-correct {
+    border-color: var(--correct);
+    background: var(--correct-light);
+    color: #166534;
+  }
+
+  .status-wrong {
+    border-color: var(--wrong);
+    background: var(--wrong-light);
+    color: #991b1b;
+  }
+
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 1.75rem;
+    }
+
+    .main-input {
+      font-size: 1.7rem;
+      max-width: 180px;
+    }
+
+    .corner-cell,
+    .row-label {
+      width: 68px;
+      min-height: 50px;
+    }
+
+    .col-label,
+    .product-cell {
+      width: 98px;
+    }
+
+    .model-input {
+      min-height: 50px;
+      font-size: 1rem;
+    }
+
+    .decomp-input {
+      font-size: 1.05rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>× Multiplication</h1>
+      <p class="subtitle">Area model partial products</p>
+    </header>
+
+    <section class="card" id="setupCard">
+      <div class="setup-grid">
+        <div>
+          <div class="label">First number</div>
+          <div class="input-row">
+            <input id="inputTop" class="main-input" type="text" inputmode="numeric" placeholder="123" autocomplete="off">
+          </div>
+        </div>
+        <div>
+          <div class="label">Second number</div>
+          <div class="input-row">
+            <div class="op">×</div>
+            <input id="inputBot" class="main-input" type="text" inputmode="numeric" placeholder="45" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="buildProblem()">Set Up</button>
+      </div>
+    </section>
+
+    <section class="card problem-card" id="problemCard">
+      <div class="problem-title" id="problemTitle"></div>
+      <p class="problem-help">Fill in the decomposition boxes, then fill each partial product box.</p>
+
+      <div class="model-wrap">
+        <div class="area-grid" id="areaGrid"></div>
+      </div>
+
+      <div class="actions" style="margin-top: 14px;">
+        <button class="btn btn-primary" onclick="checkAnswer()">Check</button>
+        <button class="btn btn-outline" onclick="resetTool()">New problem</button>
+      </div>
+    </section>
+  </div>
+
+<script>
+  let topNumber = 0;
+  let bottomNumber = 0;
+  let topPartsExpected = [];
+  let rowPartsExpected = [];
+  let cellExpected = [];
+  let cols = 0;
+  let rows = 0;
+
+  function isWholeNumberString(value) {
+    return /^\d+$/.test(value);
+  }
+
+  function normalizeWholeNumber(value) {
+    return value.replace(/^0+(?=\d)/, '');
+  }
+
+  function buildProblem() {
+    const topRaw = document.getElementById('inputTop').value.trim();
+    const botRaw = document.getElementById('inputBot').value.trim();
+
+    if (!isWholeNumberString(topRaw) || !isWholeNumberString(botRaw)) {
+      alert('Use whole numbers only (no decimals).');
+      return;
+    }
+
+    const topClean = normalizeWholeNumber(topRaw) || '0';
+    const botClean = normalizeWholeNumber(botRaw) || '0';
+
+    if (topClean.length > 6 || botClean.length > 6) {
+      alert('Please use numbers up to 6 digits each.');
+      return;
+    }
+
+    topNumber = Number(topClean);
+    bottomNumber = Number(botClean);
+
+    const topDigits = topClean.split('').map(function(d) { return Number(d); });
+    const botDigits = botClean.split('').map(function(d) { return Number(d); });
+
+    cols = topDigits.length;
+    rows = botDigits.length;
+
+    topPartsExpected = topDigits.map(function(digit, idx) {
+      const power = cols - idx - 1;
+      return digit * Math.pow(10, power);
+    });
+
+    rowPartsExpected = botDigits.map(function(digit, idx) {
+      const power = rows - idx - 1;
+      return digit * Math.pow(10, power);
+    });
+
+    cellExpected = rowPartsExpected.map(function(rowPart) {
+      return topPartsExpected.map(function(colPart) {
+        return rowPart * colPart;
+      });
+    });
+
+    renderAreaModel();
+
+    document.getElementById('problemTitle').textContent = topNumber + ' × ' + bottomNumber;
+    document.getElementById('problemCard').classList.add('visible');
+    document.getElementById('setupCard').style.display = 'none';
+  }
+
+  function renderAreaModel() {
+    const grid = document.getElementById('areaGrid');
+    grid.innerHTML = '';
+
+    grid.style.gridTemplateColumns = '78px repeat(' + cols + ', 112px)';
+    grid.style.gridAutoRows = '54px';
+
+    const corner = document.createElement('div');
+    corner.className = 'corner-cell';
+    corner.textContent = '×';
+    grid.appendChild(corner);
+
+    for (let c = 0; c < cols; c++) {
+      const colInput = document.createElement('input');
+      colInput.type = 'text';
+      colInput.inputMode = 'numeric';
+      colInput.className = 'model-input decomp-input col-label top-separator';
+      colInput.id = 'col-part-' + c;
+      colInput.placeholder = '?';
+      colInput.addEventListener('input', clearStatus);
+      grid.appendChild(colInput);
+    }
+
+    for (let r = 0; r < rows; r++) {
+      const rowInput = document.createElement('input');
+      rowInput.type = 'text';
+      rowInput.inputMode = 'numeric';
+      rowInput.className = 'model-input decomp-input row-label left-separator';
+      rowInput.id = 'row-part-' + r;
+      rowInput.placeholder = '?';
+      rowInput.addEventListener('input', clearStatus);
+      grid.appendChild(rowInput);
+
+      for (let c = 0; c < cols; c++) {
+        const cellInput = document.createElement('input');
+        cellInput.type = 'text';
+        cellInput.inputMode = 'numeric';
+        cellInput.className = 'model-input product-cell';
+        cellInput.id = 'cell-' + r + '-' + c;
+        cellInput.placeholder = '?';
+        cellInput.addEventListener('input', clearStatus);
+        grid.appendChild(cellInput);
+      }
+    }
+
+    if (window.matchMedia('(max-width: 640px)').matches) {
+      grid.style.gridTemplateColumns = '68px repeat(' + cols + ', 98px)';
+      grid.style.gridAutoRows = '50px';
+    }
+  }
+
+  function clearStatus(event) {
+    const el = event.target;
+    el.classList.remove('status-correct');
+    el.classList.remove('status-wrong');
+  }
+
+  function applyCheckToInput(el, expectedValue) {
+    const value = el.value.trim();
+
+    el.classList.remove('status-correct');
+    el.classList.remove('status-wrong');
+
+    if (!value) {
+      return { checked: false, correct: false, empty: true };
+    }
+
+    const parsed = Number(value);
+    const validWhole = /^\d+$/.test(value);
+    const correct = validWhole && parsed === expectedValue;
+
+    if (correct) {
+      el.classList.add('status-correct');
+      return { checked: true, correct: true, empty: false };
+    }
+
+    el.classList.add('status-wrong');
+    return { checked: true, correct: false, empty: false };
+  }
+
+  function checkAnswer() {
+    let checkedCount = 0;
+    let correctCount = 0;
+
+    for (let c = 0; c < cols; c++) {
+      const el = document.getElementById('col-part-' + c);
+      const result = applyCheckToInput(el, topPartsExpected[c]);
+      if (result.checked) {
+        checkedCount += 1;
+        if (result.correct) correctCount += 1;
+      }
+    }
+
+    for (let r = 0; r < rows; r++) {
+      const rowEl = document.getElementById('row-part-' + r);
+      const rowResult = applyCheckToInput(rowEl, rowPartsExpected[r]);
+      if (rowResult.checked) {
+        checkedCount += 1;
+        if (rowResult.correct) correctCount += 1;
+      }
+
+      for (let c = 0; c < cols; c++) {
+        const cellEl = document.getElementById('cell-' + r + '-' + c);
+        const cellResult = applyCheckToInput(cellEl, cellExpected[r][c]);
+        if (cellResult.checked) {
+          checkedCount += 1;
+          if (cellResult.correct) correctCount += 1;
+        }
+      }
+    }
+
+    if (checkedCount === 0) {
+      return;
+    }
+  }
+
+  function resetTool() {
+    document.getElementById('problemCard').classList.remove('visible');
+    document.getElementById('setupCard').style.display = '';
+    document.getElementById('inputTop').value = '';
+    document.getElementById('inputBot').value = '';
+    document.getElementById('areaGrid').innerHTML = '';
+  }
+</script>
+</body>
+</html>
