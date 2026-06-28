@@ -128,6 +128,10 @@
     gap: 10px;
   }
 
+  .hidden {
+    display: none;
+  }
+
   .btn {
     border: none;
     border-radius: 14px;
@@ -158,6 +162,31 @@
   .btn-outline:hover {
     color: var(--accent);
     border-color: var(--accent);
+  }
+
+  .btn-read {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+
+  .btn-read:hover {
+    background: var(--accent-light);
+  }
+
+  .btn-read.hidden {
+    display: none;
+  }
+
+  .btn-read:disabled {
+    opacity: 0.5;
+    cursor: default;
   }
 
   .problem-card {
@@ -286,6 +315,10 @@
     cursor: default;
   }
 
+  .problem-card.completed .product-cell {
+    cursor: pointer;
+  }
+
   .celebration-layer {
     position: fixed;
     inset: 0;
@@ -301,6 +334,39 @@
     border-radius: 2px;
     opacity: 0.95;
     animation: confettiFall 1800ms linear forwards;
+  }
+
+  .speaking-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a6fa8;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 10px 24px;
+    border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, background 0.2s;
+    z-index: 1000;
+    cursor: pointer;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .speaking-toast.visible {
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+
+  .speaking-toast.visible:hover {
+    background: #c0392b;
+  }
+
+  .speaking-toast.visible:hover .toast-label::after {
+    content: ' - tap to stop';
   }
 
   @keyframes confettiFall {
@@ -384,9 +450,17 @@
 
       <div class="actions" style="margin-top: 14px;">
         <button class="btn btn-primary" onclick="checkAnswer()">Check</button>
+        <button class="btn btn-read hidden" id="readAnswersBtn" onclick="readAllProductsAloud()" type="button">
+          <span aria-hidden="true">🎤</span>
+          <span>Read answers aloud</span>
+        </button>
         <button class="btn btn-outline" onclick="resetTool()">New problem</button>
       </div>
     </section>
+  </div>
+
+  <div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+    🔊 <span class="toast-label">Reading aloud...</span>
   </div>
 
 <script>
@@ -398,6 +472,15 @@
   let cols = 0;
   let rows = 0;
   let isCompleted = false;
+  let isBatchReading = false;
+
+  const ONES = [
+    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+    'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+    'seventeen', 'eighteen', 'nineteen'
+  ];
+  const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+  const THOUSANDS = ['', 'thousand', 'million', 'billion', 'trillion'];
 
   function isWholeNumberString(value) {
     return /^\d+$/.test(value);
@@ -460,7 +543,11 @@
     const grid = document.getElementById('areaGrid');
     grid.innerHTML = '';
     isCompleted = false;
+    isBatchReading = false;
+    hideSpeakingToast();
+    window.speechSynthesis.cancel();
     document.getElementById('problemCard').classList.remove('completed');
+    document.getElementById('readAnswersBtn').classList.add('hidden');
 
     grid.style.gridTemplateColumns = '78px repeat(' + cols + ', 112px)';
     grid.style.gridAutoRows = '54px';
@@ -497,8 +584,10 @@
         cellInput.inputMode = 'numeric';
         cellInput.className = 'model-input product-cell';
         cellInput.id = 'cell-' + r + '-' + c;
+        cellInput.dataset.expected = String(cellExpected[r][c]);
         cellInput.placeholder = '?';
         cellInput.addEventListener('input', clearStatus);
+        cellInput.addEventListener('click', onProductCellClick);
         grid.appendChild(cellInput);
       }
     }
@@ -594,7 +683,174 @@
 
     isCompleted = true;
     problemCard.classList.add('completed');
+    document.getElementById('readAnswersBtn').classList.remove('hidden');
     playCelebration();
+  }
+
+  function onProductCellClick(event) {
+    if (!isCompleted || isBatchReading) {
+      return;
+    }
+    const target = event.currentTarget;
+    const raw = target.dataset.expected || target.value;
+    const value = Number(raw);
+    if (!Number.isFinite(value)) {
+      return;
+    }
+    speakReadyNumber(value);
+  }
+
+  function chunkToWords(n) {
+    let words = [];
+    const hundreds = Math.floor(n / 100);
+    const remainder = n % 100;
+
+    if (hundreds > 0) {
+      words.push(ONES[hundreds]);
+      words.push('hundred');
+    }
+
+    if (remainder > 0) {
+      if (remainder < 20) {
+        words.push(ONES[remainder]);
+      } else {
+        const tens = Math.floor(remainder / 10);
+        const ones = remainder % 10;
+        words.push(TENS[tens]);
+        if (ones > 0) {
+          words.push(ONES[ones]);
+        }
+      }
+    }
+
+    return words.join(' ');
+  }
+
+  function numberToWords(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) {
+      return '';
+    }
+    if (n === 0) {
+      return 'zero';
+    }
+
+    let temp = Math.floor(Math.abs(n));
+    let groupIndex = 0;
+    let parts = [];
+
+    while (temp > 0 && groupIndex < THOUSANDS.length) {
+      const group = temp % 1000;
+      if (group > 0) {
+        const chunk = chunkToWords(group);
+        const scale = THOUSANDS[groupIndex];
+        parts.unshift(scale ? chunk + ' ' + scale : chunk);
+      }
+      temp = Math.floor(temp / 1000);
+      groupIndex += 1;
+    }
+
+    return parts.join(' ').trim();
+  }
+
+  function showSpeakingToast() {
+    document.getElementById('speakingToast').classList.add('visible');
+  }
+
+  function hideSpeakingToast() {
+    document.getElementById('speakingToast').classList.remove('visible');
+  }
+
+  function cancelSpeak() {
+    isBatchReading = false;
+    window.speechSynthesis.cancel();
+    hideSpeakingToast();
+    const readBtn = document.getElementById('readAnswersBtn');
+    readBtn.disabled = false;
+  }
+
+  function speakText(text, onEnd) {
+    if (!('speechSynthesis' in window)) {
+      if (typeof onEnd === 'function') {
+        onEnd();
+      }
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    showSpeakingToast();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.onend = function() {
+      if (typeof onEnd === 'function') {
+        onEnd();
+      }
+    };
+    utterance.onerror = function() {
+      if (typeof onEnd === 'function') {
+        onEnd();
+      }
+    };
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function speakReadyNumber(value, onEnd) {
+    const words = numberToWords(value);
+    speakText('Ready? The number is ' + words, function() {
+      if (!isBatchReading) {
+        hideSpeakingToast();
+      }
+      if (typeof onEnd === 'function') {
+        onEnd();
+      }
+    });
+  }
+
+  function readAllProductsAloud() {
+    if (!isCompleted || isBatchReading) {
+      return;
+    }
+
+    const values = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        values.push(cellExpected[r][c]);
+      }
+    }
+
+    if (!values.length) {
+      return;
+    }
+
+    isBatchReading = true;
+    const readBtn = document.getElementById('readAnswersBtn');
+    readBtn.disabled = true;
+
+    let index = 0;
+    function readNext() {
+      if (!isBatchReading) {
+        return;
+      }
+
+      if (index >= values.length) {
+        isBatchReading = false;
+        readBtn.disabled = false;
+        hideSpeakingToast();
+        return;
+      }
+
+      const value = values[index];
+      index += 1;
+      speakReadyNumber(value, function() {
+        if (!isBatchReading) {
+          return;
+        }
+        window.setTimeout(readNext, 350);
+      });
+    }
+
+    readNext();
   }
 
   function playCelebration() {
@@ -619,6 +875,7 @@
   }
 
   function resetTool() {
+    cancelSpeak();
     const problemCard = document.getElementById('problemCard');
     problemCard.classList.remove('completed');
     isCompleted = false;
@@ -638,6 +895,7 @@
     document.getElementById('inputTop').value = '';
     document.getElementById('inputBot').value = '';
     document.getElementById('areaGrid').innerHTML = '';
+    document.getElementById('readAnswersBtn').classList.add('hidden');
   }
 </script>
 </body>
