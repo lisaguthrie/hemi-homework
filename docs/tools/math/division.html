@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Division Partial Products Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --border: #d0d8f0;
+    --text: #1a2a3a;
+    --muted: #8a9ab0;
+    --accent: #3b7dd8;
+    --accent-light: #e8f0ff;
+    --input-bg: #f7f9ff;
+    --line: #334155;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px 80px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 860px;
+  }
+
+  header {
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 6px 28px rgba(59, 125, 216, 0.12);
+    padding: 22px;
+    margin-bottom: 16px;
+  }
+
+  .screen {
+    display: none;
+  }
+
+  .screen.visible {
+    display: block;
+  }
+
+  .setup-label {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .setup-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .number-input {
+    width: 170px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--input-bg);
+    color: var(--text);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.7rem;
+    line-height: 1;
+    padding: 10px 12px;
+    text-align: center;
+    outline: none;
+  }
+
+  .number-input:focus {
+    border-color: var(--accent);
+  }
+
+  .number-input::placeholder {
+    color: #bdc8dd;
+  }
+
+  .division-symbol {
+    position: relative;
+    width: 32px;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .division-symbol .bar {
+    width: 24px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--line);
+  }
+
+  .division-symbol::before,
+  .division-symbol::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+
+  .division-symbol::before {
+    top: 3px;
+  }
+
+  .division-symbol::after {
+    bottom: 3px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #2a5fb0;
+  }
+
+  .btn-outline {
+    background: #fff;
+    color: var(--muted);
+    border: 2px solid var(--border);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+
+  .btn-outline:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .problem-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .readonly-num {
+    min-width: 78px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: #eef3ff;
+    color: var(--text);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 10px 14px;
+    text-align: center;
+  }
+
+  .matrix-wrap {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  th,
+  td {
+    border: 2px solid var(--border);
+    background: #fff;
+    padding: 8px;
+    min-width: 96px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background: #f7f9ff;
+  }
+
+  .corner {
+    min-width: 72px;
+    width: 72px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--accent);
+  }
+
+  .row-label-cell {
+    min-width: 72px;
+    width: 72px;
+    background: #f7f9ff;
+  }
+
+  .head-field,
+  .cell-field {
+    width: 6ch;
+    min-width: 6ch;
+    max-width: 100%;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--text);
+    padding: 9px 6px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 1.02rem;
+    outline: none;
+  }
+
+  .row-field,
+  .remainder-field {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--text);
+    padding: 9px 8px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 1.02rem;
+    outline: none;
+  }
+
+  .head-field:focus,
+  .cell-field:focus,
+  .row-field:focus,
+  .remainder-field:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  .remainder-cell {
+    min-width: 170px;
+    width: 170px;
+  }
+
+  .remainder-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .remainder-field {
+    width: 7ch;
+    min-width: 7ch;
+    max-width: 100%;
+  }
+
+  .remainder-label {
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .add-col,
+  .add-cell {
+    min-width: 72px;
+    width: 72px;
+    padding: 8px;
+  }
+
+  .add-btn {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    background: #fff;
+    color: var(--accent);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.7rem;
+    cursor: pointer;
+  }
+
+  .add-btn:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .add-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: var(--border);
+    background: #eef2ff;
+    color: #93a0ba;
+  }
+
+  .btn-check {
+    background: #22c55e;
+    color: #fff;
+  }
+
+  .btn-check:hover {
+    background: #16a34a;
+  }
+
+  .status-correct {
+    border-color: #22c55e;
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .status-wrong {
+    border-color: #ef4444;
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .final-gray {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    color: #9ca3af;
+  }
+
+  .final-remainder-blue {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: #1e3a8a;
+  }
+
+  .remainder-label-final-gray {
+    color: #9ca3af;
+  }
+
+  .celebration-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 999;
+  }
+
+  .confetti {
+    position: absolute;
+    width: 10px;
+    height: 16px;
+    border-radius: 2px;
+    opacity: 0.95;
+    animation: confettiFall 1800ms linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% {
+      transform: translateY(-18vh) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(112vh) rotate(540deg);
+      opacity: 0;
+    }
+  }
+
+  .col-header-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .plus-prefix {
+    font-family: 'Fredoka One', cursive;
+    color: var(--accent);
+    font-size: 1.15rem;
+  }
+
+  .hint {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  @media (max-width: 640px) {
+    body {
+      padding: 18px 10px 70px;
+    }
+
+    .number-input {
+      width: 140px;
+      font-size: 1.45rem;
+    }
+
+    th,
+    td {
+      min-width: 88px;
+      padding: 6px;
+    }
+
+    .remainder-cell {
+      min-width: 160px;
+      width: 160px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Division: Partial Products</h1>
+    <p class="subtitle">Build each subtraction step while tracking divisor multiples.</p>
+  </header>
+
+  <section class="card screen visible" id="setupScreen">
+    <p class="setup-label">Problem Setup</p>
+    <div class="setup-row" aria-label="Division problem setup">
+      <input id="dividendInput" class="number-input" type="text" inputmode="numeric" placeholder="Dividend" aria-label="Dividend">
+      <span class="division-symbol" aria-hidden="true"><span class="bar"></span></span>
+      <input id="divisorInput" class="number-input" type="text" inputmode="numeric" placeholder="Divisor" aria-label="Divisor">
+    </div>
+    <div class="actions">
+      <button id="setupBtn" class="btn btn-primary" type="button">Setup</button>
+    </div>
+  </section>
+
+  <section class="card screen" id="workScreen">
+    <div class="problem-display" aria-label="Problem display">
+      <div id="problemDividend" class="readonly-num">0</div>
+      <span class="division-symbol" aria-hidden="true"><span class="bar"></span></span>
+      <div id="problemDivisor" class="readonly-num">0</div>
+    </div>
+
+    <div class="matrix-wrap">
+      <table aria-label="Partial products division table">
+        <thead>
+          <tr id="headerRow"></tr>
+        </thead>
+        <tbody>
+          <tr id="bodyRow"></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="hint">Use whole numbers only. Click + to add another partial-product column.</p>
+    <div class="actions" style="margin-top: 12px;">
+      <button id="checkBtn" class="btn btn-check" type="button">Check</button>
+      <button id="backBtn" class="btn btn-outline" type="button">Back to setup</button>
+    </div>
+  </section>
+</div>
+
+<script>
+  const setupScreen = document.getElementById('setupScreen');
+  const workScreen = document.getElementById('workScreen');
+  const dividendInput = document.getElementById('dividendInput');
+  const divisorInput = document.getElementById('divisorInput');
+  const problemDividend = document.getElementById('problemDividend');
+  const problemDivisor = document.getElementById('problemDivisor');
+  const headerRow = document.getElementById('headerRow');
+  const bodyRow = document.getElementById('bodyRow');
+  const setupBtn = document.getElementById('setupBtn');
+  const backBtn = document.getElementById('backBtn');
+  const checkBtn = document.getElementById('checkBtn');
+
+  const DIGITS_ONLY = /[^0-9]/g;
+
+  const state = {
+    dividend: 0,
+    divisor: 0,
+    rowLabel: '',
+    currentMinuend: 0,
+    remainderValue: '',
+    checkPassed: false,
+    completionShown: false,
+    columns: [
+      { header: '', multiple: '', showPlusPrefix: false }
+    ]
+  };
+
+  function clearCompletionStyles() {
+    const finalized = workScreen.querySelectorAll('.final-gray, .final-remainder-blue, .remainder-label-final-gray');
+    finalized.forEach(function (el) {
+      el.classList.remove('final-gray');
+      el.classList.remove('final-remainder-blue');
+      el.classList.remove('remainder-label-final-gray');
+    });
+    state.completionShown = false;
+    document.querySelectorAll('.celebration-layer').forEach(function (layer) {
+      layer.remove();
+    });
+  }
+
+  function playCelebration() {
+    const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+    const layer = document.createElement('div');
+    layer.className = 'celebration-layer';
+
+    for (let i = 0; i < 80; i++) {
+      const piece = document.createElement('span');
+      piece.className = 'confetti';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDelay = (Math.random() * 300) + 'ms';
+      piece.style.animationDuration = (1400 + Math.random() * 900) + 'ms';
+      layer.appendChild(piece);
+    }
+
+    document.body.appendChild(layer);
+    window.setTimeout(function () {
+      layer.remove();
+    }, 2600);
+  }
+
+  function applyFinalRemainderState(remainderNumber) {
+    const rowInput = document.getElementById('rowLabelInput');
+    if (rowInput) {
+      rowInput.classList.remove('status-correct', 'status-wrong');
+      rowInput.classList.add('final-gray');
+    }
+
+    state.columns.forEach(function (_, index) {
+      const headerInput = document.getElementById('colHeader-' + index);
+      const valueInput = document.getElementById('colValue-' + index);
+
+      if (headerInput) {
+        headerInput.classList.remove('final-gray', 'status-wrong');
+        headerInput.classList.add('status-correct');
+      }
+
+      if (valueInput) {
+        valueInput.classList.remove('status-correct', 'status-wrong');
+        valueInput.classList.add('final-gray');
+      }
+    });
+
+    const remainderInput = document.getElementById('remainderInput');
+    const remainderLabel = document.getElementById('remainderLabel');
+    if (remainderInput) {
+      remainderInput.classList.remove('status-correct', 'status-wrong');
+      if (remainderNumber === 0) {
+        remainderInput.classList.add('final-gray');
+      } else {
+        remainderInput.classList.add('final-remainder-blue');
+      }
+    }
+
+    if (remainderLabel && remainderNumber === 0) {
+      remainderLabel.classList.add('remainder-label-final-gray');
+    }
+
+    if (!state.completionShown) {
+      playCelebration();
+      state.completionShown = true;
+    }
+  }
+
+  function clearValidationStyles() {
+    const fields = workScreen.querySelectorAll('.status-correct, .status-wrong');
+    fields.forEach(function (field) {
+      field.classList.remove('status-correct');
+      field.classList.remove('status-wrong');
+    });
+  }
+
+  function applyStatus(input, status) {
+    input.classList.remove('status-correct', 'status-wrong');
+    if (status === 'correct') {
+      input.classList.add('status-correct');
+    }
+    if (status === 'wrong') {
+      input.classList.add('status-wrong');
+    }
+  }
+
+  function updateAddButton() {
+    const addBtn = document.getElementById('addColBtn');
+    if (addBtn) {
+      const remainderRaw = sanitizeToDigits(state.remainderValue);
+      const hasRemainder = remainderRaw !== '';
+      const remainderIsSmall = hasRemainder && Number(remainderRaw) < state.divisor;
+      addBtn.disabled = !state.checkPassed || remainderIsSmall;
+    }
+  }
+
+  function markDirty() {
+    state.checkPassed = false;
+    clearCompletionStyles();
+    clearValidationStyles();
+    updateAddButton();
+  }
+
+  function sanitizeToDigits(value) {
+    return value.replace(DIGITS_ONLY, '');
+  }
+
+  function normalizeInputTarget(event) {
+    event.target.value = sanitizeToDigits(event.target.value);
+  }
+
+  function remainderExpression() {
+    const lastColumn = state.columns[state.columns.length - 1];
+    const multiple = lastColumn.multiple !== '' ? lastColumn.multiple : '?';
+    return state.currentMinuend + ' - ' + multiple + ' =';
+  }
+
+  function addColumn() {
+    if (!state.checkPassed) {
+      return;
+    }
+
+    const remainderRaw = sanitizeToDigits(state.remainderValue);
+    if (remainderRaw !== '') {
+      state.currentMinuend = Number(remainderRaw);
+    }
+
+    state.remainderValue = '';
+    state.checkPassed = false;
+    state.columns.push({ header: '', multiple: '', showPlusPrefix: true });
+    renderTable();
+  }
+
+  function buildHeaderCell(column, index) {
+    const th = document.createElement('th');
+    const wrap = document.createElement('div');
+    wrap.className = 'col-header-wrap';
+
+    if (column.showPlusPrefix) {
+      const plus = document.createElement('span');
+      plus.className = 'plus-prefix';
+      plus.textContent = '+';
+      wrap.appendChild(plus);
+    }
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.placeholder = '?';
+    input.className = 'head-field';
+    input.id = 'colHeader-' + index;
+    input.value = column.header;
+    input.setAttribute('aria-label', 'Column header ' + (index + 1));
+    input.addEventListener('input', function (event) {
+      const cleaned = sanitizeToDigits(event.target.value);
+      event.target.value = cleaned;
+      state.columns[index].header = cleaned;
+      markDirty();
+    });
+
+    wrap.appendChild(input);
+    th.appendChild(wrap);
+    return th;
+  }
+
+  function buildBodyCell(column, index) {
+    const td = document.createElement('td');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.inputMode = 'numeric';
+    input.placeholder = '?';
+    input.className = 'cell-field';
+    input.id = 'colValue-' + index;
+    input.value = column.multiple;
+    input.setAttribute('aria-label', 'Partial product cell ' + (index + 1));
+    input.addEventListener('input', function (event) {
+      const cleaned = sanitizeToDigits(event.target.value);
+      event.target.value = cleaned;
+      state.columns[index].multiple = cleaned;
+      renderRemainderLabel();
+      markDirty();
+    });
+
+    td.appendChild(input);
+    return td;
+  }
+
+  function renderRemainderLabel() {
+    const label = document.getElementById('remainderLabel');
+    if (label) {
+      label.textContent = remainderExpression();
+    }
+  }
+
+  function renderTable() {
+    headerRow.innerHTML = '';
+    bodyRow.innerHTML = '';
+
+    const corner = document.createElement('th');
+    corner.className = 'corner';
+    corner.textContent = '';
+    headerRow.appendChild(corner);
+
+    state.columns.forEach(function (column, index) {
+      headerRow.appendChild(buildHeaderCell(column, index));
+    });
+
+    const addHeader = document.createElement('th');
+    addHeader.className = 'add-col';
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'add-btn';
+    addBtn.id = 'addColBtn';
+    addBtn.setAttribute('aria-label', 'Add new column');
+    addBtn.textContent = '+';
+    addBtn.addEventListener('click', addColumn);
+    addHeader.appendChild(addBtn);
+    headerRow.appendChild(addHeader);
+
+    const remainderHeader = document.createElement('th');
+    remainderHeader.textContent = 'Remainder';
+    headerRow.appendChild(remainderHeader);
+
+    const rowLabelCell = document.createElement('th');
+    rowLabelCell.className = 'row-label-cell';
+    const rowInput = document.createElement('input');
+    rowInput.type = 'text';
+    rowInput.inputMode = 'numeric';
+    rowInput.placeholder = '?';
+    rowInput.className = 'row-field';
+    rowInput.id = 'rowLabelInput';
+    rowInput.value = state.rowLabel;
+    rowInput.setAttribute('aria-label', 'Row label');
+    rowInput.addEventListener('input', function (event) {
+      const cleaned = sanitizeToDigits(event.target.value);
+      event.target.value = cleaned;
+      state.rowLabel = cleaned;
+      markDirty();
+    });
+    rowLabelCell.appendChild(rowInput);
+    bodyRow.appendChild(rowLabelCell);
+
+    state.columns.forEach(function (column, index) {
+      bodyRow.appendChild(buildBodyCell(column, index));
+    });
+
+    const addBody = document.createElement('td');
+    addBody.className = 'add-cell';
+    bodyRow.appendChild(addBody);
+
+    const remainderCell = document.createElement('td');
+    remainderCell.className = 'remainder-cell';
+
+    const remainderWrap = document.createElement('div');
+    remainderWrap.className = 'remainder-content';
+
+    const remainderLabel = document.createElement('span');
+    remainderLabel.className = 'remainder-label';
+    remainderLabel.id = 'remainderLabel';
+    remainderLabel.textContent = remainderExpression();
+
+    const equalsSpacer = document.createElement('span');
+    equalsSpacer.setAttribute('aria-hidden', 'true');
+    equalsSpacer.textContent = ' ';
+
+    const remainderInput = document.createElement('input');
+    remainderInput.type = 'text';
+    remainderInput.inputMode = 'numeric';
+    remainderInput.placeholder = '?';
+    remainderInput.className = 'remainder-field';
+    remainderInput.id = 'remainderInput';
+    remainderInput.value = state.remainderValue;
+    remainderInput.setAttribute('aria-label', 'Remainder value');
+    remainderInput.addEventListener('input', function (event) {
+      const cleaned = sanitizeToDigits(event.target.value);
+      event.target.value = cleaned;
+      state.remainderValue = cleaned;
+      markDirty();
+    });
+
+    remainderWrap.appendChild(remainderLabel);
+    remainderWrap.appendChild(equalsSpacer);
+    remainderWrap.appendChild(remainderInput);
+    remainderCell.appendChild(remainderWrap);
+    bodyRow.appendChild(remainderCell);
+
+    updateAddButton();
+  }
+
+  function runCheck() {
+    clearCompletionStyles();
+    clearValidationStyles();
+
+    let allGreen = true;
+
+    const rowInput = document.getElementById('rowLabelInput');
+    const rowValue = rowInput ? sanitizeToDigits(rowInput.value) : '';
+    if (rowInput) {
+      if (rowValue === '') {
+        allGreen = false;
+      } else if (Number(rowValue) === state.divisor) {
+        applyStatus(rowInput, 'correct');
+      } else {
+        applyStatus(rowInput, 'wrong');
+        allGreen = false;
+      }
+    }
+
+    const lastIndex = state.columns.length - 1;
+    let lastPairCompleteAndCorrect = false;
+    let lastMultipleValue = null;
+
+    state.columns.forEach(function (column, index) {
+      const headerInput = document.getElementById('colHeader-' + index);
+      const valueInput = document.getElementById('colValue-' + index);
+
+      const headerValue = headerInput ? sanitizeToDigits(headerInput.value) : '';
+      const multipleValue = valueInput ? sanitizeToDigits(valueInput.value) : '';
+
+      const bothFilled = headerValue !== '' && multipleValue !== '';
+      if (!bothFilled) {
+        allGreen = false;
+        return;
+      }
+
+      const expected = Number(headerValue) * state.divisor;
+      const actual = Number(multipleValue);
+      const correct = expected === actual;
+
+      if (correct) {
+        applyStatus(headerInput, 'correct');
+        applyStatus(valueInput, 'correct');
+      } else {
+        applyStatus(headerInput, 'wrong');
+        applyStatus(valueInput, 'wrong');
+        allGreen = false;
+      }
+
+      if (index === lastIndex) {
+        lastPairCompleteAndCorrect = correct;
+        lastMultipleValue = actual;
+      }
+    });
+
+    const remainderInput = document.getElementById('remainderInput');
+    const remainderValue = remainderInput ? sanitizeToDigits(remainderInput.value) : '';
+    let remainderNumber = null;
+    if (remainderInput) {
+      if (remainderValue === '') {
+        allGreen = false;
+      } else if (lastPairCompleteAndCorrect) {
+        const expectedRemainder = state.currentMinuend - lastMultipleValue;
+        remainderNumber = Number(remainderValue);
+        if (remainderNumber === expectedRemainder) {
+          applyStatus(remainderInput, 'correct');
+        } else {
+          applyStatus(remainderInput, 'wrong');
+          allGreen = false;
+        }
+      } else {
+        allGreen = false;
+      }
+    }
+
+    state.checkPassed = allGreen;
+
+    if (allGreen && remainderNumber !== null && remainderNumber < state.divisor) {
+      applyFinalRemainderState(remainderNumber);
+    }
+    updateAddButton();
+  }
+
+  function resetStateForProblem(dividend, divisor) {
+    state.dividend = dividend;
+    state.divisor = divisor;
+    state.rowLabel = '';
+    state.currentMinuend = dividend;
+    state.remainderValue = '';
+    state.checkPassed = false;
+    state.completionShown = false;
+    state.columns = [
+      { header: '', multiple: '', showPlusPrefix: false }
+    ];
+  }
+
+  function startProblem() {
+    const rawDividend = sanitizeToDigits(dividendInput.value);
+    const rawDivisor = sanitizeToDigits(divisorInput.value);
+
+    if (rawDividend === '' || rawDivisor === '' || Number(rawDivisor) === 0) {
+      return;
+    }
+
+    const dividend = Number(rawDividend);
+    const divisor = Number(rawDivisor);
+
+    resetStateForProblem(dividend, divisor);
+
+    problemDividend.textContent = String(dividend);
+    problemDivisor.textContent = String(divisor);
+
+    renderTable();
+
+    setupScreen.classList.remove('visible');
+    workScreen.classList.add('visible');
+  }
+
+  function goBackToSetup() {
+    clearCompletionStyles();
+    workScreen.classList.remove('visible');
+    setupScreen.classList.add('visible');
+  }
+
+  [dividendInput, divisorInput].forEach(function (input) {
+    input.addEventListener('input', normalizeInputTarget);
+  });
+
+  setupBtn.addEventListener('click', startProblem);
+  checkBtn.addEventListener('click', runCheck);
+  backBtn.addEventListener('click', goBackToSetup);
+</script>
+</body>
+</html>

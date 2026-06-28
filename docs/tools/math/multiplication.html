@@ -73,10 +73,11 @@
   }
 
   .setup-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
   .label {
@@ -104,7 +105,7 @@
 
   .main-input {
     width: 100%;
-    max-width: 220px;
+    max-width: 180px;
     border: 2px solid var(--border);
     border-radius: 12px;
     background: var(--input-bg);
@@ -262,6 +263,67 @@
     color: #991b1b;
   }
 
+  .problem-card.completed .decomp-input,
+  .problem-card.completed .decomp-input.status-correct {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    color: #9ca3af;
+  }
+
+  .problem-card.completed .product-cell,
+  .problem-card.completed .product-cell.status-correct {
+    background: var(--correct-light);
+    border-color: var(--correct);
+    color: #14532d;
+    font-size: 1.2rem;
+    font-weight: 900;
+    box-shadow: 0 10px 24px rgba(34, 197, 94, 0.22);
+    transform: scale(1.04);
+    animation: productPulse 900ms ease-in-out 2;
+  }
+
+  .problem-card.completed .model-input {
+    cursor: default;
+  }
+
+  .celebration-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 999;
+  }
+
+  .confetti {
+    position: absolute;
+    width: 10px;
+    height: 16px;
+    border-radius: 2px;
+    opacity: 0.95;
+    animation: confettiFall 1800ms linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0% {
+      transform: translateY(-18vh) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(112vh) rotate(540deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes productPulse {
+    0%,
+    100% {
+      transform: scale(1.04);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+  }
+
   @media (max-width: 640px) {
     h1 {
       font-size: 1.75rem;
@@ -269,7 +331,7 @@
 
     .main-input {
       font-size: 1.7rem;
-      max-width: 180px;
+      max-width: 140px;
     }
 
     .corner-cell,
@@ -303,19 +365,9 @@
 
     <section class="card" id="setupCard">
       <div class="setup-grid">
-        <div>
-          <div class="label">First number</div>
-          <div class="input-row">
-            <input id="inputTop" class="main-input" type="text" inputmode="numeric" placeholder="123" autocomplete="off">
-          </div>
-        </div>
-        <div>
-          <div class="label">Second number</div>
-          <div class="input-row">
-            <div class="op">×</div>
-            <input id="inputBot" class="main-input" type="text" inputmode="numeric" placeholder="45" autocomplete="off">
-          </div>
-        </div>
+        <input id="inputTop" class="main-input" type="text" inputmode="numeric" placeholder="123" autocomplete="off" aria-label="First number">
+        <div class="op" aria-hidden="true">×</div>
+        <input id="inputBot" class="main-input" type="text" inputmode="numeric" placeholder="45" autocomplete="off" aria-label="Second number">
       </div>
       <div class="actions">
         <button class="btn btn-primary" onclick="buildProblem()">Set Up</button>
@@ -345,6 +397,7 @@
   let cellExpected = [];
   let cols = 0;
   let rows = 0;
+  let isCompleted = false;
 
   function isWholeNumberString(value) {
     return /^\d+$/.test(value);
@@ -406,6 +459,8 @@
   function renderAreaModel() {
     const grid = document.getElementById('areaGrid');
     grid.innerHTML = '';
+    isCompleted = false;
+    document.getElementById('problemCard').classList.remove('completed');
 
     grid.style.gridTemplateColumns = '78px repeat(' + cols + ', 112px)';
     grid.style.gridAutoRows = '54px';
@@ -484,6 +539,10 @@
   }
 
   function checkAnswer() {
+    if (isCompleted) {
+      return;
+    }
+
     let checkedCount = 0;
     let correctCount = 0;
 
@@ -517,9 +576,63 @@
     if (checkedCount === 0) {
       return;
     }
+
+    const totalInputs = cols + rows + (rows * cols);
+    if (checkedCount === totalInputs && correctCount === totalInputs) {
+      finalizeCompletedState();
+    }
+  }
+
+  function finalizeCompletedState() {
+    const problemCard = document.getElementById('problemCard');
+    const allInputs = problemCard.querySelectorAll('.model-input');
+
+    allInputs.forEach(function(input) {
+      input.readOnly = true;
+      input.setAttribute('aria-readonly', 'true');
+    });
+
+    isCompleted = true;
+    problemCard.classList.add('completed');
+    playCelebration();
+  }
+
+  function playCelebration() {
+    const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+    const layer = document.createElement('div');
+    layer.className = 'celebration-layer';
+
+    for (let i = 0; i < 80; i++) {
+      const piece = document.createElement('span');
+      piece.className = 'confetti';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDelay = (Math.random() * 300) + 'ms';
+      piece.style.animationDuration = (1400 + Math.random() * 900) + 'ms';
+      layer.appendChild(piece);
+    }
+
+    document.body.appendChild(layer);
+    window.setTimeout(function() {
+      layer.remove();
+    }, 2600);
   }
 
   function resetTool() {
+    const problemCard = document.getElementById('problemCard');
+    problemCard.classList.remove('completed');
+    isCompleted = false;
+
+    const allInputs = problemCard.querySelectorAll('.model-input');
+    allInputs.forEach(function(input) {
+      input.readOnly = false;
+      input.removeAttribute('aria-readonly');
+    });
+
+    document.querySelectorAll('.celebration-layer').forEach(function(layer) {
+      layer.remove();
+    });
+
     document.getElementById('problemCard').classList.remove('visible');
     document.getElementById('setupCard').style.display = '';
     document.getElementById('inputTop').value = '';

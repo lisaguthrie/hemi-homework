@@ -73,10 +73,11 @@
   }
 
   .setup-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
   .label {
@@ -104,7 +105,7 @@
 
   .main-input {
     width: 100%;
-    max-width: 220px;
+    max-width: 180px;
     border: 2px solid var(--border);
     border-radius: 12px;
     background: var(--input-bg);
@@ -330,7 +331,7 @@
 
     .main-input {
       font-size: 1.7rem;
-      max-width: 180px;
+      max-width: 140px;
     }
 
     .corner-cell,
@@ -364,19 +365,9 @@
 
     <section class="card" id="setupCard">
       <div class="setup-grid">
-        <div>
-          <div class="label">First number</div>
-          <div class="input-row">
-            <input id="inputTop" class="main-input" type="text" inputmode="numeric" placeholder="123" autocomplete="off">
-          </div>
-        </div>
-        <div>
-          <div class="label">Second number</div>
-          <div class="input-row">
-            <div class="op">×</div>
-            <input id="inputBot" class="main-input" type="text" inputmode="numeric" placeholder="45" autocomplete="off">
-          </div>
-        </div>
+        <input id="inputTop" class="main-input" type="text" inputmode="numeric" placeholder="123" autocomplete="off" aria-label="First number">
+        <div class="op" aria-hidden="true">×</div>
+        <input id="inputBot" class="main-input" type="text" inputmode="numeric" placeholder="45" autocomplete="off" aria-label="Second number">
       </div>
       <div class="actions">
         <button class="btn btn-primary" onclick="buildProblem()">Set Up</button>
