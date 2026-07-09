@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Division Partial Products Tool</title>
+<title>Division Tool</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -64,6 +64,41 @@
     box-shadow: 0 6px 28px rgba(59, 125, 216, 0.12);
     padding: 22px;
     margin-bottom: 16px;
+  }
+
+  .work-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 240px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .work-main {
+    margin-bottom: 0;
+  }
+
+  .subtraction-card {
+    margin-bottom: 0;
+    min-height: 100%;
+  }
+
+  .subtraction-title {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .subtraction-track {
+    white-space: pre;
+    margin: 0;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 1.22rem;
+    line-height: 1.25;
+    color: var(--text);
+    min-height: 180px;
   }
 
   .screen {
@@ -206,6 +241,58 @@
     line-height: 1;
     padding: 10px 14px;
     text-align: center;
+  }
+
+  .quick-products {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .quick-product {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .qp-label {
+    font-family: 'Fredoka One', cursive;
+    color: var(--accent);
+    font-size: 1.05rem;
+  }
+
+  .qp-field {
+    width: 6ch;
+    min-width: 6ch;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--input-bg);
+    color: var(--text);
+    padding: 8px 6px;
+    text-align: center;
+    font-weight: 900;
+    font-size: 1rem;
+    outline: none;
+  }
+
+  .qp-inline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2ch;
+    color: var(--accent);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+
+  .qp-field:focus {
+    border-color: var(--accent);
+    background: #fff;
   }
 
   .matrix-wrap {
@@ -433,6 +520,15 @@
       padding: 18px 10px 70px;
     }
 
+    .work-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .subtraction-track {
+      min-height: 120px;
+      font-size: 1.1rem;
+    }
+
     .number-input {
       width: 140px;
       font-size: 1.45rem;
@@ -454,7 +550,7 @@
 <body>
 <div class="app">
   <header>
-    <h1>Division: Partial Products</h1>
+    <h1>Division</h1>
     <p class="subtitle">Build each subtraction step while tracking divisor multiples.</p>
   </header>
 
@@ -470,28 +566,53 @@
     </div>
   </section>
 
-  <section class="card screen" id="workScreen">
-    <div class="problem-display" aria-label="Problem display">
-      <div id="problemDividend" class="readonly-num">0</div>
-      <span class="division-symbol" aria-hidden="true"><span class="bar"></span></span>
-      <div id="problemDivisor" class="readonly-num">0</div>
-    </div>
+  <section class="screen" id="workScreen">
+    <div class="work-layout">
+      <div class="card work-main">
+        <div class="problem-display" aria-label="Problem display">
+          <div id="problemDividend" class="readonly-num">0</div>
+          <span class="division-symbol" aria-hidden="true"><span class="bar"></span></span>
+          <div id="problemDivisor" class="readonly-num">0</div>
+        </div>
 
-    <div class="matrix-wrap">
-      <table aria-label="Partial products division table">
-        <thead>
-          <tr id="headerRow"></tr>
-        </thead>
-        <tbody>
-          <tr id="bodyRow"></tr>
-        </tbody>
-      </table>
-    </div>
+        <div class="quick-products" aria-label="Partial quotient helper line">
+          <label class="quick-product" for="tenProductInput">
+            <span class="qp-label">10 x</span>
+            <span id="tenDivisorValue" class="qp-inline" aria-label="Divisor for 10 times">0</span>
+            <span>=</span>
+            <input id="tenProductInput" class="qp-field" type="text" inputmode="numeric" placeholder="?" aria-label="Product for 10 times divisor">
+          </label>
 
-    <p class="hint">Use whole numbers only. Click + to add another partial-product column.</p>
-    <div class="actions" style="margin-top: 12px;">
-      <button id="checkBtn" class="btn btn-check" type="button">Check</button>
-      <button id="backBtn" class="btn btn-outline" type="button">Back to setup</button>
+          <label class="quick-product" for="fiveProductInput">
+            <span class="qp-label">5 x</span>
+            <span id="fiveDivisorValue" class="qp-inline" aria-label="Divisor for 5 times">0</span>
+            <span>=</span>
+            <input id="fiveProductInput" class="qp-field" type="text" inputmode="numeric" placeholder="?" aria-label="Product for 5 times divisor">
+          </label>
+        </div>
+
+        <div class="matrix-wrap">
+          <table aria-label="Partial products division table">
+            <thead>
+              <tr id="headerRow"></tr>
+            </thead>
+            <tbody>
+              <tr id="bodyRow"></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="hint">Use whole numbers only. Click + to add another partial-product column.</p>
+        <div class="actions" style="margin-top: 12px;">
+          <button id="checkBtn" class="btn btn-check" type="button">Check</button>
+          <button id="backBtn" class="btn btn-outline" type="button">Back to setup</button>
+        </div>
+      </div>
+
+      <aside class="card subtraction-card" aria-live="polite">
+        <p class="subtraction-title">Subtraction Track</p>
+        <pre id="subtractionTrack" class="subtraction-track">0</pre>
+      </aside>
     </div>
   </section>
 </div>
@@ -508,6 +629,11 @@
   const setupBtn = document.getElementById('setupBtn');
   const backBtn = document.getElementById('backBtn');
   const checkBtn = document.getElementById('checkBtn');
+  const subtractionTrack = document.getElementById('subtractionTrack');
+  const fiveDivisorValue = document.getElementById('fiveDivisorValue');
+  const fiveProductInput = document.getElementById('fiveProductInput');
+  const tenDivisorValue = document.getElementById('tenDivisorValue');
+  const tenProductInput = document.getElementById('tenProductInput');
 
   const DIGITS_ONLY = /[^0-9]/g;
 
@@ -519,10 +645,67 @@
     remainderValue: '',
     checkPassed: false,
     completionShown: false,
+    subtractionSteps: [],
+    previewStep: null,
     columns: [
       { header: '', multiple: '', showPlusPrefix: false }
     ]
   };
+
+  function renderSubtractionTrack() {
+    if (!subtractionTrack) {
+      return;
+    }
+
+    const stepsToRender = state.subtractionSteps.slice();
+    if (state.previewStep) {
+      stepsToRender.push(state.previewStep);
+    }
+
+    if (stepsToRender.length === 0) {
+      subtractionTrack.textContent = String(state.dividend);
+      return;
+    }
+
+    const resolvedSteps = [];
+    let runningMinuend = state.dividend;
+    stepsToRender.forEach(function (step) {
+      const subtrahendNumber = Number(step.subtrahend);
+      const enteredRemainder = step.remainder === null || step.remainder === undefined
+        ? null
+        : Number(step.remainder);
+      const resolved = {
+        minuend: runningMinuend,
+        subtrahend: subtrahendNumber,
+        remainder: enteredRemainder
+      };
+      resolvedSteps.push(resolved);
+
+      if (enteredRemainder !== null) {
+        runningMinuend = enteredRemainder;
+      }
+    });
+
+    let width = String(state.dividend).length;
+    resolvedSteps.forEach(function (step) {
+      width = Math.max(width, String(step.minuend).length);
+      width = Math.max(width, String(step.subtrahend).length + 1);
+      if (step.remainder !== null && step.remainder !== undefined) {
+        width = Math.max(width, String(step.remainder).length);
+      }
+    });
+
+    const lines = [String(state.dividend).padStart(width, ' ')];
+    resolvedSteps.forEach(function (step) {
+      lines.push('-' + String(step.subtrahend).padStart(width - 1, ' '));
+      lines.push('-'.repeat(width + 1));
+      if (step.remainder !== null && step.remainder !== undefined) {
+        lines.push(String(step.remainder).padStart(width, ' '));
+      }
+    });
+
+    subtractionTrack.textContent = lines.join('\n');
+  }
 
   function clearCompletionStyles() {
     const finalized = workScreen.querySelectorAll('.final-gray, .final-remainder-blue, .remainder-label-final-gray');
@@ -622,6 +805,13 @@
   function updateAddButton() {
     const addBtn = document.getElementById('addColBtn');
     if (addBtn) {
+      if (state.columns.length === 0) {
+        const rowRaw = sanitizeToDigits(state.rowLabel);
+        const divisorReady = rowRaw !== '' && Number(rowRaw) === state.divisor;
+        addBtn.disabled = !divisorReady;
+        return;
+      }
+
       const remainderRaw = sanitizeToDigits(state.remainderValue);
       const hasRemainder = remainderRaw !== '';
       const remainderIsSmall = hasRemainder && Number(remainderRaw) < state.divisor;
@@ -629,10 +819,19 @@
     }
   }
 
-  function markDirty() {
+  function markDirty(clearPreview) {
+    const shouldClearPreview = clearPreview !== false;
     state.checkPassed = false;
+    if (shouldClearPreview) {
+      state.previewStep = null;
+    }
+    const maxStableSteps = Math.max(0, state.columns.length - 1);
+    if (state.subtractionSteps.length > maxStableSteps) {
+      state.subtractionSteps = state.subtractionSteps.slice(0, maxStableSteps);
+    }
     clearCompletionStyles();
     clearValidationStyles();
+    renderSubtractionTrack();
     updateAddButton();
   }
 
@@ -646,11 +845,23 @@
 
   function remainderExpression() {
     const lastColumn = state.columns[state.columns.length - 1];
-    const multiple = lastColumn.multiple !== '' ? lastColumn.multiple : '?';
+    const multiple = lastColumn && lastColumn.multiple !== '' ? lastColumn.multiple : '?';
     return state.currentMinuend + ' - ' + multiple + ' =';
   }
 
   function addColumn() {
+    if (state.columns.length === 0) {
+      const rowRaw = sanitizeToDigits(state.rowLabel);
+      if (rowRaw === '' || Number(rowRaw) !== state.divisor) {
+        return;
+      }
+
+      state.columns.push({ header: '', multiple: '', showPlusPrefix: false });
+      state.checkPassed = false;
+      renderTable();
+      return;
+    }
+
     if (!state.checkPassed) {
       return;
     }
@@ -662,8 +873,10 @@
 
     state.remainderValue = '';
     state.checkPassed = false;
+    state.previewStep = null;
     state.columns.push({ header: '', multiple: '', showPlusPrefix: true });
     renderTable();
+    renderSubtractionTrack();
   }
 
   function buildHeaderCell(column, index) {
@@ -786,37 +999,43 @@
     const remainderCell = document.createElement('td');
     remainderCell.className = 'remainder-cell';
 
-    const remainderWrap = document.createElement('div');
-    remainderWrap.className = 'remainder-content';
+    if (state.columns.length > 0) {
+      const remainderWrap = document.createElement('div');
+      remainderWrap.className = 'remainder-content';
 
-    const remainderLabel = document.createElement('span');
-    remainderLabel.className = 'remainder-label';
-    remainderLabel.id = 'remainderLabel';
-    remainderLabel.textContent = remainderExpression();
+      const remainderLabel = document.createElement('span');
+      remainderLabel.className = 'remainder-label';
+      remainderLabel.id = 'remainderLabel';
+      remainderLabel.textContent = remainderExpression();
 
-    const equalsSpacer = document.createElement('span');
-    equalsSpacer.setAttribute('aria-hidden', 'true');
-    equalsSpacer.textContent = ' ';
+      const equalsSpacer = document.createElement('span');
+      equalsSpacer.setAttribute('aria-hidden', 'true');
+      equalsSpacer.textContent = ' ';
 
-    const remainderInput = document.createElement('input');
-    remainderInput.type = 'text';
-    remainderInput.inputMode = 'numeric';
-    remainderInput.placeholder = '?';
-    remainderInput.className = 'remainder-field';
-    remainderInput.id = 'remainderInput';
-    remainderInput.value = state.remainderValue;
-    remainderInput.setAttribute('aria-label', 'Remainder value');
-    remainderInput.addEventListener('input', function (event) {
-      const cleaned = sanitizeToDigits(event.target.value);
-      event.target.value = cleaned;
-      state.remainderValue = cleaned;
-      markDirty();
-    });
+      const remainderInput = document.createElement('input');
+      remainderInput.type = 'text';
+      remainderInput.inputMode = 'numeric';
+      remainderInput.placeholder = '?';
+      remainderInput.className = 'remainder-field';
+      remainderInput.id = 'remainderInput';
+      remainderInput.value = state.remainderValue;
+      remainderInput.setAttribute('aria-label', 'Remainder value');
+      remainderInput.addEventListener('input', function (event) {
+        const cleaned = sanitizeToDigits(event.target.value);
+        event.target.value = cleaned;
+        state.remainderValue = cleaned;
+        if (state.previewStep) {
+          state.previewStep.remainder = cleaned === '' ? null : Number(cleaned);
+        }
+        markDirty(false);
+      });
 
-    remainderWrap.appendChild(remainderLabel);
-    remainderWrap.appendChild(equalsSpacer);
-    remainderWrap.appendChild(remainderInput);
-    remainderCell.appendChild(remainderWrap);
+      remainderWrap.appendChild(remainderLabel);
+      remainderWrap.appendChild(equalsSpacer);
+      remainderWrap.appendChild(remainderInput);
+      remainderCell.appendChild(remainderWrap);
+    }
+
     bodyRow.appendChild(remainderCell);
 
     updateAddButton();
@@ -827,6 +1046,32 @@
     clearValidationStyles();
 
     let allGreen = true;
+
+    const quickChecks = [
+      {
+        input: fiveProductInput,
+        expected: state.divisor * 5
+      },
+      {
+        input: tenProductInput,
+        expected: state.divisor * 10
+      }
+    ];
+
+    quickChecks.forEach(function (item) {
+      const raw = item.input ? sanitizeToDigits(item.input.value) : '';
+      if (!item.input || raw === '') {
+        allGreen = false;
+        return;
+      }
+
+      if (Number(raw) === item.expected) {
+        applyStatus(item.input, 'correct');
+      } else {
+        applyStatus(item.input, 'wrong');
+        allGreen = false;
+      }
+    });
 
     const rowInput = document.getElementById('rowLabelInput');
     const rowValue = rowInput ? sanitizeToDigits(rowInput.value) : '';
@@ -897,7 +1142,29 @@
       }
     }
 
+    if (lastPairCompleteAndCorrect && lastMultipleValue !== null) {
+      state.previewStep = {
+        minuend: state.currentMinuend,
+        subtrahend: lastMultipleValue,
+        remainder: remainderValue === '' ? null : Number(remainderValue)
+      };
+    } else {
+      state.previewStep = null;
+    }
+
     state.checkPassed = allGreen;
+
+    if (allGreen && remainderNumber !== null && lastIndex >= 0) {
+      state.subtractionSteps[lastIndex] = {
+        minuend: state.currentMinuend,
+        subtrahend: lastMultipleValue,
+        remainder: remainderNumber
+      };
+      state.subtractionSteps = state.subtractionSteps.slice(0, lastIndex + 1);
+      state.previewStep = null;
+    }
+
+    renderSubtractionTrack();
 
     if (allGreen && remainderNumber !== null && remainderNumber < state.divisor) {
       applyFinalRemainderState(remainderNumber);
@@ -913,9 +1180,9 @@
     state.remainderValue = '';
     state.checkPassed = false;
     state.completionShown = false;
-    state.columns = [
-      { header: '', multiple: '', showPlusPrefix: false }
-    ];
+    state.subtractionSteps = [];
+    state.previewStep = null;
+    state.columns = [];
   }
 
   function startProblem() {
@@ -933,21 +1200,41 @@
 
     problemDividend.textContent = String(dividend);
     problemDivisor.textContent = String(divisor);
+    fiveDivisorValue.textContent = String(divisor);
+    fiveProductInput.value = '';
+    tenDivisorValue.textContent = String(divisor);
+    tenProductInput.value = '';
 
     renderTable();
+    renderSubtractionTrack();
 
     setupScreen.classList.remove('visible');
     workScreen.classList.add('visible');
   }
 
   function goBackToSetup() {
+    const wasCompleted = state.completionShown;
     clearCompletionStyles();
     workScreen.classList.remove('visible');
     setupScreen.classList.add('visible');
+    if (wasCompleted) {
+      dividendInput.value = '';
+      divisorInput.value = '';
+    }
   }
 
   [dividendInput, divisorInput].forEach(function (input) {
     input.addEventListener('input', normalizeInputTarget);
+  });
+
+  [fiveProductInput, tenProductInput].forEach(function (input) {
+    input.addEventListener('input', function (event) {
+      normalizeInputTarget(event);
+      clearCompletionStyles();
+      clearValidationStyles();
+      state.checkPassed = false;
+      updateAddButton();
+    });
   });
 
   setupBtn.addEventListener('click', startProblem);

@@ -7,7 +7,8 @@
     "build": "python runners/cli.py",
     "watch": "python runners/watcher.py",
     "propagate": "python runners/propagate.py",
-    "publish": "python runners/publish.py"
+    "publish": "python runners/publish.py",
+    "install-hooks": ".githooks\\install-hooks.cmd"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

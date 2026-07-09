@@ -1,0 +1,20 @@
+#!/bin/sh
+set -e
+
+# Resolve child without committing it to the repo.
+# Priority: PUBLISH_CHILD env var -> local git config hooks.child -> DEFAULT_CHILD env var.
+CHILD="${PUBLISH_CHILD:-$(git config --get hooks.child || true)}"
+if [ -z "$CHILD" ]; then
+	CHILD="${DEFAULT_CHILD:-}"
+fi
+if [ -z "$CHILD" ]; then
+	echo "Missing child. Set one with: git config --local hooks.child <name>"
+	echo "Or set env var PUBLISH_CHILD (or DEFAULT_CHILD)."
+	exit 1
+fi
+
+# Rebuild docs pages for the configured child before each commit.
+python runners/publish.py --child "$CHILD"
+
+# Include regenerated docs files in the same commit.
+git add docs/

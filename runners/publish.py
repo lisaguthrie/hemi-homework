@@ -99,7 +99,7 @@ def regenerate_index(docs_files: list[Path], has_archive: bool = False) -> None:
 </html>"""
     index_path = WORKSHEETS_DOCS_DIR / "index.html"
     index_path.write_text(html, encoding="utf8")
-    print(f"📄 Index written: {index_path.relative_to(ROOT).as_posix()}")
+    print(f"[INFO] Index written: {index_path.relative_to(ROOT).as_posix()}")
 
 
 def regenerate_archive_index(archive_files: list[Path]) -> None:
@@ -134,7 +134,7 @@ def regenerate_archive_index(archive_files: list[Path]) -> None:
 </html>"""
     archive_index = WORKSHEETS_DOCS_DIR / "archive" / "index.html"
     archive_index.write_text(html, encoding="utf8")
-    print(f"📄 Archive index written: {archive_index.relative_to(ROOT).as_posix()}")
+    print(f"[INFO] Archive index written: {archive_index.relative_to(ROOT).as_posix()}")
 
 
 def regenerate_activities_index(activity_html_files: list[Path], has_archive: bool = False) -> None:
@@ -176,7 +176,7 @@ def regenerate_activities_index(activity_html_files: list[Path], has_archive: bo
     index_path = ACTIVITIES_DOCS_DIR / "index.html"
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(html, encoding="utf8")
-    print(f"📄 Activities index written: {index_path.relative_to(ROOT).as_posix()}")
+    print(f"[INFO] Activities index written: {index_path.relative_to(ROOT).as_posix()}")
 
 
 def regenerate_activities_archive_index(archive_files: list[Path]) -> None:
@@ -216,7 +216,7 @@ def regenerate_activities_archive_index(archive_files: list[Path]) -> None:
     archive_index = ACTIVITIES_DOCS_DIR / "archive" / "index.html"
     archive_index.parent.mkdir(parents=True, exist_ok=True)
     archive_index.write_text(html, encoding="utf8")
-    print(f"📄 Activities archive index written: {archive_index.relative_to(ROOT).as_posix()}")
+    print(f"[INFO] Activities archive index written: {archive_index.relative_to(ROOT).as_posix()}")
 
 
 def commit_and_push(root: Path) -> None:
@@ -228,10 +228,10 @@ def commit_and_push(root: Path) -> None:
     try:
         for command in commands:
             subprocess.run(command, check=True, capture_output=True, text=True)
-        print("🚀 Committed and pushed docs/")
+        print("[INFO] Committed and pushed docs/")
     except subprocess.CalledProcessError as error:
         message = error.stderr.strip() or error.stdout.strip() or str(error)
-        print(f"⚠️  Git operation failed: {message}", file=sys.stderr)
+        print(f"[WARN] Git operation failed: {message}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -267,18 +267,18 @@ def main() -> int:
 
     child = args.child or os.environ.get("DEFAULT_CHILD")
     if not child:
-        print("❌ Child name required: pass --child <name> or set DEFAULT_CHILD env var.", file=sys.stderr)
+        print("[ERROR] Child name required: pass --child <name> or set DEFAULT_CHILD env var.", file=sys.stderr)
         return 1
 
     source_dir = ROOT / "worksheets" / child
 
     if not source_dir.exists():
-        print(f"❌ Source directory not found: {source_dir}", file=sys.stderr)
+        print(f"[ERROR] Source directory not found: {source_dir}", file=sys.stderr)
         return 1
 
     source_files = sorted(source_dir.glob("*.html"))
     if not source_files:
-        print(f"⚠️  No HTML files found in {source_dir.relative_to(ROOT).as_posix()}/", file=sys.stderr)
+        print(f"[WARN] No HTML files found in {source_dir.relative_to(ROOT).as_posix()}/", file=sys.stderr)
         return 0
 
     WORKSHEETS_DOCS_DIR.mkdir(parents=True, exist_ok=True)
@@ -293,7 +293,7 @@ def main() -> int:
                 stale.unlink()
                 removed += 1
         if removed:
-            print(f"  🗑️  Removed {removed} stale file(s) from docs/worksheets/")
+            print(f"  [INFO] Removed {removed} stale file(s) from docs/worksheets/")
 
     # Copy main worksheets
     copied = 0
@@ -305,12 +305,12 @@ def main() -> int:
         docs_files.append(dest)
 
         if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
-            print(f"  ✓ Unchanged: {src.name}")
+            print(f"  [OK] Unchanged: {src.name}")
             skipped += 1
             continue
 
         dest.write_bytes(src.read_bytes())
-        print(f"  📋 Copied:   {src.name}")
+        print(f"  [INFO] Copied:   {src.name}")
         copied += 1
 
     # Copy archive/ if present
@@ -324,24 +324,24 @@ def main() -> int:
             has_archive = True
             archive_dest_dir = WORKSHEETS_DOCS_DIR / "archive"
             archive_dest_dir.mkdir(parents=True, exist_ok=True)
-            print(f"  📦 Archive:")
+            print("  [INFO] Archive:")
             for src in archive_files:
                 dest = archive_dest_dir / src.name
                 archive_docs_files.append(dest)
 
                 if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
-                    print(f"    ✓ Unchanged: {src.name}")
+                    print(f"    [OK] Unchanged: {src.name}")
                     continue
 
                 dest.write_bytes(src.read_bytes())
-                print(f"    📋 Copied:   {src.name}")
+                print(f"    [INFO] Copied:   {src.name}")
 
             regenerate_archive_index(archive_docs_files)
 
     regenerate_index(docs_files, has_archive=has_archive)
     skipped_note = f", {skipped} unchanged" if args.preserve else ""
     archive_note = f", {len(archive_docs_files)} archived" if has_archive else ""
-    print(f"\n✅ Done — {copied} copied{skipped_note}{archive_note}, {len(docs_files)} total")
+    print(f"\n[OK] Done - {copied} copied{skipped_note}{archive_note}, {len(docs_files)} total")
 
     # Sync tools/ → docs/tools/
     tools_source = ROOT / "tools"
@@ -356,10 +356,10 @@ def main() -> int:
             if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
                 continue
             dest.write_bytes(src.read_bytes())
-            print(f"  🔧 Tools:    {src.relative_to(tools_source).as_posix()}")
+            print(f"  [INFO] Tools:    {src.relative_to(tools_source).as_posix()}")
             tools_copied += 1
         if tools_copied:
-            print(f"  🔧 {tools_copied} tool file(s) synced to docs/tools/")
+            print(f"  [INFO] {tools_copied} tool file(s) synced to docs/tools/")
 
     # Sync activities/ → docs/activities/
     activities_source = ROOT / "activities"
@@ -410,7 +410,7 @@ def main() -> int:
                 if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
                     continue
                 dest.write_bytes(src.read_bytes())
-                print(f"  🧩 Activity: {rel.as_posix()}")
+                print(f"  [INFO] Activity: {rel.as_posix()}")
                 activities_copied += 1
 
             archive_source_dir = child_source_dir / "archive"
@@ -425,7 +425,7 @@ def main() -> int:
                     if args.preserve and dest.exists() and file_hash(src) == file_hash(dest):
                         continue
                     dest.write_bytes(src.read_bytes())
-                    print(f"  🧩 Activity archive: {rel.as_posix()}")
+                    print(f"  [INFO] Activity archive: {rel.as_posix()}")
                     activities_archived += 1
 
         if archived_activity_html_files:
@@ -437,7 +437,7 @@ def main() -> int:
 
         regenerate_activities_index(activity_html_files, has_archive=bool(archived_activity_html_files))
         archive_note = f", {activities_archived} archived" if activities_archived else ""
-        print(f"  🧩 {activities_copied} activit(y/ies) synced to docs/activities/{archive_note}")
+        print(f"  [INFO] {activities_copied} activit(y/ies) synced to docs/activities/{archive_note}")
 
     if should_push:
         commit_and_push(ROOT)
