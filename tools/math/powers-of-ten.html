@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Powers of 10 Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --border: #d0d8f0;
+    --text: #1a2a3a;
+    --muted: #8a9ab0;
+    --accent: #3b7dd8;
+    --accent-light: #e8f0ff;
+    --correct: #22c55e;
+    --correct-light: #dcfce7;
+    --wrong: #ef4444;
+    --wrong-light: #fee2e2;
+    --pv-cell: 58px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 16px 80px;
+    color: var(--text);
+  }
+
+  header { width: 100%; max-width: 520px; margin-bottom: 24px; }
+  header h1 { font-family: 'Fredoka One', cursive; font-size: 1.9rem; color: var(--accent); }
+  header p { font-size: 0.82rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+  /* ── Setup card ── */
+  .setup-card {
+    background: var(--card); border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(59,125,216,.10);
+    padding: 28px 24px; width: 100%; max-width: 420px;
+    border: 2px solid var(--border);
+  }
+  .setup-label { font-size: .82rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .setup-row { margin-bottom: 18px; }
+  .setup-input {
+    font-family: 'Fredoka One', cursive; font-size: 1.7rem;
+    width: 100%; padding: 12px 14px;
+    border: 2.5px solid var(--border); border-radius: 12px;
+    background: var(--bg); color: var(--text); text-align: center; outline: none;
+    transition: border-color .2s;
+  }
+  .setup-input:focus { border-color: var(--accent); }
+  .setup-input::placeholder { color: #c0cce0; }
+  .setup-select {
+    font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    width: 100%; padding: 12px 14px;
+    border: 2.5px solid var(--border); border-radius: 12px;
+    background: var(--bg); color: var(--text); outline: none;
+    -webkit-appearance: none; appearance: none;
+    transition: border-color .2s;
+  }
+  .setup-select:focus { border-color: var(--accent); }
+  .build-btn {
+    width: 100%; padding: 14px; background: var(--accent); color: white; border: none;
+    border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    cursor: pointer; transition: background .15s, transform .1s;
+  }
+  .build-btn:hover { background: #2a5fb0; }
+  .build-btn:active { transform: scale(.97); }
+  .setup-hint {
+    display: none; margin-top: 14px; padding: 10px 16px; border-radius: 12px;
+    font-size: .9rem; font-weight: 700; text-align: center;
+    background: #fef3c7; color: #92400e; border: 2px solid #fcd34d;
+  }
+  .setup-hint.show { display: block; }
+
+  /* ── Problem card ── */
+  .problem-card {
+    display: none; background: var(--card); border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(59,125,216,.10);
+    padding: 28px 20px 24px; width: 100%; max-width: 560px;
+    border: 2px solid var(--border);
+    flex-direction: column; align-items: center;
+  }
+  .problem-card.visible { display: flex; }
+  .problem-expr { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--accent); margin-bottom: 20px; text-align: center; }
+
+  /* ── Place-value grid ── */
+  .model-wrap { width: 100%; overflow-x: auto; padding-bottom: 4px; }
+  .pv-table-wrap { position: relative; width: max-content; margin: 0 auto; }
+  .pv-table {
+    display: grid;
+    grid-template-columns: repeat(8, var(--pv-cell));
+    background: var(--border);
+    gap: 2px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .pv-header {
+    background: var(--card);
+    min-height: 46px; min-width: 0; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .58rem; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .2px; line-height: 1.15;
+    text-align: center; padding: 6px 3px;
+    hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; word-break: break-word;
+  }
+  .pv-header.marker-header { font-size: 1.2rem; color: var(--text); font-weight: 400; text-transform: none; }
+
+  .pv-cell {
+    background: var(--card);
+    min-height: 58px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--text);
+  }
+  .pv-cell.digit-cell {
+    cursor: pointer; border-radius: 4px; transition: background .15s, box-shadow .15s;
+    box-shadow: inset 0 0 0 2px var(--border);
+  }
+  .pv-cell.digit-cell:hover { background: var(--accent-light); }
+  .pv-cell.digit-cell.inactive {
+    color: #c8d2e4; cursor: default; box-shadow: inset 0 0 0 2px transparent;
+  }
+  .pv-cell.digit-cell.inactive:hover { background: var(--card); }
+  .pv-cell.digit-cell.active-cell { box-shadow: inset 0 0 0 3px var(--accent); background: var(--accent-light); }
+  .pv-cell.digit-cell.correct-cell { box-shadow: inset 0 0 0 3px var(--correct); background: var(--correct-light); color: #166534; }
+  .pv-cell.digit-cell.wrong-cell { box-shadow: inset 0 0 0 3px var(--wrong); background: var(--wrong-light); animation: shake .3s ease; }
+  .pv-cell.digit-cell.demo-highlight { box-shadow: inset 0 0 0 3px var(--accent); background: #fef3c7; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+  .pv-divider {
+    grid-column: 1 / -1;
+    background: var(--card);
+    min-height: 14px;
+    position: relative;
+  }
+  .pv-divider::after {
+    content: ''; position: absolute; left: 4px; right: 4px; top: 50%;
+    border-top: 3px dashed #94a3b8;
+  }
+
+  #arrowLayer {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; overflow: visible; z-index: 5;
+  }
+  .arrow-line { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+  .arrow-line.preview { stroke-dasharray: 6 5; opacity: .75; }
+  .arrow-line.confirmed { opacity: 1; }
+  .arrow-line.wrong { stroke: var(--wrong); }
+
+  .step-text { font-size: .95rem; font-weight: 700; color: var(--text); text-align: center; margin: 18px 0 12px; }
+  .arrow-step, .final-answer-step { width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+  .final-answer-field {
+    min-width: 140px; min-height: 58px; padding: 10px 20px;
+    border: 2.5px solid var(--border); border-radius: 12px; background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--text);
+    cursor: pointer; transition: border-color .15s, background .15s;
+    margin-bottom: 16px;
+  }
+  .final-answer-field:hover { border-color: var(--accent); background: var(--accent-light); }
+  .final-answer-field.active-cell { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px rgba(59,125,216,.2); }
+  .final-answer-field.correct-cell { border-color: var(--correct); background: var(--correct-light); color: #166534; }
+  .final-answer-field.wrong-cell { border-color: var(--wrong); background: var(--wrong-light); animation: shake .3s ease; }
+
+  .confirm-btn {
+    margin-top: 22px; padding: 14px 36px; background: var(--accent); color: white; border: none;
+    border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    cursor: pointer; transition: background .15s, transform .1s;
+  }
+  .confirm-btn:hover { background: #2a5fb0; }
+  .confirm-btn:active { transform: scale(.97); }
+  .confirm-btn:disabled { background: #c0cce0; cursor: default; }
+
+  .feedback-msg {
+    display: none; margin-top: 12px; padding: 10px 16px; border-radius: 12px;
+    font-size: .95rem; font-weight: 700; text-align: center;
+  }
+  .feedback-msg.show { display: block; background: #fef3c7; color: #92400e; border: 2px solid #fcd34d; }
+
+  .result-chip {
+    display: none; position: relative; align-items: center; gap: 10px;
+    background: var(--correct-light); border: 2.5px solid var(--correct);
+    border-radius: 16px; padding: 14px 22px;
+    font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: #166534;
+    margin-top: 16px; overflow: visible;
+  }
+  .result-chip.visible { display: flex; }
+
+  .reset-btn {
+    margin-top: 14px; padding: 10px 24px; background: transparent;
+    color: var(--muted); border: 2px solid var(--border); border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 700;
+    cursor: pointer; transition: border-color .15s, color .15s;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Overlays / numpad ── */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(10,20,40,.35); z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .bottom-sheet {
+    background: #f8faff; border-radius: 24px 24px 0 0;
+    padding: 16px 16px 36px; width: 100%; max-width: 420px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,.18);
+    animation: slideUp .2s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+  .sheet-hint { text-align: center; font-size: .8rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+  .digit-preview {
+    display: none; text-align: center;
+    font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: var(--accent);
+    background: var(--accent-light); border: 2px solid var(--border);
+    border-radius: 10px; padding: 6px 12px; margin-bottom: 12px;
+    min-height: 48px; letter-spacing: 2px;
+  }
+  .digit-preview.active { display: block; }
+  .digit-preview.empty { color: #b0bcd0; }
+
+  .numpad-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .numpad-key {
+    height: 64px; border: none; border-radius: 14px; background: #fff;
+    box-shadow: 0 2px 8px rgba(59,125,216,.10);
+    font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--text);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .12s, transform .1s;
+  }
+  .numpad-key:active { background: var(--accent-light); transform: scale(.94); }
+  .numpad-key.zero { grid-column: span 2; }
+  .numpad-grid.final-mode .numpad-key.zero { grid-column: span 1; }
+  .numpad-key.dot { display: none; }
+  .numpad-grid.final-mode .numpad-key.dot { display: flex; }
+  .numpad-key.clr { background: #fee2e2; color: var(--wrong); font-size: 1rem; font-family: 'Nunito', sans-serif; font-weight: 800; }
+
+  /* ── Calm celebration ── */
+  .celebration-layer { position: absolute; inset: -10px -10px auto -10px; height: 160px; pointer-events: none; overflow: visible; z-index: 20; }
+  .celebrate-dot { position: absolute; width: 12px; height: 12px; border-radius: 50%; opacity: 0; animation: celebrateFade 2000ms ease forwards; }
+  @keyframes celebrateFade {
+    0%   { opacity: 0; transform: translateY(6px) scale(0.7); }
+    30%  { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-4px) scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔟 Powers of 10</h1>
+  <p>Multiply or divide by 10, 100, or 1000</p>
+</header>
+
+<!-- Setup -->
+<div class="setup-card" id="setupCard">
+  <div class="setup-label">Your number</div>
+  <div class="setup-row">
+    <input class="setup-input" id="numberInput" type="text" inputmode="decimal" placeholder="4.582">
+  </div>
+  <div class="setup-label">Operation</div>
+  <div class="setup-row">
+    <select class="setup-select" id="opSelect">
+      <option value="×">× multiply</option>
+      <option value="÷">÷ divide</option>
+    </select>
+  </div>
+  <div class="setup-label">Power of ten</div>
+  <div class="setup-row">
+    <select class="setup-select" id="powerSelect">
+      <option value="10">10</option>
+      <option value="100">100</option>
+      <option value="1000">1000</option>
+    </select>
+  </div>
+  <button class="build-btn" onclick="buildProblem()">Build Chart ↓</button>
+  <div class="setup-hint" id="setupHint"></div>
+</div>
+
+<!-- Problem -->
+<div class="problem-card" id="problemCard">
+  <div class="problem-expr" id="problemExpr"></div>
+
+  <div class="model-wrap">
+    <div class="pv-table-wrap" id="gridWrap">
+      <div class="pv-table" id="pvTable"></div>
+      <svg id="arrowLayer">
+        <defs>
+          <marker id="arrowhead" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#3b7dd8"></path>
+          </marker>
+          <marker id="arrowheadWrong" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#ef4444"></path>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <button class="confirm-btn" id="verifyRow1Btn" onclick="verifyRow(1)">Verify Number ✓</button>
+
+  <div class="arrow-step" id="arrowStepEl" style="display:none;">
+    <p class="step-text">Tap the column below where the highlighted digit moves to.</p>
+    <button class="confirm-btn" id="verifyArrowBtn" onclick="verifyArrow()" disabled>Verify Arrow ✓</button>
+  </div>
+
+  <button class="confirm-btn" id="verifyRow2Btn" onclick="verifyRow(2)" style="display:none;">Verify Row 2 ✓</button>
+
+  <div class="final-answer-step" id="finalAnswerStepEl" style="display:none;">
+    <p class="step-text">What's the full answer?</p>
+    <div class="final-answer-field" id="finalAnswerField" onclick="openFinalAnswerNumpad()"></div>
+    <button class="confirm-btn" id="verifyAnswerBtn" onclick="verifyFinalAnswer()">Verify Answer ✓</button>
+  </div>
+
+  <div class="feedback-msg" id="feedbackMsg"></div>
+  <div class="result-chip" id="resultChip"></div>
+  <button class="reset-btn" onclick="resetTool()">← New problem</button>
+</div>
+
+<!-- Numpad overlay — shared for row1/row2 digits and the final answer -->
+<div class="overlay" id="numpadOverlay" onclick="closeNumpad()">
+  <div class="bottom-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-hint" id="numpadHint">Tap this column's digit</div>
+    <div class="digit-preview" id="digitPreview"></div>
+    <div class="numpad-grid" id="numpadGrid">
+      <button class="numpad-key" onclick="numpadTap('7')">7</button>
+      <button class="numpad-key" onclick="numpadTap('8')">8</button>
+      <button class="numpad-key" onclick="numpadTap('9')">9</button>
+      <button class="numpad-key" onclick="numpadTap('4')">4</button>
+      <button class="numpad-key" onclick="numpadTap('5')">5</button>
+      <button class="numpad-key" onclick="numpadTap('6')">6</button>
+      <button class="numpad-key" onclick="numpadTap('1')">1</button>
+      <button class="numpad-key" onclick="numpadTap('2')">2</button>
+      <button class="numpad-key" onclick="numpadTap('3')">3</button>
+      <button class="numpad-key dot" onclick="numpadTap('.')">.</button>
+      <button class="numpad-key zero" onclick="numpadTap('0')">0</button>
+      <button class="numpad-key clr" onclick="numpadTap('clear')">Clear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Column model ─────────────────────────────────────────────────────────
+  const COLUMNS = [
+    { place: 3,    label: 'Thou­sands' },
+    { place: 2,    label: 'Hun­dreds' },
+    { place: 1,    label: 'Tens' },
+    { place: 0,    label: 'Ones' },
+    { place: null, label: '●', marker: true },
+    { place: -1,   label: 'Tenths' },
+    { place: -2,   label: 'Hun­dredths' },
+    { place: -3,   label: 'Thou­sandths' }
+  ];
+  const PLACES = COLUMNS.filter(c => !c.marker).map(c => c.place);
+
+  function colIndexForPlace(place) { return COLUMNS.findIndex(c => c.place === place); }
+  function fitsGrid(l, h) { return l >= -3 && h <= 3; }
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  let digitMap = {};
+  let lo = 0, hi = 0, delta = 0, row2Lo = 0, row2Hi = 0, demoPlace = 0;
+  let opSymbol = '×', power = 10;
+  let row1Digits = {}, row2Digits = {};
+  let phase = 'setup';
+  let previewTargetPlace = null;
+  let arrowRecords = [];
+  let finalAnswerStr = '', expectedFinalAnswer = '';
+  let activeCell = null;
+
+  // ── Parsing / setup ──────────────────────────────────────────────────────
+  function parseSetupNumber(raw) {
+    if (!/^\d*\.?\d*$/.test(raw) || raw === '' || raw === '.') return null;
+    let [intPartRaw, fracPartRaw] = raw.split('.');
+    intPartRaw = intPartRaw || '0';
+    fracPartRaw = fracPartRaw || '';
+
+    let intPart = intPartRaw.replace(/^0+(?=\d)/, '');
+    let fracPart = fracPartRaw.replace(/0+$/, '');
+
+    if (intPart === '0' && fracPart === '') return null;
+    return { intPart, fracPart };
+  }
+
+  function buildProblem() {
+    clearSetupHint();
+    const raw = document.getElementById('numberInput').value.trim();
+    const parsed = parseSetupNumber(raw);
+    if (!parsed) { showSetupHint('💡 Enter a positive number first — like 4.582 or 246.'); return; }
+
+    const opSel = document.getElementById('opSelect').value;
+    const powerSel = parseInt(document.getElementById('powerSelect').value, 10);
+
+    digitMap = {};
+    const { intPart, fracPart } = parsed;
+    for (let i = 0; i < intPart.length; i++) digitMap[intPart.length - 1 - i] = intPart[i];
+    for (let i = 0; i < fracPart.length; i++) digitMap[-(i + 1)] = fracPart[i];
+
+    hi = intPart.length - 1;
+    lo = fracPart.length > 0 ? -fracPart.length : 0;
+
+    const k = Math.log10(powerSel);
+    delta = opSel === '×' ? k : -k;
+    row2Hi = hi + delta;
+    row2Lo = lo + delta;
+
+    if (!fitsGrid(lo, hi) || !fitsGrid(row2Lo, row2Hi)) {
+      showSetupHint('💡 Try a smaller number or a smaller jump — this one runs off the chart.');
+      return;
+    }
+
+    opSymbol = opSel;
+    power = powerSel;
+    demoPlace = hi;
+    row1Digits = {};
+    row2Digits = {};
+    arrowRecords = [];
+    previewTargetPlace = null;
+    finalAnswerStr = '';
+    expectedFinalAnswer = computeFinalAnswerString();
+
+    renderChart();
+    setPhase('row1');
+
+    document.getElementById('finalAnswerField').textContent = '';
+    document.getElementById('finalAnswerField').classList.remove('correct-cell', 'wrong-cell');
+    document.getElementById('resultChip').className = 'result-chip';
+    document.getElementById('resultChip').innerHTML = '';
+    document.getElementById('feedbackMsg').className = 'feedback-msg';
+
+    document.getElementById('setupCard').style.display = 'none';
+    document.getElementById('problemCard').classList.add('visible');
+  }
+
+  // ── Digit-string helpers ─────────────────────────────────────────────────
+  function formatOriginalNumber() {
+    let digits = '';
+    for (let p = hi; p >= lo; p--) digits += digitMap[p] || '0';
+    const pointPos = hi + 1;
+    let intStr = digits.slice(0, pointPos) || '0';
+    let fracStr = digits.slice(pointPos);
+    intStr = intStr.replace(/^0+(?=\d)/, '');
+    return fracStr ? intStr + '.' + fracStr : intStr;
+  }
+
+  function computeFinalAnswerString() {
+    let digits = '';
+    for (let p = hi; p >= lo; p--) digits += digitMap[p] || '0';
+    const pointPos = hi + 1;
+    let newPointPos = pointPos + delta;
+
+    let padded = digits;
+    if (newPointPos < 0) {
+      padded = '0'.repeat(-newPointPos) + padded;
+      newPointPos = 0;
+    }
+    if (newPointPos > padded.length) {
+      padded = padded + '0'.repeat(newPointPos - padded.length);
+    }
+
+    let intStr = padded.slice(0, newPointPos) || '0';
+    let fracStr = padded.slice(newPointPos);
+    intStr = intStr.replace(/^0+(?=\d)/, '');
+    fracStr = fracStr.replace(/0+$/, '');
+
+    return fracStr ? intStr + '.' + fracStr : intStr;
+  }
+
+  function expectedDigit(place, spanLo, spanHi, offset) {
+    if (place < spanLo || place > spanHi) return null;
+    return digitMap[place - offset] ?? '0';
+  }
+
+  // ── Chart rendering ──────────────────────────────────────────────────────
+  function renderChart() {
+    const table = document.getElementById('pvTable');
+    table.innerHTML = '';
+
+    COLUMNS.forEach((col) => {
+      const h = document.createElement('div');
+      h.className = 'pv-header' + (col.marker ? ' marker-header' : '');
+      h.textContent = col.label;
+      table.appendChild(h);
+    });
+
+    COLUMNS.forEach((col, colIndex) => {
+      const r1 = document.createElement('div');
+      r1.className = 'pv-cell' + (col.marker ? '' : ' digit-cell');
+      r1.id = 'pv-row1-' + colIndex;
+      if (!col.marker) r1.onclick = () => handleRow1Tap(colIndex);
+      table.appendChild(r1);
+    });
+
+    const divider = document.createElement('div');
+    divider.className = 'pv-divider';
+    table.appendChild(divider);
+
+    COLUMNS.forEach((col, colIndex) => {
+      const r2 = document.createElement('div');
+      r2.className = 'pv-cell' + (col.marker ? '' : ' digit-cell inactive');
+      r2.id = 'pv-row2-' + colIndex;
+      if (!col.marker) r2.onclick = () => handleRow2Tap(colIndex);
+      table.appendChild(r2);
+    });
+
+    document.getElementById('problemExpr').textContent =
+      formatOriginalNumber() + ' ' + opSymbol + ' ' + power + ' = ?';
+
+    const svg = document.getElementById('arrowLayer');
+    svg.querySelectorAll('line').forEach(l => l.remove());
+  }
+
+  function handleRow1Tap(colIndex) {
+    if (phase !== 'row1') return;
+    const col = COLUMNS[colIndex];
+    openNumpad('row1', col.place, colIndex);
+  }
+
+  function handleRow2Tap(colIndex) {
+    if (phase === 'arrow') {
+      setArrowPreview(colIndex);
+    } else if (phase === 'row2') {
+      const col = COLUMNS[colIndex];
+      openNumpad('row2', col.place, colIndex);
+    }
+  }
+
+  // ── Phases ────────────────────────────────────────────────────────────────
+  function setPhase(newPhase) {
+    phase = newPhase;
+
+    document.getElementById('verifyRow1Btn').style.display = newPhase === 'row1' ? '' : 'none';
+    document.getElementById('arrowStepEl').style.display = newPhase === 'arrow' ? '' : 'none';
+    document.getElementById('verifyRow2Btn').style.display = newPhase === 'row2' ? '' : 'none';
+    document.getElementById('finalAnswerStepEl').style.display = (newPhase === 'answer' || newPhase === 'done') ? '' : 'none';
+
+    clearFeedback();
+
+    const demoEl = document.getElementById('pv-row1-' + colIndexForPlace(demoPlace));
+
+    if (newPhase === 'arrow') {
+      if (demoEl) demoEl.classList.add('demo-highlight');
+      document.getElementById('verifyArrowBtn').disabled = true;
+      PLACES.forEach((place) => {
+        document.getElementById('pv-row2-' + colIndexForPlace(place)).classList.remove('inactive');
+      });
+    } else {
+      if (demoEl) demoEl.classList.remove('demo-highlight');
+    }
+  }
+
+  // ── Row verification (Row 1 and Row 2 share this) ───────────────────────
+  function verifyRow(rowNum) {
+    const spanLo = rowNum === 1 ? lo : row2Lo;
+    const spanHi = rowNum === 1 ? hi : row2Hi;
+    const offset = rowNum === 1 ? 0 : delta;
+    const digitsObj = rowNum === 1 ? row1Digits : row2Digits;
+
+    let allCorrect = true;
+    PLACES.forEach((place) => {
+      const colIndex = colIndexForPlace(place);
+      const expected = expectedDigit(place, spanLo, spanHi, offset);
+      const typed = digitsObj[place] || '';
+      const passes = expected === null ? (typed === '' || typed === '0') : (typed === expected);
+      const cellEl = document.getElementById('pv-row' + rowNum + '-' + colIndex);
+      if (!passes) {
+        allCorrect = false;
+        cellEl.classList.add('wrong-cell');
+        setTimeout(() => cellEl.classList.remove('wrong-cell'), 400);
+      } else {
+        cellEl.classList.remove('wrong-cell');
+      }
+    });
+
+    if (allCorrect) {
+      PLACES.forEach((place) => {
+        document.getElementById('pv-row' + rowNum + '-' + colIndexForPlace(place)).classList.add('correct-cell');
+      });
+      clearFeedback();
+      if (rowNum === 1) setPhase('arrow'); else setPhase('answer');
+    } else {
+      showFeedback('💡 Check each column — one or more digits need another look.');
+    }
+  }
+
+  // ── Arrow step ────────────────────────────────────────────────────────────
+  function setArrowPreview(colIndex) {
+    if (phase !== 'arrow') return;
+    previewTargetPlace = COLUMNS[colIndex].place;
+    clearFeedback();
+    redrawArrowLayer();
+    document.getElementById('verifyArrowBtn').disabled = false;
+  }
+
+  function verifyArrow() {
+    if (previewTargetPlace === null) return;
+    const expectedTarget = demoPlace + delta;
+
+    if (previewTargetPlace === expectedTarget) {
+      arrowRecords.push({ fromPlace: demoPlace, toPlace: expectedTarget, confirmed: true });
+      previewTargetPlace = null;
+      document.getElementById('verifyArrowBtn').disabled = true;
+      clearFeedback();
+      redrawArrowLayer();
+
+      const remainingPlaces = PLACES.filter(p => p !== demoPlace && p >= lo && p <= hi);
+      if (remainingPlaces.length === 0) {
+        setPhase('row2');
+      } else {
+        autoDrawRemainingArrows(remainingPlaces, () => setPhase('row2'));
+      }
+    } else {
+      showFeedback('💡 Count the columns carefully — how far does ' + opSymbol + ' ' + power + ' move each digit?');
+      flashArrowWrong();
+    }
+  }
+
+  function flashArrowWrong() {
+    const svg = document.getElementById('arrowLayer');
+    const previewLine = svg.querySelector('line[data-key="preview"]');
+    if (previewLine) {
+      previewLine.classList.add('wrong');
+      previewLine.setAttribute('marker-end', 'url(#arrowheadWrong)');
+    }
+    document.getElementById('verifyArrowBtn').disabled = true;
+    setTimeout(() => {
+      previewTargetPlace = null;
+      redrawArrowLayer();
+    }, 500);
+  }
+
+  function autoDrawRemainingArrows(places, onDone) {
+    const ordered = places.slice().sort((a, b) => b - a);
+    ordered.forEach((place, i) => {
+      setTimeout(() => {
+        arrowRecords.push({ fromPlace: place, toPlace: place + delta, confirmed: true });
+        redrawArrowLayer();
+      }, i * 500);
+    });
+    setTimeout(onDone, ordered.length * 500 + 400);
+  }
+
+  // ── Arrow overlay (SVG) ──────────────────────────────────────────────────
+  function computeArrowCoords(fromEl, toEl, wrap) {
+    const wrapRect = wrap.getBoundingClientRect();
+    const a = fromEl.getBoundingClientRect();
+    const b = toEl.getBoundingClientRect();
+    return {
+      x1: a.left + a.width / 2 - wrapRect.left,
+      y1: a.bottom - wrapRect.top,
+      x2: b.left + b.width / 2 - wrapRect.left,
+      y2: b.top - wrapRect.top
+    };
+  }
+
+  function redrawArrowLayer() {
+    const svg = document.getElementById('arrowLayer');
+    const wrap = document.getElementById('gridWrap');
+    if (!svg || !wrap) return;
+
+    const existing = {};
+    svg.querySelectorAll('line[data-key]').forEach(l => existing[l.dataset.key] = l);
+    const wanted = new Set();
+
+    arrowRecords.forEach(rec => {
+      const key = rec.fromPlace + '>' + rec.toPlace;
+      wanted.add(key);
+      const fromEl = document.getElementById('pv-row1-' + colIndexForPlace(rec.fromPlace));
+      const toEl = document.getElementById('pv-row2-' + colIndexForPlace(rec.toPlace));
+      if (!fromEl || !toEl) return;
+      const coords = computeArrowCoords(fromEl, toEl, wrap);
+      let line = existing[key];
+      if (!line) {
+        line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.dataset.key = key;
+        line.classList.add('arrow-line', 'confirmed');
+        line.setAttribute('marker-end', 'url(#arrowhead)');
+        line.style.opacity = '0';
+        svg.appendChild(line);
+        requestAnimationFrame(() => {
+          line.style.transition = 'opacity 600ms ease';
+          line.style.opacity = '1';
+        });
+      }
+      line.setAttribute('x1', coords.x1);
+      line.setAttribute('y1', coords.y1);
+      line.setAttribute('x2', coords.x2);
+      line.setAttribute('y2', coords.y2);
+    });
+
+    let previewLine = svg.querySelector('line[data-key="preview"]');
+    if (phase === 'arrow' && previewTargetPlace !== null) {
+      const fromEl = document.getElementById('pv-row1-' + colIndexForPlace(demoPlace));
+      const toEl = document.getElementById('pv-row2-' + colIndexForPlace(previewTargetPlace));
+      if (fromEl && toEl) {
+        const coords = computeArrowCoords(fromEl, toEl, wrap);
+        if (!previewLine) {
+          previewLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          previewLine.dataset.key = 'preview';
+          previewLine.classList.add('arrow-line', 'preview');
+          previewLine.setAttribute('marker-end', 'url(#arrowhead)');
+          svg.appendChild(previewLine);
+        }
+        previewLine.setAttribute('x1', coords.x1);
+        previewLine.setAttribute('y1', coords.y1);
+        previewLine.setAttribute('x2', coords.x2);
+        previewLine.setAttribute('y2', coords.y2);
+      }
+    } else if (previewLine) {
+      previewLine.remove();
+    }
+
+    Object.keys(existing).forEach(key => {
+      if (!wanted.has(key)) existing[key].remove();
+    });
+  }
+
+  function debounce(fn, ms) {
+    let t;
+    return function() {
+      clearTimeout(t);
+      const args = arguments;
+      t = setTimeout(() => fn.apply(null, args), ms);
+    };
+  }
+  window.addEventListener('resize', debounce(redrawArrowLayer, 150));
+  window.addEventListener('orientationchange', () => setTimeout(redrawArrowLayer, 300));
+
+  // ── Numpad (row1 / row2 digits, and the uncapped final-answer field) ────
+  function openNumpad(type, place, colIndex) {
+    activeCell = { type, place, colIndex };
+    const hintEl = document.getElementById('numpadHint');
+    const preview = document.getElementById('digitPreview');
+    const grid = document.getElementById('numpadGrid');
+
+    clearActiveHighlights();
+
+    if (type === 'final') {
+      hintEl.textContent = 'Full answer — tap digits, use . for the decimal point';
+      preview.classList.add('active');
+      preview.textContent = finalAnswerStr || '—';
+      preview.classList.toggle('empty', !finalAnswerStr);
+      grid.classList.add('final-mode');
+      document.getElementById('finalAnswerField').classList.add('active-cell');
+    } else {
+      hintEl.textContent = "Tap this column's digit";
+      preview.classList.remove('active');
+      grid.classList.remove('final-mode');
+      const el = document.getElementById('pv-' + type + '-' + colIndex);
+      if (el) el.classList.add('active-cell');
+    }
+
+    document.getElementById('numpadOverlay').classList.add('open');
+  }
+
+  function openFinalAnswerNumpad() {
+    if (phase !== 'answer') return;
+    openNumpad('final', null, null);
+  }
+
+  function closeNumpad() {
+    document.getElementById('numpadOverlay').classList.remove('open');
+    document.getElementById('digitPreview').classList.remove('active');
+    clearActiveHighlights();
+    activeCell = null;
+  }
+
+  function clearActiveHighlights() {
+    document.querySelectorAll('.active-cell').forEach(e => e.classList.remove('active-cell'));
+  }
+
+  function numpadTap(val) {
+    if (!activeCell) return;
+    const { type, place, colIndex } = activeCell;
+
+    if (type === 'row1' || type === 'row2') {
+      const el = document.getElementById('pv-' + type + '-' + colIndex);
+      if (!el) return;
+      const store = type === 'row1' ? row1Digits : row2Digits;
+      if (val === 'clear') {
+        store[place] = '';
+        el.textContent = '';
+        el.classList.remove('correct-cell', 'wrong-cell');
+      } else if (val !== '.') {
+        store[place] = val;
+        el.textContent = val;
+        el.classList.remove('wrong-cell');
+      }
+      closeNumpad();
+    } else if (type === 'final') {
+      const fieldEl = document.getElementById('finalAnswerField');
+      const preview = document.getElementById('digitPreview');
+      if (val === 'clear') {
+        finalAnswerStr = '';
+      } else if (val === '.') {
+        if (!finalAnswerStr.includes('.')) {
+          finalAnswerStr = (finalAnswerStr === '' ? '0' : finalAnswerStr) + '.';
+        }
+      } else {
+        finalAnswerStr += val;
+      }
+      fieldEl.textContent = finalAnswerStr;
+      fieldEl.classList.remove('wrong-cell');
+      preview.textContent = finalAnswerStr || '—';
+      preview.classList.toggle('empty', !finalAnswerStr);
+    }
+  }
+
+  // ── Final answer ──────────────────────────────────────────────────────────
+  function verifyFinalAnswer() {
+    if (finalAnswerStr === '') { showFeedback('💡 Type the answer using the numpad.'); return; }
+    const userVal = parseFloat(finalAnswerStr);
+    const correctVal = parseFloat(expectedFinalAnswer);
+    const fieldEl = document.getElementById('finalAnswerField');
+
+    if (!isNaN(userVal) && userVal === correctVal) {
+      fieldEl.classList.remove('wrong-cell');
+      fieldEl.classList.add('correct-cell');
+      document.getElementById('verifyAnswerBtn').style.display = 'none';
+      const chip = document.getElementById('resultChip');
+      chip.innerHTML = '✅ &nbsp;' + formatOriginalNumber() + ' ' + opSymbol + ' ' + power +
+        ' = <strong style="margin-left:6px">' + expectedFinalAnswer + '</strong>';
+      chip.classList.add('visible');
+      clearFeedback();
+      setPhase('done');
+      playCelebration();
+    } else {
+      fieldEl.classList.add('wrong-cell');
+      setTimeout(() => fieldEl.classList.remove('wrong-cell'), 400);
+      showFeedback('💡 Check where the decimal point moved.');
+    }
+  }
+
+  // ── Calm celebration ──────────────────────────────────────────────────────
+  function playCelebration() {
+    const colors = ['#22c55e', '#f59e0b'];
+    const layer = document.createElement('div');
+    layer.className = 'celebration-layer';
+    const count = 10 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'celebrate-dot';
+      dot.style.left = (Math.random() * 90 + 5) + '%';
+      dot.style.top = (Math.random() * 60 + 10) + '%';
+      dot.style.background = colors[i % colors.length];
+      dot.style.animationDelay = (i * 90) + 'ms';
+      layer.appendChild(dot);
+    }
+    document.getElementById('resultChip').appendChild(layer);
+    window.setTimeout(() => layer.remove(), 2600);
+  }
+
+  // ── Feedback ──────────────────────────────────────────────────────────────
+  function showFeedback(msg) {
+    const el = document.getElementById('feedbackMsg');
+    el.className = 'feedback-msg show';
+    el.textContent = msg;
+  }
+  function clearFeedback() {
+    document.getElementById('feedbackMsg').className = 'feedback-msg';
+  }
+  function showSetupHint(msg) {
+    const el = document.getElementById('setupHint');
+    el.className = 'setup-hint show';
+    el.textContent = msg;
+  }
+  function clearSetupHint() {
+    document.getElementById('setupHint').className = 'setup-hint';
+  }
+
+  // ── Reset ─────────────────────────────────────────────────────────────────
+  function resetTool() {
+    document.getElementById('problemCard').classList.remove('visible');
+    document.getElementById('setupCard').style.display = '';
+    document.getElementById('numberInput').value = '';
+    clearSetupHint();
+
+    document.getElementById('pvTable').innerHTML = '';
+    document.getElementById('arrowLayer').querySelectorAll('line').forEach(l => l.remove());
+
+    document.getElementById('finalAnswerField').textContent = '';
+    document.getElementById('finalAnswerField').classList.remove('correct-cell', 'wrong-cell', 'active-cell');
+    document.getElementById('resultChip').className = 'result-chip';
+    document.getElementById('resultChip').innerHTML = '';
+    document.getElementById('feedbackMsg').className = 'feedback-msg';
+    document.querySelectorAll('.celebration-layer').forEach(l => l.remove());
+
+    arrowRecords = [];
+    previewTargetPlace = null;
+    row1Digits = {};
+    row2Digits = {};
+    finalAnswerStr = '';
+    phase = 'setup';
+
+    document.getElementById('verifyRow1Btn').style.display = '';
+    document.getElementById('arrowStepEl').style.display = 'none';
+    document.getElementById('verifyRow2Btn').style.display = 'none';
+    document.getElementById('finalAnswerStepEl').style.display = 'none';
+    document.getElementById('verifyAnswerBtn').style.display = '';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Place Value Chart Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --border: #d0d8f0;
+    --text: #1a2a3a;
+    --muted: #8a9ab0;
+    --accent: #3b7dd8;
+    --accent-light: #e8f0ff;
+    --correct: #22c55e;
+    --correct-light: #dcfce7;
+    --wrong: #ef4444;
+    --wrong-light: #fee2e2;
+    --pv-cell: 58px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 80px;
+    color: var(--text);
+  }
+
+  header { width: 100%; max-width: 520px; margin-bottom: 24px; }
+  header h1 { font-family: 'Fredoka One', cursive; font-size: 1.9rem; color: var(--accent); }
+  header p { font-size: 0.82rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+  .setup-card {
+    background: var(--card); border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(59,125,216,.10);
+    padding: 28px 24px; width: 100%; max-width: 420px;
+    border: 2px solid var(--border);
+  }
+  .setup-label { font-size: .82rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .setup-row { margin-bottom: 18px; }
+  .setup-input {
+    font-family: 'Fredoka One', cursive; font-size: 1.7rem;
+    width: 100%; padding: 12px 14px;
+    border: 2.5px solid var(--border); border-radius: 12px;
+    background: var(--bg); color: var(--text); text-align: center; outline: none;
+    transition: border-color .2s;
+  }
+  .setup-input:focus { border-color: var(--accent); }
+  .setup-input::placeholder { color: #c0cce0; }
+  .build-btn {
+    width: 100%; padding: 14px; background: var(--accent); color: white; border: none;
+    border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    cursor: pointer; transition: background .15s, transform .1s;
+  }
+  .build-btn:hover { background: #2a5fb0; }
+  .build-btn:active { transform: scale(.97); }
+  .setup-hint {
+    display: none; margin-top: 14px; padding: 10px 16px; border-radius: 12px;
+    font-size: .9rem; font-weight: 700; text-align: center;
+    background: #fef3c7; color: #92400e; border: 2px solid #fcd34d;
+  }
+  .setup-hint.show { display: block; }
+
+  .problem-card {
+    display: none; background: var(--card); border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(59,125,216,.10);
+    padding: 28px 20px 24px; width: 100%; max-width: 560px;
+    border: 2px solid var(--border);
+    flex-direction: column; align-items: center;
+  }
+  .problem-card.visible { display: flex; }
+  .problem-expr { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--accent); margin-bottom: 20px; text-align: center; }
+
+  .model-wrap { width: 100%; overflow-x: auto; padding-bottom: 4px; }
+  .pv-table-wrap { position: relative; width: max-content; margin: 0 auto; }
+  .pv-table {
+    display: grid;
+    grid-template-columns: repeat(8, var(--pv-cell));
+    background: var(--border);
+    gap: 2px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .pv-header {
+    background: var(--card);
+    min-height: 46px; min-width: 0; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .58rem; font-weight: 800; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .2px; line-height: 1.15;
+    text-align: center; padding: 6px 3px;
+    hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; word-break: break-word;
+  }
+  .pv-header.marker-header { font-size: 1.2rem; color: var(--text); font-weight: 400; text-transform: none; }
+
+  .pv-cell {
+    background: var(--card);
+    min-height: 58px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--text);
+  }
+  .pv-cell.digit-cell {
+    cursor: pointer; border-radius: 4px; transition: background .15s, box-shadow .15s;
+    box-shadow: inset 0 0 0 2px var(--border);
+  }
+  .pv-cell.digit-cell:hover { background: var(--accent-light); }
+  .pv-cell.digit-cell.active-cell { box-shadow: inset 0 0 0 3px var(--accent); background: var(--accent-light); }
+  .pv-cell.digit-cell.correct-cell { box-shadow: inset 0 0 0 3px var(--correct); background: var(--correct-light); color: #166534; }
+  .pv-cell.digit-cell.wrong-cell { box-shadow: inset 0 0 0 3px var(--wrong); background: var(--wrong-light); animation: shake .3s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+  .pv-marker {
+    background: var(--card);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; color: var(--text);
+  }
+
+  .confirm-btn {
+    margin-top: 22px; padding: 14px 36px; background: var(--accent); color: white; border: none;
+    border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    cursor: pointer; transition: background .15s, transform .1s;
+  }
+  .confirm-btn:hover { background: #2a5fb0; }
+  .confirm-btn:active { transform: scale(.97); }
+  .confirm-btn:disabled { background: #c0cce0; cursor: default; }
+
+  .feedback-msg {
+    display: none; margin-top: 12px; padding: 10px 16px; border-radius: 12px;
+    font-size: .95rem; font-weight: 700; text-align: center;
+  }
+  .feedback-msg.show { display: block; background: #fef3c7; color: #92400e; border: 2px solid #fcd34d; }
+
+  .result-chip {
+    display: none; position: relative; align-items: center; gap: 10px;
+    background: var(--correct-light); border: 2.5px solid var(--correct);
+    border-radius: 16px; padding: 14px 22px;
+    font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: #166534;
+    margin-top: 16px; overflow: visible;
+  }
+  .result-chip.visible { display: flex; }
+
+  .reset-btn {
+    margin-top: 14px; padding: 10px 24px; background: transparent;
+    color: var(--muted); border: 2px solid var(--border); border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 700;
+    cursor: pointer; transition: border-color .15s, color .15s;
+  }
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(10,20,40,.35); z-index: 100;
+    align-items: flex-end; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .bottom-sheet {
+    background: #f8faff; border-radius: 24px 24px 0 0;
+    padding: 16px 16px 36px; width: 100%; max-width: 420px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,.18);
+    animation: slideUp .2s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+  .sheet-hint { text-align: center; font-size: .8rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+  .digit-preview {
+    display: none; text-align: center;
+    font-family: 'Fredoka One', cursive; font-size: 1.6rem; color: var(--accent);
+    background: var(--accent-light); border: 2px solid var(--border);
+    border-radius: 10px; padding: 6px 12px; margin-bottom: 12px;
+    min-height: 48px; letter-spacing: 2px;
+  }
+  .digit-preview.active { display: block; }
+  .digit-preview.empty { color: #b0bcd0; }
+
+  .numpad-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .numpad-key {
+    height: 64px; border: none; border-radius: 14px; background: #fff;
+    box-shadow: 0 2px 8px rgba(59,125,216,.10);
+    font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--text);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background .12s, transform .1s;
+  }
+  .numpad-key:active { background: var(--accent-light); transform: scale(.94); }
+  .numpad-key.zero { grid-column: span 2; }
+  .numpad-key.clr { background: #fee2e2; color: var(--wrong); font-size: 1rem; font-family: 'Nunito', sans-serif; font-weight: 800; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔢 Place Value Chart</h1>
+  <p>Type a number, then fill in the digit boxes</p>
+</header>
+
+<div class="setup-card" id="setupCard">
+  <div class="setup-label">Your number</div>
+  <div class="setup-row">
+    <input class="setup-input" id="numberInput" type="text" inputmode="decimal" placeholder="4.582">
+  </div>
+  <button class="build-btn" onclick="buildChart()">Build Chart ↓</button>
+  <div class="setup-hint" id="setupHint"></div>
+</div>
+
+<div class="problem-card" id="problemCard">
+  <div class="problem-expr" id="problemExpr"></div>
+
+  <div class="model-wrap">
+    <div class="pv-table-wrap">
+      <div class="pv-table" id="pvTable"></div>
+    </div>
+  </div>
+
+  <button class="confirm-btn" id="checkBtn" onclick="checkChart()">Check ✓</button>
+
+  <div class="feedback-msg" id="feedbackMsg"></div>
+  <div class="result-chip" id="resultChip"></div>
+  <button class="reset-btn" onclick="resetTool()">← New number</button>
+</div>
+
+<div class="overlay" id="numpadOverlay" onclick="closeNumpad()">
+  <div class="bottom-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-hint" id="numpadHint">Tap this column's digit</div>
+    <div class="digit-preview" id="digitPreview"></div>
+    <div class="numpad-grid" id="numpadGrid">
+      <button class="numpad-key" onclick="numpadTap('7')">7</button>
+      <button class="numpad-key" onclick="numpadTap('8')">8</button>
+      <button class="numpad-key" onclick="numpadTap('9')">9</button>
+      <button class="numpad-key" onclick="numpadTap('4')">4</button>
+      <button class="numpad-key" onclick="numpadTap('5')">5</button>
+      <button class="numpad-key" onclick="numpadTap('6')">6</button>
+      <button class="numpad-key" onclick="numpadTap('1')">1</button>
+      <button class="numpad-key" onclick="numpadTap('2')">2</button>
+      <button class="numpad-key" onclick="numpadTap('3')">3</button>
+      <button class="numpad-key zero" onclick="numpadTap('0')">0</button>
+      <button class="numpad-key clr" onclick="numpadTap('clear')">Clear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const COLUMNS = [
+    { place: 3,    label: 'Thousands' },
+    { place: 2,    label: 'Hundreds' },
+    { place: 1,    label: 'Tens' },
+    { place: 0,    label: 'Ones' },
+    { place: null, label: '●', marker: true },
+    { place: -1,   label: 'Tenths' },
+    { place: -2,   label: 'Hundredths' },
+    { place: -3,   label: 'Thousandths' }
+  ];
+  const PLACES = COLUMNS.filter(c => !c.marker).map(c => c.place);
+
+  function colIndexForPlace(place) { return COLUMNS.findIndex(c => c.place === place); }
+  function fitsGrid(lo, hi) { return lo >= -3 && hi <= 3; }
+
+  let digitMap = {};
+  let lo = 0;
+  let hi = 0;
+  let targetDisplay = '';
+  let enteredDigits = {};
+  let activeCell = null;
+  let solved = false;
+
+  function parseSetupNumber(raw) {
+    if (!/^\d*\.?\d*$/.test(raw) || raw === '' || raw === '.') return null;
+    let [intPartRaw, fracPartRaw] = raw.split('.');
+    intPartRaw = intPartRaw || '0';
+    fracPartRaw = fracPartRaw || '';
+
+    let intPart = intPartRaw.replace(/^0+(?!$)/, '');
+    if (intPart === '') intPart = '0';
+
+    return {
+      intPart,
+      fracPart: fracPartRaw,
+      display: fracPartRaw ? intPart + '.' + fracPartRaw : intPart
+    };
+  }
+
+  function buildChart() {
+    clearSetupHint();
+    const raw = document.getElementById('numberInput').value.trim();
+    const parsed = parseSetupNumber(raw);
+    if (!parsed) {
+      showSetupHint('💡 Enter a positive number first — like 4.582 or 246.');
+      return;
+    }
+
+    digitMap = {};
+    for (let i = 0; i < parsed.intPart.length; i++) {
+      digitMap[parsed.intPart.length - 1 - i] = parsed.intPart[i];
+    }
+    for (let i = 0; i < parsed.fracPart.length; i++) {
+      digitMap[-(i + 1)] = parsed.fracPart[i];
+    }
+
+    hi = parsed.intPart.length - 1;
+    lo = parsed.fracPart.length > 0 ? -parsed.fracPart.length : 0;
+
+    if (!fitsGrid(lo, hi)) {
+      showSetupHint('💡 Try a smaller number — this one needs more places than the chart shows.');
+      return;
+    }
+
+    targetDisplay = parsed.display;
+    enteredDigits = {};
+    activeCell = null;
+    solved = false;
+
+    renderChart();
+
+    document.getElementById('setupCard').style.display = 'none';
+    document.getElementById('problemCard').classList.add('visible');
+    document.getElementById('problemExpr').textContent = 'Enter ' + targetDisplay + ' into the chart.';
+    document.getElementById('resultChip').className = 'result-chip';
+    document.getElementById('resultChip').innerHTML = '';
+    document.getElementById('feedbackMsg').className = 'feedback-msg';
+    document.getElementById('checkBtn').style.display = '';
+  }
+
+  function expectedDigit(place, spanLo, spanHi) {
+    if (place < spanLo || place > spanHi) return null;
+    return digitMap[place] ?? '0';
+  }
+
+  function renderChart() {
+    const table = document.getElementById('pvTable');
+    table.innerHTML = '';
+
+    COLUMNS.forEach((col) => {
+      const h = document.createElement('div');
+      h.className = 'pv-header' + (col.marker ? ' marker-header' : '');
+      h.textContent = col.label;
+      table.appendChild(h);
+    });
+
+    COLUMNS.forEach((col, colIndex) => {
+      const cell = document.createElement('div');
+      cell.className = 'pv-cell' + (col.marker ? ' pv-marker' : ' digit-cell');
+      cell.id = 'pv-cell-' + colIndex;
+      if (col.marker) {
+        cell.textContent = '●';
+      } else {
+        cell.textContent = enteredDigits[col.place] || '';
+        cell.onclick = () => openNumpad(colIndex);
+      }
+      table.appendChild(cell);
+    });
+  }
+
+  function openNumpad(colIndex) {
+    if (solved) return;
+    const col = COLUMNS[colIndex];
+    activeCell = { colIndex, place: col.place };
+
+    const hintEl = document.getElementById('numpadHint');
+    const preview = document.getElementById('digitPreview');
+    hintEl.textContent = 'Tap the digit for this place';
+    preview.classList.add('active');
+    const current = enteredDigits[col.place] || '';
+    preview.textContent = current || '—';
+    preview.classList.toggle('empty', !current);
+
+    clearActiveHighlights();
+    const el = document.getElementById('pv-cell-' + colIndex);
+    if (el) el.classList.add('active-cell');
+    document.getElementById('numpadOverlay').classList.add('open');
+  }
+
+  function closeNumpad() {
+    document.getElementById('numpadOverlay').classList.remove('open');
+    document.getElementById('digitPreview').classList.remove('active');
+    clearActiveHighlights();
+    activeCell = null;
+  }
+
+  function clearActiveHighlights() {
+    document.querySelectorAll('.active-cell').forEach(e => e.classList.remove('active-cell'));
+  }
+
+  function numpadTap(val) {
+    if (!activeCell) return;
+    const { place, colIndex } = activeCell;
+    const cellEl = document.getElementById('pv-cell-' + colIndex);
+    const preview = document.getElementById('digitPreview');
+
+    if (val === 'clear') {
+      enteredDigits[place] = '';
+      if (cellEl) {
+        cellEl.textContent = '';
+        cellEl.classList.remove('correct-cell', 'wrong-cell');
+      }
+      preview.textContent = '—';
+      preview.classList.add('empty');
+      closeNumpad();
+      return;
+    }
+
+    enteredDigits[place] = val;
+    if (cellEl) {
+      cellEl.textContent = val;
+      cellEl.classList.remove('wrong-cell');
+    }
+    preview.textContent = val;
+    preview.classList.remove('empty');
+    closeNumpad();
+  }
+
+  function checkChart() {
+    let allCorrect = true;
+
+    PLACES.forEach((place) => {
+      const colIndex = colIndexForPlace(place);
+      const expected = expectedDigit(place, lo, hi);
+      const typed = enteredDigits[place] || '';
+      const passes = expected === null ? (typed === '' || typed === '0') : (typed === expected);
+      const cellEl = document.getElementById('pv-cell-' + colIndex);
+
+      if (!passes) {
+        allCorrect = false;
+        if (cellEl) {
+          cellEl.classList.add('wrong-cell');
+          setTimeout(() => cellEl.classList.remove('wrong-cell'), 400);
+        }
+      } else if (cellEl) {
+        cellEl.classList.remove('wrong-cell');
+      }
+    });
+
+    if (allCorrect) {
+      PLACES.forEach((place) => {
+        const cellEl = document.getElementById('pv-cell-' + colIndexForPlace(place));
+        if (cellEl) cellEl.classList.add('correct-cell');
+      });
+      clearFeedback();
+      document.getElementById('checkBtn').style.display = 'none';
+      const chip = document.getElementById('resultChip');
+      chip.innerHTML = '✅ &nbsp;' + targetDisplay + ' entered correctly';
+      chip.classList.add('visible');
+      solved = true;
+    } else {
+      showFeedback('💡 Check the place values and try again.');
+    }
+  }
+
+  function showFeedback(msg) {
+    const el = document.getElementById('feedbackMsg');
+    el.className = 'feedback-msg show';
+    el.textContent = msg;
+  }
+
+  function clearFeedback() {
+    document.getElementById('feedbackMsg').className = 'feedback-msg';
+  }
+
+  function showSetupHint(msg) {
+    const el = document.getElementById('setupHint');
+    el.className = 'setup-hint show';
+    el.textContent = msg;
+  }
+
+  function clearSetupHint() {
+    document.getElementById('setupHint').className = 'setup-hint';
+  }
+
+  function resetTool() {
+    document.getElementById('problemCard').classList.remove('visible');
+    document.getElementById('setupCard').style.display = '';
+    document.getElementById('numberInput').value = '';
+    clearSetupHint();
+
+    document.getElementById('pvTable').innerHTML = '';
+    document.getElementById('resultChip').className = 'result-chip';
+    document.getElementById('resultChip').innerHTML = '';
+    document.getElementById('feedbackMsg').className = 'feedback-msg';
+    document.getElementById('checkBtn').style.display = '';
+    document.getElementById('problemExpr').textContent = '';
+    document.getElementById('digitPreview').classList.remove('active');
+    document.querySelectorAll('.active-cell').forEach(e => e.classList.remove('active-cell'));
+    digitMap = {};
+    lo = 0;
+    hi = 0;
+    targetDisplay = '';
+    enteredDigits = {};
+    activeCell = null;
+    solved = false;
+  }
+</script>
+</body>
+</html>
