@@ -281,7 +281,9 @@
     return {
       intPart,
       fracPart: fracPartRaw,
-      display: fracPartRaw ? intPart + '.' + fracPartRaw : intPart
+      display: fracPartRaw
+        ? (intPartRaw === '' ? '.' + fracPartRaw : intPart + '.' + fracPartRaw)
+        : intPart
     };
   }
 

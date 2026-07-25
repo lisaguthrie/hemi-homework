@@ -43,9 +43,22 @@
   }
   .setup-label { font-size: .82rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
   .setup-row { margin-bottom: 18px; }
+  .setup-equation-wrap { width: 100%; overflow-x: auto; margin-bottom: 18px; }
+  .setup-equation {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 360px;
+  }
+  .eq-sign {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--muted);
+    flex: 0 0 auto;
+  }
   .setup-input {
     font-family: 'Fredoka One', cursive; font-size: 1.7rem;
-    width: 100%; padding: 12px 14px;
+    width: 100%; min-width: 160px; padding: 12px 14px;
     border: 2.5px solid var(--border); border-radius: 12px;
     background: var(--bg); color: var(--text); text-align: center; outline: none;
     transition: border-color .2s;
@@ -61,6 +74,8 @@
     transition: border-color .2s;
   }
   .setup-select:focus { border-color: var(--accent); }
+  .setup-op { max-width: 88px; text-align: center; }
+  .setup-power { max-width: 116px; text-align: center; }
   .build-btn {
     width: 100%; padding: 14px; background: var(--accent); color: white; border: none;
     border-radius: 14px; font-family: 'Fredoka One', cursive; font-size: 1.3rem;
@@ -260,24 +275,21 @@
 
 <!-- Setup -->
 <div class="setup-card" id="setupCard">
-  <div class="setup-label">Your number</div>
-  <div class="setup-row">
-    <input class="setup-input" id="numberInput" type="text" inputmode="decimal" placeholder="4.582">
-  </div>
-  <div class="setup-label">Operation</div>
-  <div class="setup-row">
-    <select class="setup-select" id="opSelect">
-      <option value="×">× multiply</option>
-      <option value="÷">÷ divide</option>
-    </select>
-  </div>
-  <div class="setup-label">Power of ten</div>
-  <div class="setup-row">
-    <select class="setup-select" id="powerSelect">
-      <option value="10">10</option>
-      <option value="100">100</option>
-      <option value="1000">1000</option>
-    </select>
+  <div class="setup-label">Set up the problem</div>
+  <div class="setup-equation-wrap">
+    <div class="setup-equation" aria-label="Problem setup">
+      <input class="setup-input" id="numberInput" type="text" inputmode="decimal" placeholder="_____">
+      <select class="setup-select setup-op" id="opSelect" aria-label="Operation">
+        <option value="×">×</option>
+        <option value="÷">÷</option>
+      </select>
+      <select class="setup-select setup-power" id="powerSelect" aria-label="Power of ten">
+        <option value="10">10</option>
+        <option value="100">100</option>
+        <option value="1000">1000</option>
+      </select>
+      <span class="eq-sign">= ?</span>
+    </div>
   </div>
   <button class="build-btn" onclick="buildProblem()">Build Chart ↓</button>
   <div class="setup-hint" id="setupHint"></div>
@@ -492,6 +504,7 @@
       const r1 = document.createElement('div');
       r1.className = 'pv-cell' + (col.marker ? '' : ' digit-cell');
       r1.id = 'pv-row1-' + colIndex;
+      if (col.marker) r1.textContent = '.';
       if (!col.marker) r1.onclick = () => handleRow1Tap(colIndex);
       table.appendChild(r1);
     });
@@ -504,6 +517,7 @@
       const r2 = document.createElement('div');
       r2.className = 'pv-cell' + (col.marker ? '' : ' digit-cell inactive');
       r2.id = 'pv-row2-' + colIndex;
+      if (col.marker) r2.textContent = '.';
       if (!col.marker) r2.onclick = () => handleRow2Tap(colIndex);
       table.appendChild(r2);
     });
