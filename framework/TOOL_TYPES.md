@@ -102,14 +102,16 @@ The student types any number (including decimals). Each digit is rendered in a l
 **Setup:** Inline problem builder: `How many [target unit] are in [number] [source unit]?`. Unit dropdowns contain the supported metric and standard length, weight, and capacity units. Invalid pairings across measurement families are flagged visually before the student proceeds.
 
 **Conversion-table interaction:**
+- Keep the conversion table hidden until the copied problem is complete and the two units belong to the same measurement family.
 - Show full unit names rather than abbreviations.
-- Conversion rows are tappable.
+- Conversion rows are tappable, but begin visually neutral: no unit color coding and no factor highlighting before the student attempts a choice.
 - A correct tap must directly connect the two currently entered units.
-- After an incorrect tap, highlight every conversion row containing either unit from the problem. Keep the original problem editable so the student can recognize and enter an intermediate single-step conversion for a multi-step problem.
+- After an incorrect tap, highlight every conversion row containing either unit from the problem and color-code only those problem units within the highlighted rows. Keep conversion-table numbers visually plain to reduce unnecessary visual load.
+- Keep the original problem editable after an incorrect tap so the student can recognize and enter an intermediate single-step conversion for a multi-step problem.
 - Once a direct conversion is selected, hide the table and lock the copied problem.
 
 **Worked scaffold:**
-1. Show the selected conversion fact with source unit, target unit, and non-1 conversion factor visually distinguished.
+1. Show the selected conversion fact with source unit, target unit, and non-1 conversion factor visually distinguished. This is the first point at which the conversion factor needs emphasis.
 2. Ask the student to choose `multiply` or `divide`; validate only after an explicit Check tap.
 3. Reveal the numeric calculation sentence and collect the result with the work-input numpad; validate on Check.
 4. Reveal the original problem and a final complete-sentence answer blank; validate on Check.
