@@ -47,7 +47,7 @@
   .subtitle {
     max-width: 500px; margin: 0 auto 28px;
     font-size: 1rem; color: var(--muted); font-weight: 600;
-    padding-left: 56px; /* align with title after back button */
+    padding-left: 56px;
   }
 
   .tools-grid {
@@ -96,7 +96,6 @@
     font-size: 1.4rem; color: var(--border); flex-shrink: 0;
   }
 
-  /* Per-tool accent colors */
   .icon-subtract { background: #fee2e2; }
   .icon-add      { background: #dcfce7; }
   .icon-multiply { background: #fef3c7; }
@@ -104,8 +103,8 @@
   .icon-fraction { background: #fce7f3; }
   .icon-place    { background: #e0f2fe; }
   .icon-powers   { background: #ede9fe; font-size: 1.7rem; }
+  .icon-convert  { background: #dcfce7; font-size: 1.9rem; }
 
-  /* Coming soon badge */
   .tool-card.coming-soon {
     opacity: 0.55;
     pointer-events: none;
@@ -180,6 +179,15 @@
     <div class="tool-info">
       <div class="tool-name">Place Value</div>
       <div class="tool-desc">Type any number and enter each digit into a single place-value chart.</div>
+    </div>
+    <div class="tool-arrow">›</div>
+  </a>
+
+  <a class="tool-card" href="conversions.html">
+    <div class="tool-icon icon-convert">↔</div>
+    <div class="tool-info">
+      <div class="tool-name">Measurement Conversions</div>
+      <div class="tool-desc">Choose a conversion fact and work through multiply or divide, calculation, and final answer one step at a time.</div>
     </div>
     <div class="tool-arrow">›</div>
   </a>
