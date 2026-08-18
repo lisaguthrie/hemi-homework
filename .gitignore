@@ -6,3 +6,4 @@ __pycache__/
 .venv/
 christina/
 pending-updates.md
+.tmp.driveupload

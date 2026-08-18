@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Multiplication Tool</title>
-<meta name="description" content="Practice multiplication with an area model and partial products.">
+<meta name="description" content="Practice whole-number and decimal multiplication with an area model and partial products.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Multiplication Tool">
-<meta property="og:description" content="Multi-digit multiplication computation using partial products.">
+<meta property="og:description" content="Whole-number and decimal multiplication using an area model and partial products.">
 <meta property="og:image" content="https://lisaguthrie.github.io/hemi-homework/tools/math/multiplication.png">
 <meta property="og:image:width" content="598">
 <meta property="og:image:height" content="416">
@@ -15,534 +15,213 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f0f4ff;
-    --card: #ffffff;
-    --border: #d0d8f0;
-    --text: #1a2a3a;
-    --muted: #8a9ab0;
-    --accent: #3b7dd8;
-    --accent-light: #e8f0ff;
-    --correct: #22c55e;
-    --correct-light: #dcfce7;
-    --wrong: #ef4444;
-    --wrong-light: #fee2e2;
-    --input-bg: #f7f9ff;
-    --decomp-bg: #fff7e8;
-    --decomp-border: #f59e0b;
-    --separator: #6b7280;
+    --bg: #f0f4ff; --card: #fff; --border: #d0d8f0; --text: #1a2a3a;
+    --muted: #8a9ab0; --accent: #3b7dd8; --accent-light: #e8f0ff;
+    --correct: #22c55e; --correct-light: #dcfce7; --wrong: #ef4444;
+    --wrong-light: #fee2e2; --input-bg: #f7f9ff; --decomp-bg: #fff7e8;
+    --decomp-border: #f59e0b; --separator: #6b7280;
   }
-
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: var(--bg);
-    min-height: 100vh;
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    padding: 24px 16px 80px;
-  }
-
-  .app {
-    width: 100%;
-    max-width: 760px;
-  }
-
-  header {
-    margin-bottom: 20px;
-  }
-
-  h1 {
-    font-family: 'Fredoka One', cursive;
-    font-size: 2rem;
-    color: var(--accent);
-  }
-
-  .subtitle {
-    color: var(--muted);
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin-top: 4px;
-  }
-
-  .card {
-    background: var(--card);
-    border: 2px solid var(--border);
-    border-radius: 20px;
-    box-shadow: 0 6px 28px rgba(59, 125, 216, 0.12);
-    padding: 22px;
-    margin-bottom: 16px;
-  }
-
-  .setup-grid {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .label {
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-
-  .input-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .op {
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.8rem;
-    color: var(--accent);
-    width: 26px;
-    text-align: center;
-  }
-
-  .main-input {
-    width: 100%;
-    max-width: 180px;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    background: var(--input-bg);
-    color: var(--text);
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.9rem;
-    line-height: 1;
-    padding: 12px 14px;
-    text-align: center;
-    outline: none;
-  }
-
-  .main-input:focus {
-    border-color: var(--accent);
-  }
-
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .hidden {
-    display: none;
-  }
-
-  .btn {
-    border: none;
-    border-radius: 14px;
-    padding: 12px 20px;
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.1rem;
-    cursor: pointer;
-  }
-
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-  }
-
-  .btn-primary:hover {
-    background: #2a5fb0;
-  }
-
-  .btn-outline {
-    background: #fff;
-    color: var(--muted);
-    border: 2px solid var(--border);
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 0.95rem;
-  }
-
-  .btn-outline:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .btn-read {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #fff;
-    color: var(--accent);
-    border: 2px solid var(--accent);
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 0.95rem;
-  }
-
-  .btn-read:hover {
-    background: var(--accent-light);
-  }
-
-  .btn-read.hidden {
-    display: none;
-  }
-
-  .btn-read:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-
-  .problem-card {
-    display: none;
-  }
-
-  .problem-card.visible {
-    display: block;
-  }
-
-  .problem-title {
-    font-family: 'Fredoka One', cursive;
-    color: var(--accent);
-    font-size: 1.35rem;
-    margin-bottom: 8px;
-  }
-
-  .problem-help {
-    color: var(--muted);
-    font-size: 0.95rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-  }
-
-  .model-wrap {
-    width: 100%;
-    overflow-x: auto;
-    padding-bottom: 8px;
-  }
-
-  .area-grid {
-    display: grid;
-    gap: 8px;
-    min-width: max-content;
-  }
-
-  .corner-cell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 78px;
-    min-height: 54px;
-    border-radius: 10px;
-    background: var(--accent-light);
-    border: 2px solid var(--border);
-    font-family: 'Fredoka One', cursive;
-    color: var(--accent);
-    font-size: 1.6rem;
-  }
-
-  .model-input {
-    width: 100%;
-    min-height: 54px;
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    background: var(--input-bg);
-    color: var(--text);
-    padding: 10px 8px;
-    text-align: center;
-    font-weight: 800;
-    font-size: 1.05rem;
-    outline: none;
-  }
-
-  .model-input:focus {
-    border-color: var(--accent);
-    background: #fff;
-  }
-
-  .row-label {
-    width: 78px;
-  }
-
-  .decomp-input {
-    background: var(--decomp-bg);
-    border: 3px solid var(--decomp-border);
-    font-size: 1.1rem;
-    font-weight: 900;
-  }
-
-  .col-label,
-  .product-cell {
-    width: 112px;
-  }
-
-  .top-separator {
-    border-bottom: 4px solid var(--separator);
-  }
-
-  .left-separator {
-    border-right: 4px solid var(--separator);
-  }
-
-  .status-correct {
-    border-color: var(--correct);
-    background: var(--correct-light);
-    color: #166534;
-  }
-
-  .status-wrong {
-    border-color: var(--wrong);
-    background: var(--wrong-light);
-    color: #991b1b;
-  }
-
-  .problem-card.completed .decomp-input,
-  .problem-card.completed .decomp-input.status-correct {
-    background: #f3f4f6;
-    border-color: #e5e7eb;
-    color: #9ca3af;
-  }
-
-  .problem-card.completed .product-cell,
-  .problem-card.completed .product-cell.status-correct {
-    background: var(--correct-light);
-    border-color: var(--correct);
-    color: #14532d;
-    font-size: 1.2rem;
-    font-weight: 900;
-    box-shadow: 0 10px 24px rgba(34, 197, 94, 0.22);
-    transform: scale(1.04);
-    animation: productPulse 900ms ease-in-out 2;
-  }
-
-  .problem-card.completed .model-input {
-    cursor: default;
-  }
-
-  .problem-card.completed .product-cell {
-    cursor: pointer;
-  }
-
-  .celebration-layer {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 999;
-  }
-
-  .confetti {
-    position: absolute;
-    width: 10px;
-    height: 16px;
-    border-radius: 2px;
-    opacity: 0.95;
-    animation: confettiFall 1800ms linear forwards;
-  }
-
-  .speaking-toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: #1a6fa8;
-    color: #fff;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-    padding: 10px 24px;
-    border-radius: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, background 0.2s;
-    z-index: 1000;
-    cursor: pointer;
-    user-select: none;
-    pointer-events: none;
-  }
-
-  .speaking-toast.visible {
-    transform: translateX(-50%) translateY(0);
-    pointer-events: auto;
-  }
-
-  .speaking-toast.visible:hover {
-    background: #c0392b;
-  }
-
-  .speaking-toast.visible:hover .toast-label::after {
-    content: ' - tap to stop';
-  }
-
-  @keyframes confettiFall {
-    0% {
-      transform: translateY(-18vh) rotate(0deg);
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(112vh) rotate(540deg);
-      opacity: 0;
-    }
-  }
-
-  @keyframes productPulse {
-    0%,
-    100% {
-      transform: scale(1.04);
-    }
-    50% {
-      transform: scale(1.1);
-    }
-  }
-
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); display: flex; justify-content: center; padding: 24px 16px 80px; }
+  .app { width: 100%; max-width: 760px; }
+  header { margin-bottom: 20px; }
+  h1 { font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--accent); }
+  .subtitle { color: var(--muted); font-size: .95rem; font-weight: 700; margin-top: 4px; }
+  .card { background: var(--card); border: 2px solid var(--border); border-radius: 20px; box-shadow: 0 6px 28px rgba(59,125,216,.12); padding: 22px; margin-bottom: 16px; }
+  .setup-grid { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; }
+  .op { font-family: 'Fredoka One', cursive; font-size: 1.8rem; color: var(--accent); width: 26px; text-align: center; }
+  .main-input { width: 100%; max-width: 180px; border: 2px solid var(--border); border-radius: 12px; background: var(--input-bg); color: var(--text); font-family: 'Fredoka One', cursive; font-size: 1.9rem; line-height: 1; padding: 12px 14px; text-align: center; outline: none; }
+  .main-input:focus, .model-input:focus, .final-input:focus { border-color: var(--accent); background: #fff; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .hidden { display: none !important; }
+  .btn { min-height: 44px; border: none; border-radius: 14px; padding: 12px 20px; font-family: 'Fredoka One', cursive; font-size: 1.1rem; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #2a5fb0; }
+  .btn-outline { background: #fff; color: var(--muted); border: 2px solid var(--border); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .95rem; }
+  .btn-outline:hover { color: var(--accent); border-color: var(--accent); }
+  .btn-read { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--accent); border: 2px solid var(--accent); font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .95rem; }
+  .btn-read:hover { background: var(--accent-light); }
+  .btn-read:disabled { opacity: .5; cursor: default; }
+  .problem-card { display: none; }
+  .problem-card.visible { display: block; }
+  .problem-title { font-family: 'Fredoka One', cursive; color: var(--accent); font-size: 1.35rem; margin-bottom: 8px; }
+  .problem-help { color: var(--muted); font-size: .95rem; font-weight: 700; margin-bottom: 16px; }
+  .model-wrap { width: 100%; overflow-x: auto; padding-bottom: 8px; }
+  .area-grid { display: grid; gap: 8px; min-width: max-content; }
+  .corner-cell { display: flex; align-items: center; justify-content: center; width: 78px; min-height: 54px; border-radius: 10px; background: var(--accent-light); border: 2px solid var(--border); font-family: 'Fredoka One', cursive; color: var(--accent); font-size: 1.6rem; }
+  .model-input { width: 100%; min-height: 54px; border: 2px solid var(--border); border-radius: 10px; background: var(--input-bg); color: var(--text); padding: 10px 8px; text-align: center; font-weight: 800; font-size: 1.05rem; outline: none; }
+  .row-label { width: 78px; }
+  .decomp-input { background: var(--decomp-bg); border: 3px solid var(--decomp-border); font-size: 1.1rem; font-weight: 900; }
+  .col-label, .product-cell { width: 112px; }
+  .top-separator { border-bottom: 4px solid var(--separator); }
+  .left-separator { border-right: 4px solid var(--separator); }
+  .status-correct { border-color: var(--correct) !important; background: var(--correct-light) !important; color: #166534; }
+  .status-wrong { border-color: var(--wrong) !important; background: var(--wrong-light) !important; color: #991b1b; }
+  .area-complete .decomp-input { background: #f3f4f6; border-color: #e5e7eb; color: #9ca3af; }
+  .area-complete .product-cell { background: var(--correct-light); border-color: var(--correct); color: #14532d; font-size: 1.2rem; font-weight: 900; box-shadow: 0 10px 24px rgba(34,197,94,.18); }
+  .final-step { margin-top: 20px; border-top: 2px solid var(--border); padding-top: 18px; }
+  .final-title { font-family: 'Fredoka One', cursive; color: var(--accent); font-size: 1.2rem; margin-bottom: 6px; }
+  .sum-line { font-weight: 800; line-height: 1.7; margin-bottom: 12px; word-break: break-word; }
+  .final-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .final-expression { font-family: 'Fredoka One', cursive; font-size: 1.25rem; }
+  .final-input { width: 170px; min-height: 54px; border: 3px solid var(--accent); border-radius: 12px; background: var(--input-bg); color: var(--text); padding: 8px 10px; text-align: center; font-family: 'Fredoka One', cursive; font-size: 1.35rem; outline: none; }
+  .result-chip { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 14px; margin-top: 12px; border-radius: 999px; background: var(--correct-light); color: #166534; font-weight: 900; }
+  .celebration-layer { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 999; }
+  .confetti { position: absolute; width: 10px; height: 16px; border-radius: 2px; opacity: .95; animation: confettiFall 1800ms linear forwards; }
+  .speaking-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a6fa8; color: #fff; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1rem; padding: 10px 24px; border-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,.2); transition: transform .3s ease, background .2s; z-index: 1000; cursor: pointer; user-select: none; pointer-events: none; }
+  .speaking-toast.visible { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .speaking-toast.visible:hover { background: #c0392b; }
+  .speaking-toast.visible:hover .toast-label::after { content: ' - tap to stop'; }
+  @keyframes confettiFall { 0% { transform: translateY(-18vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(112vh) rotate(540deg); opacity: 0; } }
   @media (max-width: 640px) {
-    h1 {
-      font-size: 1.75rem;
-    }
-
-    .main-input {
-      font-size: 1.7rem;
-      max-width: 140px;
-    }
-
-    .corner-cell,
-    .row-label {
-      width: 68px;
-      min-height: 50px;
-    }
-
-    .col-label,
-    .product-cell {
-      width: 98px;
-    }
-
-    .model-input {
-      min-height: 50px;
-      font-size: 1rem;
-    }
-
-    .decomp-input {
-      font-size: 1.05rem;
-    }
+    h1 { font-size: 1.75rem; }
+    .main-input { font-size: 1.7rem; max-width: 140px; }
+    .corner-cell, .row-label { width: 68px; min-height: 50px; }
+    .col-label, .product-cell { width: 98px; }
+    .model-input { min-height: 50px; font-size: 1rem; }
+    .decomp-input { font-size: 1.05rem; }
   }
 </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <h1>× Multiplication</h1>
-      <p class="subtitle">Area model partial products</p>
-    </header>
+<div class="app">
+  <header>
+    <h1>× Multiplication</h1>
+    <p class="subtitle">Area model partial products — whole numbers or decimals</p>
+  </header>
 
-    <section class="card" id="setupCard">
-      <div class="setup-grid">
-        <input id="inputTop" class="main-input" type="text" inputmode="numeric" placeholder="123" autocomplete="off" aria-label="First number">
-        <div class="op" aria-hidden="true">×</div>
-        <input id="inputBot" class="main-input" type="text" inputmode="numeric" placeholder="45" autocomplete="off" aria-label="Second number">
+  <section class="card" id="setupCard">
+    <div class="setup-grid">
+      <input id="inputTop" class="main-input" type="text" inputmode="decimal" placeholder="3.2" autocomplete="off" aria-label="First number">
+      <div class="op" aria-hidden="true">×</div>
+      <input id="inputBot" class="main-input" type="text" inputmode="decimal" placeholder="4.6" autocomplete="off" aria-label="Second number">
+    </div>
+    <div class="actions"><button class="btn btn-primary" onclick="buildProblem()">Set Up</button></div>
+  </section>
+
+  <section class="card problem-card" id="problemCard">
+    <div class="problem-title" id="problemTitle"></div>
+    <p class="problem-help">Break each number into place-value parts, then fill in each partial product.</p>
+    <div class="model-wrap"><div class="area-grid" id="areaGrid"></div></div>
+
+    <div class="final-step hidden" id="finalStep">
+      <div class="final-title">Add the partial products</div>
+      <div class="sum-line" id="sumLine"></div>
+      <div class="final-row">
+        <span class="final-expression" id="finalExpression"></span>
+        <input id="finalAnswer" class="final-input" type="text" inputmode="decimal" placeholder="?" autocomplete="off" aria-label="Final product">
+        <button class="btn btn-primary" id="checkFinalBtn" onclick="checkFinalAnswer()">Check final answer</button>
       </div>
-      <div class="actions">
-        <button class="btn btn-primary" onclick="buildProblem()">Set Up</button>
-      </div>
-    </section>
+      <div class="result-chip hidden" id="resultChip"></div>
+    </div>
 
-    <section class="card problem-card" id="problemCard">
-      <div class="problem-title" id="problemTitle"></div>
-      <p class="problem-help">Fill in the decomposition boxes, then fill each partial product box.</p>
+    <div class="actions" style="margin-top:14px;">
+      <button class="btn btn-primary" id="checkAreaBtn" onclick="checkAreaModel()">Check</button>
+      <button class="btn btn-read hidden" id="readAnswersBtn" onclick="readAllProductsAloud()" type="button"><span aria-hidden="true">🔊</span><span>Read partial products aloud</span></button>
+      <button class="btn btn-outline" onclick="resetTool()">New problem</button>
+    </div>
+  </section>
+</div>
 
-      <div class="model-wrap">
-        <div class="area-grid" id="areaGrid"></div>
-      </div>
-
-      <div class="actions" style="margin-top: 14px;">
-        <button class="btn btn-primary" onclick="checkAnswer()">Check</button>
-        <button class="btn btn-read hidden" id="readAnswersBtn" onclick="readAllProductsAloud()" type="button">
-          <span aria-hidden="true">🎤</span>
-          <span>Read answers aloud</span>
-        </button>
-        <button class="btn btn-outline" onclick="resetTool()">New problem</button>
-      </div>
-    </section>
-  </div>
-
-  <div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
-    🔊 <span class="toast-label">Reading aloud...</span>
-  </div>
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">🔊 <span class="toast-label">Reading aloud...</span></div>
 
 <script>
-  let topNumber = 0;
-  let bottomNumber = 0;
+  let topNumberText = '';
+  let bottomNumberText = '';
   let topPartsExpected = [];
   let rowPartsExpected = [];
   let cellExpected = [];
+  let finalExpected = '';
   let cols = 0;
   let rows = 0;
+  let areaComplete = false;
   let isCompleted = false;
   let isBatchReading = false;
 
-  const ONES = [
-    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
-    'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
-    'seventeen', 'eighteen', 'nineteen'
-  ];
-  const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
-  const THOUSANDS = ['', 'thousand', 'million', 'billion', 'trillion'];
+  const ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const TENS = ['', '', 'twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  const THOUSANDS = ['', 'thousand','million','billion','trillion'];
 
-  function isWholeNumberString(value) {
-    return /^\d+$/.test(value);
+  function normalizeDecimalString(value) {
+    const raw = String(value).trim();
+    if (!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw)) return null;
+    let clean = raw.startsWith('.') ? '0' + raw : raw;
+    let parts = clean.split('.');
+    let whole = (parts[0] || '0').replace(/^0+(?=\d)/, '') || '0';
+    let frac = parts.length > 1 ? parts[1].replace(/0+$/, '') : '';
+    return frac ? whole + '.' + frac : whole;
   }
 
-  function normalizeWholeNumber(value) {
-    return value.replace(/^0+(?=\d)/, '');
+  function toScaledDecimal(value) {
+    const clean = normalizeDecimalString(value);
+    if (clean === null) return null;
+    const parts = clean.split('.');
+    const frac = parts[1] || '';
+    return { digits: BigInt((parts[0] || '0') + frac), scale: frac.length };
+  }
+
+  function formatScaledDecimal(digits, scale) {
+    let s = digits.toString();
+    if (scale === 0) return s;
+    if (s.length <= scale) s = '0'.repeat(scale - s.length + 1) + s;
+    const split = s.length - scale;
+    return normalizeDecimalString(s.slice(0, split) + '.' + s.slice(split));
+  }
+
+  function multiplyExact(a, b) {
+    const da = toScaledDecimal(a);
+    const db = toScaledDecimal(b);
+    return formatScaledDecimal(da.digits * db.digits, da.scale + db.scale);
+  }
+
+  function decomposeDecimal(value) {
+    const clean = normalizeDecimalString(value);
+    const pieces = clean.split('.');
+    const whole = pieces[0];
+    const frac = pieces[1] || '';
+    const digits = whole + frac;
+    const wholeLength = whole.length;
+    const result = [];
+
+    for (let i = 0; i < digits.length; i++) {
+      const digit = Number(digits[i]);
+      if (digit === 0) continue;
+      const exponent = wholeLength - i - 1;
+      if (exponent >= 0) {
+        result.push(String(digit) + '0'.repeat(exponent));
+      } else {
+        result.push('0.' + '0'.repeat((-exponent) - 1) + String(digit));
+      }
+    }
+    return result.length ? result : ['0'];
   }
 
   function buildProblem() {
-    const topRaw = document.getElementById('inputTop').value.trim();
-    const botRaw = document.getElementById('inputBot').value.trim();
-
-    if (!isWholeNumberString(topRaw) || !isWholeNumberString(botRaw)) {
-      alert('Use whole numbers only (no decimals).');
+    const topClean = normalizeDecimalString(document.getElementById('inputTop').value);
+    const botClean = normalizeDecimalString(document.getElementById('inputBot').value);
+    if (topClean === null || botClean === null) {
+      alert('Use positive whole numbers or decimals, such as 3.2 or 0.15.');
+      return;
+    }
+    if (topClean.replace('.', '').length > 6 || botClean.replace('.', '').length > 6) {
+      alert('Please use numbers with up to 6 digits each, not counting the decimal point.');
       return;
     }
 
-    const topClean = normalizeWholeNumber(topRaw) || '0';
-    const botClean = normalizeWholeNumber(botRaw) || '0';
-
-    if (topClean.length > 6 || botClean.length > 6) {
-      alert('Please use numbers up to 6 digits each.');
-      return;
-    }
-
-    topNumber = Number(topClean);
-    bottomNumber = Number(botClean);
-
-    const topDigits = topClean.split('').map(function(d) { return Number(d); });
-    const botDigits = botClean.split('').map(function(d) { return Number(d); });
-
-    cols = topDigits.length;
-    rows = botDigits.length;
-
-    topPartsExpected = topDigits.map(function(digit, idx) {
-      const power = cols - idx - 1;
-      return digit * Math.pow(10, power);
-    });
-
-    rowPartsExpected = botDigits.map(function(digit, idx) {
-      const power = rows - idx - 1;
-      return digit * Math.pow(10, power);
-    });
-
+    topNumberText = topClean;
+    bottomNumberText = botClean;
+    topPartsExpected = decomposeDecimal(topClean);
+    rowPartsExpected = decomposeDecimal(botClean);
+    cols = topPartsExpected.length;
+    rows = rowPartsExpected.length;
     cellExpected = rowPartsExpected.map(function(rowPart) {
-      return topPartsExpected.map(function(colPart) {
-        return rowPart * colPart;
-      });
+      return topPartsExpected.map(function(colPart) { return multiplyExact(rowPart, colPart); });
     });
+    finalExpected = multiplyExact(topClean, botClean);
 
     renderAreaModel();
-
-    document.getElementById('problemTitle').textContent = topNumber + ' × ' + bottomNumber;
+    document.getElementById('problemTitle').textContent = topNumberText + ' × ' + bottomNumberText;
+    document.getElementById('finalExpression').textContent = topNumberText + ' × ' + bottomNumberText + ' =';
     document.getElementById('problemCard').classList.add('visible');
     document.getElementById('setupCard').style.display = 'none';
   }
@@ -550,56 +229,48 @@
   function renderAreaModel() {
     const grid = document.getElementById('areaGrid');
     grid.innerHTML = '';
+    areaComplete = false;
     isCompleted = false;
     isBatchReading = false;
-    hideSpeakingToast();
-    window.speechSynthesis.cancel();
-    document.getElementById('problemCard').classList.remove('completed');
+    cancelSpeak();
+    document.getElementById('problemCard').classList.remove('area-complete');
+    document.getElementById('finalStep').classList.add('hidden');
+    document.getElementById('resultChip').classList.add('hidden');
     document.getElementById('readAnswersBtn').classList.add('hidden');
+    document.getElementById('checkAreaBtn').classList.remove('hidden');
+    document.getElementById('checkFinalBtn').classList.remove('hidden');
+    document.getElementById('finalAnswer').value = '';
+    document.getElementById('finalAnswer').readOnly = false;
 
     grid.style.gridTemplateColumns = '78px repeat(' + cols + ', 112px)';
     grid.style.gridAutoRows = '54px';
-
     const corner = document.createElement('div');
-    corner.className = 'corner-cell';
-    corner.textContent = '×';
-    grid.appendChild(corner);
+    corner.className = 'corner-cell'; corner.textContent = '×'; grid.appendChild(corner);
 
     for (let c = 0; c < cols; c++) {
-      const colInput = document.createElement('input');
-      colInput.type = 'text';
-      colInput.inputMode = 'numeric';
-      colInput.className = 'model-input decomp-input col-label top-separator';
-      colInput.id = 'col-part-' + c;
-      colInput.placeholder = '?';
-      colInput.addEventListener('input', clearStatus);
-      grid.appendChild(colInput);
+      const el = document.createElement('input');
+      el.type = 'text'; el.inputMode = 'decimal';
+      el.className = 'model-input decomp-input col-label top-separator';
+      el.id = 'col-part-' + c; el.placeholder = '?';
+      el.addEventListener('input', clearStatus); grid.appendChild(el);
     }
-
     for (let r = 0; r < rows; r++) {
-      const rowInput = document.createElement('input');
-      rowInput.type = 'text';
-      rowInput.inputMode = 'numeric';
-      rowInput.className = 'model-input decomp-input row-label left-separator';
-      rowInput.id = 'row-part-' + r;
-      rowInput.placeholder = '?';
-      rowInput.addEventListener('input', clearStatus);
-      grid.appendChild(rowInput);
-
+      const row = document.createElement('input');
+      row.type = 'text'; row.inputMode = 'decimal';
+      row.className = 'model-input decomp-input row-label left-separator';
+      row.id = 'row-part-' + r; row.placeholder = '?';
+      row.addEventListener('input', clearStatus); grid.appendChild(row);
       for (let c = 0; c < cols; c++) {
-        const cellInput = document.createElement('input');
-        cellInput.type = 'text';
-        cellInput.inputMode = 'numeric';
-        cellInput.className = 'model-input product-cell';
-        cellInput.id = 'cell-' + r + '-' + c;
-        cellInput.dataset.expected = String(cellExpected[r][c]);
-        cellInput.placeholder = '?';
-        cellInput.addEventListener('input', clearStatus);
-        cellInput.addEventListener('click', onProductCellClick);
-        grid.appendChild(cellInput);
+        const cell = document.createElement('input');
+        cell.type = 'text'; cell.inputMode = 'decimal';
+        cell.className = 'model-input product-cell';
+        cell.id = 'cell-' + r + '-' + c;
+        cell.dataset.expected = cellExpected[r][c]; cell.placeholder = '?';
+        cell.addEventListener('input', clearStatus);
+        cell.addEventListener('click', onProductCellClick);
+        grid.appendChild(cell);
       }
     }
-
     if (window.matchMedia('(max-width: 640px)').matches) {
       grid.style.gridTemplateColumns = '68px repeat(' + cols + ', 98px)';
       grid.style.gridAutoRows = '50px';
@@ -607,146 +278,91 @@
   }
 
   function clearStatus(event) {
-    const el = event.target;
-    el.classList.remove('status-correct');
-    el.classList.remove('status-wrong');
+    event.target.classList.remove('status-correct', 'status-wrong');
   }
 
   function applyCheckToInput(el, expectedValue) {
-    const value = el.value.trim();
-
-    el.classList.remove('status-correct');
-    el.classList.remove('status-wrong');
-
-    if (!value) {
-      return { checked: false, correct: false, empty: true };
-    }
-
-    const parsed = Number(value);
-    const validWhole = /^\d+$/.test(value);
-    const correct = validWhole && parsed === expectedValue;
-
-    if (correct) {
-      el.classList.add('status-correct');
-      return { checked: true, correct: true, empty: false };
-    }
-
-    el.classList.add('status-wrong');
-    return { checked: true, correct: false, empty: false };
+    const raw = el.value.trim();
+    el.classList.remove('status-correct', 'status-wrong');
+    if (!raw) return { checked: false, correct: false };
+    const normalized = normalizeDecimalString(raw);
+    const correct = normalized !== null && normalized === expectedValue;
+    el.classList.add(correct ? 'status-correct' : 'status-wrong');
+    return { checked: true, correct: correct };
   }
 
-  function checkAnswer() {
-    if (isCompleted) {
-      return;
-    }
-
+  function checkAreaModel() {
+    if (areaComplete) return;
     let checkedCount = 0;
     let correctCount = 0;
-
     for (let c = 0; c < cols; c++) {
-      const el = document.getElementById('col-part-' + c);
-      const result = applyCheckToInput(el, topPartsExpected[c]);
-      if (result.checked) {
-        checkedCount += 1;
-        if (result.correct) correctCount += 1;
-      }
+      const result = applyCheckToInput(document.getElementById('col-part-' + c), topPartsExpected[c]);
+      if (result.checked) { checkedCount++; if (result.correct) correctCount++; }
     }
-
     for (let r = 0; r < rows; r++) {
-      const rowEl = document.getElementById('row-part-' + r);
-      const rowResult = applyCheckToInput(rowEl, rowPartsExpected[r]);
-      if (rowResult.checked) {
-        checkedCount += 1;
-        if (rowResult.correct) correctCount += 1;
-      }
-
+      let result = applyCheckToInput(document.getElementById('row-part-' + r), rowPartsExpected[r]);
+      if (result.checked) { checkedCount++; if (result.correct) correctCount++; }
       for (let c = 0; c < cols; c++) {
-        const cellEl = document.getElementById('cell-' + r + '-' + c);
-        const cellResult = applyCheckToInput(cellEl, cellExpected[r][c]);
-        if (cellResult.checked) {
-          checkedCount += 1;
-          if (cellResult.correct) correctCount += 1;
-        }
+        result = applyCheckToInput(document.getElementById('cell-' + r + '-' + c), cellExpected[r][c]);
+        if (result.checked) { checkedCount++; if (result.correct) correctCount++; }
       }
     }
-
-    if (checkedCount === 0) {
-      return;
-    }
-
-    const totalInputs = cols + rows + (rows * cols);
-    if (checkedCount === totalInputs && correctCount === totalInputs) {
-      finalizeCompletedState();
-    }
+    const total = cols + rows + (rows * cols);
+    if (checkedCount === total && correctCount === total) revealFinalStep();
   }
 
-  function finalizeCompletedState() {
-    const problemCard = document.getElementById('problemCard');
-    const allInputs = problemCard.querySelectorAll('.model-input');
-
-    allInputs.forEach(function(input) {
-      input.readOnly = true;
-      input.setAttribute('aria-readonly', 'true');
+  function revealFinalStep() {
+    areaComplete = true;
+    const card = document.getElementById('problemCard');
+    card.classList.add('area-complete');
+    card.querySelectorAll('.model-input').forEach(function(input) {
+      input.readOnly = true; input.setAttribute('aria-readonly', 'true');
     });
-
-    isCompleted = true;
-    problemCard.classList.add('completed');
+    const flat = cellExpected.flat();
+    document.getElementById('sumLine').textContent = flat.join(' + ');
+    document.getElementById('finalStep').classList.remove('hidden');
     document.getElementById('readAnswersBtn').classList.remove('hidden');
+    document.getElementById('checkAreaBtn').classList.add('hidden');
+    setTimeout(function() { document.getElementById('finalAnswer').focus(); }, 100);
+  }
+
+  function checkFinalAnswer() {
+    if (!areaComplete || isCompleted) return;
+    const input = document.getElementById('finalAnswer');
+    const result = applyCheckToInput(input, finalExpected);
+    if (!result.checked || !result.correct) return;
+    isCompleted = true;
+    input.readOnly = true;
+    input.setAttribute('aria-readonly', 'true');
+    document.getElementById('checkFinalBtn').classList.add('hidden');
+    const chip = document.getElementById('resultChip');
+    chip.textContent = '✅ ' + topNumberText + ' × ' + bottomNumberText + ' = ' + finalExpected;
+    chip.classList.remove('hidden');
     playCelebration();
   }
 
   function onProductCellClick(event) {
-    if (!isCompleted || isBatchReading) {
-      return;
-    }
-    const target = event.currentTarget;
-    const raw = target.dataset.expected || target.value;
-    const value = Number(raw);
-    if (!Number.isFinite(value)) {
-      return;
-    }
-    speakReadyNumber(value);
+    if (!areaComplete || isBatchReading) return;
+    speakReadyNumber(event.currentTarget.dataset.expected || event.currentTarget.value);
   }
 
   function chunkToWords(n) {
     let words = [];
     const hundreds = Math.floor(n / 100);
     const remainder = n % 100;
-
-    if (hundreds > 0) {
-      words.push(ONES[hundreds]);
-      words.push('hundred');
-    }
-
+    if (hundreds > 0) words.push(ONES[hundreds], 'hundred');
     if (remainder > 0) {
-      if (remainder < 20) {
-        words.push(ONES[remainder]);
-      } else {
-        const tens = Math.floor(remainder / 10);
-        const ones = remainder % 10;
-        words.push(TENS[tens]);
-        if (ones > 0) {
-          words.push(ONES[ones]);
-        }
-      }
+      if (remainder < 20) words.push(ONES[remainder]);
+      else { const tens = Math.floor(remainder / 10); const ones = remainder % 10; words.push(TENS[tens]); if (ones > 0) words.push(ONES[ones]); }
     }
-
     return words.join(' ');
   }
 
-  function numberToWords(value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) {
-      return '';
-    }
-    if (n === 0) {
-      return 'zero';
-    }
-
-    let temp = Math.floor(Math.abs(n));
+  function wholeNumberToWords(value) {
+    let temp = Number(value);
+    if (temp === 0) return 'zero';
     let groupIndex = 0;
     let parts = [];
-
     while (temp > 0 && groupIndex < THOUSANDS.length) {
       const group = temp % 1000;
       if (group > 0) {
@@ -754,156 +370,75 @@
         const scale = THOUSANDS[groupIndex];
         parts.unshift(scale ? chunk + ' ' + scale : chunk);
       }
-      temp = Math.floor(temp / 1000);
-      groupIndex += 1;
+      temp = Math.floor(temp / 1000); groupIndex++;
     }
-
     return parts.join(' ').trim();
   }
 
-  function showSpeakingToast() {
-    document.getElementById('speakingToast').classList.add('visible');
+  function numberToWords(value) {
+    const clean = normalizeDecimalString(value);
+    if (clean === null) return '';
+    const parts = clean.split('.');
+    let words = wholeNumberToWords(parts[0]);
+    if (parts[1]) words += ' point ' + parts[1].split('').map(function(d) { return ONES[Number(d)]; }).join(' ');
+    return words;
   }
 
-  function hideSpeakingToast() {
-    document.getElementById('speakingToast').classList.remove('visible');
-  }
-
+  function showSpeakingToast() { document.getElementById('speakingToast').classList.add('visible'); }
+  function hideSpeakingToast() { document.getElementById('speakingToast').classList.remove('visible'); }
   function cancelSpeak() {
     isBatchReading = false;
-    window.speechSynthesis.cancel();
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     hideSpeakingToast();
-    const readBtn = document.getElementById('readAnswersBtn');
-    readBtn.disabled = false;
+    const btn = document.getElementById('readAnswersBtn'); if (btn) btn.disabled = false;
   }
-
   function speakText(text, onEnd) {
-    if (!('speechSynthesis' in window)) {
-      if (typeof onEnd === 'function') {
-        onEnd();
-      }
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-    showSpeakingToast();
-
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.95;
-    utterance.onend = function() {
-      if (typeof onEnd === 'function') {
-        onEnd();
-      }
-    };
-    utterance.onerror = function() {
-      if (typeof onEnd === 'function') {
-        onEnd();
-      }
-    };
+    if (!('speechSynthesis' in window)) { if (onEnd) onEnd(); return; }
+    window.speechSynthesis.cancel(); showSpeakingToast();
+    const utterance = new SpeechSynthesisUtterance(text); utterance.rate = .95;
+    utterance.onend = utterance.onerror = function() { if (onEnd) onEnd(); };
     window.speechSynthesis.speak(utterance);
   }
-
   function speakReadyNumber(value, onEnd) {
-    const words = numberToWords(value);
-    speakText('Ready? The number is ' + words, function() {
-      if (!isBatchReading) {
-        hideSpeakingToast();
-      }
-      if (typeof onEnd === 'function') {
-        onEnd();
-      }
+    speakText('Ready? The number is ' + numberToWords(value), function() {
+      if (!isBatchReading) hideSpeakingToast(); if (onEnd) onEnd();
     });
   }
-
   function readAllProductsAloud() {
-    if (!isCompleted || isBatchReading) {
-      return;
-    }
-
-    const values = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        values.push(cellExpected[r][c]);
-      }
-    }
-
-    if (!values.length) {
-      return;
-    }
-
+    if (!areaComplete || isBatchReading) return;
+    const values = cellExpected.flat(); if (!values.length) return;
     isBatchReading = true;
-    const readBtn = document.getElementById('readAnswersBtn');
-    readBtn.disabled = true;
-
+    const btn = document.getElementById('readAnswersBtn'); btn.disabled = true;
     let index = 0;
     function readNext() {
-      if (!isBatchReading) {
-        return;
-      }
-
-      if (index >= values.length) {
-        isBatchReading = false;
-        readBtn.disabled = false;
-        hideSpeakingToast();
-        return;
-      }
-
-      const value = values[index];
-      index += 1;
-      speakReadyNumber(value, function() {
-        if (!isBatchReading) {
-          return;
-        }
-        window.setTimeout(readNext, 350);
-      });
+      if (!isBatchReading) return;
+      if (index >= values.length) { isBatchReading = false; btn.disabled = false; hideSpeakingToast(); return; }
+      speakReadyNumber(values[index++], function() { if (isBatchReading) setTimeout(readNext, 350); });
     }
-
     readNext();
   }
 
   function playCelebration() {
-    const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
-    const layer = document.createElement('div');
-    layer.className = 'celebration-layer';
-
+    const colors = ['#22c55e','#3b82f6','#f59e0b','#ef4444','#8b5cf6'];
+    const layer = document.createElement('div'); layer.className = 'celebration-layer';
     for (let i = 0; i < 80; i++) {
-      const piece = document.createElement('span');
-      piece.className = 'confetti';
-      piece.style.left = Math.random() * 100 + 'vw';
-      piece.style.background = colors[i % colors.length];
-      piece.style.animationDelay = (Math.random() * 300) + 'ms';
-      piece.style.animationDuration = (1400 + Math.random() * 900) + 'ms';
-      layer.appendChild(piece);
+      const piece = document.createElement('span'); piece.className = 'confetti';
+      piece.style.left = Math.random() * 100 + 'vw'; piece.style.background = colors[i % colors.length];
+      piece.style.animationDelay = Math.random() * 300 + 'ms'; piece.style.animationDuration = 1400 + Math.random() * 900 + 'ms'; layer.appendChild(piece);
     }
-
-    document.body.appendChild(layer);
-    window.setTimeout(function() {
-      layer.remove();
-    }, 2600);
+    document.body.appendChild(layer); setTimeout(function() { layer.remove(); }, 2600);
   }
 
   function resetTool() {
     cancelSpeak();
-    const problemCard = document.getElementById('problemCard');
-    problemCard.classList.remove('completed');
-    isCompleted = false;
-
-    const allInputs = problemCard.querySelectorAll('.model-input');
-    allInputs.forEach(function(input) {
-      input.readOnly = false;
-      input.removeAttribute('aria-readonly');
-    });
-
-    document.querySelectorAll('.celebration-layer').forEach(function(layer) {
-      layer.remove();
-    });
-
-    document.getElementById('problemCard').classList.remove('visible');
+    document.querySelectorAll('.celebration-layer').forEach(function(layer) { layer.remove(); });
+    document.getElementById('problemCard').classList.remove('visible', 'area-complete');
     document.getElementById('setupCard').style.display = '';
     document.getElementById('inputTop').value = '';
     document.getElementById('inputBot').value = '';
     document.getElementById('areaGrid').innerHTML = '';
-    document.getElementById('readAnswersBtn').classList.add('hidden');
+    document.getElementById('finalStep').classList.add('hidden');
+    areaComplete = false; isCompleted = false;
   }
 </script>
 </body>
