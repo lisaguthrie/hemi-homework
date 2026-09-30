@@ -1297,3 +1297,37 @@ function openDefinition(word) {
 ```
 
 **Trigger:** Confirmed in the first 2026–27 Wordly Wise “Just the Right Word” build, where definitions had to remain available as an accessibility support while the full vocabulary-selection task stayed intact.
+
+
+### Plain-Prose Word Tap-to-Speak
+
+Use this when every word in a sentence must be independently tappable for TTS but the sentence should still look like ordinary continuous text.
+
+- Render each word as an unstyled inline `span` (or equivalent), not as a visible button/chip.
+- Preserve normal prose appearance: transparent background, no border, no rounded box, inherited font/weight, and natural spacing.
+- Keep keyboard access with `role="button"`, `tabindex="0"`, and Enter/Space activation.
+- A focus-visible outline may appear for keyboard users, but no persistent visual affordance is required on every word.
+- This is an explicit exception to the general “tappable content must be visually distinct” rule because marking every word would destroy readable continuous prose. The surrounding exercise already provides visible affordances for the actual answer interaction.
+
+```javascript
+function addReadableWords(container, text) {
+  text.trim().split(/\\s+/).filter(Boolean).forEach(token => {
+    const span = document.createElement('span');
+    span.className = 'plain-word-tap';
+    span.textContent = token;
+    span.setAttribute('role', 'button');
+    span.tabIndex = 0;
+    span.onclick = (e) => { e.stopPropagation(); speak(cleanWord(token)); };
+    span.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        speak(cleanWord(token));
+      }
+    };
+    container.appendChild(span);
+  });
+}
+```
+
+*Trigger:* Confirmed while refining the first active Wordly Wise Type 1 worksheet; visible per-word button styling made sentences look fragmented and impaired normal reading.
