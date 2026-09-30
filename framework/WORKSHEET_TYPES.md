@@ -70,9 +70,9 @@ const answerChoices = [
 
 The bold phrase is a composite inline answer area, not a text field.
 
-- Render the phrase prominently in the sentence.
-- Words inside the phrase remain individually tappable for word-level TTS.
-- A clear `Pick a word ▾` control inside the phrase area opens a large touch-friendly choice panel.
+- Render ordinary sentence text as normal inline prose, not visible word/button chips. Individual words remain tappable for word-level TTS using invisible/unstyled tap targets.
+- Render the bold replacement phrase with a subtle orange highlight.
+- Put only a small dropdown arrow (`▾`) at the right edge of the highlighted phrase; do not show "Pick a word" text in the sentence itself. The arrow opens a large touch-friendly choice panel.
 - The choice panel shows **one candidate from every word family in the lesson bank**. Do not narrow the list per question.
 - If the correct response requires a form of a word (for example `integrated`, `detained`, `segregation`, `vacated`, or `violated`), include that form directly in the choice panel so the student does not need to type it.
 - After selection, replace the bold phrase with the chosen word/form and keep the original phrase available in a small “Original bold phrase” reminder below the sentence.
@@ -81,7 +81,7 @@ The bold phrase is a composite inline answer area, not a text field.
 
 This type uses three levels of TTS:
 
-1. **Word level:** Every ordinary word in the exercise sentence is independently tappable and reads only that word. Words inside the original bold phrase or selected replacement are independently tappable too.
+1. **Word level:** Every ordinary word in the exercise sentence is independently tappable and reads only that word, but the text should still look like normal continuous prose. Words inside the original bold phrase or selected replacement are independently tappable too.
 2. **Sentence level:** Every card has a green ▶ button that reads the full current sentence. Before an answer is chosen, it reads the original sentence; after selection, it reads the revised sentence.
 3. **Selection read-back:** After a choice is selected, wait about 300 ms and read the full revised sentence aloud so the student can self-correct by listening.
 
