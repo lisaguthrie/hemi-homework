@@ -21,3 +21,14 @@ The following reusable lessons were confirmed in the Lesson 2B build and applied
 Reference implementation: `worksheets/reference/2026-09-30-wordly-wise-lesson-2b.html`.
 
 *Status: applied automatically during the build; no propagation action remains for these items.*
+
+
+---
+
+## Applied automatically — 2026-09-30 Wordly Wise Type 1 refinement
+
+- Ordinary sentence words now remain visually plain while retaining per-word tap-to-speak.
+- The vocabulary replacement affordance is a subtle orange-highlighted phrase with an arrow-only dropdown trigger.
+- The active Type 1 specification and general interaction/build guidance were updated so future Wordly Wise worksheets use the same presentation.
+
+*Status: applied automatically; no propagation action remains.*
