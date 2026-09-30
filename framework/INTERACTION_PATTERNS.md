@@ -1331,3 +1331,54 @@ function addReadableWords(container, text) {
 ```
 
 *Trigger:* Confirmed while refining the first active Wordly Wise Type 1 worksheet; visible per-word button styling made sentences look fragmented and impaired normal reading.
+
+---
+
+## Checkbox / Read-Aloud Split for Multi-Select Options
+
+Use this pattern when an answer choice must support both selection and text-to-speech, and tapping the answer text should **not** change the selected state.
+
+### Interaction rule
+
+Keep the checkbox and readable answer text as separate controls.
+
+- Checkbox tap: toggle that choice only.
+- Answer-text tap: speak the whole answer choice only.
+- Do not use the answer text as a `<label>` for the checkbox, because label activation toggles the input.
+- Do not put a click handler on the whole row that changes selection.
+- Give the checkbox a minimum 44px surrounding tap area.
+- Save checkbox state immediately after `change`.
+- Do not auto-read on checkbox toggle when the answer text already provides an explicit read-aloud target.
+
+### Minimal structure
+
+```html
+<div class="option-row">
+  <div class="check-wrap">
+    <input
+      class="choice-check"
+      type="checkbox"
+      aria-label="Select option a"
+    >
+  </div>
+  <button class="option-text" type="button">
+    🔊 <span class="option-letter">(a)</span>
+    from one ocean to another ocean.
+  </button>
+</div>
+```
+
+```javascript
+checkbox.onchange = function () {
+  state[questionIndex][optionIndex] = checkbox.checked;
+  saveState();
+  updateProgress();
+};
+
+textButton.onclick = function () {
+  speak(optionText);
+};
+```
+
+This separation is especially useful for multi-select vocabulary work: the student can listen repeatedly without accidentally adding or removing an answer.
+
