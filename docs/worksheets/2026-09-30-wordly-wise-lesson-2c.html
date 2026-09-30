@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wordly Wise Lesson 2C — Applying Meanings</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-start:#e0f4ff;
+  --bg-end:#f0e8ff;
+  --card-bg:#ffffff;
+  --text-primary:#1a2a3a;
+  --text-muted:#6a8299;
+  --accent-blue:#3b9ede;
+  --accent-blue-dk:#1a6fa8;
+  --phrase-bg:#fff3c4;
+  --phrase-border:#e6c800;
+  --phrase-text:#5a3a00;
+  --btn-play:#5dca7e;
+  --btn-play-dk:#3aaa5a;
+  --pip-empty:#dde0e8;
+  --pip-done:#5dca7e;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(160deg,var(--bg-start) 0%,var(--bg-end) 100%);
+  min-height:100vh;
+  color:var(--text-primary);
+  padding:20px 16px 64px;
+}
+button,input{font:inherit}
+.app{max-width:760px;margin:0 auto}
+.eyebrow{text-align:center;color:var(--accent-blue-dk);font-size:.82rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+h1{font-family:'Fredoka One',cursive;font-weight:400;text-align:center;margin:4px 0 2px;font-size:2rem}
+.subtitle{text-align:center;color:var(--text-muted);font-weight:800;margin:0 0 14px}
+.instructions,.progress,.question-card{
+  background:var(--card-bg);
+  border-radius:18px;
+  box-shadow:0 4px 20px rgba(0,0,0,.10);
+}
+.instructions{
+  border:2.5px solid var(--accent-blue);
+  padding:12px 14px;
+  margin-bottom:12px;
+  font-weight:800;
+  cursor:pointer;
+  line-height:1.45;
+}
+.instructions:focus-visible,.word:focus-visible,.vocab-target:focus-visible,.option-text:focus-visible,.clear-btn:focus-visible,.close-btn:focus-visible,.mini-read-btn:focus-visible,.word-speak:focus-visible{
+  outline:3px solid #1a6fa8;
+  outline-offset:3px;
+}
+.progress{
+  padding:9px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:14px;
+}
+.pips{display:flex;gap:6px;flex-wrap:wrap}
+.pip{display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--pip-empty);transition:background .2s}
+.pip.done{background:var(--pip-done)}
+#progressText{font-size:.9rem;font-weight:900;color:var(--text-muted);text-align:right}
+.questions{display:flex;flex-direction:column;gap:14px}
+.question-card{padding:16px 18px;border:2.5px solid transparent}
+.question-card.has-answer{border-color:#a8d9f5}
+.question-top{display:flex;align-items:flex-start;gap:10px}
+.question-num{
+  font-family:'Fredoka One',cursive;
+  color:var(--accent-blue-dk);
+  font-size:1.2rem;
+  min-width:30px;
+  line-height:44px;
+}
+.stem{
+  flex:1;
+  font-size:1.05rem;
+  line-height:2.15;
+  font-weight:750;
+}
+.word{
+  display:inline-block;
+  min-height:44px;
+  line-height:44px;
+  margin:0 .09em;
+  padding:0;
+  color:inherit;
+  background:transparent;
+  border:0;
+  cursor:pointer;
+  vertical-align:middle;
+  user-select:none;
+}
+.vocab-target{
+  display:inline-flex;
+  align-items:center;
+  min-height:44px;
+  margin:0 .09em;
+  padding:0 8px;
+  border:2px solid var(--phrase-border);
+  border-radius:8px;
+  background:var(--phrase-bg);
+  color:var(--phrase-text);
+  font-weight:900;
+  cursor:pointer;
+  vertical-align:middle;
+}
+.vocab-target::after{content:'  📖';font-size:.78em}
+.options{display:flex;flex-direction:column;gap:8px;margin:8px 0 0 39px}
+.option-row{
+  display:grid;
+  grid-template-columns:52px minmax(0,1fr);
+  gap:8px;
+  align-items:stretch;
+}
+.check-wrap{
+  min-width:52px;
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid #c9d8e4;
+  border-radius:12px;
+  background:#f7fbff;
+}
+.choice-check{
+  width:30px;
+  height:30px;
+  accent-color:var(--accent-blue);
+  cursor:pointer;
+}
+.option-text{
+  min-height:52px;
+  width:100%;
+  border:2px solid #cfe4f3;
+  border-radius:12px;
+  background:#fafdff;
+  color:var(--text-primary);
+  font-weight:750;
+  line-height:1.4;
+  text-align:left;
+  padding:10px 12px;
+  cursor:pointer;
+}
+.option-text:hover{background:#edf8ff;border-color:#8dc9ec}
+.option-text:active{transform:scale(.995)}
+.option-letter{color:var(--accent-blue-dk);font-weight:900;margin-right:6px}
+.speaker{font-size:.9em;margin-right:5px}
+.review-note{
+  margin:14px 0 0 39px;
+  color:var(--text-muted);
+  font-size:.84rem;
+  font-weight:800;
+}
+.clear-btn{
+  display:block;
+  margin:20px auto 0;
+  min-height:44px;
+  padding:8px 14px;
+  background:#fff;
+  border:2px solid #c8d5df;
+  border-radius:11px;
+  color:#506575;
+  font-weight:850;
+  cursor:pointer;
+}
+.backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(15,31,45,.58);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  z-index:50;
+}
+.backdrop.show{display:flex}
+.modal{
+  width:min(680px,100%);
+  max-height:88vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 14px 60px rgba(0,0,0,.28);
+}
+.modal-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.modal-title{font-family:'Fredoka One',cursive;font-size:1.55rem;flex:1;color:var(--phrase-text)}
+.close-btn,.word-speak,.mini-read-btn{min-height:44px;border:0;border-radius:11px;font-weight:900;cursor:pointer}
+.close-btn{width:44px;background:#eef1f4}
+.word-speak{padding:7px 12px;background:#e8f4ff;color:var(--accent-blue-dk)}
+.definition-card{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start;border:2px solid #d9e8f3;border-radius:13px;padding:12px;margin:10px 0;background:#fbfdff;line-height:1.45}
+.definition-card-content{min-width:0}
+.definition-label{font-weight:900;color:#173e58;margin-bottom:9px;font-size:1.02rem}
+.definition-part{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:start;margin:7px 0}
+.definition-kind{font-weight:900;color:var(--accent-blue-dk);background:#e8f4ff;border-radius:8px;padding:4px 7px;text-align:center}
+.definition-copy{padding:4px 0;font-weight:750}
+.definition-copy-text{padding:4px 0}
+.definition-example .definition-kind{color:#376944;background:#e9f8ee}
+.definition-example .definition-copy{color:#405464;font-style:italic}
+.mini-read-btn{width:44px;height:44px;padding:0;border-radius:50%;background:var(--btn-play);color:#153b20;font-size:1rem;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(93,202,126,.32)}
+.mini-read-btn:hover{background:var(--btn-play-dk);color:#fff}
+.source-note{color:var(--text-muted);font-size:.82rem;font-weight:700;margin:4px 0 0}
+.speaking-toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--accent-blue-dk);
+  color:#fff;
+  font-weight:800;
+  font-size:1rem;
+  padding:10px 24px;
+  border-radius:30px;
+  box-shadow:0 4px 20px rgba(0,0,0,.2);
+  transition:transform .3s ease,background .2s;
+  z-index:100;
+  cursor:pointer;
+  user-select:none;
+  pointer-events:none;
+}
+.speaking-toast.visible{transform:translateX(-50%) translateY(0);pointer-events:auto}
+.speaking-toast.visible:hover{background:#c0392b}
+.speaking-toast.visible:hover .toast-label::after{content:' — tap to stop'}
+@media(max-width:560px){
+  body{padding:14px 10px 58px}
+  h1{font-size:1.7rem}
+  .question-card{padding:12px}
+  .options,.review-note{margin-left:0}
+  .option-row{grid-template-columns:50px minmax(0,1fr)}
+  .stem{font-size:1rem}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="eyebrow">Wordly Wise · Lesson 2</div>
+  <h1>2C Applying Meanings</h1>
+  <p class="subtitle">Choose every correct answer for each question.</p>
+
+  <div class="instructions" id="instructions" role="button" tabindex="0">
+    🔊 Circle the letter of each correct answer to the questions below. Each question has from one to four correct answers.
+  </div>
+
+  <div class="progress" aria-live="polite">
+    <div class="pips" id="pips" aria-hidden="true"></div>
+    <div id="progressText">0 / 8 questions have a choice</div>
+  </div>
+
+  <main class="questions" id="questions"></main>
+
+  <button class="clear-btn" id="clearBtn">🗑️ Clear all responses</button>
+</div>
+
+<div class="backdrop" id="definitionBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="definitionTitle">
+    <div class="modal-head">
+      <div class="modal-title" id="definitionTitle"></div>
+      <button class="word-speak" id="wordSpeak">🔊 Word</button>
+      <button class="close-btn" id="closeDefinition" aria-label="Close definition">✕</button>
+    </div>
+    <div id="definitionBody"></div>
+    <p class="source-note">Definition wording and examples are from Word List 2.</p>
+  </div>
+</div>
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+  🔊 <span class="toast-label">Reading aloud…</span>
+</div>
+
+<script>
+const STORAGE_KEY = 'hemi_wordly_wise_l2_2c_applying_meanings_2026_09_30_v2';
+
+const definitions = {
+  ceremonies: {
+    spokenWord: 'ceremonies',
+    paragraphs: [
+      { label:'ceremony · noun', text:'A formal event held in honor of a special occasion. The bride and groom exchanged rings during the wedding ceremony.' }
+    ]
+  },
+  violated: {
+    spokenWord: 'violated',
+    paragraphs: [
+      { label:'violate · verb · 1', text:'To break, as a law or a promise. Damien violated our teacher’s trust by trying to cheat on the homework.' },
+      { label:'violate · verb · 2', text:'To treat in an improper or disrespectful way. The vandals who violated the cemetery by knocking over gravestones had to restore it.' },
+      { label:'violation · noun', text:'A breaking of or failing to keep something like a law or a promise. Revealing the secret was a violation of your friend’s trust.' }
+    ]
+  },
+  triumph: {
+    spokenWord: 'triumph',
+    paragraphs: [
+      { label:'triumph · noun · 1', text:'A noteworthy success. Helen Keller’s graduation from college was a triumph.' },
+      { label:'triumph · noun · 2', text:'The joy that winning brings. The dancer who was invited to audition shot a look of triumph at those who were not so lucky.' },
+      { label:'triumph · verb', text:'To win. The winner of the national spelling bee triumphed over forty-nine other contestants.' },
+      { label:'triumphant · adjective', text:'Joyful over a victory or success. The triumphant skater was given a hero’s welcome on her return from the Olympic Games.' }
+    ]
+  },
+  boycotted: {
+    spokenWord: 'boycotted',
+    paragraphs: [
+      { label:'boycott · verb', text:'To join others in refusing to support an organization. Customers plan to boycott that store if it continues to discriminate.' },
+      { label:'boycott · noun', text:'The act of boycotting. The fans called off their boycott when the teams agreed to lower ticket prices.' }
+    ]
+  },
+  verdict: {
+    spokenWord: 'verdict',
+    paragraphs: [
+      { label:'verdict · noun · 1', text:'The decision reached at the end of a trial. The jury looked grim as she announced the verdict.' },
+      { label:'verdict · noun · 2', text:'A judgment or opinion. The verdict on the new computer is that it does twice the work in half the time.' }
+    ]
+  },
+  campaign: {
+    spokenWord: 'campaign',
+    paragraphs: [
+      { label:'campaign · noun · 1', text:'A series of actions intended to accomplish a goal. Picking up litter was the first step in the campaign to clean up the town center.' },
+      { label:'campaign · noun · 2', text:'A series of military actions in a particular area. The Battle of the Bulge was part of the Allied campaign to invade Germany and end the war.' },
+      { label:'campaign · verb', text:'To take part in actions planned to accomplish a particular goal. Students who wish to campaign for class office must submit petitions.' }
+    ]
+  },
+  detained: {
+    spokenWord: 'detained',
+    paragraphs: [
+      { label:'detain · verb', text:'To stop or hold; to keep from going on. The hall monitor detained us until we could prove we had permission to leave the classroom.' }
+    ]
+  },
+  vacated: {
+    spokenWord: 'vacated',
+    paragraphs: [
+      { label:'vacate · verb', text:'To make empty, as by leaving. We will vacate the house at the end of June to make way for the people moving in.' }
+    ]
+  }
+};
+
+const questions = [
+  {
+    before:'Which of the following are ', target:'ceremonies', after:'?', definition:'ceremonies',
+    options:[
+      'the swearing in of a president',
+      'a wedding',
+      'the election of a president',
+      'a birthday'
+    ]
+  },
+  {
+    before:'Which of the following can be ', target:'violated', after:'?', definition:'violated',
+    options:[
+      'one’s health',
+      'a building code',
+      'one’s privacy',
+      'an order'
+    ]
+  },
+  {
+    before:'Which of the following would be a ', target:'triumph', after:'?', definition:'triumph',
+    options:[
+      'landing people on Mars',
+      'winning a portable radio',
+      'receiving a standing ovation for a speech',
+      'ending world poverty'
+    ]
+  },
+  {
+    before:'Which of the following can be ', target:'boycotted', after:'?', definition:'boycotted',
+    options:[
+      'tap water',
+      'a brand of soft drink',
+      'punishment',
+      'a grocery store'
+    ]
+  },
+  {
+    before:'Which of the following is a ', target:'verdict', after:'?', definition:'verdict',
+    options:[
+      '“Guilty.”',
+      '“Be quiet!”',
+      '“Not guilty.”',
+      '“I didn’t do it.”'
+    ]
+  },
+  {
+    before:'Which of the following might a person ', target:'campaign', after:' for?', definition:'campaign',
+    options:[
+      'someone running for Congress',
+      'lower taxes',
+      'a second helping of food',
+      'changes in a law'
+    ]
+  },
+  {
+    before:'Which of the following can be ', target:'detained', after:'?', definition:'detained',
+    options:[
+      'a journey',
+      'a lawbreaker',
+      'a guest',
+      'a passenger'
+    ]
+  },
+  {
+    before:'Which of the following can be ', target:'vacated', after:'?', definition:'vacated',
+    options:[
+      'a hotel room',
+      'hope',
+      'a seat',
+      'a promise'
+    ]
+  }
+];
+
+let state = questions.map(() => [false,false,false,false]);
+let activeDefinitionKey = '';
+
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if (Array.isArray(saved) && saved.length === questions.length && saved.every(row => Array.isArray(row) && row.length === 4)) {
+    state = saved.map(row => row.map(Boolean));
+  }
+} catch (e) {}
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+
+function speak(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88;
+  utter.pitch = 1.05;
+  utter.onstart = showToast;
+  utter.onend = hideToast;
+  utter.onerror = hideToast;
+  window.speechSynthesis.speak(utter);
+}
+function showToast(){ document.getElementById('speakingToast').classList.add('visible'); }
+function hideToast(){ document.getElementById('speakingToast').classList.remove('visible'); }
+function cancelSpeak(){ if ('speechSynthesis' in window) window.speechSynthesis.cancel(); hideToast(); }
+
+function cleanWord(token) {
+  const cleaned = token.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9’'-]+$/g,'');
+  return cleaned || token;
+}
+
+function appendTappableWords(container, text) {
+  if (!text) return;
+  const tokens = text.trim().split(/\s+/).filter(Boolean);
+  tokens.forEach(token => {
+    const el = document.createElement('span');
+    el.className = 'word';
+    el.textContent = token;
+    el.setAttribute('role','button');
+    el.tabIndex = 0;
+    el.setAttribute('aria-label','Hear ' + cleanWord(token));
+    el.title = 'Tap to hear this word';
+    el.onclick = e => { e.stopPropagation(); speak(cleanWord(token)); };
+    el.onkeydown = e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        speak(cleanWord(token));
+      }
+    };
+    container.appendChild(el);
+  });
+}
+
+function render() {
+  const root = document.getElementById('questions');
+  root.innerHTML = '';
+
+  questions.forEach((q, qi) => {
+    const card = document.createElement('section');
+    card.className = 'question-card' + (state[qi].some(Boolean) ? ' has-answer' : '');
+
+    const top = document.createElement('div');
+    top.className = 'question-top';
+
+    const num = document.createElement('div');
+    num.className = 'question-num';
+    num.textContent = (qi + 1) + '.';
+    top.appendChild(num);
+
+    const stem = document.createElement('div');
+    stem.className = 'stem';
+    appendTappableWords(stem, q.before);
+
+    const target = document.createElement('button');
+    target.className = 'vocab-target';
+    target.type = 'button';
+    target.textContent = q.target;
+    target.setAttribute('aria-label','Open definition for ' + q.target);
+    target.title = 'Tap for definition';
+    target.onclick = () => openDefinition(q.definition, q.target);
+    stem.appendChild(target);
+
+    appendTappableWords(stem, q.after);
+    top.appendChild(stem);
+    card.appendChild(top);
+
+    const options = document.createElement('div');
+    options.className = 'options';
+
+    q.options.forEach((opt, oi) => {
+      const row = document.createElement('div');
+      row.className = 'option-row';
+
+      const checkWrap = document.createElement('div');
+      checkWrap.className = 'check-wrap';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'choice-check';
+      checkbox.checked = state[qi][oi];
+      checkbox.setAttribute('aria-label',`Select option ${String.fromCharCode(97 + oi)} for question ${qi + 1}`);
+      checkbox.onclick = e => e.stopPropagation();
+      checkbox.onchange = () => {
+        state[qi][oi] = checkbox.checked;
+        saveState();
+        updateProgress();
+        card.classList.toggle('has-answer', state[qi].some(Boolean));
+      };
+      checkWrap.appendChild(checkbox);
+
+      const textButton = document.createElement('button');
+      textButton.type = 'button';
+      textButton.className = 'option-text';
+      textButton.setAttribute('aria-label',`Hear answer choice: ${opt}`);
+      textButton.innerHTML = `<span class="speaker" aria-hidden="true">🔊</span>${escapeHtml(opt)}`;
+      textButton.onclick = () => speak(opt);
+
+      row.appendChild(checkWrap);
+      row.appendChild(textButton);
+      options.appendChild(row);
+    });
+
+    card.appendChild(options);
+
+    const note = document.createElement('div');
+    note.className = 'review-note';
+    note.textContent = 'An adult will check this later.';
+    card.appendChild(note);
+
+    root.appendChild(card);
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = state.filter(row => row.some(Boolean)).length;
+  const pips = document.getElementById('pips');
+  pips.innerHTML = '';
+  state.forEach(row => {
+    const pip = document.createElement('span');
+    pip.className = 'pip' + (row.some(Boolean) ? ' done' : '');
+    pips.appendChild(pip);
+  });
+  document.getElementById('progressText').textContent = `${answered} / ${questions.length} questions have a choice`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function splitDefinitionAndExample(text) {
+  const match = String(text).match(/^(.+?\.)(?:\s+)(.+)$/);
+  if (!match) return { definition: text, example: '' };
+  return { definition: match[1], example: match[2] };
+}
+
+function makeDefinitionPart(kind, copy, extraClass) {
+  const row = document.createElement('div');
+  row.className = 'definition-part' + (extraClass ? ' ' + extraClass : '');
+
+  const heading = document.createElement('div');
+  heading.className = 'definition-kind';
+  heading.textContent = kind;
+
+  const text = document.createElement('div');
+  text.className = 'definition-copy';
+  const textSpan = document.createElement('span');
+  textSpan.className = 'definition-copy-text';
+  textSpan.textContent = copy;
+  text.appendChild(textSpan);
+
+  row.appendChild(heading);
+  row.appendChild(text);
+  return row;
+}
+
+function openDefinition(key, displayedWord) {
+  const entry = definitions[key];
+  if (!entry) return;
+  activeDefinitionKey = key;
+  cancelSpeak();
+  document.getElementById('definitionTitle').textContent = displayedWord;
+  const body = document.getElementById('definitionBody');
+  body.innerHTML = '';
+
+  entry.paragraphs.forEach(paragraph => {
+    const card = document.createElement('div');
+    card.className = 'definition-card';
+
+    const parts = splitDefinitionAndExample(paragraph.text);
+
+    const read = document.createElement('button');
+    read.type = 'button';
+    read.className = 'mini-read-btn';
+    read.textContent = '▶';
+    read.setAttribute('aria-label', 'Read definition and example aloud');
+    read.title = 'Read definition and example aloud';
+    read.onclick = () => {
+      const spokenLabel = paragraph.label
+        .split('·')
+        .map(part => part.trim())
+        .filter(Boolean)
+        .join('. ') + '.';
+      const spoken = spokenLabel + ' Definition: ' + parts.definition +
+        (parts.example ? ' Example: ' + parts.example : '');
+      speak(spoken);
+    };
+
+    const content = document.createElement('div');
+    content.className = 'definition-card-content';
+
+    const label = document.createElement('div');
+    label.className = 'definition-label';
+    label.textContent = paragraph.label;
+    content.appendChild(label);
+
+    const definitionRow = makeDefinitionPart('Definition', parts.definition, '');
+    content.appendChild(definitionRow);
+
+    if (parts.example) {
+      const exampleRow = makeDefinitionPart('Example', parts.example, 'definition-example');
+      content.appendChild(exampleRow);
+    }
+
+    card.appendChild(read);
+    card.appendChild(content);
+    body.appendChild(card);
+  });
+
+  document.getElementById('definitionBackdrop').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('closeDefinition').focus({preventScroll:true});
+}
+
+function closeDefinition() {
+  cancelSpeak();
+  document.getElementById('definitionBackdrop').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('wordSpeak').onclick = () => {
+  const entry = definitions[activeDefinitionKey];
+  if (entry) speak(entry.spokenWord);
+};
+document.getElementById('closeDefinition').onclick = closeDefinition;
+document.getElementById('definitionBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('definitionBackdrop')) closeDefinition();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('definitionBackdrop').classList.contains('show')) closeDefinition();
+});
+
+const instructionText = 'Circle the letter of each correct answer to the questions below. Each question has from one to four correct answers.';
+document.getElementById('instructions').onclick = () => speak(instructionText);
+document.getElementById('instructions').onkeydown = e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    speak(instructionText);
+  }
+};
+
+document.getElementById('clearBtn').onclick = function() {
+  if (this.dataset.confirm === '1') {
+    state = questions.map(() => [false,false,false,false]);
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    this.dataset.confirm = '';
+    this.textContent = '🗑️ Clear all responses';
+    render();
+  } else {
+    this.dataset.confirm = '1';
+    this.textContent = '⚠️ Tap again to confirm';
+    setTimeout(() => {
+      if (this.dataset.confirm === '1') {
+        this.dataset.confirm = '';
+        this.textContent = '🗑️ Clear all responses';
+      }
+    }, 3000);
+  }
+};
+
+render();
+</script>
+</body>
+</html>
