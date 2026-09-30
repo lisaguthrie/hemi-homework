@@ -1229,3 +1229,71 @@ The print HTML should: reproduce the original worksheet layout (problem text, cl
 }
 .export-btn:hover { background: #5a3fa0; }
 ```
+
+---
+
+## Vocabulary Word Bank + Definition Modal
+
+Use this pattern for vocabulary curricula such as Wordly Wise when a worksheet depends on a lesson word bank and the student needs source definitions without leaving the exercise.
+
+### Data shape
+
+```javascript
+const wordEntries = [
+  {
+    word: 'campaign',
+    paragraphs: [
+      {
+        label: 'campaign · noun · 1',
+        text: 'A series of actions intended to accomplish a goal. [Source example sentence.]'
+      },
+      {
+        label: 'campaign · verb',
+        text: 'To take part in actions planned to accomplish a particular goal. [Source example sentence.]'
+      }
+    ]
+  }
+];
+```
+
+### Interaction rules
+
+- Keep the visible word bank separate from answer controls.
+- Each bank word is a minimum-44px button that opens the definition modal.
+- Opening a definition never changes an exercise answer.
+- The modal title is the base word and may include a `🔊 Word` button that speaks only the headword.
+- Preserve the source's multiple senses and related forms as distinct paragraphs.
+- Each paragraph gets its own `▶ Read this paragraph` button. The spoken string should include the paragraph label/headword, part of speech, definition, and example sentence.
+- Definitions are source transcription, not a simplification task. Do not silently rewrite the wording or replace the source's examples.
+- Leave unrelated discussion/partner prompts out of the modal unless the user asks for them.
+- Provide a 44px close button; allow Escape and backdrop-tap to close.
+- Cancel ongoing speech when opening another modal or definition so clips do not overlap.
+
+### Minimal wiring
+
+```javascript
+function openDefinition(word) {
+  const entry = wordEntries.find(e => e.word === word);
+  if (!entry) return;
+
+  title.textContent = entry.word;
+  body.innerHTML = '';
+
+  entry.paragraphs.forEach(p => {
+    const box = document.createElement('div');
+    const text = document.createElement('div');
+    text.textContent = p.label + '. ' + p.text;
+
+    const play = document.createElement('button');
+    play.textContent = '▶ Read this paragraph';
+    play.onclick = () => speak(p.label + '. ' + p.text);
+
+    box.append(text, play);
+    body.appendChild(box);
+  });
+
+  showModal();
+}
+```
+
+**Trigger:** Confirmed in the first 2026–27 Wordly Wise “Just the Right Word” build, where definitions had to remain available as an accessibility support while the full vocabulary-selection task stayed intact.
