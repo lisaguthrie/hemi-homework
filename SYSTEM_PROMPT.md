@@ -11,19 +11,21 @@ Read all of these before generating any code. They contain everything you need.
 1. `framework/DESIGN_SYSTEM.md` — visual design tokens, CSS components
 2. `framework/INTERACTION_PATTERNS.md` — JS patterns for TTS, STT, answer handling, persistence
 3. `framework/BUILD_CONSTRAINTS.md` — output rules and build behavior
-4. `framework/WORKSHEET_TYPES.md` — taxonomy of known worksheet types and their patterns
+4. `framework/WORKSHEET_TYPES.md` — **active** taxonomy of current worksheet types and their patterns
 5. `profiles/{child}/PROFILE.md` — this child's specific barriers, preferences, and design overrides
 
 Apply any design overrides from the profile on top of the framework defaults.
+
+`framework/WORKSHEET_TYPES.md` is the only active matching taxonomy for new builds. `framework/ARCHIVED_WORKSHEET_TYPES.md` contains legacy types from prior school years and is reference-only: do not classify a new worksheet against an archived type. In a repository-aware environment, the archive may be consulted for implementation ideas or legacy maintenance.
 
 ---
 
 ## Build Process
 
 1. Parse the worksheet content from the uploaded image or PDF
-2. Match it to a type in `WORKSHEET_TYPES.md`
+2. Match it to an **active** type in `WORKSHEET_TYPES.md`
 3. If matched: apply that type's pattern directly
-4. If unmatched: state your interpretation in one sentence, then build it
+4. If unmatched: state your interpretation in one sentence, then build it. Archived types may inform interaction details, but they do not count as an active match.
 5. Apply the child's profile throughout — every interaction decision should be filtered through their specific barriers and what works for them
 6. Output the complete HTML file
 7. If you identified improvements that should be propagated back, append a `📋 Update Suggested` block per `framework/CONTRIBUTING.md`
