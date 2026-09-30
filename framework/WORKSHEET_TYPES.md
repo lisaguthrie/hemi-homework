@@ -118,3 +118,68 @@ Use **deferred per-card feedback** rather than marking a choice immediately.
 **Reference implementation:** `worksheets/reference/2026-09-30-wordly-wise-lesson-2b.html`
 
 ---
+
+## Type 2: Vocabulary Sentence Completion — Multi-Select
+
+*Wordly Wise “Determining Meanings” style: a vocabulary word appears in the sentence stem, and the student selects every answer choice that can correctly complete the sentence. More than one choice may be valid.*
+
+**Use case:** Vocabulary exercises where the academic task is applying one lesson word across several possible sentence completions, including multiple meanings of the same word.
+
+**Question data shape:**
+```javascript
+{
+  before: "The nation ",
+  target: "extends",
+  after: "",
+  definitionKey: "extend",
+  options: [
+    "from one ocean to another ocean.",
+    "greetings to the people of Japan.",
+    "to be the site of the next summer Olympic Games.",
+    "millions of people from all over the world."
+  ]
+}
+```
+
+### Answer control
+
+Use one independent checkbox per answer choice.
+
+- Multiple choices may be selected for the same question.
+- Keep the checkbox and answer text as **separate tap targets**.
+- Tapping the checkbox toggles only that selection.
+- Tapping the answer text reads the entire answer choice aloud and must not toggle the checkbox.
+- Do not wrap the answer text in a `<label>` associated with the checkbox; that would make reading the answer accidentally change the response.
+- Give the checkbox itself a minimum 44px surrounding tap area even if the native control is visually smaller.
+- Persist every checkbox state to `localStorage`.
+
+### Read-aloud behavior
+
+This type uses distinct TTS scopes:
+
+1. **Stem word level:** Ordinary words in the sentence stem are independently tappable and speak only that word while remaining visually normal continuous prose.
+2. **Vocabulary target:** The lesson vocabulary word does **not** speak on direct tap. Tapping it opens the source-definition modal.
+3. **Answer choice level:** Tapping an answer choice's text reads the entire choice aloud. It does not change selection.
+4. **Instructions:** Keep the directions as one tappable block that reads the full directions aloud.
+
+Do not auto-read after a checkbox toggle. Selection and listening are intentionally separate actions for this type.
+
+### Definitions
+
+Use the shared Vocabulary Word Bank + Definition Modal pattern, but open it directly from the vocabulary word in the stem rather than requiring a separate visible word bank.
+
+- Definitions must use the provided curriculum wording; do not simplify or replace them with general-knowledge definitions.
+- Preserve every source sense needed to reason about the question. For a word such as `extend`, include all relevant numbered meanings because multiple answer choices may rely on different senses.
+- When the worksheet uses an inflected form such as `integrated`, `vacated`, or `boycotted`, the modal may display the source headword entry while keeping the inflected form as the visible stem word.
+- Definition paragraphs may include their own read-aloud buttons using the standard definition-modal behavior.
+
+### Feedback + progress
+
+Default to **selection-only** behavior unless the user explicitly requests answer checking.
+
+- Do not reveal correctness merely because a choice was selected.
+- If the assignment will be reviewed by an adult, omit answer keys, `Check Answers`, correctness styling, and hints entirely.
+- A progress pip may count a question as started/answered when it has at least one selected choice; it is not a score.
+- A two-tap reset control may clear saved selections.
+
+---
