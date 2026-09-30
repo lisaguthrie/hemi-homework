@@ -72,7 +72,7 @@ When a worksheet image contains two or more distinct skill sections (e.g. Commas
 - Minimum tap target: 44px in both dimensions
 - All interactive elements reachable by tap — no hover-only interactions
 - No text selection required for any interaction
-- Tappable content must be visually distinct (background + border, not underline alone)
+- Tappable content must normally be visually distinct (background + border, not underline alone). **Exception:** per-word TTS in continuous prose may use visually unstyled inline word targets so the sentence still reads as normal text; keep keyboard focus styling and reserve persistent visual affordances for the actual answer controls.
 - **Do not add microphone buttons to number-only input fields** — they provide no benefit and add visual clutter
 - **Do not full re-render on every keystroke/change in editable controls** (`input`, `textarea`, `select`). Update progress/status text in place so focus and caret remain stable during typing and speech-to-text.
 - If a full render is unavoidable, implement focus/caret capture-and-restore around render.
