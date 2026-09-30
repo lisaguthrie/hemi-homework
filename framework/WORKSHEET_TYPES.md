@@ -115,6 +115,6 @@ Use **deferred per-card feedback** rather than marking a choice immediately.
 - Progress pips may distinguish unanswered, selected, and correct states.
 - The progress label should report answered/total, not a running score.
 
-**Reference implementation:** `worksheets/christina/2026-09-30-wordly-wise-lesson-2b.html`
+**Reference implementation:** `worksheets/reference/2026-09-30-wordly-wise-lesson-2b.html`
 
 ---
