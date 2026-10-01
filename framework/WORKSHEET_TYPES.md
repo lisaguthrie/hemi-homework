@@ -118,3 +118,55 @@ Use **deferred per-card feedback** rather than marking a choice immediately.
 **Reference implementation:** `worksheets/reference/2026-09-30-wordly-wise-lesson-2b.html`
 
 ---
+
+
+## Type 2: Vocabulary Antonyms — Select Two of Four
+
+*Wordly Wise “Word Study” antonym style: each row contains four words, and the student identifies the two whose meanings are opposite or nearly opposite.*
+
+**Use case:** Vocabulary word-study exercises where each row contains four candidate words and the academic task is to select exactly one antonym pair.
+
+**Question data shape:**
+```javascript
+{
+  choices: ["release", "detain", "campaign", "decide"]
+}
+```
+
+### Answer control
+
+Use four large checkbox choices per row.
+
+- Keep the checkbox and the visible word as **separate tap targets**. Tapping the word provides reading/definition support and must never toggle the answer.
+- Permit at most two checked choices in a row.
+- As soon as two choices are selected, disable the two unchecked boxes. Keep the selected boxes enabled so the student can uncheck one and revise the response.
+- A row is considered response-complete when exactly two choices are checked.
+- Do not infer correctness from completion styling; use neutral/blue completion treatment rather than the green correct-answer treatment.
+
+### Read-aloud + vocabulary support
+
+Use mixed support based on the lesson source.
+
+- Make the instructions tappable and read them aloud using the profile speech settings.
+- If a displayed word is part of the lesson word list, or a source-provided related form, tapping the word **opens the reusable definition modal and immediately reads just the tapped word aloud**. Do not auto-read the definition. This keeps the immediate auditory experience consistent with non-word-list choices while still exposing source definitions on screen.
+- If a displayed word is not in the lesson word list, tapping it reads that word aloud and does **not** open a definition. Do not invent or substitute a general-knowledge definition for distractors.
+- For a displayed related form (for example `degrading`), the modal may show only the matching related-form paragraph when that is the clearest support.
+- The definition modal and checkbox selection are independent; opening a definition never changes the student's selected answers.
+
+### Feedback
+
+This type supports **adult-check-only** completion when requested.
+
+- Do not include a `Check Answers` button, automatic correctness feedback, hints, or a score.
+- The app does not need an answer key in its interaction logic when correctness is intentionally deferred to an adult.
+- Progress reflects response completion only (two choices selected), not correctness.
+
+### Progress + persistence
+
+- Persist each row's selected words in `localStorage`.
+- Progress pips and labels count rows with exactly two selections.
+- Preserve responses across reloads and provide the standard double-tap `Clear all responses` action.
+
+**Reference implementation:** `worksheets/christina/2026-09-30-wordly-wise-lesson-2d.html`
+
+---
