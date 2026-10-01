@@ -1269,6 +1269,54 @@ const wordEntries = [
 - Provide a 44px close button; allow Escape and backdrop-tap to close.
 - Cancel ongoing speech when opening another modal or definition so clips do not overlap.
 
+
+### Definition / Example separation and spoken punctuation
+
+Source entries often store a definition and its example sentence in one string. When the source format reliably places the example after the first complete definition sentence, split the string for presentation so the student can immediately tell which text is the definition and which is the example.
+
+```javascript
+function splitDefinitionAndExample(text) {
+  const match = String(text).match(/^(.+?\.)(?:\s+)(.+)$/);
+  if (!match) return { definition: text, example: '' };
+  return { definition: match[1], example: match[2] };
+}
+```
+
+The visual card should show:
+
+```
+[ ▶ ]  ceremony · noun
+       Definition   A formal event held in honor of a special occasion.
+       Example      The bride and groom exchanged rings during the wedding ceremony.
+```
+
+For speech synthesis, do **not** send a typographic separator such as `·` directly between the headword and part of speech. Some voices run the words together. Convert the label to spoken sentence boundaries so `ceremony · noun` is spoken as **"ceremony. noun."** Likewise, explicitly say "Definition" and "Example" before those parts.
+
+```javascript
+function buildDefinitionSpeech(label, definition, example) {
+  const spokenLabel = label
+    .split('·')
+    .map(part => part.trim())
+    .filter(Boolean)
+    .join('. ') + '.';
+
+  return spokenLabel +
+    ' Definition: ' + definition +
+    (example ? ' Example: ' + example : '');
+}
+
+// Compact icon-only button at the far left of the whole card:
+readButton.textContent = '▶';
+readButton.className = 'definition-read-btn';
+readButton.setAttribute('aria-label', 'Read definition and example aloud');
+readButton.onclick = () => {
+  const parts = splitDefinitionAndExample(paragraph.text);
+  speak(buildDefinitionSpeech(paragraph.label, parts.definition, parts.example));
+};
+```
+
+Keep the source wording unchanged; this pattern changes only presentation and speech punctuation.
+
 ### Minimal wiring
 
 ```javascript

@@ -214,6 +214,101 @@ Use the yellow `.phrase-chip` when the chip is independently tappable and reads 
 
 ---
 
+
+## Vocabulary Definition Modal Cards
+
+Use this presentation whenever a vocabulary definition modal shows one or more senses or related forms. The goal is to make the headword/part of speech, definition, example, and read-aloud control visually distinct without making the modal feel busy.
+
+Each sense is a two-column card:
+
+- **Left column:** one compact green circular `▶` button, aligned with the top of the entire sense card. It reads the whole sense aloud. Do not put visible words such as "Read definition" on this button.
+- **Right column:** the headword / part of speech / optional sense number, followed by separate **Definition** and **Example** rows.
+- Keep **Definition** and **Example** visibly labeled. Use a blue label treatment for Definition and a soft green label treatment for Example.
+- Example copy is slightly muted and italic so it is easy to distinguish from the source definition.
+- Preserve a 44px minimum tap target for the compact play button.
+- If the source has multiple senses or related forms, render each as its own card.
+
+```css
+.definition-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  border: 2px solid #d9e8f3;
+  border-radius: 13px;
+  padding: 12px;
+  margin: 10px 0;
+  background: #fbfdff;
+  line-height: 1.45;
+}
+.definition-card-content { min-width: 0; }
+
+.definition-label {
+  font-weight: 900;
+  color: #173e58;
+  margin-bottom: 9px;
+  font-size: 1.02rem;
+}
+
+.definition-part {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  margin: 7px 0;
+}
+
+.definition-kind {
+  font-weight: 900;
+  color: var(--accent-blue-dk);
+  background: #e8f4ff;
+  border-radius: 8px;
+  padding: 4px 7px;
+  text-align: center;
+}
+
+.definition-copy {
+  padding: 4px 0;
+  font-weight: 750;
+}
+
+.definition-example .definition-kind {
+  color: #376944;
+  background: #e9f8ee;
+}
+
+.definition-example .definition-copy {
+  color: #405464;
+  font-style: italic;
+}
+
+.definition-read-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--btn-play);
+  color: #153b20;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(93, 202, 126, 0.32);
+}
+
+.definition-read-btn:hover {
+  background: var(--btn-play-dk);
+  color: #fff;
+}
+```
+
+The button should have an accessible label such as `aria-label="Read definition and example aloud"` even though its visible content is only `▶`.
+
+---
+
 ## Answer Controls
 
 ### Dropdown
