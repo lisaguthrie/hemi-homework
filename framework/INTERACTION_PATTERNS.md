@@ -1259,6 +1259,9 @@ const wordEntries = [
 ### Interaction rules
 
 - Keep the visible word bank separate from answer controls.
+- For long card-based vocabulary exercises where the student repeatedly refers back to the word list, keep the bank visible with the reusable sticky-bank component from `framework/DESIGN_SYSTEM.md`.
+- Use a compact responsive grid so the persistent reference does not consume excessive vertical space: default to five columns on wider layouts and three columns on narrower/tablet layouts, while preserving the 44px tap-target floor where practical.
+- Keep the bank label task-focused and minimal. Use wording such as `Word List 3 · tap a word for its definition`. Do **not** add explanatory copy such as “stays here while you scroll”; the sticky behavior should explain itself without adding reading load.
 - Each bank word is a minimum-44px button that opens the definition modal.
 - Opening a definition never changes an exercise answer.
 - The modal title is the base word and may include a `🔊 Word` button that speaks only the headword.
