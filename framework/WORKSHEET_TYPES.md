@@ -87,8 +87,9 @@ This type uses three levels of TTS:
 
 ### Word bank + definitions
 
-Keep the full lesson word bank visible above the exercises.
+Keep the full lesson word bank visible above the exercises. For long exercises where the student repeatedly refers back to the bank, use the **Sticky Vocabulary Word Bank** component in `framework/DESIGN_SYSTEM.md` and the usage rules in `framework/INTERACTION_PATTERNS.md`.
 
+- Keep sticky-bank copy minimal; do not add text explaining the scrolling behavior.
 - Each base word is a large tappable button.
 - Tapping a bank word opens a definition modal; it does **not** answer a question.
 - Definitions must be transcribed from the provided source. Do not simplify, rewrite, or substitute general-knowledge definitions.
