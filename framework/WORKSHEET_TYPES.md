@@ -93,8 +93,9 @@ Keep the full lesson word bank visible above the exercises. For long exercises w
 - Each base word is a large tappable button.
 - Tapping a bank word opens a definition modal; it does **not** answer a question.
 - Definitions must be transcribed from the provided source. Do not simplify, rewrite, or substitute general-knowledge definitions.
-- Preserve multiple senses and related forms (for example `integrate` / `integration`) as separate definition paragraphs when the source presents them separately.
-- Give each definition paragraph its own ▶ button that reads the **entire paragraph**, including the headword/part of speech, definition, and example sentence.
+- Preserve multiple senses and related forms (for example `integrate` / `integration`) as separate definition cards when the source presents them separately.
+- Use the canonical **Vocabulary Definition Modal Card** style from `framework/DESIGN_SYSTEM.md`: compact green `▶` at the far left, headword/part of speech above the text, and clearly separated **Definition** and **Example** rows.
+- Use the speech behavior in `framework/INTERACTION_PATTERNS.md` so headword and part of speech are spoken with clear sentence breaks (for example, "ceremony. noun.") rather than reading the visual separator literally.
 - A word-level 🔊 control in the modal may read the headword alone.
 - Exclude unrelated partner/activity prompts from the dictionary entry unless the user asks to include them.
 
