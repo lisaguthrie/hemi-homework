@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3B Just the Right Word</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-start:#e0f4ff;--bg-end:#f0e8ff;--card-bg:#fff;--text-primary:#1a2a3a;--text-muted:#6a8299;
+  --accent-blue:#3b9ede;--accent-blue-dk:#1a6fa8;--phrase-bg:#fff3c4;--phrase-border:#e6c800;--phrase-text:#5a3a00;
+  --btn-play:#5dca7e;--btn-play-dk:#3aaa5a;--feedback-ok-bg:#d0f5e0;--feedback-ok-txt:#1d7a40;
+  --feedback-hint-bg:#ffeedd;--feedback-hint-txt:#c05000;--pip-empty:#dde0e8;--pip-done:#5dca7e;--purple:#7c5cbf;
+}
+*{box-sizing:border-box}
+html{font-size:16px}
+body{margin:0;font-family:'Nunito',Arial,sans-serif;background:linear-gradient(160deg,var(--bg-start),var(--bg-end));min-height:100vh;color:var(--text-primary);padding:18px 14px 72px}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,[role=button]:focus-visible,summary:focus-visible{outline:3px solid #6b43a3;outline-offset:3px}
+.app{max-width:760px;margin:0 auto}
+.topnav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.back-link,.wordlist-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 13px;border-radius:12px;border:1.5px solid #a9c6da;background:#fff;color:var(--accent-blue-dk);font-weight:800;text-decoration:none}
+h1,h2,h3{font-family:'Fredoka One','Arial Rounded MT Bold',Arial,sans-serif;font-weight:400}
+h1{text-align:center;margin:4px 0 3px;font-size:1.75rem}
+.eyebrow{text-align:center;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-blue-dk);font-size:.8rem;font-weight:800;margin:0}
+.subtitle{text-align:center;color:var(--text-muted);font-weight:700;margin:5px 0 14px}
+.instructions{width:100%;text-align:left;background:#e8f4ff;border:2px solid #bedff4;color:#17496d;border-radius:16px;padding:12px 14px;line-height:1.55;font-weight:800;margin:0 0 12px;min-height:44px}
+.question-card,.word-list-panel,.progress{background:var(--card-bg);border-radius:18px;box-shadow:0 4px 20px rgba(0,0,0,.10)}
+.question-card{padding:16px 18px;border:2.5px solid transparent;margin-bottom:13px}
+.question-card.correct{border-color:var(--btn-play);background:#f0fff5}
+.card-head{display:flex;align-items:flex-start;gap:10px}
+.qnum{font-family:'Fredoka One',sans-serif;color:var(--accent-blue-dk);font-size:1.15rem;min-width:30px;line-height:44px}
+.card-main{flex:1;min-width:0}
+.prompt{font-size:1.02rem;line-height:1.65;font-weight:700;margin:7px 0 10px}
+.play-btn{background:var(--btn-play);border:0;border-radius:50%;width:44px;height:44px;min-width:44px;font-size:1.05rem;box-shadow:0 2px 8px rgba(93,202,126,.4)}
+.play-btn:hover{background:var(--btn-play-dk)}
+.feedback{display:none;align-items:flex-start;gap:5px;font-size:.9rem;font-weight:800;padding:7px 11px;border-radius:13px;margin-top:10px;line-height:1.45}
+.feedback.show{display:flex}
+.feedback.correct{background:var(--feedback-ok-bg);color:var(--feedback-ok-txt)}
+.feedback.hint{background:var(--feedback-hint-bg);color:var(--feedback-hint-txt)}
+.check-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 16px;border-radius:12px;border:2px solid #d9a800;background:linear-gradient(180deg,#ffe89b,#ffd866);color:#5f4700;font-weight:800;margin-top:10px}
+.check-btn.done{background:linear-gradient(180deg,#7be09a,#5dca7e);border-color:#3aaa5a;color:#fff}
+.check-btn:disabled{opacity:.48;cursor:default}
+.progress{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0}
+.pips{display:flex;gap:6px;flex-wrap:wrap}
+.pip{width:18px;height:18px;border-radius:50%;background:var(--pip-empty)}
+.pip.answered{background:#8cc7ef}.pip.done{background:var(--pip-done)}
+.progress-count{font-weight:900;color:var(--text-muted);white-space:nowrap}
+.footer-actions{text-align:center;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.clear-btn,.export-btn{min-height:44px;border-radius:18px;padding:8px 18px;font-weight:800}
+.clear-btn{background:#f0f0f0;color:#777;border:2px solid #ccc}
+.export-btn{background:var(--purple);color:#fff;border:0;box-shadow:0 2px 8px rgba(124,92,191,.25)}
+.speaking-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(90px);opacity:0;background:var(--accent-blue-dk);color:white;padding:10px 22px;border:0;border-radius:30px;box-shadow:0 4px 20px #0003;z-index:200;pointer-events:none;font-weight:800;transition:.2s}
+.speaking-toast.visible{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
+.word-list-panel{margin-bottom:12px;overflow:hidden}
+.word-list-panel summary{min-height:44px;padding:12px 14px;font-weight:900;color:var(--accent-blue-dk);cursor:pointer}
+.word-bank{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;padding:0 12px 12px}
+.bank-word{min-height:44px;border-radius:11px;border:2px solid var(--phrase-border);background:var(--phrase-bg);color:var(--phrase-text);font-weight:900}
+dialog{border:0;border-radius:20px;width:min(650px,calc(100vw - 26px));max-height:86dvh;padding:0;box-shadow:0 14px 60px #1b294449;color:var(--text-primary)}
+dialog::backdrop{background:#17334f66}
+.modal-head{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 16px;border-bottom:1px solid #dce7f1;z-index:2}
+.modal-head h2{font-size:1.35rem;margin:0}.close-btn{min-height:44px;padding:7px 13px;border-radius:12px;border:1px solid #b8cbdc;background:#f1f6fb;color:var(--accent-blue-dk);font-weight:800}
+.modal-body{padding:15px 17px}
+.definition-box{background:#f8fbff;border:1px solid #d7e6f2;border-radius:13px;padding:12px;margin:0 0 11px}
+.definition-box p{line-height:1.65;margin:0 0 9px}.definition-box strong{display:block;margin-bottom:5px}
+.read-def{min-height:44px;border:0;border-radius:11px;background:var(--btn-play);font-weight:800;padding:7px 12px}
+.vocab-chip{display:inline-flex;align-items:center;min-height:44px;padding:3px 9px;border-radius:9px;background:var(--phrase-bg);border:2px solid var(--phrase-border);color:var(--phrase-text);font-weight:900}
+.plain-word{display:inline;border:0;background:transparent;padding:0 1px;margin:0;font:inherit;color:inherit;min-height:0;min-width:0;border-radius:3px}
+.plain-word:hover{background:#e6f3ff}
+.muted{color:var(--text-muted);font-size:.9rem}
+@media(max-width:760px){.word-bank{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:520px){body{padding:12px 9px 70px}.question-card{padding:13px}.bank-panel{top:4px;padding:8px}.word-bank{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.bank-word{min-height:40px;font-size:.88rem}h1{font-size:1.48rem}.prompt{font-size:1rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+.bank-panel{position:sticky;top:8px;z-index:60;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border:2px solid #cfe2ef;border-radius:16px;box-shadow:0 8px 24px #20365622;padding:10px 12px;margin-bottom:12px}
+.bank-label{font-weight:900;color:var(--accent-blue-dk);margin:0 0 7px}
+.sentence{font-size:1.02rem;line-height:2.05}
+.phrase-slot{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:2px 7px;border-radius:8px;background:#fff3c4;border:2px solid #e6c800;color:#5a3a00;font-weight:900;vertical-align:middle}
+.phrase-slot button{min-width:40px;min-height:40px;border:0;background:transparent;color:#5a3a00;font-weight:900}
+.original{font-size:.82rem;color:var(--text-muted);margin-top:7px}
+.choice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.choice-word{min-height:50px;border:2px solid #7cc3ee;background:#edf8ff;color:#155f90;border-radius:12px;font-weight:900}
+@media(max-width:520px){.choice-grid{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body><main class="app">
+<div class="topnav"><a class="back-link" href="2026-10-05-wordly-wise-lesson-3-index.html">← Lesson 3</a><span class="muted">Exercise 3B</span></div>
+<p class="eyebrow">Wordly Wise · Lesson 3</p><h1>3B Just the Right Word</h1><p class="subtitle">Replace each bold phrase with a Word List 3 word.</p>
+
+<button class="instructions" onclick="speak(this.dataset.speech)" data-speech="Improve each of the following sentences by crossing out the bold phrase and replacing it with a word, or a form of the word, from Word List 3.">🔊 Improve each of the following sentences by crossing out the bold phrase and replacing it with a word (or a form of the word) from Word List 3.</button>
+<div class="bank-panel" id="stickyWordBank" aria-label="Word List 3"><p class="bank-label">Word List 3 · tap a word for its definition</p><div class="word-bank" id="wordBank" style="padding:0"></div></div>
+<section id="questions"></section>
+<div class="progress"><div class="pips" id="pips"></div><span class="progress-count" id="progressCount"></span></div>
+<div class="footer-actions"><button class="clear-btn" id="clearBtn">🗑️ Clear all responses</button><button class="export-btn" onclick="exportPrint()">🖨️ Export / Print</button></div>
+<dialog id="choiceDialog" aria-labelledby="choiceTitle"><header class="modal-head"><h2 id="choiceTitle">Choose a Word List 3 word</h2><button class="close-btn" onclick="document.getElementById('choiceDialog').close()">✕ Close</button></header><div class="modal-body"><div class="choice-grid" id="choiceGrid"></div></div></dialog>
+
+</main>
+<dialog id="definitionDialog" aria-labelledby="definitionTitle">
+  <header class="modal-head"><h2 id="definitionTitle"></h2><button class="close-btn" onclick="closeDefinition()">✕ Close</button></header>
+  <div class="modal-body"><button id="readWord" class="read-def" style="margin-bottom:12px">🔊 Word</button><div id="definitionBody"></div></div>
+</dialog>
+<button class="speaking-toast" id="speakingToast" onclick="cancelSpeak()">🔊 <span>Reading aloud… tap to stop</span></button>
+
+<script>'use strict'; const wordEntries=[{"word": "abundant", "paragraphs": [{"label": "abundant · adjective", "text": "More than enough; plentiful. If good weather continues, farmers can expect an abundant harvest."}, {"label": "abundance · noun", "text": "A great amount. Natural gas supplies an abundance of power to the entire country."}]}, {"word": "arid", "paragraphs": [{"label": "arid · adjective", "text": "Having little or no rainfall; very dry. Much of North Africa is arid land."}]}, {"word": "distinct", "paragraphs": [{"label": "distinct · adjective · 1", "text": "Not the same; different or separate. Apples come in over two thousand distinct varieties."}, {"label": "distinct · adjective · 2", "text": "Unmistakable; definite. Chili peppers add a distinct flavor to this dish."}]}, {"word": "graze", "paragraphs": [{"label": "graze · verb · 1", "text": "To feed on growing grass. A small herd of cows grazed in the meadow."}, {"label": "graze · verb · 2", "text": "To touch lightly in passing. The snowball grazed my cheek but didn’t hurt me."}]}, {"word": "hectic", "paragraphs": [{"label": "hectic · adjective", "text": "Full of feverish activity, haste, or confusion. After a hectic week of sightseeing, the tourists were glad to go home and relax."}]}, {"word": "horde", "paragraphs": [{"label": "horde · noun", "text": "A large group or crowd, especially one on the move. Hordes of swimmers head for the pool in summer."}]}, {"word": "humid", "paragraphs": [{"label": "humid · adjective", "text": "Having a large amount of water or moisture in the air. Residents escape the hot, humid weather by going inside where it is cool and dry."}, {"label": "humidity · noun", "text": "The amount of moisture in the air. The humidity was so high that the slightest activity made us sweat."}]}, {"word": "incredible", "paragraphs": [{"label": "incredible · adjective", "text": "Hard or impossible to believe. It seems incredible that no one was injured in such a bad accident."}]}, {"word": "inhabit", "paragraphs": [{"label": "inhabit · verb", "text": "To live in or on. Millions of bison once inhabited the great plains of America."}, {"label": "inhabitant · noun", "text": "A person or animal that lives in a certain place. Most of the inhabitants of California were born somewhere else."}]}, {"word": "peninsula", "paragraphs": [{"label": "peninsula · noun", "text": "A piece of land, connected to a larger land mass, that juts out and is almost completely surrounded by water. Bays along the Baja peninsula provide shelter for several kinds of whales."}]}, {"word": "rural", "paragraphs": [{"label": "rural · adjective", "text": "Of or relating to the country and the people who live there. The villagers believe that a shopping mall has no place in a rural area."}]}, {"word": "sanctuary", "paragraphs": [{"label": "sanctuary · noun · 1", "text": "A place of safety or shelter. The temple was a sanctuary to those who were being persecuted."}, {"label": "sanctuary · noun · 2", "text": "Protection offered by such a place. The shelter offers sanctuary to women fleeing violence in the home."}]}, {"word": "splendor", "paragraphs": [{"label": "splendor · noun", "text": "Magnificence; brilliance of appearance. The splendor of the palace at Versailles took our breath away."}, {"label": "splendid · adjective", "text": "Very impressive; magnificent. The exhibition of American sculpture includes several splendid statues by Harriet Hosmer."}]}, {"word": "squalor", "paragraphs": [{"label": "squalor · noun", "text": "Filth; misery. People lived in squalor after their homes were destroyed by the hurricane."}, {"label": "squalid · adjective", "text": "Dirty and unfit for living, especially as a result of neglect. The newly arrived immigrants worked long hours in squalid conditions for very low wages."}]}, {"word": "terrain", "paragraphs": [{"label": "terrain · noun · 1", "text": "An area of land; a region. After hiking for several days we knew the terrain quite well."}, {"label": "terrain · noun · 2", "text": "The surface features of a region. The mountainous terrain of western Colorado attracts skiers from all parts of the country."}]}]; 
+function speak(text){
+  if(!('speechSynthesis' in window) || !text) return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=.88; u.pitch=1.05;
+  u.onstart=()=>document.getElementById('speakingToast').classList.add('visible');
+  const hide=()=>document.getElementById('speakingToast').classList.remove('visible');
+  u.onend=hide; u.onerror=hide;
+  window.speechSynthesis.speak(u);
+}
+function cancelSpeak(){ if('speechSynthesis' in window) window.speechSynthesis.cancel(); document.getElementById('speakingToast').classList.remove('visible');}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function openDefinition(word){
+  const e=wordEntries.find(x=>x.word===word);
+  if(!e)return;
+  cancelSpeak();
+  document.getElementById('definitionTitle').textContent=e.word;
+  const body=document.getElementById('definitionBody'); body.innerHTML='';
+  e.paragraphs.forEach(p=>{
+    const box=document.createElement('div'); box.className='definition-box';
+    const strong=document.createElement('strong'); strong.textContent=p.label;
+    const txt=document.createElement('p'); txt.textContent=p.text;
+    const b=document.createElement('button'); b.className='read-def'; b.textContent='▶ Read this paragraph';
+    b.onclick=()=>speak(p.label+'. '+p.text);
+    box.append(strong,txt,b); body.appendChild(box);
+  });
+  document.getElementById('readWord').onclick=()=>speak(e.word);
+  document.getElementById('definitionDialog').showModal();
+}
+function renderWordBank(containerId){
+  const b=document.getElementById(containerId); if(!b)return;
+  wordEntries.forEach(e=>{
+    const bt=document.createElement('button'); bt.className='bank-word'; bt.textContent=e.word; bt.onclick=()=>openDefinition(e.word); b.appendChild(bt);
+  });
+}
+function closeDefinition(){document.getElementById('definitionDialog').close(); cancelSpeak();}
+document.addEventListener('click',e=>{
+  const d=document.getElementById('definitionDialog');
+  if(d && d.open && e.target===d) closeDefinition();
+});
+function doubleTapClear(btn,clearFn){
+  if(btn.dataset.confirming==='true'){
+    clearFn(); btn.dataset.confirming='false'; btn.textContent='🗑️ Clear all responses'; btn.removeAttribute('style'); return;
+  }
+  btn.dataset.confirming='true'; btn.textContent='⚠️ Tap again to confirm';
+  btn.style.background='#ffeedd'; btn.style.color='#c05000'; btn.style.borderColor='#c05000';
+  setTimeout(()=>{if(btn.dataset.confirming==='true'){btn.dataset.confirming='false';btn.textContent='🗑️ Clear all responses';btn.removeAttribute('style');}},3000);
+}
+function downloadPrintHtml(htmlText){
+  const blob=new Blob([htmlText],{type:'text/html'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),10000);
+}
+function printShell(title,body){
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title>
+  <style>body{font-family:Arial,sans-serif;color:#111;margin:28px;line-height:1.45}.name-line{display:flex;gap:22px;margin:12px 0 22px}.name-line span{display:flex;align-items:flex-end;gap:6px}.line{display:inline-block;width:180px;border-bottom:1.5px solid #333}.item{margin:0 0 14px;break-inside:avoid}.selected{font-weight:700}.footer{margin-top:28px;font-size:12px;color:#555}button{padding:9px 14px}@media print{button{display:none}}</style></head><body>
+  <button onclick="window.print()">Print</button><h1>${esc(title)}</h1><div class="name-line"><span>Name: <span class="line">Tina #18</span></span><span>Date: <span class="line"></span></span></div>${body}
+  <div class="footer">Source: Wordly Wise 3000 · Book 6 · Lesson 3</div></body></html>`;
+}
+ 
+const STORAGE_KEY='worksheet_wordly_wise_lesson_3b_2026_10_05_v1';
+const questions=[{"before": "The Underground Railroad offered ", "phrase": "a place of shelter", "after": " to slaves who were escaping to freedom.", "answer": "sanctuary", "answerText": "sanctuary", "hint": "Look for the word meaning “a place of safety or shelter.”"}, {"before": "The first ball from the pitcher ", "phrase": "just barely hit", "after": " the batter’s shoulder.", "answer": "grazed", "answerText": "grazed", "hint": "Look for the verb meaning “to touch lightly in passing.”"}, {"before": "", "phrase": "Large numbers", "after": " of fans surrounded the stage door waiting for autographs.", "answer": "hordes", "answerText": "Hordes", "hint": "Look for the noun meaning “a large group or crowd, especially one on the move.”"}, {"before": "Pitcairn Island has fewer than fifty ", "phrase": "people who make their homes there", "after": ".", "answer": "inhabitants", "answerText": "inhabitants", "hint": "Look for the noun meaning “a person or animal that lives in a certain place.”"}, {"before": "Her life was ", "phrase": "full of feverish activity", "after": " because she worked at two full-time jobs.", "answer": "hectic", "answerText": "hectic", "hint": "Look for the adjective meaning “full of feverish activity, haste, or confusion.”"}, {"before": "Mark Twain wrote mostly about ", "phrase": "life away from the cities and towns of America", "after": ".", "answer": "rural", "answerText": "rural life", "hint": "Rural means “of or relating to the country and the people who live there.”"}, {"before": "The sounds of a flute and a trombone are quite ", "phrase": "different from each other", "after": " so you can easily tell them apart.", "answer": "distinct", "answerText": "distinct", "hint": "Use the meaning of distinct that says “not the same; different or separate.”"}, {"before": "Few crops can be grown where the land is ", "phrase": "very dry and gets little rain", "after": ".", "answer": "arid", "answerText": "arid", "hint": "Arid means “having little or no rainfall; very dry.”"}, {"before": "Monet’s later paintings capture the ", "phrase": "magnificent appearance", "after": " of his garden at Giverny.", "answer": "splendor", "answerText": "splendor", "hint": "Splendor means “magnificence; brilliance of appearance.”"}, {"before": "Italy is ", "phrase": "a large country that is almost completely surrounded by water", "after": ".", "answer": "peninsula", "answerText": "a peninsula", "hint": "A peninsula is “a piece of land, connected to a larger land mass, that juts out and is almost completely surrounded by water.”"}, {"before": "The ", "phrase": "rough surface features of the land", "after": " made travel difficult.", "answer": "terrain", "answerText": "terrain", "hint": "Use the meaning of terrain that says “the surface features of a region.”"}, {"before": "Crops grow in ", "phrase": "quantities that provide more than is needed", "after": " in such fertile soil.", "answer": "abundance", "answerText": "abundance", "hint": "Abundance means “a great amount.”"}];
+const answerChoices=[{"value": "abundance", "label": "abundance"}, {"value": "arid", "label": "arid"}, {"value": "distinct", "label": "distinct"}, {"value": "grazed", "label": "grazed"}, {"value": "hectic", "label": "hectic"}, {"value": "hordes", "label": "hordes"}, {"value": "humid", "label": "humid"}, {"value": "incredible", "label": "incredible"}, {"value": "inhabitants", "label": "inhabitants"}, {"value": "peninsula", "label": "peninsula"}, {"value": "rural", "label": "rural"}, {"value": "sanctuary", "label": "sanctuary"}, {"value": "splendor", "label": "splendor"}, {"value": "squalor", "label": "squalor"}, {"value": "terrain", "label": "terrain"}];
+let currentChoiceIndex=-1;
+let state={items:questions.map(()=>({selected:'',checked:false,correct:false})),answeredCount:0,total:questions.length};
+function load(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');if(s&&Array.isArray(s.items)&&s.items.length===questions.length)state=s;}catch(e){}}
+function save(){state.answeredCount=state.items.filter(x=>x.selected).length;try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}updateProgress();}
+function buildSentence(i){
+  const q=questions[i], sel=state.items[i].selected;
+  if(!sel)return q.before+q.phrase+q.after;
+  const txt=(sel===q.answer?q.answerText:answerChoices.find(x=>x.value===sel)?.label||sel);
+  return q.before+txt+q.after;
+}
+function addWords(el,text){
+  const tokens=text.split(/(\s+)/);
+  tokens.forEach(tok=>{if(/^\s+$/.test(tok)){el.appendChild(document.createTextNode(tok));return;}
+    const b=document.createElement('button');b.className='plain-word';b.textContent=tok;b.type='button';
+    b.setAttribute('aria-label','Read '+tok);b.onclick=e=>{e.stopPropagation();speak(tok.replace(/^[^A-Za-z]+|[^A-Za-z]+$/g,''));};el.appendChild(b);
+  });
+}
+function openChoice(i){currentChoiceIndex=i;document.getElementById('choiceTitle').textContent='Choose a Word List 3 word';document.getElementById('choiceDialog').showModal();}
+function chooseWord(v){
+  const i=currentChoiceIndex;if(i<0)return;
+  state.items[i]={selected:v,checked:false,correct:false};save();renderCard(i);document.getElementById('choiceDialog').close();setTimeout(()=>speak(buildSentence(i)),300);
+}
+function check(i){const s=state.items[i];if(!s.selected)return;s.checked=true;s.correct=s.selected===questions[i].answer;save();renderCard(i);}
+function renderCard(i){
+  const q=questions[i],s=state.items[i],card=document.getElementById('card-'+i);card.classList.toggle('correct',s.correct);
+  const sentence=document.getElementById('sentence-'+i);sentence.innerHTML='';
+  addWords(sentence,q.before);
+  const slot=document.createElement('span');slot.className='phrase-slot';
+  const text=document.createElement('span');text.textContent=s.selected?(s.selected===q.answer?q.answerText:answerChoices.find(x=>x.value===s.selected)?.label||s.selected):q.phrase;
+  text.setAttribute('role','button');text.tabIndex=0;text.onclick=e=>{e.stopPropagation();speak(text.textContent);};
+  const arrow=document.createElement('button');arrow.textContent='▾';arrow.title='Choose a word';arrow.onclick=e=>{e.stopPropagation();openChoice(i);};
+  slot.append(text,arrow);sentence.appendChild(slot);addWords(sentence,q.after);
+  document.getElementById('original-'+i).textContent=s.selected?'Original bold phrase: '+q.phrase:'';
+  const cb=document.getElementById('check-'+i);cb.disabled=!s.selected;cb.classList.toggle('done',s.correct);
+  const fb=document.getElementById('fb-'+i);fb.className='feedback';if(s.checked){fb.classList.add('show',s.correct?'correct':'hint');fb.textContent=s.correct?'✅ That replacement fits the sentence.':'💡 Hint: '+q.hint;}
+}
+function build(){
+  renderWordBank('wordBank');
+  const grid=document.getElementById('choiceGrid');answerChoices.forEach(c=>{const b=document.createElement('button');b.className='choice-word';b.textContent=c.label;b.onclick=()=>chooseWord(c.value);grid.appendChild(b);});
+  const wrap=document.getElementById('questions');
+  questions.forEach((q,i)=>{const card=document.createElement('article');card.className='question-card';card.id='card-'+i;
+    card.innerHTML=`<div class="card-head"><div class="qnum">${i+1}.</div><div class="card-main"><div class="sentence" id="sentence-${i}"></div><div class="original" id="original-${i}"></div><button class="check-btn" id="check-${i}" onclick="check(${i})">📝 Check answer</button><div id="fb-${i}" class="feedback"></div></div><button class="play-btn" onclick="speak(buildSentence(${i}))" title="Read sentence">▶</button></div>`;
+    wrap.appendChild(card);renderCard(i);});
+  updateProgress();
+}
+function updateProgress(){const p=document.getElementById('pips');p.innerHTML='';state.items.forEach(s=>{const d=document.createElement('span');d.className='pip'+(s.correct?' done':s.selected?' answered':'');p.appendChild(d);});document.getElementById('progressCount').textContent=state.items.filter(x=>x.selected).length+' / '+questions.length+' answered';}
+document.getElementById('clearBtn').onclick=function(){doubleTapClear(this,()=>{try{localStorage.removeItem(STORAGE_KEY)}catch(e){};location.reload();})};
+function exportPrint(){let body='';questions.forEach((q,i)=>{body+=`<div class="item"><strong>${i+1}.</strong> ${esc(buildSentence(i))}</div>`;});downloadPrintHtml(printShell('Wordly Wise Lesson 3B — Just the Right Word',body));}
+load();build();
+</script></body></html>

@@ -87,8 +87,9 @@ This type uses three levels of TTS:
 
 ### Word bank + definitions
 
-Keep the full lesson word bank visible above the exercises.
+Keep the full lesson word bank visible above the exercises. For long exercises where the student repeatedly refers back to the bank, use the **Sticky Vocabulary Word Bank** component in `framework/DESIGN_SYSTEM.md` and the usage rules in `framework/INTERACTION_PATTERNS.md`.
 
+- Keep sticky-bank copy minimal; do not add text explaining the scrolling behavior.
 - Each base word is a large tappable button.
 - Tapping a bank word opens a definition modal; it does **not** answer a question.
 - Definitions must be transcribed from the provided source. Do not simplify, rewrite, or substitute general-knowledge definitions.
@@ -168,5 +169,152 @@ This type supports **adult-check-only** completion when requested.
 - Preserve responses across reloads and provide the standard double-tap `Clear all responses` action.
 
 **Reference implementation:** `worksheets/christina/2026-09-30-wordly-wise-lesson-2d.html`
+
+---
+
+## Type 3: Vocabulary Sentence Pairing — Choose Two Phrases
+
+*Wordly Wise “Finding Meanings” style: each item contains four sentence fragments, and the student chooses the two fragments that form one sentence correctly using a lesson vocabulary word.*
+
+**Use case:** Vocabulary exercises where two of four printed phrases must be paired to demonstrate the meaning of a word.
+
+**Question data shape:**
+```javascript
+{
+  phrases: [
+    ["a", "Squalid areas are those"],
+    ["b", "with little rainfall."],
+    ["c", "Rural areas are those"],
+    ["d", "away from large cities."]
+  ],
+  answer: ["c", "d"],
+  hint: "Rural means “of or relating to the country and the people who live there.”"
+}
+```
+
+### Answer control
+
+Use one selection control plus one phrase-reading control per printed phrase.
+
+- Permit exactly two selected phrases.
+- Once two are selected, disable unselected choices until the student deselects one.
+- Keep selection and TTS as separate tap targets so listening never changes the answer.
+- After two phrases are selected, assemble them into a readable sentence in grammatical order and show that sentence below the choices.
+- Auto-read the assembled sentence about 300 ms after the second selection.
+
+### Feedback
+
+Use deferred per-card checking.
+
+- `Check answer` is disabled until two phrases are selected.
+- Correct: calm green ✅ feedback.
+- Incorrect: a `💡 Hint:` based on the source definition of the vocabulary word used in the correct sentence.
+- A changed selection clears prior correctness feedback.
+
+### Progress + persistence
+
+- Persist the two selected phrase IDs and check state for each item.
+- Count an item as answered when exactly two phrases are selected.
+- Progress pips may distinguish selected from checked/correct.
+
+**Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3a-finding-meanings.html`
+
+---
+
+## Type 4: Vocabulary Applying Meanings — Multi-Select, Adult Review
+
+*Wordly Wise “Applying Meanings” style: each question has four choices and may have from one to four correct answers.*
+
+**Use case:** Vocabulary application questions where the printed source explicitly allows multiple correct choices but does not provide an answer key in the supplied material.
+
+**Question data shape:**
+```javascript
+{
+  question: "Which of the following animals graze?",
+  vocab: "graze",
+  choices: [
+    ["a", "crocodiles"],
+    ["b", "sheep"],
+    ["c", "horses"],
+    ["d", "cats"]
+  ]
+}
+```
+
+### Answer control
+
+Use four independent checkbox-style selections.
+
+- Do not cap the number of selected choices.
+- Keep the selection control and the visible answer text as separate tap targets: the selection control changes the answer; the text control reads the option aloud.
+- Make the full question tappable/readable.
+- Provide the lesson vocabulary definition through the standard definition modal without changing the answer.
+
+### Feedback
+
+When the supplied source does not contain an answer key, use **adult-check-only** completion.
+
+- Do not infer or manufacture correctness from general knowledge.
+- Do not include automatic hints, scoring, or correct/incorrect labels.
+- A question is response-complete after at least one option is selected.
+- A short neutral note may state that selections are saved for review.
+
+If a trustworthy answer key is supplied with a future worksheet, correctness logic may be added without changing the selection interaction.
+
+### Progress + persistence
+
+- Persist selected option IDs per question.
+- Progress counts questions with at least one selection.
+- Preserve all selections across reloads and provide the standard double-tap clear action.
+
+**Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3c-applying-meanings.html`
+
+---
+
+## Type 5: Vocabulary Analogy — Choose Related Pair
+
+*Word Study analogy style: a stem pair is shown in capitals, followed by four candidate word pairs; the student chooses the pair with the same semantic relationship.*
+
+**Use case:** Vocabulary analogies where the source teaches a specific relationship, such as antonyms, and asks the student to choose one matching pair.
+
+**Question data shape:**
+```javascript
+{
+  pair: ["HUMID", "ARID"],
+  choices: [
+    ["a", "square", "round"],
+    ["b", "sloppy", "careless"],
+    ["c", "thirsty", "hungry"],
+    ["d", "wet", "dry"]
+  ],
+  answer: "d"
+}
+```
+
+### Answer control
+
+Use four large single-select pair buttons.
+
+- Display the source pair prominently above the choices.
+- Selecting a choice replaces any prior selection.
+- After selection, auto-read the complete analogy sentence (for example, “Humid is to arid as wet is to dry.”).
+- Keep the lesson word bank available through the standard definition modal for lesson words; do not invent definitions for non-lesson distractors.
+- Preserve any source-provided analogy explanation/example in a collapsible support section when it would otherwise add substantial visual load.
+
+### Feedback
+
+Use deferred per-card checking.
+
+- Correct: calm green ✅ confirmation.
+- Incorrect: a relationship hint that names the source-taught relationship without revealing the correct choice (for example, “HUMID and ARID are opposites. Look for another pair of opposites.”).
+- Do not add broader analogy rules not present in the source.
+
+### Progress + persistence
+
+- Persist selected choice and check/correct state.
+- Count any selected pair as answered; distinguish checked/correct with the standard progress styling.
+- Provide the standard double-tap clear action.
+
+**Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3d-word-study.html`
 
 ---

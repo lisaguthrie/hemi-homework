@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wordly Wise Lesson 3</title><link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-start:#e0f4ff;--bg-end:#f0e8ff;--card-bg:#fff;--text-primary:#1a2a3a;--text-muted:#6a8299;
+  --accent-blue:#3b9ede;--accent-blue-dk:#1a6fa8;--phrase-bg:#fff3c4;--phrase-border:#e6c800;--phrase-text:#5a3a00;
+  --btn-play:#5dca7e;--btn-play-dk:#3aaa5a;--feedback-ok-bg:#d0f5e0;--feedback-ok-txt:#1d7a40;
+  --feedback-hint-bg:#ffeedd;--feedback-hint-txt:#c05000;--pip-empty:#dde0e8;--pip-done:#5dca7e;--purple:#7c5cbf;
+}
+*{box-sizing:border-box}
+html{font-size:16px}
+body{margin:0;font-family:'Nunito',Arial,sans-serif;background:linear-gradient(160deg,var(--bg-start),var(--bg-end));min-height:100vh;color:var(--text-primary);padding:18px 14px 72px}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,[role=button]:focus-visible,summary:focus-visible{outline:3px solid #6b43a3;outline-offset:3px}
+.app{max-width:760px;margin:0 auto}
+.topnav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.back-link,.wordlist-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 13px;border-radius:12px;border:1.5px solid #a9c6da;background:#fff;color:var(--accent-blue-dk);font-weight:800;text-decoration:none}
+h1,h2,h3{font-family:'Fredoka One','Arial Rounded MT Bold',Arial,sans-serif;font-weight:400}
+h1{text-align:center;margin:4px 0 3px;font-size:1.75rem}
+.eyebrow{text-align:center;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-blue-dk);font-size:.8rem;font-weight:800;margin:0}
+.subtitle{text-align:center;color:var(--text-muted);font-weight:700;margin:5px 0 14px}
+.instructions{width:100%;text-align:left;background:#e8f4ff;border:2px solid #bedff4;color:#17496d;border-radius:16px;padding:12px 14px;line-height:1.55;font-weight:800;margin:0 0 12px;min-height:44px}
+.question-card,.word-list-panel,.progress{background:var(--card-bg);border-radius:18px;box-shadow:0 4px 20px rgba(0,0,0,.10)}
+.question-card{padding:16px 18px;border:2.5px solid transparent;margin-bottom:13px}
+.question-card.correct{border-color:var(--btn-play);background:#f0fff5}
+.card-head{display:flex;align-items:flex-start;gap:10px}
+.qnum{font-family:'Fredoka One',sans-serif;color:var(--accent-blue-dk);font-size:1.15rem;min-width:30px;line-height:44px}
+.card-main{flex:1;min-width:0}
+.prompt{font-size:1.02rem;line-height:1.65;font-weight:700;margin:7px 0 10px}
+.play-btn{background:var(--btn-play);border:0;border-radius:50%;width:44px;height:44px;min-width:44px;font-size:1.05rem;box-shadow:0 2px 8px rgba(93,202,126,.4)}
+.play-btn:hover{background:var(--btn-play-dk)}
+.feedback{display:none;align-items:flex-start;gap:5px;font-size:.9rem;font-weight:800;padding:7px 11px;border-radius:13px;margin-top:10px;line-height:1.45}
+.feedback.show{display:flex}
+.feedback.correct{background:var(--feedback-ok-bg);color:var(--feedback-ok-txt)}
+.feedback.hint{background:var(--feedback-hint-bg);color:var(--feedback-hint-txt)}
+.check-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 16px;border-radius:12px;border:2px solid #d9a800;background:linear-gradient(180deg,#ffe89b,#ffd866);color:#5f4700;font-weight:800;margin-top:10px}
+.check-btn.done{background:linear-gradient(180deg,#7be09a,#5dca7e);border-color:#3aaa5a;color:#fff}
+.check-btn:disabled{opacity:.48;cursor:default}
+.progress{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 0}
+.pips{display:flex;gap:6px;flex-wrap:wrap}
+.pip{width:18px;height:18px;border-radius:50%;background:var(--pip-empty)}
+.pip.answered{background:#8cc7ef}.pip.done{background:var(--pip-done)}
+.progress-count{font-weight:900;color:var(--text-muted);white-space:nowrap}
+.footer-actions{text-align:center;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.clear-btn,.export-btn{min-height:44px;border-radius:18px;padding:8px 18px;font-weight:800}
+.clear-btn{background:#f0f0f0;color:#777;border:2px solid #ccc}
+.export-btn{background:var(--purple);color:#fff;border:0;box-shadow:0 2px 8px rgba(124,92,191,.25)}
+.speaking-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(90px);opacity:0;background:var(--accent-blue-dk);color:white;padding:10px 22px;border:0;border-radius:30px;box-shadow:0 4px 20px #0003;z-index:200;pointer-events:none;font-weight:800;transition:.2s}
+.speaking-toast.visible{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
+.word-list-panel{margin-bottom:12px;overflow:hidden}
+.word-list-panel summary{min-height:44px;padding:12px 14px;font-weight:900;color:var(--accent-blue-dk);cursor:pointer}
+.word-bank{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 12px 12px}
+.bank-word{min-height:44px;border-radius:11px;border:2px solid var(--phrase-border);background:var(--phrase-bg);color:var(--phrase-text);font-weight:900}
+dialog{border:0;border-radius:20px;width:min(650px,calc(100vw - 26px));max-height:86dvh;padding:0;box-shadow:0 14px 60px #1b294449;color:var(--text-primary)}
+dialog::backdrop{background:#17334f66}
+.modal-head{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 16px;border-bottom:1px solid #dce7f1;z-index:2}
+.modal-head h2{font-size:1.35rem;margin:0}.close-btn{min-height:44px;padding:7px 13px;border-radius:12px;border:1px solid #b8cbdc;background:#f1f6fb;color:var(--accent-blue-dk);font-weight:800}
+.modal-body{padding:15px 17px}
+.definition-box{background:#f8fbff;border:1px solid #d7e6f2;border-radius:13px;padding:12px;margin:0 0 11px}
+.definition-box p{line-height:1.65;margin:0 0 9px}.definition-box strong{display:block;margin-bottom:5px}
+.read-def{min-height:44px;border:0;border-radius:11px;background:var(--btn-play);font-weight:800;padding:7px 12px}
+.vocab-chip{display:inline-flex;align-items:center;min-height:44px;padding:3px 9px;border-radius:9px;background:var(--phrase-bg);border:2px solid var(--phrase-border);color:var(--phrase-text);font-weight:900}
+.plain-word{display:inline;border:0;background:transparent;padding:0 1px;margin:0;font:inherit;color:inherit;min-height:0;min-width:0;border-radius:3px}
+.plain-word:hover{background:#e6f3ff}
+.muted{color:var(--text-muted);font-size:.9rem}
+@media(max-width:520px){body{padding:12px 9px 70px}.question-card{padding:13px}.word-bank{grid-template-columns:repeat(2,1fr)}h1{font-size:1.48rem}.prompt{font-size:1rem}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+.launcher{max-width:760px;margin:auto}.lesson-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:16px}
+.exercise-card{background:#fff;border-radius:18px;box-shadow:0 4px 20px #00000018;padding:16px;display:flex;flex-direction:column;gap:9px}
+.exercise-card h2{margin:0;font-size:1.24rem}.exercise-card p{margin:0;color:var(--text-muted);line-height:1.45}
+.start-link{display:inline-flex;align-items:center;justify-content:center;min-height:48px;margin-top:auto;border-radius:13px;background:var(--accent-blue);color:#fff;text-decoration:none;font-weight:900}
+.progress-mini{font-size:.86rem;font-weight:800;color:var(--accent-blue-dk)}
+@media(max-width:620px){.lesson-grid{grid-template-columns:1fr}}
+</style></head><body><main class="launcher">
+<p class="eyebrow">Wordly Wise · Book 6</p><h1>Lesson 3</h1><p class="subtitle">Choose one exercise. Each exercise opens on its own page.</p>
+<div class="lesson-grid">
+<article class="exercise-card"><h2>3A Finding Meanings</h2><p>Choose two phrases to make a sentence that correctly uses a Word List 3 word.</p><div id="p3a" class="progress-mini">Not started</div><a class="start-link" href="2026-10-05-wordly-wise-lesson-3a-finding-meanings.html">Open 3A · 8 questions</a></article>
+<article class="exercise-card"><h2>3B Just the Right Word</h2><p>Replace each bold phrase with a word, or a form of a word, from Word List 3.</p><div id="p3b" class="progress-mini">Not started</div><a class="start-link" href="2026-10-05-wordly-wise-lesson-3b-just-the-right-word.html">Open 3B · 12 sentences</a></article>
+<article class="exercise-card"><h2>3C Applying Meanings</h2><p>Choose every answer that fits. Each question can have from one to four answers.</p><div id="p3c" class="progress-mini">Not started</div><a class="start-link" href="2026-10-05-wordly-wise-lesson-3c-applying-meanings.html">Open 3C · 8 questions</a></article>
+<article class="exercise-card"><h2>3D Word Study</h2><p>Choose the word pair that has the same relationship as the pair in capital letters.</p><div id="p3d" class="progress-mini">Not started</div><a class="start-link" href="2026-10-05-wordly-wise-lesson-3d-word-study.html">Open 3D · 6 analogies</a></article>
+</div></main><script>
+const exercises=[
+ {key:'worksheet_wordly_wise_lesson_3a_2026_10_05_v1',id:'p3a',total:8},
+ {key:'worksheet_wordly_wise_lesson_3b_2026_10_05_v1',id:'p3b',total:12},
+ {key:'worksheet_wordly_wise_lesson_3c_2026_10_05_v1',id:'p3c',total:8},
+ {key:'worksheet_wordly_wise_lesson_3d_2026_10_05_v1',id:'p3d',total:6}
+];
+exercises.forEach(x=>{let n=0;try{const s=JSON.parse(localStorage.getItem(x.key)||'null');if(s)n=Number(s.answeredCount)||0;}catch(e){}
+ const el=document.getElementById(x.id);el.textContent=n?`${n} / ${x.total} answered`:'Not started';
+});
+</script></body></html>
