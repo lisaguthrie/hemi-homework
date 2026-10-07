@@ -133,6 +133,62 @@ Use the yellow `.phrase-chip` when the chip is independently tappable and reads 
 
 ---
 
+## Sticky Vocabulary Word Bank
+
+Use this component when a vocabulary exercise contains enough question cards that the student would otherwise need to scroll back to the lesson word list repeatedly.
+
+```css
+.bank-panel {
+  position: sticky;
+  top: 8px;
+  z-index: 60;
+  background: rgba(255,255,255,.97);
+  backdrop-filter: blur(8px);
+  border: 2px solid #cfe2ef;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px #20365622;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.bank-label {
+  font-weight: 900;
+  color: var(--accent-blue-dk);
+  margin: 0 0 7px;
+}
+
+.word-bank {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  gap: 7px;
+}
+
+.bank-word {
+  min-height: 44px;
+  border-radius: 11px;
+  border: 2px solid var(--phrase-border);
+  background: var(--phrase-bg);
+  color: var(--phrase-text);
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .word-bank { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+
+@media (max-width: 520px) {
+  .bank-panel { top: 4px; padding: 8px; }
+  .word-bank { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 5px; }
+  .bank-word { min-height: 40px; font-size: .88rem; }
+}
+```
+
+**Content rule:** keep the label minimal and instructional, e.g. `Word List 3 · tap a word for its definition`. Do not add prose explaining that the bank stays visible while scrolling; that adds decoding load without helping the task.
+
+**Use when:** the word list is a repeated reference during a vertically scrolling exercise. Do not make small, rarely used support banks sticky by default.
+
+---
+
 ## Buttons
 
 ```css
