@@ -77,6 +77,16 @@ When a worksheet image contains two or more distinct skill sections (e.g. Commas
 - **Do not full re-render on every keystroke/change in editable controls** (`input`, `textarea`, `select`). Update progress/status text in place so focus and caret remain stable during typing and speech-to-text.
 - If a full render is unavoidable, implement focus/caret capture-and-restore around render.
 
+### Passage + Free-Text Variants
+
+- Honor explicit microphone inclusion/omission requests, including delivering both variants. Speech recognition availability must never gate typing, autosave, read-back, or print export.
+- Use distinct persistence keys for separate variants so their responses cannot overwrite one another.
+- Preserve original passage paragraphs across printed page breaks. Store sentence boundaries explicitly when abbreviations make automatic splitting unsafe.
+- Keep passage and question scrolling independent in a two-pane layout, and retain both panes on small screens.
+- Inline definition controls must be independent of question read-aloud and answer editing.
+- For open-ended written responses, count nonempty responses as answered without marking them correct or applying exact-string grading.
+- Simulated microphone tests establish event handling only; document live capture as unverified until tested in the target browser.
+
 ### Selective Read-Aloud
 
 Not every section requires read-aloud. Matching/labeling sections (e.g. Type 1B: match subject pronoun to possessive pronoun) where the interaction is purely visual and the words are short labels do not benefit from TTS and should omit it entirely:

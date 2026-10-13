@@ -59,8 +59,64 @@ dialog::backdrop{background:#17334f66}
 .modal-head{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 16px;border-bottom:1px solid #dce7f1;z-index:2}
 .modal-head h2{font-size:1.35rem;margin:0}.close-btn{min-height:44px;padding:7px 13px;border-radius:12px;border:1px solid #b8cbdc;background:#f1f6fb;color:var(--accent-blue-dk);font-weight:800}
 .modal-body{padding:15px 17px}
-.definition-box{background:#f8fbff;border:1px solid #d7e6f2;border-radius:13px;padding:12px;margin:0 0 11px}
-.definition-box p{line-height:1.65;margin:0 0 9px}.definition-box strong{display:block;margin-bottom:5px}
+.definition-card{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start;border:2px solid #d9e8f3;border-radius:13px;padding:12px;margin:10px 0;background:#fbfdff;line-height:1.45}
+.definition-card-content{min-width:0}
+.definition-label{font-weight:900;color:#173e58;margin-bottom:9px;font-size:1.02rem}
+.definition-part{display:grid;grid-template-columns:92px minmax(0,1fr);gap:8px;align-items:start;margin:7px 0}
+.definition-kind{font-weight:900;color:var(--accent-blue-dk);background:#e8f4ff;border-radius:8px;padding:4px 7px;text-align:center}
+.definition-copy{padding:4px 0;font-weight:750}
+.definition-example .definition-kind{color:#376944;background:#e9f8ee}
+.definition-example .definition-copy{color:#405464;font-style:italic}
+.definition-read-btn{width:44px;height:44px;padding:0;border:0;border-radius:50%;background:var(--btn-play);color:#153b20;font-size:1rem;font-weight:900;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(93,202,126,.32)}
+.definition-read-btn:hover{background:var(--btn-play-dk);color:#fff}
+/* Part-of-speech color coding */
+.pos-tag{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:24px;
+  min-height:20px;
+  padding:1px 5px;
+  border-radius:999px;
+  border:1.5px solid transparent;
+  font-size:.72rem;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.01em;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.pos-noun{color:#2457a7;background:#e8f0ff;border-color:#b9cdf4}
+.pos-verb{color:#257044;background:#e7f7ed;border-color:#b8dfc5}
+.pos-adjective{color:#9a4c00;background:#fff0df;border-color:#f0c79b}
+.pos-adverb{color:#6841a3;background:#f1eaff;border-color:#d2c0ef}
+.pos-other{color:#5a6470;background:#f0f2f4;border-color:#d2d7dc}
+.bank-word{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  flex-wrap:wrap;
+  padding:5px 6px;
+  line-height:1.1;
+}
+.bank-word-text{font-weight:900}
+.bank-pos-list{display:inline-flex;align-items:center;gap:3px;flex-wrap:wrap;justify-content:center}
+.definition-label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.definition-headword{font-weight:900;color:#173e58}
+.definition-sense{
+  font-size:.78rem;
+  font-weight:800;
+  color:#6a7580;
+  background:#f0f2f4;
+  border-radius:999px;
+  padding:2px 7px;
+}
 .read-def{min-height:44px;border:0;border-radius:11px;background:var(--btn-play);font-weight:800;padding:7px 12px}
 .vocab-chip{display:inline-flex;align-items:center;min-height:44px;padding:3px 9px;border-radius:9px;background:var(--phrase-bg);border:2px solid var(--phrase-border);color:var(--phrase-text);font-weight:900}
 .plain-word{display:inline;border:0;background:transparent;padding:0 1px;margin:0;font:inherit;color:inherit;min-height:0;min-width:0;border-radius:3px}
@@ -105,6 +161,48 @@ function speak(text){
 }
 function cancelSpeak(){ if('speechSynthesis' in window) window.speechSynthesis.cancel(); document.getElementById('speakingToast').classList.remove('visible');}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+const POS_META={
+  noun:{short:'n',className:'pos-noun'},
+  verb:{short:'v',className:'pos-verb'},
+  adjective:{short:'adj',className:'pos-adjective'},
+  adverb:{short:'adv',className:'pos-adverb'}
+};
+function parseDefinitionLabel(label){
+  const parts=String(label).split('·').map(part=>part.trim()).filter(Boolean);
+  const headword=parts[0]||'';
+  const partOfSpeech=(parts[1]||'').toLowerCase();
+  const sense=parts.slice(2).join(' · ');
+  return {headword,partOfSpeech,sense};
+}
+function makePosTag(partOfSpeech){
+  const meta=POS_META[partOfSpeech]||{short:partOfSpeech||'?',className:'pos-other'};
+  const tag=document.createElement('span');
+  tag.className='pos-tag '+meta.className;
+  tag.textContent=meta.short;
+  tag.title=partOfSpeech||'part of speech';
+  tag.setAttribute('aria-label',partOfSpeech||'part of speech');
+  return tag;
+}
+function entryPartsOfSpeech(entry){
+  const seen=new Set(), out=[];
+  (entry.paragraphs||[]).forEach(p=>{
+    const info=parseDefinitionLabel(p.label);
+    if(info.partOfSpeech && !seen.has(info.partOfSpeech)){
+      seen.add(info.partOfSpeech);
+      out.push(info.partOfSpeech);
+    }
+  });
+  return out;
+}
+function splitDefinitionAndExample(text){
+  const match=String(text).match(/^(.+?\.)(?:\s+)(.+)$/);
+  if(!match)return {definition:text,example:''};
+  return {definition:match[1],example:match[2]};
+}
+function buildDefinitionSpeech(label,definition,example){
+  const spokenLabel=label.split('·').map(part=>part.trim()).filter(Boolean).join('. ')+'.';
+  return spokenLabel+' Definition: '+definition+(example?' Example: '+example:'');
+}
 function openDefinition(word){
   const e=wordEntries.find(x=>x.word===word);
   if(!e)return;
@@ -112,12 +210,33 @@ function openDefinition(word){
   document.getElementById('definitionTitle').textContent=e.word;
   const body=document.getElementById('definitionBody'); body.innerHTML='';
   e.paragraphs.forEach(p=>{
-    const box=document.createElement('div'); box.className='definition-box';
-    const strong=document.createElement('strong'); strong.textContent=p.label;
-    const txt=document.createElement('p'); txt.textContent=p.text;
-    const b=document.createElement('button'); b.className='read-def'; b.textContent='▶ Read this paragraph';
-    b.onclick=()=>speak(p.label+'. '+p.text);
-    box.append(strong,txt,b); body.appendChild(box);
+    const parts=splitDefinitionAndExample(p.text);
+    const card=document.createElement('div'); card.className='definition-card';
+    const play=document.createElement('button'); play.className='definition-read-btn'; play.textContent='▶';
+    play.setAttribute('aria-label','Read definition and example aloud');
+    play.onclick=()=>speak(buildDefinitionSpeech(p.label,parts.definition,parts.example));
+    const content=document.createElement('div'); content.className='definition-card-content';
+    const info=parseDefinitionLabel(p.label);
+    const label=document.createElement('div'); label.className='definition-label';
+    const headword=document.createElement('span'); headword.className='definition-headword'; headword.textContent=info.headword;
+    label.appendChild(headword);
+    if(info.partOfSpeech) label.appendChild(makePosTag(info.partOfSpeech));
+    if(info.sense){
+      const sense=document.createElement('span'); sense.className='definition-sense'; sense.textContent='sense '+info.sense;
+      label.appendChild(sense);
+    }
+    const defPart=document.createElement('div'); defPart.className='definition-part';
+    const defKind=document.createElement('div'); defKind.className='definition-kind'; defKind.textContent='Definition';
+    const defCopy=document.createElement('div'); defCopy.className='definition-copy'; defCopy.textContent=parts.definition;
+    defPart.append(defKind,defCopy);
+    content.append(label,defPart);
+    if(parts.example){
+      const exPart=document.createElement('div'); exPart.className='definition-part definition-example';
+      const exKind=document.createElement('div'); exKind.className='definition-kind'; exKind.textContent='Example';
+      const exCopy=document.createElement('div'); exCopy.className='definition-copy'; exCopy.textContent=parts.example;
+      exPart.append(exKind,exCopy); content.append(exPart);
+    }
+    card.append(play,content); body.appendChild(card);
   });
   document.getElementById('readWord').onclick=()=>speak(e.word);
   document.getElementById('definitionDialog').showModal();
@@ -125,7 +244,11 @@ function openDefinition(word){
 function renderWordBank(containerId){
   const b=document.getElementById(containerId); if(!b)return;
   wordEntries.forEach(e=>{
-    const bt=document.createElement('button'); bt.className='bank-word'; bt.textContent=e.word; bt.onclick=()=>openDefinition(e.word); b.appendChild(bt);
+    const bt=document.createElement('button'); bt.className='bank-word'; bt.onclick=()=>openDefinition(e.word);
+    const word=document.createElement('span'); word.className='bank-word-text'; word.textContent=e.word;
+    const posList=document.createElement('span'); posList.className='bank-pos-list';
+    entryPartsOfSpeech(e).forEach(pos=>posList.appendChild(makePosTag(pos)));
+    bt.append(word,posList); b.appendChild(bt);
   });
 }
 function closeDefinition(){document.getElementById('definitionDialog').close(); cancelSpeak();}

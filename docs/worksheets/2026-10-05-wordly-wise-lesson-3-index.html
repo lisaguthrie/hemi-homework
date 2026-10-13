@@ -80,12 +80,14 @@ dialog::backdrop{background:#17334f66}
 <article class="exercise-card"><h2>3B Just the Right Word</h2><p>Replace each bold phrase with a word, or a form of a word, from Word List 3.</p><div id="p3b" class="progress-mini">Not started</div><a class="start-link" href="2026-10-05-wordly-wise-lesson-3b-just-the-right-word.html">Open 3B · 12 sentences</a></article>
 <article class="exercise-card"><h2>3C Applying Meanings</h2><p>Choose every answer that fits. Each question can have from one to four answers.</p><div id="p3c" class="progress-mini">Not started</div><a class="start-link" href="2026-10-05-wordly-wise-lesson-3c-applying-meanings.html">Open 3C · 8 questions</a></article>
 <article class="exercise-card"><h2>3D Word Study</h2><p>Choose the word pair that has the same relationship as the pair in capital letters.</p><div id="p3d" class="progress-mini">Not started</div><a class="start-link" href="2026-10-05-wordly-wise-lesson-3d-word-study.html">Open 3D · 6 analogies</a></article>
+<article class="exercise-card"><h2>3E Vocabulary in Context</h2><p>Read “Land of Contrasts,” then answer 15 questions in complete sentences using Word List 3 vocabulary.</p><div id="p3e" class="progress-mini">Not started</div><a class="start-link" href="2026-10-08-wordly-wise-lesson-3e-vocabulary-in-context.html">Open 3E · 15 questions</a></article>
 </div></main><script>
 const exercises=[
  {key:'worksheet_wordly_wise_lesson_3a_2026_10_05_v1',id:'p3a',total:8},
  {key:'worksheet_wordly_wise_lesson_3b_2026_10_05_v1',id:'p3b',total:12},
  {key:'worksheet_wordly_wise_lesson_3c_2026_10_05_v1',id:'p3c',total:8},
- {key:'worksheet_wordly_wise_lesson_3d_2026_10_05_v1',id:'p3d',total:6}
+ {key:'worksheet_wordly_wise_lesson_3d_2026_10_05_v1',id:'p3d',total:6},
+ {key:'worksheet_wordly_wise_lesson_3e_2026_10_08_v1',id:'p3e',total:15}
 ];
 exercises.forEach(x=>{let n=0;try{const s=JSON.parse(localStorage.getItem(x.key)||'null');if(s)n=Number(s.answeredCount)||0;}catch(e){}
  const el=document.getElementById(x.id);el.textContent=n?`${n} / ${x.total} answered`:'Not started';

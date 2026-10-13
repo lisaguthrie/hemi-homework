@@ -61,6 +61,70 @@ Max content width: `700px`, centered. Sections stack with `gap: 14px`.
 
 ---
 
+## Two-Pane Reading Workspace
+
+Use this layout for long passages with a separate response area. At 1280px and wider, the passage and response panes scroll independently; pane headings and their primary actions remain visible while scrolling. Below 1280px, stack the panes in reading order and let both remain fully reachable in normal page flow. Do not apply the standard 700px page-width cap to this layout.
+
+```css
+.reading-page {
+  max-width: 1280px;
+  margin-inline: auto;
+}
+
+.reading-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 16px;
+}
+
+.reading-pane {
+  min-width: 0;
+  border: 2px solid #d9e8f3;
+  border-radius: 16px;
+  background: var(--card-bg);
+}
+
+.reading-pane-heading {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px 14px 0 0;
+  background: var(--card-bg);
+}
+
+.reading-pane-content {
+  padding: 0 14px 14px;
+}
+
+@media (min-width: 1280px) {
+  .reading-workspace {
+    height: calc(100vh - 180px);
+    min-height: 560px;
+  }
+
+  .reading-pane {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 1279px) {
+  .reading-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+```
+
+Keep sentence targets tappable without making the passage look like a grid of controls. Open-ended response completion remains visually neutral; do not use correctness colors or badges.
+
+---
+
 ## Cards
 
 ```css
@@ -189,6 +253,50 @@ Use this component when a vocabulary exercise contains enough question cards tha
 
 ---
 
+## Vocabulary Part-of-Speech Tags
+
+Use compact, color-coded part-of-speech tags in vocabulary word banks and definition cards. Keep the abbreviation visible so color is reinforcement rather than the only cue.
+
+- noun: blue, `n`
+- verb: green, `v`
+- adjective: orange, `adj`
+- adverb: purple, `adv`
+- If a word-family entry has related forms with multiple parts of speech, show every unique POS tag after the base word.
+- In definition cards, show the exact headword/form followed by its matching POS tag; keep sense numbers neutral.
+
+```css
+.pos-tag{display:inline-flex;align-items:center;justify-content:center;min-width:24px;min-height:20px;padding:1px 5px;border-radius:999px;border:1.5px solid transparent;font-size:.72rem;line-height:1;font-weight:900;white-space:nowrap}
+.pos-noun{color:#2457a7;background:#e8f0ff;border-color:#b9cdf4}
+.pos-verb{color:#257044;background:#e7f7ed;border-color:#b8dfc5}
+.pos-adjective{color:#9a4c00;background:#fff0df;border-color:#f0c79b}
+.pos-adverb{color:#6841a3;background:#f1eaff;border-color:#d2c0ef}
+.pos-other{color:#5a6470;background:#f0f2f4;border-color:#d2d7dc}
+.bank-word{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap}
+.bank-pos-list{display:inline-flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap}
+.definition-label{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+```
+
+---
+
+## Part-of-Speech Scaffold Button
+
+On vocabulary phrase-replacement cards, an optional icon-only `💡` button may reveal a part-of-speech scaffold. Stack it directly below the play button.
+
+- Visible content is only `💡`; use `aria-label="Show part-of-speech hint"`.
+- Once activated, recolor the replacement phrase using the same POS palette and keep the scaffold active for that card.
+
+```css
+.card-tools{display:flex;flex-direction:column;align-items:center;gap:7px;flex-shrink:0}
+.hint-btn{min-width:44px;min-height:44px;padding:5px 8px;border-radius:12px;border:2px solid #c8b8e0;background:#f6f0ff;color:#69449a;font-weight:900}
+.hint-btn.active{border-color:#8e75b8;background:#eee3ff}
+.phrase-slot.hint-pos-noun{background:#e8f0ff;border-color:#7fa5e8;color:#2457a7}
+.phrase-slot.hint-pos-verb{background:#e7f7ed;border-color:#83c79b;color:#257044}
+.phrase-slot.hint-pos-adjective{background:#fff0df;border-color:#e9ae6c;color:#9a4c00}
+.phrase-slot.hint-pos-adverb{background:#f1eaff;border-color:#b79bdf;color:#6841a3}
+```
+
+---
+
 ## Buttons
 
 ```css
@@ -266,10 +374,7 @@ Use this component when a vocabulary exercise contains enough question cards tha
 - Transitions to green (`.done`) after a correct submission — keeps it visually distinct from unchecked state.
 - Do not reuse the play button's green color here; use the gradient yellow → green pattern above.
 
-```css
-
 ---
-
 
 ## Vocabulary Definition Modal Cards
 

@@ -34,7 +34,7 @@ If a printed worksheet is divided into distinct labeled parts (for example, Part
   phrase: "brought together and formed",
   after: " into one large corporation.",
   answer: "integrated",
-  hint: "Look for a form of the word meaning “to unite into a whole.”"
+  requiredPos: "verb"
 }
 ```
 
@@ -58,11 +58,22 @@ const wordEntries = [
 ];
 
 const answerChoices = [
-  // One candidate from every lesson word family.
-  // Use the section-appropriate derived/inflected form when needed.
-  "arrogant", "boycott", "campaign", "ceremony", "custody",
-  "degrade", "detained", "extend", "integrated", "segregation",
-  "supreme", "triumph", "vacated", "verdict", "violated"
+  // One candidate from every lesson word family. Tag the displayed form with its POS.
+  { value: "arrogant",    label: "arrogant",    pos: "adjective" },
+  { value: "boycott",     label: "boycott",     pos: "verb" },
+  { value: "campaign",    label: "campaign",    pos: "noun" },
+  { value: "ceremony",    label: "ceremony",    pos: "noun" },
+  { value: "custody",     label: "custody",     pos: "noun" },
+  { value: "degrade",     label: "degrade",     pos: "verb" },
+  { value: "detained",    label: "detained",    pos: "verb" },
+  { value: "extend",      label: "extend",      pos: "verb" },
+  { value: "integrated",  label: "integrated",  pos: "verb" },
+  { value: "segregation", label: "segregation", pos: "noun" },
+  { value: "supreme",     label: "supreme",     pos: "adjective" },
+  { value: "triumph",     label: "triumph",     pos: "noun" },
+  { value: "vacated",     label: "vacated",     pos: "verb" },
+  { value: "verdict",     label: "verdict",     pos: "noun" },
+  { value: "violated",    label: "violated",    pos: "verb" }
 ];
 ```
 
@@ -73,7 +84,8 @@ The bold phrase is a composite inline answer area, not a text field.
 - Render ordinary sentence text as normal inline prose, not visible word/button chips. Individual words remain tappable for word-level TTS using invisible/unstyled tap targets.
 - Render the bold replacement phrase with a subtle orange highlight.
 - Put only a small dropdown arrow (`▾`) at the right edge of the highlighted phrase; do not show "Pick a word" text in the sentence itself. The arrow opens a large touch-friendly choice panel.
-- The choice panel shows **one candidate from every word family in the lesson bank**. Do not narrow the list per question.
+- Before any scaffold is requested, the choice panel shows **one candidate from every word family in the lesson bank**. Do not narrow the list per question by default.
+- Tag every displayed candidate form with its source-supported part of speech so the optional POS scaffold can filter accurately.
 - If the correct response requires a form of a word (for example `integrated`, `detained`, `segregation`, `vacated`, or `violated`), include that form directly in the choice panel so the student does not need to type it.
 - After selection, replace the bold phrase with the chosen word/form and keep the original phrase available in a small “Original bold phrase” reminder below the sentence.
 
@@ -90,7 +102,8 @@ This type uses three levels of TTS:
 Keep the full lesson word bank visible above the exercises. For long exercises where the student repeatedly refers back to the bank, use the **Sticky Vocabulary Word Bank** component in `framework/DESIGN_SYSTEM.md` and the usage rules in `framework/INTERACTION_PATTERNS.md`.
 
 - Keep sticky-bank copy minimal; do not add text explaining the scrolling behavior.
-- Each base word is a large tappable button.
+- Each base word is a large tappable button. Show abbreviated, color-coded POS tag(s) after the headword (`n`, `v`, `adj`, `adv`) using the canonical POS palette from `framework/DESIGN_SYSTEM.md`.
+- If the word-family entry contains related forms with different parts of speech, show each unique POS tag in the bank; the definition popup resolves the exact POS for each related form.
 - Tapping a bank word opens a definition modal; it does **not** answer a question.
 - Definitions must be transcribed from the provided source. Do not simplify, rewrite, or substitute general-knowledge definitions.
 - Preserve multiple senses and related forms (for example `integrate` / `integration`) as separate definition cards when the source presents them separately.
@@ -101,23 +114,35 @@ Keep the full lesson word bank visible above the exercises. For long exercises w
 
 Use the reusable definition-modal behavior in `framework/INTERACTION_PATTERNS.md`.
 
+### Optional part-of-speech scaffold
+
+Include an icon-only `💡` button directly under the sentence play button. This is a one-way support scaffold, not correctness feedback.
+
+- Before the student taps it, leave the phrase highlight and full vocabulary picker unchanged.
+- When tapped, color the phrase/replacement area using the required POS color and filter that card's word picker to candidate forms with that same part of speech.
+- Determine the required POS from the source-supported correct replacement form; do not guess from surface wording alone.
+- The scaffold must not select an answer, mark anything correct, or expose a score.
+- Persist the scaffold state per card so it stays active after answer changes and reloads.
+- Visible button content is only `💡`; provide an accessible label such as `Show part-of-speech hint`.
+
+Use the **Part-of-Speech Filter Scaffold** in `framework/INTERACTION_PATTERNS.md`.
+
 ### Feedback
 
-Use **deferred per-card feedback** rather than marking a choice immediately.
+This type uses **response-only / adult-check** completion.
 
-- Choosing a word updates the sentence, saves state, and reads the revised sentence.
-- Correctness is revealed only when the student taps `Check answer`.
-- Correct: show a calm green ✅ confirmation and mark the card complete.
-- Incorrect: show a `💡 Hint:` using the relevant source definition or meaning. Never use “wrong” or an unsupported guess-and-check prompt.
-- A new selection clears the prior check state.
+- Do **not** include a `Check answer` button, automatic correctness feedback, a score, or green correct-state styling.
+- Choosing a word updates the sentence, saves state, and reads the revised sentence aloud after about 300 ms.
+- The optional `💡` scaffold only reveals part of speech and filters candidates; it does not evaluate the response.
 
 ### Progress + persistence
 
-- Persist the selected word and checked/correct state in `localStorage`.
-- Progress pips may distinguish unanswered, selected, and correct states.
-- The progress label should report answered/total, not a running score.
+- Persist the selected word and `hinted` scaffold state in `localStorage`.
+- Progress pips report response completion only: unanswered vs. answered.
+- The progress label reports `answered / total`, not correctness.
+- Preserve responses across reloads and provide the standard double-tap `Clear all responses` action.
 
-**Reference implementation:** `worksheets/reference/2026-09-30-wordly-wise-lesson-2b.html`
+**Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3b-just-the-right-word.html`
 
 ---
 
@@ -319,3 +344,53 @@ Use deferred per-card checking.
 **Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3d-word-study.html`
 
 ---
+
+---
+
+## Type 6: Vocabulary in Context — Passage + Sentence Responses
+
+*Wordly Wise “Vocabulary in Context” style: the student reads a passage containing lesson vocabulary, then answers comprehension/context questions in complete sentences.*
+
+**Use case:** Long reading passages followed by open-response questions where vocabulary meaning must be understood in context and the printed directions may require unused lesson words in answers.
+
+### Layout
+
+Use a two-pane reading/response workspace on wider screens and stack the panes on narrow screens.
+
+- **Left pane:** passage, split into paragraph cards.
+- **Right pane:** directions, lesson word bank, question cards, and progress.
+- Preserve the printed directions verbatim; use adult review for open-ended written responses.
+- Each sentence is independently tappable for TTS.
+- Each paragraph has a green `▶` button that reads the full paragraph.
+- Map inline vocabulary taps to the exact source headword/form, including related forms; do not guess a match by stemming.
+- Lesson vocabulary in the passage and questions opens the standard definition modal without changing an answer or interrupting answer editing.
+
+### Answer control
+
+Use one large free-text area per question with a `▶ Read my answer` control.
+
+- Preserve the printed requirement to answer in a sentence.
+- Do not add automatic correctness scoring for open-ended comprehension responses.
+- Typing must remain focus-safe; update progress in place rather than rebuilding the question card.
+- Include speech recognition only when requested. If both microphone and no-microphone versions are requested, make both while keeping typing, autosave, read-back, and print fully usable in either version.
+
+When the printed directions say that a question without a lesson word must use one in the answer, pair those questions with the **Unique Vocabulary-Family Allocation** interaction in `framework/INTERACTION_PATTERNS.md`.
+
+### Vocabulary support
+
+Use the standard Word List bank and definition modal.
+
+- Preserve source definitions, related forms, sense numbers, Definition/Example separation, spoken punctuation, and POS tags.
+- Related forms belong to one word family for “use each word only once” tracking.
+- A question that already contains a lesson word does not need an extra vocabulary selector.
+
+### Progress + persistence
+
+- Persist answer text and any assigned vocabulary family in `localStorage`.
+- A normal vocabulary-in-question item is complete when its response is non-empty.
+- An item requiring an added lesson word is complete only when both a vocabulary family and response text are present.
+- Progress represents response completion, never correctness.
+- Provide the standard double-tap clear action and Export / Print.
+- Give separately delivered variants distinct persistence keys.
+
+**Reference implementation:** `docs/worksheets/2026-10-08-wordly-wise-lesson-3e-vocabulary-in-context.html`

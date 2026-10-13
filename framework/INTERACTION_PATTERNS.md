@@ -1272,6 +1272,15 @@ const wordEntries = [
 - Provide a 44px close button; allow Escape and backdrop-tap to close.
 - Cancel ongoing speech when opening another modal or definition so clips do not overlap.
 
+### Part-of-Speech tags in vocabulary banks
+
+Use the canonical POS colors from `framework/DESIGN_SYSTEM.md`.
+
+- Parse each source label into exact headword/form, part of speech, and optional sense number.
+- In the word bank, show abbreviated tags (`n`, `v`, `adj`, `adv`) for all unique parts of speech represented in the entry.
+- In each definition card, show the exact source headword/form plus its matching POS tag.
+- Color is not the only cue; keep the abbreviation visible.
+- TTS still speaks full POS words using the spoken-punctuation rule below; do not read the abbreviations aloud.
 
 ### Definition / Example separation and spoken punctuation
 
@@ -1319,6 +1328,29 @@ readButton.onclick = () => {
 ```
 
 Keep the source wording unchanged; this pattern changes only presentation and speech punctuation.
+
+### Part-of-Speech Filter Scaffold
+
+Use this as an optional, student-requested scaffold on vocabulary phrase-replacement cards.
+
+- Put an icon-only `💡` button directly below the play button with `aria-label="Show part-of-speech hint"`.
+- Before activation, show the normal full candidate list.
+- On activation, identify the required POS from the source-supported correct replacement form, recolor the phrase slot, and filter the picker to displayed forms with that POS.
+- The scaffold must not select an answer, reveal correctness, show a score, or trigger correctness feedback.
+- Persist `hinted: true` and preserve it when the student changes an answer; normalize older saved state that lacks the field.
+
+```javascript
+// state per card
+{ selected: '', hinted: false }
+
+function showPosHint(i){
+  state.items[i].hinted=true;
+  save();
+  renderCard(i);
+}
+```
+
+If filtering leaves one candidate, that is acceptable when POS filtering is intentionally used as a strong scaffold.
 
 ### Minimal wiring
 

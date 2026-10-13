@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wordly Wise 2E - Typing</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&amp;family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+:root{--bg-start:#e0f4ff;--bg-end:#f0e8ff;--card-bg:#fff;--text-primary:#1a2a3a;--text-muted:#526b80;--accent-blue:#3b9ede;--accent-blue-dk:#1a6fa8;--phrase-bg:#fff3c4;--phrase-border:#e6c800;--phrase-text:#5a3a00;--btn-play:#5dca7e;--btn-play-dk:#3aaa5a;--btn-mic:#3b9ede;--pip-empty:#dde0e8;--pip-done:#3b9ede}
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-size:16px}body{font-family:'Nunito',Arial,sans-serif;color:var(--text-primary);background:linear-gradient(160deg,var(--bg-start),var(--bg-end));padding:14px;overflow:hidden}
+button,textarea,summary{font:inherit}button{cursor:pointer;min-height:44px;min-width:44px;border-radius:12px;font-weight:800}button:disabled{opacity:.55;cursor:default}button:focus-visible,[role=button]:focus-visible,summary:focus-visible,textarea:focus-visible{outline:3px solid #6b43a3;outline-offset:3px}h1,h2,h3{font-family:'Fredoka One','Arial Rounded MT Bold',Arial,sans-serif;font-weight:400;margin:0}
+.app{max-width:1280px;height:100%;margin:auto;display:flex;flex-direction:column;gap:12px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 6px}.topbar h1{font-size:1.55rem}.eyebrow{font-size:.88rem;color:var(--accent-blue-dk);font-weight:800;margin:0 0 4px}.mode-badge{font-weight:800;font-size:.86rem;background:#fff;border:1px solid #c9d9e7;padding:8px 14px;border-radius:24px;white-space:nowrap}
+.workspace{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:14px;flex:1;min-height:0}.pane{background:#ffffffc7;border:1px solid #cddfea;border-radius:20px;box-shadow:0 4px 20px #20365612;display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden}.pane-head{padding:15px 18px 12px;background:#fff;border-bottom:1px solid #dfe9f2}.pane-head h2{font-size:1.22rem}.pane-kicker{font-size:.78rem;color:var(--accent-blue-dk);font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:0 0 5px}.pane-head p{font-size:.88rem;margin:8px 0 0;color:var(--text-muted)}.scroll-area{overflow-y:auto;overflow-x:hidden;min-height:0;flex:1;padding:14px;scrollbar-gutter:stable;overscroll-behavior:contain}
+.paragraph-card,.question-card{background:var(--card-bg);border-radius:16px;padding:15px 16px;box-shadow:0 3px 13px #2036560c;margin-bottom:14px;border:2px solid transparent}.paragraph-card:last-child,.question-card:last-child{margin-bottom:0}.paragraph-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.paragraph-label{font-size:.82rem;font-weight:800;color:var(--text-muted)}.paragraph-text{font-size:1.04rem;line-height:48px;margin:0}.sentence-tap,.question-read{cursor:pointer;border-radius:5px;padding:12px 1px;background:#f7fbff;border:1px solid #deebf5;box-decoration-break:clone;-webkit-box-decoration-break:clone}.sentence-tap:hover,.question-read:hover{background:#dcedfa}.sentence-tap.speaking{background:#fff3c4;border-color:#e6c800}.paragraph-card.reading{border-color:var(--btn-play)}
+.tool-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border:0;font-size:.86rem}.read-btn{background:var(--btn-play);color:#133f22}.read-btn:hover{background:var(--btn-play-dk);color:#fff}.round-play{width:44px;height:44px;min-width:44px;border:0;border-radius:50%;background:var(--btn-play);color:#153d22;font-size:1.05rem;flex-shrink:0}.round-play:hover{background:var(--btn-play-dk)}
+.directions{display:block;width:100%;text-align:left;background:#e8f4ff;border:2px solid #bedff4;color:#17496d;padding:12px 13px;line-height:1.6;margin:0 0 12px;font-size:.95rem}.support-note{font-size:.86rem;color:var(--text-muted);margin:0 0 12px}.word-list{border:1px solid #d8e4ee;border-radius:14px;background:#fff;margin-bottom:14px}.word-list summary{cursor:pointer;padding:12px;font-weight:800;color:var(--accent-blue-dk);min-height:44px;line-height:22px}.bank{display:flex;gap:8px;flex-wrap:wrap;padding:0 12px 12px}.bank-word,.vocab-button{color:var(--phrase-text);background:var(--phrase-bg);border:2px solid var(--phrase-border);border-radius:8px;padding:3px 8px;font-size:1rem}.bank-word:hover,.vocab-button:hover{background:#ffe88a}.vocab-button{display:inline-flex;align-items:center;gap:4px;vertical-align:baseline;line-height:1.35}.vocab-icon{font-size:.8rem}
+.question-top{display:grid;grid-template-columns:24px minmax(0,1fr) 44px;gap:8px;align-items:start}.question-num{font-family:'Fredoka One',Arial,sans-serif;font-size:1.05rem;color:var(--accent-blue-dk);padding-top:10px}.question-prompt{font-size:1.03rem;font-weight:700;line-height:48px;margin:0}.question-card.answered{border-color:#bfdff5}.answer-label{display:block;font-size:.85rem;font-weight:800;color:var(--text-muted);margin:12px 0 6px}.answer-textarea{display:block;width:100%;min-height:120px;background:#f8fbff;border:2.5px solid var(--accent-blue);border-radius:12px;padding:10px 12px;font-size:1rem;font-weight:600;color:var(--text-primary);line-height:1.6;resize:vertical}.answer-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:9px}
+.pane-footer{flex-shrink:0;padding:10px 14px 13px;background:#fff;border-top:1px solid #dfe9f2}.progress-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}.pips{display:flex;flex-wrap:wrap;gap:5px}.pip{width:16px;height:16px;border-radius:50%;background:var(--pip-empty)}.pip.done{background:var(--pip-done)}.progress-label{font-size:.84rem;font-weight:800}.save-status{font-size:.77rem;color:var(--text-muted);margin:5px 0 0}.footer-actions{display:flex;gap:8px;flex-wrap:wrap}.clear-btn{background:#f4f5f7;color:#526474;border:1px solid #b9c6d2;padding:8px 12px;font-size:.82rem}.clear-btn.confirming{background:#ffeedd;border-color:#c05000;color:#9f3b00}.export-btn{background:#7c5cbf;color:#fff;border:0;padding:8px 14px;font-size:.86rem}.export-btn:hover{background:#5a3fa0}
+.speaking-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(110px);opacity:0;background:var(--accent-blue-dk);color:#fff;border:0;padding:11px 22px;border-radius:30px;box-shadow:0 4px 20px #0003;z-index:100;pointer-events:none;transition:transform .18s,opacity .18s;font-size:.95rem}.speaking-toast.visible{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}.speaking-toast:hover{background:#a93838}.app-status{font-size:.85rem;color:#9f3b00;margin:0;padding:0 6px}.app-status:empty{display:none}
+dialog{border:0;border-radius:20px;width:min(640px,calc(100vw - 28px));max-height:85dvh;padding:0;color:var(--text-primary);box-shadow:0 14px 60px #1b294449;background:#fff}dialog::backdrop{background:#17334f66}.modal-head{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;padding:16px 18px;border-bottom:1px solid #dce7f1;z-index:1}.modal-head h2{font-size:1.35rem}.close-btn{border:1px solid #b8cbdc;background:#f1f6fb;color:var(--accent-blue-dk);font-size:.88rem;padding:7px 12px}.modal-body{padding:16px 18px}.family-label{font-size:.87rem;margin:4px 0 12px;color:var(--text-muted)}.def-paragraph{background:#f8fbff;border:1px solid #d7e6f2;border-radius:12px;padding:13px;margin:12px 0}.def-paragraph h3{font-family:'Nunito',Arial,sans-serif;font-size:1rem;font-weight:800}.def-paragraph p{font-size:1rem;line-height:1.7;margin:8px 0 12px}
+
+@media(max-width:760px){body{overflow:auto;height:auto;padding:10px}.app{height:auto;gap:10px}.topbar{align-items:flex-start}.topbar h1{font-size:1.22rem}.mode-badge{font-size:.75rem;padding:7px 9px}.workspace{grid-template-columns:1fr;gap:12px}.pane{min-height:0}.story-pane .scroll-area{max-height:55dvh}.questions-pane .scroll-area{max-height:65dvh}.pane-head{padding:12px 14px}.scroll-area{padding:10px}.question-card,.paragraph-card{padding:12px}.paragraph-text,.question-prompt{font-size:1rem}.question-top{grid-template-columns:22px minmax(0,1fr) 44px;gap:6px}.pane-footer{padding:10px}.speaking-toast{max-width:calc(100vw - 24px);font-size:.86rem;white-space:nowrap}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+@media print{body{overflow:visible;height:auto;background:#fff;padding:0}.app{height:auto}.workspace{display:block}.pane,.scroll-area{overflow:visible!important;max-height:none!important}.pane{border:0;box-shadow:none}.topbar,.pane-footer,button,.word-list,.support-note,.app-status,dialog{display:none!important}.question-card,.paragraph-card{box-shadow:none;break-inside:avoid}.answer-textarea{border:1px solid #bbb}.sentence-tap,.question-read{border:0;background:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar"><div><p class="eyebrow">Vocabulary in Context</p><h1>Wordly Wise · Lesson 2E</h1></div><span class="mode-badge">Typing</span></header>
+  <p id="appStatus" class="app-status" role="status" aria-live="polite"></p>
+  <main class="workspace">
+    <section class="pane story-pane" aria-labelledby="storyHeading">
+      <header class="pane-head"><p class="pane-kicker">The story</p><h2 id="storyHeading">The Mother of the Civil Rights Movement</h2><p>Tap a sentence to hear it. Use ▶ to read a paragraph.</p></header>
+      <div class="scroll-area" id="storyScroll" tabindex="0" aria-label="Story paragraphs"><div id="story"></div></div>
+    </section>
+    <section class="pane questions-pane" aria-labelledby="questionsHeading">
+      <header class="pane-head"><p class="pane-kicker">Your responses</p><h2 id="questionsHeading">Questions</h2><p>Tap question text to listen. Yellow words open definitions.</p></header>
+      <div class="scroll-area" id="questionScroll" tabindex="0" aria-label="Questions and responses">
+        <button id="directions" class="directions" title="Read directions aloud"></button>
+        <details class="word-list"><summary>Word List 2 · tap for definitions</summary><div class="bank" id="wordBank"></div></details>
+        <div id="questionList"></div>
+      </div>
+      <footer class="pane-footer"><div class="progress-row"><div id="progressPips" class="pips" aria-hidden="true"></div><span id="progressCount" class="progress-label"></span></div><div class="footer-actions"><button id="clearBtn" class="clear-btn">Clear all responses</button><button id="exportBtn" class="export-btn">🖨️ Export / Print</button></div><p id="saveStatus" class="save-status" role="status">Saved on this device</p></footer>
+    </section>
+  </main>
+</div>
+<button class="speaking-toast" id="speakingToast" tabindex="-1" aria-hidden="true">🔊 Reading aloud · tap to stop</button>
+<dialog id="definitionDialog" aria-labelledby="definitionTitle"><header class="modal-head"><h2 id="definitionTitle"></h2><button id="closeDefinition" class="close-btn" autofocus>✕ Close</button></header><div class="modal-body"><p id="definitionFamily" class="family-label"></p><button id="readWord" class="tool-btn read-btn">🔊 Word</button><div id="definitionBody"></div></div></dialog>
+<script>
+'use strict';
+const DATE='2026_10_01';
+const SUBJECT='wordly_wise_lesson_2e';
+const VARIANT='no_mic';
+const STORAGE_KEY=`worksheet_${SUBJECT}_${DATE}_${VARIANT}_v1`;
+const SOURCE='Wordly Wise 3000 · Book 6 · Lesson 2E · pages 20–22';
+const storyTitle='The Mother of the Civil Rights Movement';
+const directions="Answer each of the following questions with a sentence. If a question does not contain a vocabulary word from the lesson’s word list, use one in your answer. Use each word only once.";
+const paragraphs=[
+  [
+    "Many people believe that the Civil Rights Movement in America began on December 1, 1955.",
+    "On that date, an African American woman named Rosa Parks refused to vacate her seat on a Montgomery, Alabama, bus so that a white person could sit there.",
+    "At the time, local laws unjustly allowed African Americans to be treated as second-class citizens.",
+    "Many hotels, restaurants, and even drinking fountains throughout the South were for whites only.",
+    "And in Montgomery, the state capital of Alabama, as elsewhere throughout the South, city buses were segregated.",
+    "The front ten seats were set aside for whites; African American passengers had to ride in the back."
+  ],
+  [
+    "Rosa Parks found it degrading to have to sit in the back of the bus.",
+    "For that reason, she usually walked home from her job in a Montgomery department store.",
+    "But on that winter evening, Parks was feeling tired and decided to take the bus home.",
+    "Soon all ten seats in the front of the bus were occupied by white people.",
+    "When another white man got on, the driver told Parks and three others to give up their seats so that he could extend the “whites only” section.",
+    "The three others gave up their seats, but Parks refused to move.",
+    "The driver called the police, who took her into custody."
+  ],
+  [
+    "Parks was detained at the police station for three hours.",
+    "When she was released, she was ordered to appear in court four days later.",
+    "There she was found guilty and fined ten dollars.",
+    "Her lawyers appealed the verdict, and the case slowly began making its way through the courts."
+  ],
+  [
+    "Meanwhile, the battle for civil rights was also being fought in the streets of Montgomery.",
+    "African American people boycotted the city’s buses.",
+    "This resulted in heavy losses to the company.",
+    "An African American minister from Atlanta, Georgia, Dr. Martin Luther King Jr., found himself suddenly thrust into a position of leadership.",
+    "Many white citizens felt that the boycotters were being arrogant in demanding equal treatment under the law.",
+    "There were numerous outbreaks of violence.",
+    "However, Dr. King preached a message of nonviolence.",
+    "He urged his supporters never to use force even if they were attacked.",
+    "The country was moved by his eloquence; they could no longer ignore the racial injustice that had been previously taken for granted.",
+    "The campaign lasted 381 days.",
+    "It ended on December 20, 1956, when the United States Supreme Court made a historic ruling.",
+    "The court agreed with a lower court ruling that the Montgomery law violated the United States Constitution.",
+    "The nation’s highest court ordered the bus company to integrate its buses.",
+    "In doing so, it sent a powerful message: African American people could no longer be treated as second-class citizens."
+  ],
+  [
+    "It was clear that the movement sparked by Rosa Parks had triumphed when Congress passed the 1964 Civil Rights Act.",
+    "This law opened up public housing, schools, and employment to people of all races.",
+    "In 1989, Parks was invited to attend ceremonies at the White House marking the twenty-fifth anniversary of its passage.",
+    "In 2002, her former home in Montgomery was placed on the National Register of Historic Places.",
+    "Rosa Parks died in 2005, but she will always be remembered as the mother of the Civil Rights Movement.",
+    "Her hundredth birthday would have been February 4, 2013.",
+    "To mark the date, the United States Postal Service created a Rosa Parks stamp, and later that month President Barack Obama unveiled a statue of her in the U.S. Capitol building.",
+    "It was one small way to apologize for what had happened nearly sixty years before."
+  ]
+];
+const questions=[
+  {
+    "text": "How do you think African Americans were affected by the bus boycott?",
+    "word": "boycott"
+  },
+  {
+    "text": "What is the meaning of extend as it is used in the passage?",
+    "word": "extend"
+  },
+  {
+    "text": "Why did Rosa Parks get home late on December 1, 1955?",
+    "word": null
+  },
+  {
+    "text": "What is the meaning of custody as it is used in the passage?",
+    "word": "custody"
+  },
+  {
+    "text": "What did the Supreme Court rule in 1956?",
+    "word": "Supreme"
+  },
+  {
+    "text": "How did segregation in the South affect African Americans?",
+    "word": "segregation"
+  },
+  {
+    "text": "What is the meaning of campaign as it is used in the passage?",
+    "word": "campaign"
+  },
+  {
+    "text": "How did local laws throughout the South degrade African Americans?",
+    "word": "degrade"
+  },
+  {
+    "text": "Why did some whites believe that the African American protesters in Montgomery were behaving arrogantly?",
+    "word": "arrogantly"
+  },
+  {
+    "text": "What was the verdict in Rosa Parks’s first court case?",
+    "word": "verdict"
+  },
+  {
+    "text": "What was the result of the integration of Montgomery’s buses?",
+    "word": "integration"
+  },
+  {
+    "text": "What is the meaning of triumph as it is used in the passage?",
+    "word": "triumph"
+  },
+  {
+    "text": "What did those sitting next to Rosa Parks on December 1, 1955, do when they were told to move?",
+    "word": null
+  }
+];
+const entries=[
+{word:'arrogant',p:[['arrogant · adjective','Showing too much pride in oneself. You were arrogant to claim that you knew all the answers.'],['arrogance · noun','A feeling of too much pride in oneself. Declaring that you are sure to win is another example of your arrogance.']]},
+{word:'boycott',p:[['boycott · verb','To join others in refusing to support an organization. Customers plan to boycott that store if it continues to discriminate.'],['boycott · noun','The act of boycotting. The fans called off their boycott when the teams agreed to lower ticket prices.']]},
+{word:'campaign',p:[['campaign · noun · 1','A series of actions intended to accomplish a goal. Picking up litter was the first step in the campaign to clean up the town center.'],['campaign · noun · 2','A series of military actions in a particular area. The Battle of the Bulge was part of the Allied campaign to invade Germany and end the war.'],['campaign · verb','To take part in actions planned to accomplish a particular goal. Students who wish to campaign for class office must submit petitions.']]},
+{word:'ceremony',p:[['ceremony · noun','A formal event held in honor of a special occasion. The bride and groom exchanged rings during the wedding ceremony.']]},
+{word:'custody',p:[['custody · noun · 1','Control over and responsibility for care. The stolen Picasso painting was returned to the custody of the Museum of Modern Art.'],['custody · noun · 2','In the keeping of the police; in jail. The police officer took the thief into custody.']]},
+{word:'degrade',p:[['degrade · verb','To bring shame or disgrace upon. By lying to cover up his cheating, Sam degraded himself even more.'],['degrading · adjective','Causing shame or disgrace. Losing the trophy because one player cheated on a test was a degrading experience.']]},
+{word:'detain',p:[['detain · verb','To stop or hold; to keep from going on. The hall monitor detained us until we could prove we had permission to leave the classroom.']]},
+{word:'extend',p:[['extend · verb · 1','To reach out. The conductor extended her arms as a signal to the orchestra to be ready.'],['extend · verb · 2','To offer. I wish to extend my apologies for behaving so badly.'],['extend · verb · 3','To make longer. The exhibition was so popular that the museum decided to extend it by a week.'],['extend · verb · 4','To stretch or spread outward from a certain point. The property extends for a half mile beyond the river.']]},
+{word:'integrate',p:[['integrate · verb','To unite into a whole; especially to end the separation of people of different races. In 1948, President Truman integrated the armed forces of the United States.'],['integration · noun','The act of uniting or bringing together, especially people of different races. The racial integration of public and private places has made our country better and stronger.']]},
+{word:'segregate',p:[['segregate · verb','To keep separate or apart. Ranchers segregate sick animals from the herd to prevent diseases from spreading.'],['segregation · noun','The act of keeping separate or apart. One of the goals of the Civil Rights Movement was to end racial segregation in the United States.']]},
+{word:'supreme',p:[['supreme · adjective · 1','The highest in rank or position. The supreme commander was happy to retire after years of responsibility.'],['supreme · adjective · 2','Of the greatest importance. The sea captain’s supreme mission was to get revenge on the white whale.']]},
+{word:'triumph',p:[['triumph · noun · 1','A noteworthy success. Helen Keller’s graduation from college was a triumph.'],['triumph · noun · 2','The joy that winning brings. The dancer who was invited to audition shot a look of triumph at those who were not so lucky.'],['triumph · verb','To win. The winner of the national spelling bee triumphed over forty-nine other contestants.'],['triumphant · adjective','Joyful over a victory or success. The triumphant skater was given a hero’s welcome on her return from the Olympic Games.']]},
+{word:'vacate',p:[['vacate · verb','To make empty, as by leaving. We will vacate the house at the end of June to make way for the people moving in.']]},
+{word:'verdict',p:[['verdict · noun · 1','The decision reached at the end of a trial. The jury looked grim as she announced the verdict.'],['verdict · noun · 2','A judgment or opinion. The verdict on the new computer is that it does twice the work in half the time.']]},
+{word:'violate',p:[['violate · verb · 1','To break, as a law or a promise. Damien violated our teacher’s trust by trying to cheat on the homework.'],['violate · verb · 2','To treat in an improper or disrespectful way. The vandals who violated the cemetery by knocking over gravestones had to restore it.'],['violation · noun','A breaking of or failing to keep something like a law or a promise. Revealing the secret was a violation of your friend’s trust.']]}
+];
+const forms={arrogant:'arrogant',arrogantly:'arrogant',arrogance:'arrogant',boycott:'boycott',boycotted:'boycott',campaign:'campaign',ceremony:'ceremony',ceremonies:'ceremony',custody:'custody',degrade:'degrade',degrading:'degrade',detain:'detain',detained:'detain',extend:'extend',integrate:'integrate',integrated:'integrate',integration:'integrate',segregate:'segregate',segregated:'segregate',segregation:'segregate',supreme:'supreme',triumph:'triumph',triumphed:'triumph',triumphant:'triumph',vacate:'vacate',vacated:'vacate',verdict:'verdict',violate:'violate',violated:'violate',violation:'violate'};
+const $=id=>document.getElementById(id);
+let answers=questions.map(()=>'');
+let speechGeneration=0;
+let utterance=null;
+let lastDefinitionTrigger=null;
+let clearTimer=null;
+let storageAvailable=true;
+
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function activate(element,action){element.addEventListener('click',e=>{e.stopPropagation();action();});if(element.tagName!=='BUTTON'){element.setAttribute('role','button');element.tabIndex=0;element.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();action();}});}}
+function setToast(visible){$('speakingToast').classList.toggle('visible',visible);$('speakingToast').tabIndex=visible?0:-1;$('speakingToast').setAttribute('aria-hidden',String(!visible));}
+function cancelSpeak(){speechGeneration++;if('speechSynthesis'in window)window.speechSynthesis.cancel();utterance=null;setToast(false);document.querySelectorAll('.speaking,.reading').forEach(el=>el.classList.remove('speaking','reading'));}
+function speak(text,options={}){
+  
+  cancelSpeak();
+  const chunks=(Array.isArray(text)?text:[text]).map(x=>String(x).trim()).filter(Boolean);
+  if(!chunks.length)return;
+  if(!('speechSynthesis'in window)||!('SpeechSynthesisUtterance'in window)){$('appStatus').textContent='Read-aloud is unavailable in this browser.';return;}
+  $('appStatus').textContent='';const generation=speechGeneration;let index=0;
+  if(options.card)options.card.classList.add('reading');
+  function next(){
+    if(generation!==speechGeneration)return;
+    if(index>=chunks.length){setToast(false);if(options.card)options.card.classList.remove('reading');utterance=null;return;}
+    document.querySelectorAll('.sentence-tap.speaking').forEach(el=>el.classList.remove('speaking'));
+    if(options.sentenceElements&&options.sentenceElements[index])options.sentenceElements[index].classList.add('speaking');
+    const u=new SpeechSynthesisUtterance(chunks[index]);utterance=u;u.rate=.88;u.pitch=1.05;
+    u.onstart=()=>{if(generation===speechGeneration)setToast(true);};
+    u.onend=()=>{if(generation!==speechGeneration)return;document.querySelectorAll('.sentence-tap.speaking').forEach(el=>el.classList.remove('speaking'));index++;next();};
+    u.onerror=()=>{if(generation!==speechGeneration)return;cancelSpeak();$('appStatus').textContent='Read-aloud stopped. Tap the text to listen again.';};
+    try{window.speechSynthesis.speak(u);}catch(e){cancelSpeak();$('appStatus').textContent='Read-aloud could not start. Tap the text to listen again.';}
+  }
+  next();
+}
+function addEmphasis(container,text){const parts=text.split(/(\b(?:vacate|segregated|degrading|extend|custody|detained|verdict|boycotted|arrogant|campaign|Supreme|violated|integrate|triumphed|ceremonies)\b)/g);parts.forEach(part=>{if(forms[part.toLowerCase()]){const bold=document.createElement('strong');bold.textContent=part;container.append(bold);}else container.append(document.createTextNode(part));});}
+function renderStory(){paragraphs.forEach((sentences,pi)=>{const card=document.createElement('article');card.className='paragraph-card';card.id='paragraph-'+pi;const top=document.createElement('div');top.className='paragraph-top';const label=document.createElement('span');label.className='paragraph-label';label.textContent='Paragraph '+(pi+1);const play=document.createElement('button');play.className='tool-btn read-btn paragraph-play';play.textContent='▶ Read paragraph';play.setAttribute('aria-label','Read all of paragraph '+(pi+1));top.append(label,play);const p=document.createElement('p');p.className='paragraph-text';const elements=[];sentences.forEach((sentence,si)=>{const span=document.createElement('span');span.className='sentence-tap';span.setAttribute('aria-label','Read sentence '+(si+1)+' in paragraph '+(pi+1));addEmphasis(span,sentence);activate(span,()=>speak(sentence,{card,sentenceElements:[span]}));p.append(span);if(si<sentences.length-1)p.append(document.createTextNode(' '));elements.push(span);});play.onclick=()=>speak(sentences,{card,sentenceElements:elements});card.append(top,p);$('story').append(card);});}
+function openDefinition(form,trigger){
+  const family=forms[form.toLowerCase()];const entry=entries.find(e=>e.word===family);if(!entry)return;
+  
+  cancelSpeak();lastDefinitionTrigger=trigger||document.activeElement;$('definitionTitle').textContent=form;
+  $('definitionFamily').textContent=form.toLowerCase()===family?'Word List 2':'Word family: '+family;
+  $('readWord').onclick=()=>speak(form);$('definitionBody').replaceChildren();
+  const exact=entry.p.filter(([label])=>label.split(' · ')[0]===form.toLowerCase());
+  const definitions=exact.length&&form.toLowerCase()!==family?exact:entry.p;
+  definitions.forEach(([label,text])=>{const section=document.createElement('section');section.className='def-paragraph';const h=document.createElement('h3');h.textContent=label;const p=document.createElement('p');p.textContent=text;const b=document.createElement('button');b.className='tool-btn read-btn definition-play';b.textContent='▶ Read this paragraph';b.onclick=()=>speak([label,text]);section.append(h,p,b);$('definitionBody').append(section);});
+  if(!$('definitionDialog').open)$('definitionDialog').showModal();$('closeDefinition').focus({preventScroll:true});
+}
+function closeDefinition(){cancelSpeak();$('definitionDialog').close();}
+function renderWordBank(){entries.forEach(entry=>{const b=document.createElement('button');b.className='bank-word';b.textContent=entry.word;b.setAttribute('aria-label','Definition of '+entry.word);b.onclick=()=>openDefinition(entry.word,b);$('wordBank').append(b);});}
+function addQuestionText(container,q){
+  const parts=q.word?q.text.split(q.word):[q.text];
+  parts.forEach((text,partIndex)=>{if(text&&!/[A-Za-z0-9]/.test(text)){container.append(document.createTextNode(text));}else if(text){const span=document.createElement('span');span.className='question-read';span.textContent=text;span.title='Read the whole question';activate(span,()=>speak(q.text));container.append(span);}if(q.word&&partIndex===0){const word=document.createElement('button');word.className='vocab-button';word.dataset.word=q.word;word.setAttribute('aria-label','Definition of '+q.word);word.title='Tap for the lesson definition';const icon=document.createElement('span');icon.className='vocab-icon';icon.setAttribute('aria-hidden','true');icon.textContent='🔊';word.append(icon,document.createTextNode(q.word));word.onclick=e=>{e.stopPropagation();openDefinition(q.word,word);};container.append(word);}});
+}
+function renderQuestions(){questions.forEach((q,i)=>{const card=document.createElement('article');card.className='question-card';card.id='question-'+i;const top=document.createElement('div');top.className='question-top';const num=document.createElement('span');num.className='question-num';num.textContent=(i+1)+'.';const prompt=document.createElement('div');prompt.className='question-prompt';prompt.id='prompt-'+i;addQuestionText(prompt,q);const play=document.createElement('button');play.className='round-play question-play';play.textContent='▶';play.setAttribute('aria-label','Read question '+(i+1));play.onclick=()=>speak(q.text);top.append(num,prompt,play);const label=document.createElement('label');label.className='answer-label';label.htmlFor='answer-'+i;label.textContent='Your answer';const ta=document.createElement('textarea');ta.id='answer-'+i;ta.className='answer-textarea';ta.setAttribute('aria-label','Answer to question '+(i+1));ta.setAttribute('aria-describedby',prompt.id);ta.value=answers[i];ta.spellcheck=true;ta.addEventListener('input',()=>{answers[i]=ta.value;saveAnswers();updateProgress();});const actions=document.createElement('div');actions.className='answer-actions';const readBack=document.createElement('button');readBack.className='tool-btn read-btn answer-play';readBack.textContent='▶ Read my answer';readBack.disabled=!ta.value.trim();readBack.onclick=()=>speak(ta.value);readBack.id='answer-play-'+i;actions.append(readBack);
+
+  card.append(top,label,ta,actions); $('questionList').append(card);});}
+function loadAnswers(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));if(Array.isArray(saved)&&saved.length===questions.length)answers=saved.map(a=>typeof a==='string'?a:'');}catch(e){storageAvailable=false;$('saveStatus').textContent='Autosave unavailable. Export / Print keeps a copy.';}}
+function saveAnswers(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(answers));storageAvailable=true;$('saveStatus').textContent='Saved on this device';}catch(e){storageAvailable=false;$('saveStatus').textContent='Autosave unavailable. Export / Print keeps a copy.';}}
+function updateProgress(){let done=0;answers.forEach((answer,i)=>{const complete=answer.trim().length>0;if(complete)done++;$('pip-'+i).classList.toggle('done',complete);$('question-'+i).classList.toggle('answered',complete);$('answer-play-'+i).disabled=!complete;});$('progressCount').textContent=done+' / '+questions.length+' answered';}
+function resetClearButton(){clearTimeout(clearTimer);$('clearBtn').classList.remove('confirming');$('clearBtn').textContent='Clear all responses';$('clearBtn').dataset.confirming='false';}
+function clearAllResponses(){const b=$('clearBtn');if(b.dataset.confirming==='true'){
+
+  cancelSpeak();answers.fill('');answers.forEach((_,i)=>{$('answer-'+i).value='';});try{localStorage.removeItem(STORAGE_KEY);}catch(e){}updateProgress();resetClearButton();$('saveStatus').textContent=storageAvailable?'Responses cleared':'Responses cleared. Autosave unavailable.';
+}else{b.dataset.confirming='true';b.classList.add('confirming');b.textContent='Tap again to clear';clearTimer=setTimeout(resetClearButton,3000);}}
+function printStory(){return paragraphs.map(sentences=>'<p>'+sentences.map(s=>escapeHtml(s).replace(/\b(vacate|segregated|degrading|extend|custody|detained|verdict|boycotted|arrogant|campaign|Supreme|violated|integrate|triumphed|ceremonies)\b/g,'<strong>$1</strong>')).join(' ')+'</p>').join('');}
+function exportPrint(){
+
+  const qHtml=questions.map((q,i)=>{let prompt=escapeHtml(q.text);if(q.word)prompt=prompt.replace(escapeHtml(q.word),'<strong>'+escapeHtml(q.word)+'</strong>');return '<section class="answer-block"><p><strong>'+(i+1)+'.</strong> '+prompt+'</p><div class="response">'+(answers[i].trim()?escapeHtml(answers[i]):'&nbsp;')+'</div></section>';}).join('');
+  const date=new Date().toLocaleDateString('en-US');
+  const html='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Wordly Wise Lesson 2E - Responses</title><style>body{max-width:780px;margin:30px auto;padding:0 24px;color:#182332;font:15px/1.55 Arial,sans-serif}h1{font-size:23px}h2{font-size:21px}.name-line{display:flex;gap:24px;flex-wrap:wrap;margin:14px 0 24px}.name-line span{display:flex;align-items:flex-end;gap:7px}.line{display:inline-block;min-width:170px;border-bottom:1px solid #333}.story p{margin:12px 0}.directions{font-weight:bold}.bank{border:1px solid #bbb;padding:10px}.answer-block{break-inside:avoid;margin:20px 0}.answer-block p{margin:0 0 7px}.response{white-space:pre-wrap;overflow-wrap:anywhere;min-height:48px;border-bottom:1px solid #999;padding-bottom:8px}button{padding:10px 16px;font:inherit}footer{font-size:11px;color:#555;margin-top:30px}@media print{body{margin:0;padding:0}button{display:none}@page{margin:.65in}}</style></head><body><button onclick="window.print()">Print / Save as PDF</button><h1>Wordly Wise · Lesson 2E</h1><div class="name-line"><span>Name: <span class="line">Tina #18</span></span><span>Date: <span class="line">'+escapeHtml(date)+'</span></span></div><h2>'+escapeHtml(storyTitle)+'</h2><div class="story">'+printStory()+'</div><h2>Questions</h2><p class="directions">'+escapeHtml(directions)+'</p><p class="bank"><strong>Word List 2:</strong> '+entries.map(e=>escapeHtml(e.word)).join(' · ')+'</p>'+qHtml+'<footer>'+escapeHtml(SOURCE)+'</footer></body></html>';
+  const url=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+$('speakingToast').onclick=cancelSpeak;
+$('directions').textContent='🔊 '+directions;$('directions').onclick=()=>speak(directions);
+$('closeDefinition').onclick=closeDefinition;
+$('definitionDialog').addEventListener('cancel',cancelSpeak);
+$('definitionDialog').addEventListener('close',()=>{cancelSpeak();if(lastDefinitionTrigger&&lastDefinitionTrigger.isConnected)lastDefinitionTrigger.focus({preventScroll:true});});
+$('definitionDialog').addEventListener('click',e=>{if(e.target!==$('definitionDialog'))return;const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeDefinition();});
+$('clearBtn').onclick=clearAllResponses;$('exportBtn').onclick=exportPrint;
+window.addEventListener('pagehide',()=>{ cancelSpeak();});
+loadAnswers();renderStory();renderWordBank();questions.forEach((_,i)=>{const pip=document.createElement('span');pip.className='pip';pip.id='pip-'+i;$('progressPips').append(pip);});renderQuestions();updateProgress();
+
+</script>
+</body>
+</html>

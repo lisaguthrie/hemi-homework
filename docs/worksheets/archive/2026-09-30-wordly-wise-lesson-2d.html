@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wordly Wise Lesson 2 — 2D Word Study</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-start:#e0f4ff;
+  --bg-end:#f0e8ff;
+  --card-bg:#ffffff;
+  --text:#1a2a3a;
+  --muted:#6a8299;
+  --blue:#3b9ede;
+  --blue-dk:#1a6fa8;
+  --blue-soft:#e8f4ff;
+  --blue-done:#d6efff;
+  --green:#5dca7e;
+  --pip:#dde0e8;
+  --shadow:rgba(0,0,0,.10);
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(160deg,var(--bg-start),var(--bg-end));
+  color:var(--text);
+  min-height:100vh;
+  padding:20px 16px 70px;
+}
+button,input { font:inherit; }
+.app { max-width:760px; margin:0 auto; }
+.eyebrow { text-align:center; color:var(--blue-dk); text-transform:uppercase; font-weight:800; font-size:.82rem; }
+h1 { font-family:'Fredoka One',cursive; font-weight:400; text-align:center; margin:4px 0 2px; }
+.subtitle { margin:0 0 14px; text-align:center; color:var(--muted); font-weight:800; }
+.instructions,.progress,.question-card {
+  background:var(--card-bg);
+  border-radius:18px;
+  box-shadow:0 4px 20px var(--shadow);
+}
+.instructions {
+  padding:13px 15px;
+  border:2px solid var(--blue);
+  font-weight:800;
+  cursor:pointer;
+  margin-bottom:12px;
+  line-height:1.45;
+}
+.instructions:focus-visible { outline:3px solid #174f74; outline-offset:3px; }
+.progress {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 13px;
+  margin-bottom:12px;
+}
+.pips { display:flex; flex-wrap:wrap; gap:6px; }
+.pip { width:17px; height:17px; border-radius:50%; background:var(--pip); transition:.2s; }
+.pip.done { background:var(--blue); }
+#progressText { color:var(--muted); font-weight:900; font-size:.92rem; white-space:nowrap; }
+.questions { display:flex; flex-direction:column; gap:12px; }
+.question-card { padding:14px; border:2.5px solid transparent; transition:.2s; }
+.question-card.complete { border-color:#79c3ef; background:#f7fcff; }
+.row-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.question-number { font-family:'Fredoka One',cursive; color:var(--blue-dk); font-size:1.2rem; }
+.row-status { color:var(--muted); font-size:.86rem; font-weight:900; }
+.choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.choice-option {
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  border:2px solid #d8e5ef;
+  border-radius:13px;
+  background:#fbfdff;
+  padding:5px 7px;
+  transition:.15s;
+}
+.choice-option.selected { border-color:var(--blue); background:var(--blue-soft); }
+.choice-option.locked:not(.selected) { opacity:.55; }
+.check-wrap {
+  width:46px;
+  height:46px;
+  display:grid;
+  place-items:center;
+  flex:0 0 46px;
+  cursor:pointer;
+  border-radius:10px;
+}
+.check-wrap input {
+  width:25px;
+  height:25px;
+  margin:0;
+  accent-color:var(--blue-dk);
+  cursor:pointer;
+}
+.check-wrap input:disabled { cursor:not-allowed; }
+.word-button {
+  min-height:46px;
+  flex:1;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--text);
+  text-align:left;
+  padding:8px 9px;
+  font-size:1.05rem;
+  font-weight:800;
+  cursor:pointer;
+}
+.word-button:hover,.word-button:focus-visible { background:#eef7fd; outline:none; }
+.word-button:focus-visible { box-shadow:0 0 0 3px #77bce6 inset; }
+.clear-btn {
+  display:block;
+  margin:18px auto 0;
+  min-height:44px;
+  padding:8px 16px;
+  border:2px solid #c8d5df;
+  border-radius:18px;
+  background:#fff;
+  color:#607789;
+  font-weight:800;
+  cursor:pointer;
+}
+.backdrop {
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background:#0f1f2d88;
+  z-index:50;
+}
+.backdrop.show { display:flex; }
+.modal {
+  width:min(680px,100%);
+  max-height:88vh;
+  overflow:auto;
+  background:#fff;
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 10px 40px rgba(0,0,0,.25);
+}
+.modal-head { display:flex; align-items:center; gap:8px; }
+.modal-title { flex:1; font-family:'Fredoka One',cursive; font-size:1.5rem; }
+.word-speak,.close,.read-btn {
+  min-height:44px;
+  border:0;
+  border-radius:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+.word-speak { padding:7px 12px; background:var(--blue-soft); color:var(--blue-dk); }
+.close { width:44px; background:#eef1f4; }
+.def-card { border:2px solid #d9e8f3; border-radius:13px; padding:11px; margin:10px 0; background:#fbfdff; line-height:1.45; }
+.def-label { color:#173e58; font-weight:900; margin-bottom:5px; }
+.def-line strong { color:#173e58; }
+.read-btn { margin-top:9px; padding:7px 12px; background:var(--green); color:#163a22; }
+.speaking-toast {
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%) translateY(85px);
+  background:var(--blue-dk);
+  color:#fff;
+  padding:10px 22px;
+  border-radius:30px;
+  font-weight:800;
+  box-shadow:0 4px 20px rgba(0,0,0,.2);
+  transition:.25s;
+  z-index:80;
+  pointer-events:none;
+  cursor:pointer;
+  user-select:none;
+}
+.speaking-toast.visible { transform:translateX(-50%) translateY(0); pointer-events:auto; }
+@media (max-width:560px) {
+  body { padding:14px 10px 64px; }
+  .question-card { padding:12px; }
+  .choice-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="eyebrow">Wordly Wise · Lesson 2</div>
+  <h1>2D Word Study</h1>
+  <p class="subtitle">Choose the two words in each row that are antonyms.</p>
+
+  <div class="instructions" id="instructions" role="button" tabindex="0">
+    🔊 Antonyms are pairs of words whose meanings are opposite or nearly opposite. Choose two of four words that are antonyms in each row.
+  </div>
+
+  <div class="progress" aria-live="polite">
+    <div class="pips" id="pips"></div>
+    <div id="progressText">0 / 10 rows complete</div>
+  </div>
+
+  <main class="questions" id="questions"></main>
+  <button class="clear-btn" id="clearBtn">🗑️ Clear all responses</button>
+</div>
+
+<div class="backdrop" id="definitionBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="definitionTitle">
+    <div class="modal-head">
+      <div class="modal-title" id="definitionTitle"></div>
+      <button class="word-speak" id="wordSpeakBtn">🔊 Word</button>
+      <button class="close" id="closeDefinition" aria-label="Close definition">✕</button>
+    </div>
+    <div id="definitionBody"></div>
+  </div>
+</div>
+
+<div class="speaking-toast" id="speakingToast" onclick="cancelSpeak()" title="Tap to stop">
+  🔊 <span>Reading aloud…</span>
+</div>
+
+<script>
+const STORAGE_KEY = 'worksheet_wordly_wise_l2_2d_2026_09_30_v1';
+
+const groups = [
+  ['timid', 'wealthy', 'supreme', 'arrogant'],
+  ['release', 'detain', 'campaign', 'decide'],
+  ['vacate', 'segregate', 'immigrate', 'integrate'],
+  ['supreme', 'weighty', 'degrading', 'lowest'],
+  ['verdict', 'exhibit', 'disaster', 'triumph'],
+  ['degrade', 'violate', 'obey', 'declare'],
+  ['occupy', 'vacate', 'boycott', 'return'],
+  ['point', 'extend', 'shorten', 'clasp'],
+  ['conceal', 'persecute', 'unveil', 'need'],
+  ['health', 'poverty', 'wealth', 'affection']
+];
+
+const entries = {
+  arrogant: [
+    ['arrogant · adjective', 'Showing too much pride in oneself. You were arrogant to claim that you knew all the answers.'],
+    ['arrogance · noun', 'A feeling of too much pride in oneself. Declaring that you are sure to win is another example of your arrogance.']
+  ],
+  boycott: [
+    ['boycott · verb', 'To join others in refusing to support an organization. Customers plan to boycott that store if it continues to discriminate.'],
+    ['boycott · noun', 'The act of boycotting. The fans called off their boycott when the teams agreed to lower ticket prices.']
+  ],
+  campaign: [
+    ['campaign · noun · 1', 'A series of actions intended to accomplish a goal. Picking up litter was the first step in the campaign to clean up the town center.'],
+    ['campaign · noun · 2', 'A series of military actions in a particular area. The Battle of the Bulge was part of the Allied campaign to invade Germany and end the war.'],
+    ['campaign · verb', 'To take part in actions planned to accomplish a particular goal. Students who wish to campaign for class office must submit petitions.']
+  ],
+  degrade: [
+    ['degrade · verb', 'To bring shame or disgrace upon. By lying to cover up his cheating, Sam degraded himself even more.'],
+    ['degrading · adjective', 'Causing shame or disgrace. Losing the trophy because one player cheated on a test was a degrading experience.']
+  ],
+  detain: [
+    ['detain · verb', 'To stop or hold; to keep from going on. The hall monitor detained us until we could prove we had permission to leave the classroom.']
+  ],
+  extend: [
+    ['extend · verb · 1', 'To reach out. The conductor extended her arms as a signal to the orchestra to be ready.'],
+    ['extend · verb · 2', 'To offer. I wish to extend my apologies for behaving so badly.'],
+    ['extend · verb · 3', 'To make longer. The exhibition was so popular that the museum decided to extend it by a week.'],
+    ['extend · verb · 4', 'To stretch or spread outward from a certain point. The property extends for a half mile beyond the river.']
+  ],
+  integrate: [
+    ['integrate · verb', 'To unite into a whole; especially to end the separation of people of different races. In 1948, President Truman integrated the armed forces of the United States.'],
+    ['integration · noun', 'The act of uniting or bringing together, especially people of different races. The racial integration of public and private places has made our country better and stronger.']
+  ],
+  segregate: [
+    ['segregate · verb', 'To keep separate or apart. Ranchers segregate sick animals from the herd to prevent diseases from spreading.'],
+    ['segregation · noun', 'The act of keeping separate or apart. One of the goals of the Civil Rights Movement was to end racial segregation in the United States.']
+  ],
+  supreme: [
+    ['supreme · adjective · 1', 'The highest in rank or position. The supreme commander was happy to retire after years of responsibility.'],
+    ['supreme · adjective · 2', 'Of the greatest importance. The sea captain’s supreme mission was to get revenge on the white whale.']
+  ],
+  triumph: [
+    ['triumph · noun · 1', 'A noteworthy success. Helen Keller’s graduation from college was a triumph.'],
+    ['triumph · noun · 2', 'The joy that winning brings. The dancer who was invited to audition shot a look of triumph at those who were not so lucky.'],
+    ['triumph · verb', 'To win. The winner of the national spelling bee triumphed over forty-nine other contestants.'],
+    ['triumphant · adjective', 'Joyful over a victory or success. The triumphant skater was given a hero’s welcome on her return from the Olympic Games.']
+  ],
+  vacate: [
+    ['vacate · verb', 'To make empty, as by leaving. We will vacate the house at the end of June to make way for the people moving in.']
+  ],
+  verdict: [
+    ['verdict · noun · 1', 'The decision reached at the end of a trial. The jury looked grim as she announced the verdict.'],
+    ['verdict · noun · 2', 'A judgment or opinion. The verdict on the new computer is that it does twice the work in half the time.']
+  ],
+  violate: [
+    ['violate · verb · 1', 'To break, as a law or a promise. Damien violated our teacher’s trust by trying to cheat on the homework.'],
+    ['violate · verb · 2', 'To treat in an improper or disrespectful way. The vandals who violated the cemetery by knocking over gravestones had to restore it.'],
+    ['violation · noun', 'A breaking of or failing to keep something like a law or a promise. Revealing the secret was a violation of your friend’s trust.']
+  ]
+};
+
+const supportMap = {
+  arrogant: { entry:'arrogant' },
+  supreme: { entry:'supreme' },
+  detain: { entry:'detain' },
+  campaign: { entry:'campaign' },
+  vacate: { entry:'vacate' },
+  segregate: { entry:'segregate' },
+  integrate: { entry:'integrate' },
+  degrading: { entry:'degrade', labels:['degrading · adjective'] },
+  verdict: { entry:'verdict' },
+  triumph: { entry:'triumph' },
+  degrade: { entry:'degrade' },
+  violate: { entry:'violate' },
+  boycott: { entry:'boycott' },
+  extend: { entry:'extend' }
+};
+
+let selections = groups.map(() => []);
+let activeWord = '';
+
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if (Array.isArray(saved) && saved.length === groups.length) {
+    selections = saved.map((row, i) => {
+      if (!Array.isArray(row)) return [];
+      const valid = row.filter(w => groups[i].includes(w));
+      return [...new Set(valid)].slice(0, 2);
+    });
+  }
+} catch (e) {}
+
+function saveProgress() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(selections)); } catch (e) {}
+}
+
+function speak(text) {
+  if (!text || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate = 0.88;
+  utter.pitch = 1.05;
+  utter.onstart = () => speakingToast.classList.add('visible');
+  utter.onend = utter.onerror = () => speakingToast.classList.remove('visible');
+  window.speechSynthesis.speak(utter);
+}
+
+function cancelSpeak() {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  speakingToast.classList.remove('visible');
+}
+
+function renderQuestions() {
+  groups.forEach((words, rowIndex) => {
+    const card = document.createElement('section');
+    card.className = 'question-card';
+    card.id = 'card-' + rowIndex;
+
+    const head = document.createElement('div');
+    head.className = 'row-head';
+
+    const number = document.createElement('div');
+    number.className = 'question-number';
+    number.textContent = (rowIndex + 1) + '.';
+
+    const status = document.createElement('div');
+    status.className = 'row-status';
+    status.id = 'status-' + rowIndex;
+
+    head.append(number, status);
+    card.appendChild(head);
+
+    const grid = document.createElement('div');
+    grid.className = 'choice-grid';
+
+    words.forEach(word => {
+      const option = document.createElement('div');
+      option.className = 'choice-option';
+      option.dataset.row = rowIndex;
+      option.dataset.word = word;
+
+      const checkWrap = document.createElement('label');
+      checkWrap.className = 'check-wrap';
+
+      const check = document.createElement('input');
+      check.type = 'checkbox';
+      check.dataset.row = rowIndex;
+      check.dataset.word = word;
+      check.setAttribute('aria-label', 'Select ' + word);
+      check.addEventListener('change', () => handleSelection(rowIndex, word, check.checked));
+      checkWrap.appendChild(check);
+
+      const wordButton = document.createElement('button');
+      wordButton.className = 'word-button';
+      wordButton.textContent = word;
+      const hasDefinition = !!supportMap[word];
+      wordButton.setAttribute('aria-label', hasDefinition ? 'Open definition for ' + word : 'Hear ' + word);
+      wordButton.title = hasDefinition ? 'Tap for definition and example' : 'Tap to hear this word';
+      wordButton.addEventListener('click', () => handleWordTap(word));
+
+      option.append(checkWrap, wordButton);
+      grid.appendChild(option);
+    });
+
+    card.appendChild(grid);
+    questions.appendChild(card);
+    updateRow(rowIndex);
+  });
+  updateProgress();
+}
+
+function handleSelection(rowIndex, word, checked) {
+  const current = selections[rowIndex];
+  if (checked) {
+    if (current.length >= 2) {
+      updateRow(rowIndex);
+      return;
+    }
+    if (!current.includes(word)) current.push(word);
+  } else {
+    selections[rowIndex] = current.filter(w => w !== word);
+  }
+  saveProgress();
+  updateRow(rowIndex);
+  updateProgress();
+}
+
+function updateRow(rowIndex) {
+  const current = selections[rowIndex];
+  const full = current.length === 2;
+  const card = document.getElementById('card-' + rowIndex);
+  if (!card) return;
+  card.classList.toggle('complete', full);
+  const status = document.getElementById('status-' + rowIndex);
+  status.textContent = current.length + ' of 2 selected';
+
+  card.querySelectorAll('.choice-option').forEach(option => {
+    const word = option.dataset.word;
+    const checked = current.includes(word);
+    option.classList.toggle('selected', checked);
+    option.classList.toggle('locked', full && !checked);
+    const input = option.querySelector('input[type="checkbox"]');
+    input.checked = checked;
+    input.disabled = full && !checked;
+  });
+}
+
+function updateProgress() {
+  pips.innerHTML = '';
+  let complete = 0;
+  selections.forEach(row => {
+    const pip = document.createElement('span');
+    pip.className = 'pip' + (row.length === 2 ? ' done' : '');
+    if (row.length === 2) complete++;
+    pips.appendChild(pip);
+  });
+  progressText.textContent = complete + ' / ' + groups.length + ' rows complete';
+}
+
+function handleWordTap(word) {
+  const support = supportMap[word];
+  if (!support) {
+    speak(word);
+    return;
+  }
+  openDefinition(word, support);
+}
+
+function openDefinition(word, support) {
+  cancelSpeak();
+  activeWord = word;
+  definitionTitle.textContent = word;
+  definitionBody.innerHTML = '';
+
+  let paragraphs = entries[support.entry] || [];
+  if (support.labels) paragraphs = paragraphs.filter(([label]) => support.labels.includes(label));
+
+  paragraphs.forEach(([label, text]) => {
+    const card = document.createElement('div');
+    card.className = 'def-card';
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'def-label';
+    labelEl.textContent = label;
+
+    const split = text.indexOf('. ');
+    const definition = split >= 0 ? text.slice(0, split + 1) : text;
+    const example = split >= 0 ? text.slice(split + 2) : '';
+
+    const defLine = document.createElement('div');
+    defLine.className = 'def-line';
+    const defStrong = document.createElement('strong');
+    defStrong.textContent = 'Definition: ';
+    defLine.append(defStrong, document.createTextNode(definition));
+
+    card.append(labelEl, defLine);
+
+    if (example) {
+      const exLine = document.createElement('div');
+      exLine.className = 'def-line';
+      const exStrong = document.createElement('strong');
+      exStrong.textContent = 'Example: ';
+      exLine.append(exStrong, document.createTextNode(example));
+      card.appendChild(exLine);
+    }
+
+    const read = document.createElement('button');
+    read.className = 'read-btn';
+    read.textContent = '▶ Read this paragraph';
+    read.addEventListener('click', () => speak(label + '. Definition: ' + definition + (example ? ' Example: ' + example : '')));
+    card.appendChild(read);
+
+    definitionBody.appendChild(card);
+  });
+
+  definitionBackdrop.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  closeDefinition.focus();
+  setTimeout(() => speak(word), 50);
+}
+
+function closeDefinitionModal() {
+  definitionBackdrop.classList.remove('show');
+  document.body.style.overflow = '';
+  cancelSpeak();
+}
+
+const instructionSpeech = 'Antonyms are pairs of words whose meanings are opposite or nearly opposite. Rise and fall are antonyms. Both words have to do with movement, but in opposite directions. Choose two of four words that are antonyms in each group below.';
+instructions.addEventListener('click', () => speak(instructionSpeech));
+instructions.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    speak(instructionSpeech);
+  }
+});
+
+wordSpeakBtn.addEventListener('click', () => speak(activeWord));
+closeDefinition.addEventListener('click', closeDefinitionModal);
+definitionBackdrop.addEventListener('click', e => {
+  if (e.target === definitionBackdrop) closeDefinitionModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && definitionBackdrop.classList.contains('show')) closeDefinitionModal();
+});
+
+clearBtn.addEventListener('click', () => {
+  if (clearBtn.dataset.confirming === 'true') {
+    selections = groups.map(() => []);
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    groups.forEach((_, i) => updateRow(i));
+    updateProgress();
+    clearBtn.dataset.confirming = 'false';
+    clearBtn.textContent = '🗑️ Clear all responses';
+    clearBtn.style.background = '';
+    clearBtn.style.color = '';
+    clearBtn.style.borderColor = '';
+  } else {
+    clearBtn.dataset.confirming = 'true';
+    clearBtn.textContent = '⚠️ Tap again to confirm';
+    clearBtn.style.background = '#ffeedd';
+    clearBtn.style.color = '#c05000';
+    clearBtn.style.borderColor = '#c05000';
+    setTimeout(() => {
+      if (clearBtn.dataset.confirming === 'true') {
+        clearBtn.dataset.confirming = 'false';
+        clearBtn.textContent = '🗑️ Clear all responses';
+        clearBtn.style.background = '';
+        clearBtn.style.color = '';
+        clearBtn.style.borderColor = '';
+      }
+    }, 3000);
+  }
+});
+
+renderQuestions();
+</script>
+</body>
+</html>
