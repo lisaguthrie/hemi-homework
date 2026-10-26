@@ -150,7 +150,15 @@ Apply the default **three whole-worksheet checks** against the source-verified r
 - The progress label reports `answered / total`, not correctness.
 - Preserve responses across reloads and provide the standard double-tap `Clear all responses` action.
 
-**Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3b-just-the-right-word.html`
+### Export / Print
+
+For a **Just the Right Word** phrase-replacement exercise, preserve the original full sentence with its bold paraphrase, the separate `Replacement:` line, and the full sentence with the student's chosen word inserted. On that **completed-sentence line only**, format **the student's replacement word** as **bold + single underline**; leave the surrounding sentence text unmarked. Preserve punctuation and spacing from the original `before` and `after` text.
+
+- Render the actual saved selection (even if incorrect), not the answer-key word. If no word was selected, display the existing plain blank (`_____`) rather than bolding or underlining a placeholder.
+- Use a print-only class and escape each of the three text segments separately so only the inserted word is emphasized. Do not alter the original-sentence line, the `Replacement:` line, interactive controls, read-aloud, autosave, or three-check grading.
+- Use `Print / Export — Phrase Replacement in the Completed Sentence` in `framework/INTERACTION_PATTERNS.md`.
+
+**Reference implementations:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3b-just-the-right-word.html` (prior pattern) and `docs/worksheets/2026-10-19-wordly-wise-lesson-5b-just-the-right-word.html` (bold-underlined replacement in completed sentence)
 
 ---
 
@@ -261,7 +269,13 @@ Use the default **three whole-worksheet checks**, not individual `Check answer` 
 - Count an item as answered when exactly two phrases are selected.
 - Progress pips may distinguish selected from checked/correct.
 
-**Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3a-finding-meanings.html`
+### Export / Print
+
+- Keep the source fragments, question numbering, `Sentence:` label, and assembled response wording and placement unchanged.
+- Format **only the student's assembled answer sentence** in **bold + single underline** in the print/export view. Keep the label and source fragments as previously styled; never apply the emphasis to the answer key or substitute a model/correct sentence for a student's incomplete or incorrect selection.
+- Use a print-only class (for example `.print-a-answer{font-weight:800;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}`) around the escaped output of `buildPairSentence(q, state.answers[i])`. Interactive controls, TTS, autosave, progress, and three-check feedback do not change.
+
+**Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3a-finding-meanings.html` and `docs/worksheets/2026-10-19-wordly-wise-lesson-5a-finding-meanings.html` (bold-underlined assembled sentence on export)
 
 ---
 

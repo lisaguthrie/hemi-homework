@@ -289,6 +289,35 @@ const prepHtml = selectedPrep ? doubleUnderline(selectedPrep) : '___';
 
 Keep these markings in the print/export HTML only; on-screen worksheet controls keep the standard interactive styling.
 
+### Print / Export — Phrase Replacement in the Completed Sentence
+
+Use for Type 1 **Just the Right Word** exercises that export the original sentence (with the original bold paraphrase), a `Replacement:` answer line, and the sentence with the student's chosen replacement inserted. Keep those three lines, their wording, and their spacing unchanged. In the **completed sentence only**, make the saved replacement word **bold and single-underlined**. The surrounding sentence remains plain; the `Replacement:` line remains as originally styled. Do not format the whole sentence or underline a missing-word placeholder.
+
+Always render the student's current chosen form, not the stored correct answer. Escape `q.before`, the chosen word, and `q.after` separately to maintain punctuation, spacing and safe HTML. An unanswered item keeps the same plain `_____` blank. This is an **export-only** display change and does not affect the interactive sentence, grading, or saved answers.
+
+```javascript
+// escHtml is the normal HTML-escaping helper; selectedWord comes from saved state.
+function printCompletedReplacementSentence(q, selectedWord) {
+  const middle = selectedWord
+    ? '<strong class="print-b-replacement">' + escHtml(selectedWord) + '</strong>'
+    : '_____';
+  return '<p>' + escHtml(q.before) + middle + escHtml(q.after) + '</p>';
+}
+```
+
+```css
+.print-b-replacement {
+  font-weight: 800;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+```
+
+**Reference implementation:** `docs/worksheets/2026-10-19-wordly-wise-lesson-5b-just-the-right-word.html` (print view only).
+
+---
+
 ### Print / Export — Applying Meanings In-Place Selection
 
 Use for Wordly Wise **Applying Meanings** (Type 4), where each question has four lettered choices and the student may select any subset. Keep the wording and options exactly as printed, bold the source vocabulary word inside each question, and show **only the student's chosen answers** with **bold + underline** on their letter and phrase. Never include a separate `Selected:` line, grading badges, or answers inferred from the publisher key. Incomplete and incorrect student selections print exactly as chosen.
