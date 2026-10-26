@@ -27,8 +27,9 @@ Apply any design overrides from the profile on top of the framework defaults.
 3. If matched: apply that type's pattern directly
 4. If unmatched: state your interpretation in one sentence, then build it. Archived types may inform interaction details, but they do not count as an active match.
 5. Apply the child's profile throughout — every interaction decision should be filtered through their specific barriers and what works for them
-6. Output the complete HTML file
-7. If you identified improvements that should be propagated back, append a `📋 Update Suggested` block per `framework/CONTRIBUTING.md`
+6. For every new or revised student-facing HTML file, launcher, and public asset, save matching copies in both the source tree and its `docs/` mirror, using the exact path mappings and verification checklist in `framework/BUILD_CONSTRAINTS.md`. Keep both copies aligned after later changes, and never copy private profiles, framework files, or secrets into `docs/`.
+7. Output the complete HTML file and the verified paths for both copies; report any destination that could not be updated.
+8. If you identified improvements that should be propagated back, append a `📋 Update Suggested` block per `framework/CONTRIBUTING.md`
 
 ---
 
@@ -44,8 +45,8 @@ This system prompt is consumed in three environments:
 
 **claude.ai (manual):** Attach this file + all framework files + the relevant profile + the worksheet PDF. The model reads all attached files and builds.
 
-**CLI (`runners/cli.py`):** The runner assembles these files programmatically, sends them to the Claude API with the worksheet as a base64-encoded image/PDF, writes the HTML output to the appropriate `worksheets/{child}/` directory.
+**CLI (`runners/cli.py`):** The runner assembles these files programmatically, sends them to the Claude API with the worksheet as a base64-encoded image/PDF, and handles writing the HTML. The runner must write and verify **both** the source `worksheets/{child}/` output and the matching `docs/worksheets/` copy; check the runner's actual behavior rather than assuming this instruction alone implements file copying.
 
-**Automation (`runners/watcher.py`):** Same as CLI but triggered automatically when a new worksheet file appears in a watched folder.
+**Automation (`runners/watcher.py`):** Same output requirements as the CLI, triggered when a new worksheet file appears in a watched folder. The mirroring requirement applies to all later edits as well as initial output.
 
 The model's job is identical in all three cases. Only the I/O mechanism differs.

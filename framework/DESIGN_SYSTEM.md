@@ -251,6 +251,23 @@ Use this component when a vocabulary exercise contains enough question cards tha
 
 **Use when:** the word list is a repeated reference during a vertically scrolling exercise. Do not make small, rarely used support banks sticky by default.
 
+### Collapsible Word Bank in Two-Pane Reading
+
+For Type 6 passage-plus-response worksheets, **do not show the full word grid in the right pane by default**. Use a compact, keyboard-accessible disclosure (native `<details>` / `<summary>` is sufficient) labeled `📖 Show / hide Word List N`. Omit `open` initially so the bank starts collapsed each time the worksheet opens.
+
+- Place the disclosure near the top of the right pane, after the directions and before the question cards.
+- Keep the summary at least 44px high; allow both mouse/touch and keyboard activation.
+- On expansion, show the normal source-definition word buttons. Closing the bank must not remove definition access from vocabulary words in the passage and question text.
+- Unlike the persistent bank on short vocabulary exercises, this variant should **not** be sticky or consume right-pane scrolling space when collapsed.
+- Do not add a separate long explanation: the disclosure label explains the action.
+
+```html
+<details class="reading-word-bank">
+  <summary>📖 Show / hide Word List 5</summary>
+  <div class="word-bank"><!-- lesson word buttons --></div>
+</details>
+```
+
 ---
 
 ## Vocabulary Part-of-Speech Tags
@@ -373,6 +390,27 @@ On vocabulary phrase-replacement cards, an optional icon-only `💡` button may 
 - Always include visible text ("Check answers"), not just an icon or checkmark symbol.
 - Transitions to green (`.done`) after a correct submission — keeps it visually distinct from unchecked state.
 - Do not reuse the play button's green color here; use the gradient yellow → green pattern above.
+
+---
+
+## In-Question Vocabulary Word Highlight (Word Study)
+
+For Type 2 synonym/antonym candidate rows, mark **only current-lesson packet words and source-listed related forms** with the same yellow box as the lesson word bank (`--phrase-bg`, `--phrase-border`, `--phrase-text`). Leave all nonlesson words in the existing plain, unobtrusive word-button style. The word text remains a separate 44px-minimum button that opens the definition dialog; the adjacent checkbox is the separate select-and-speak target. Avoid coloring a distractor yellow merely because it was in another lesson's word list.
+
+```css
+.word-definition.lesson-vocab {
+  background: var(--phrase-bg);
+  border: 2px solid var(--phrase-border);
+  border-radius: 10px;
+  color: var(--phrase-text);
+  font-weight: 900;
+}
+.word-definition:not(.lesson-vocab) {
+  /* Inherit the worksheet's ordinary plain word-target style. */
+}
+```
+
+The modal uses packet wording for yellow words and a visibly attributed, externally researched definition/example for plain words; always embed both in the worksheet for offline access. This style affects the interactive view only. The compact printed row keeps the original words without yellow answer cues, with only the student's selected terms bold-underlined.
 
 ---
 

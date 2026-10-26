@@ -16,6 +16,14 @@ If a printed worksheet is divided into distinct labeled parts (for example, Part
 
 ---
 
+## Default Review Policy — Three Whole-Worksheet Checks
+
+For objectively verifiable questions, the default checking model is **three chances to check every response in one action at the bottom of the page**. No per-card Check buttons, automatic correctness on selection, unlimited attempts, or adult-check-only mode unless the user explicitly requests an exception. An incomplete submission first raises a warning; proceeding after confirmation consumes a chance and distinguishes blanks from attempted-but-incorrect answers. Use the source-verified key, exact-set matching for multiple-choice, persistent attempt counts, and neutral feedback on changed answers. See `framework/BUILD_CONSTRAINTS.md` and `framework/INTERACTION_PATTERNS.md` for complete behavior.
+
+For inherently open-ended work, such as original sentence continuations or comprehension writing, a meaningful answer cannot be validated by an exact-string key. Retain adult review as an **explicit documented exception** and preserve the writing task. Do not invent model answers to simulate a machine-gradable worksheet.
+
+---
+
 ## Type 1: Vocabulary Phrase Replacement — Word Bank
 
 *Wordly Wise “Just the Right Word” style: each sentence contains a bold paraphrase. The student replaces that phrase with a vocabulary word, or an appropriate form of the word, from the lesson word list.*
@@ -129,11 +137,11 @@ Use the **Part-of-Speech Filter Scaffold** in `framework/INTERACTION_PATTERNS.md
 
 ### Feedback
 
-This type uses **response-only / adult-check** completion.
+Apply the default **three whole-worksheet checks** against the source-verified replacement words, unless the user explicitly requests adult review.
 
-- Do **not** include a `Check answer` button, automatic correctness feedback, a score, or green correct-state styling.
-- Choosing a word updates the sentence, saves state, and reads the revised sentence aloud after about 300 ms.
-- The optional `💡` scaffold only reveals part of speech and filters candidates; it does not evaluate the response.
+- Choosing a word updates the sentence, saves state, and reads the revised sentence aloud after about 300 ms, **without revealing correctness**.
+- The optional `💡` scaffold only reveals part of speech and filters candidates; it never evaluates the response.
+- At the bottom, check every replacement together; an unselected sentence is **unanswered**, not an incorrect choice. Keep verified correct / needs-review / unanswered visually separate.
 
 ### Progress + persistence
 
@@ -147,11 +155,11 @@ This type uses **response-only / adult-check** completion.
 ---
 
 
-## Type 2: Vocabulary Antonyms — Select Two of Four
+## Type 2: Vocabulary Word Relationships — Select Two of Four
 
-*Wordly Wise “Word Study” antonym style: each row contains four words, and the student identifies the two whose meanings are opposite or nearly opposite.*
+*Wordly Wise “Word Study” synonym / antonym style: each row contains four words, and the student identifies the two whose meanings are alike or opposite.*
 
-**Use case:** Vocabulary word-study exercises where each row contains four candidate words and the academic task is to select exactly one antonym pair.
+**Use case:** Vocabulary word-study exercises where four candidates contain exactly one related pair. Antonyms-only exercises ask for the pair; mixed synonyms-and-antonyms exercises also ask the student to identify the relationship.
 
 **Question data shape:**
 ```javascript
@@ -166,8 +174,9 @@ Use four large checkbox choices per row.
 
 - Keep the checkbox and the visible word as **separate tap targets**. Tapping the word provides reading/definition support and must never toggle the answer.
 - Permit at most two checked choices in a row.
-- As soon as two choices are selected, disable the two unchecked boxes. Keep the selected boxes enabled so the student can uncheck one and revise the response.
-- A row is considered response-complete when exactly two choices are checked.
+- Permit no third selected word. Because every checkbox also speaks its word when tapped, keep other boxes tappable for **audio only** when two words are already selected (visually indicate the selection limit, but do not use a native `disabled` control that blocks speech). Keep selected boxes available for deselection and revision.
+- For antonyms-only exercises, a row is response-complete when exactly two choices are checked.
+- For mixed synonyms-and-antonyms exercises, add large `S · Synonyms` and `A · Antonyms` selectors below the words. Completion requires exactly two choices **and** one relationship choice; either selection remains independently editable.
 - Do not infer correctness from completion styling; use neutral/blue completion treatment rather than the green correct-answer treatment.
 
 ### Read-aloud + vocabulary support
@@ -175,26 +184,36 @@ Use four large checkbox choices per row.
 Use mixed support based on the lesson source.
 
 - Make the instructions tappable and read them aloud using the profile speech settings.
-- If a displayed word is part of the lesson word list, or a source-provided related form, tapping the word **opens the reusable definition modal and immediately reads just the tapped word aloud**. Do not auto-read the definition. This keeps the immediate auditory experience consistent with non-word-list choices while still exposing source definitions on screen.
-- If a displayed word is not in the lesson word list, tapping it reads that word aloud and does **not** open a definition. Do not invent or substitute a general-knowledge definition for distractors.
-- For a displayed related form (for example `degrading`), the modal may show only the matching related-form paragraph when that is the clearest support.
-- The definition modal and checkbox selection are independent; opening a definition never changes the student's selected answers.
+- **Checkbox target:** Tapping its box selects/deselects the word (up to two per row) **and speaks just that one word**, whether the tap selected or deselected it. If two are already selected, tapping an unselected checkbox speaks the word but does not add a third answer.
+- **Word-text target:** Tapping the displayed word opens the **same Vocabulary Definition Modal Card** for *every* word, without changing selection or automatically speaking. The modal's own green `▶` reads the definition and example when requested.
+- **This week's lesson word or exact listed related form:** Show the usual **yellow word-bank style** on the word target; use the exact definition and example from the packet, preserving senses, source wording and part-of-speech tags. Do not replace these with an outside dictionary.
+- **Other printed word (including a term from another lesson):** Keep the word text visually plain; research an authoritative outside dictionary for a context-appropriate definition and example. Embed the content in the self-contained HTML for offline use, and identify/link the outside source in the popup. Do not fabricate a source or quietly pass off external definitions as packet text.
+- Keep separate large keyboard-accessible targets with clear labels and visible focus. The word's definition popup must never alter answers, checking chances, or progress. Use the **Word Study — Checkbox Speaks / Word Opens Definition** pattern in `framework/INTERACTION_PATTERNS.md` and the yellow styling in `framework/DESIGN_SYSTEM.md`.
 
 ### Feedback
 
-This type supports **adult-check-only** completion when requested.
+Use the default **three whole-worksheet checks** when a reliable pair key is available. Validate the exact two-word pair; in the mixed variant, validate the chosen `S` / `A` relationship **as well**. Do not show correctness while the student is still selecting.
 
-- Do not include a `Check Answers` button, automatic correctness feedback, hints, or a score.
-- The app does not need an answer key in its interaction logic when correctness is intentionally deferred to an adult.
-- Progress reflects response completion only (two choices selected), not correctness.
+- A row with fewer than two selections, or without a required `S` / `A` selection, is **incomplete/unanswered** for the warning and review, distinct from a completed but incorrect pair.
+- Selection alone never shows correctness; verified feedback appears only when the bottom Check all responses action is used.
+- Adult-check-only remains an explicit user-requested exception.
 
 ### Progress + persistence
 
-- Persist each row's selected words in `localStorage`.
-- Progress pips and labels count rows with exactly two selections.
+- Persist each row's selected words and, when present, its `S` / `A` classification in `localStorage`.
+- Progress pips and labels count a row only when all controls required for that variant are answered.
 - Preserve responses across reloads and provide the standard double-tap `Clear all responses` action.
 
-**Reference implementation:** `worksheets/christina/2026-09-30-wordly-wise-lesson-2d.html`
+### Export / Print
+
+For the mixed synonyms-and-antonyms variant, mirror the printed four-word exercise instead of creating a separate answer summary:
+
+- Keep the item number, **all four original words in source order**, and the `S` and `A` labels on **one horizontal line**. Space the four words evenly; leave a slightly larger gap before `S` and a small gap between `S` and `A`.
+- Use **bold + underline** on precisely the two words the student actually selected and the `S` or `A` they selected. Leave unselected words/letters in regular type. If selections are incomplete, mark only what was selected.
+- Do not repeat the chosen pair on a `Selected:` line, expand `S/A` into `Synonyms/Antonyms`, print check results, or substitute the correct answer key. Keep the source directions and question numbering.
+- Prevent the words and S/A from wrapping in print. Apply this formatting **only to the export**, leaving the accessible interactive controls unchanged. Use `Print / Export — Four-Word Pair with S/A` in `framework/INTERACTION_PATTERNS.md`.
+
+**Reference implementations:** `worksheets/christina/2026-09-30-wordly-wise-lesson-2d.html` (antonyms only) and `worksheets/christina/2026-10-19-wordly-wise-lesson-5d-word-study-synonyms-antonyms.html` (mixed pair + classification).
 
 ---
 
@@ -230,12 +249,11 @@ Use one selection control plus one phrase-reading control per printed phrase.
 
 ### Feedback
 
-Use deferred per-card checking.
+Use the default **three whole-worksheet checks**, not individual `Check answer` buttons.
 
-- `Check answer` is disabled until two phrases are selected.
-- Correct: calm green ✅ feedback.
-- Incorrect: a `💡 Hint:` based on the source definition of the vocabulary word used in the correct sentence.
-- A changed selection clears prior correctness feedback.
+- Validate every selected phrase pair on the same bottom-of-page check. Fewer than two chosen phrases is **unanswered/incomplete**.
+- Correct: calm green ✅ feedback. Answered but incorrect: a 💡 relationship hint based on the source definition, without naming the answer.
+- Changing a pair clears only that item's previous result until the next whole-page check.
 
 ### Progress + persistence
 
@@ -247,11 +265,11 @@ Use deferred per-card checking.
 
 ---
 
-## Type 4: Vocabulary Applying Meanings — Multi-Select, Adult Review
+## Type 4: Vocabulary Applying Meanings — Multi-Select
 
 *Wordly Wise “Applying Meanings” style: each question has four choices and may have from one to four correct answers.*
 
-**Use case:** Vocabulary application questions where the printed source explicitly allows multiple correct choices but does not provide an answer key in the supplied material.
+**Use case:** Vocabulary application questions where the printed source explicitly allows multiple correct choices.
 
 **Question data shape:**
 ```javascript
@@ -263,7 +281,9 @@ Use deferred per-card checking.
     ["b", "sheep"],
     ["c", "horses"],
     ["d", "cats"]
-  ]
+  ],
+  answer: ["b", "c"], // source-verified IDs; may contain 1–4 letters
+  hint: "Graze means to feed on growing grass. Think about which animals do that."
 }
 ```
 
@@ -278,22 +298,30 @@ Use four independent checkbox-style selections.
 
 ### Feedback
 
-When the supplied source does not contain an answer key, use **adult-check-only** completion.
+Use the default **three whole-worksheet checks** against a verified publisher/teacher key, evaluating the **exact full selection set** for each question. The answer controls themselves remain multi-select and independent of listening.
 
-- Do not infer or manufacture correctness from general knowledge.
-- Do not include automatic hints, scoring, or correct/incorrect labels.
-- A question is response-complete after at least one option is selected.
-- A short neutral note may state that selections are saved for review.
-
-If a trustworthy answer key is supplied with a future worksheet, correctness logic may be added without changing the selection interaction.
+- Before falling back to adult checking merely because the provided student worksheet omits answers, **look for an edition-matched teacher/publisher key**. Verify its exercise, page, question wording, and option order against the student's pages. When the matching key is available, implement automated three-chance checking rather than adult review.
+- Store the correct option letters (one to four) as an `answer` array in each question's data. Ignore selection order but require the chosen set to match the source key exactly: missing or extra options both mean **needs another look**. Never treat a partially correct subset as correct.
+- A question with no selections is **unanswered**. A nonempty selection that omits a correct choice or includes a distractor is **answered but needs review**; keep a concept-specific hint on each card and reveal it only after checking, without listing the correct options.
+- Use the reusable **Publisher-Keyed Multi-Select Review** pattern in `framework/INTERACTION_PATTERNS.md`. All three attempts are shared across the worksheet, saved across reloads, and consumed only by a completed/confirmed whole-worksheet check.
+- If no trustworthy, matching key can be established, do not invent one. Adult review remains an explicit fallback for genuinely uncheckable items or unavailable keys.
 
 ### Progress + persistence
 
-- Persist selected option IDs per question.
-- Progress counts questions with at least one selection.
+- Persist selected option IDs, check count, review statuses, and revised markers in `localStorage`. Changing one selection clears that question's stale review feedback only.
+- Progress counts questions with at least one selection, independently of correctness.
 - Preserve all selections across reloads and provide the standard double-tap clear action.
 
-**Reference implementation:** `docs/worksheets/2026-10-05-wordly-wise-lesson-3c-applying-meanings.html`
+### Export / Print
+
+Mirror the original Applying Meanings printed exercise rather than adding a separate answer summary.
+
+- Preserve each question and its four original lettered choices. Bold the target lesson vocabulary word **in the question prompt**, including its printed related form (for example `evolved` from `evolve` or `inscription` from `inscribe`); do not bold the entire prompt or silently rewrite vocabulary forms.
+- Follow the printed choice arrangement when practical (the two-column `a`/`b` left and `c`/`d` right layout for Wordly Wise Book 6 Lesson 5C). Mark **only the student's selected answer options** in place with **bold + underline** on both the printed letter and choice text; other options remain plain.
+- Print every selected option, including incomplete or incorrect selections, without exposing the answer key or three-check review status. Remove the redundant `Selected:` answer line; this pattern does not affect the interactive controls or saved attempts.
+- Use `Print / Export — Applying Meanings In-Place Selection` in `framework/INTERACTION_PATTERNS.md`.
+
+**Reference implementations:** `docs/worksheets/2026-10-19-wordly-wise-lesson-5c-applying-meanings.html` (edition-matched publisher key, three whole-worksheet checks) and `docs/worksheets/2026-10-05-wordly-wise-lesson-3c-applying-meanings.html` (earlier implementation).
 
 ---
 
@@ -329,11 +357,10 @@ Use four large single-select pair buttons.
 
 ### Feedback
 
-Use deferred per-card checking.
+Use the default **three whole-worksheet checks**, never unlimited per-card checking unless explicitly requested.
 
-- Correct: calm green ✅ confirmation.
-- Incorrect: a relationship hint that names the source-taught relationship without revealing the correct choice (for example, “HUMID and ARID are opposites. Look for another pair of opposites.”).
-- Do not add broader analogy rules not present in the source.
+- Correct: calm green ✅ confirmation. Answered but incorrect: a 💡 relationship hint naming the source-taught relationship without revealing the correct choice (for example, “HUMID and ARID are opposites. Look for another pair of opposites.”).
+- A row with no selected pair remains **unanswered**; do not add broader analogy rules absent from the source.
 
 ### Progress + persistence
 
@@ -358,7 +385,7 @@ Use deferred per-card checking.
 Use a two-pane reading/response workspace on wider screens and stack the panes on narrow screens.
 
 - **Left pane:** passage, split into paragraph cards.
-- **Right pane:** directions, lesson word bank, question cards, and progress.
+- **Right pane:** directions, a **collapsible lesson word bank (collapsed by default)**, question cards, and progress. Place the disclosure inside the response pane so the 15-word bank never crowds the questions until requested.
 - Preserve the printed directions verbatim; use adult review for open-ended written responses.
 - Each sentence is independently tappable for TTS.
 - Each paragraph has a green `▶` button that reads the full paragraph.
@@ -370,27 +397,111 @@ Use a two-pane reading/response workspace on wider screens and stack the panes o
 Use one large free-text area per question with a `▶ Read my answer` control.
 
 - Preserve the printed requirement to answer in a sentence.
-- Do not add automatic correctness scoring for open-ended comprehension responses.
+- This open-ended comprehension task is an **explicit adult-review exception** to the default three automated checks; do not score it with exact-string matching.
 - Typing must remain focus-safe; update progress in place rather than rebuilding the question card.
 - Include speech recognition only when requested. If both microphone and no-microphone versions are requested, make both while keeping typing, autosave, read-back, and print fully usable in either version.
 
-When the printed directions say that a question without a lesson word must use one in the answer, pair those questions with the **Unique Vocabulary-Family Allocation** interaction in `framework/INTERACTION_PATTERNS.md`.
+When the printed directions say that a question without a lesson word must use one in the answer, pair those questions with the **Unique Vocabulary-Family Allocation** interaction in `framework/INTERACTION_PATTERNS.md`. Include a final **“Choose a different word…”** option in those drop-downs: it is an independence reminder, not a special word or automatic answer. Leave the written response fully editable and have an adult review any independently chosen word.
 
 ### Vocabulary support
 
 Use the standard Word List bank and definition modal.
 
 - Preserve source definitions, related forms, sense numbers, Definition/Example separation, spoken punctuation, and POS tags.
-- Related forms belong to one word family for “use each word only once” tracking.
+- Related forms belong to one word family for “use each word only once” tracking. Prevent duplicate assignments among named dropdown options; the “Choose a different word…” option remains available for manual choices without pretending to track which family was used.
 - A question that already contains a lesson word does not need an extra vocabulary selector.
 
 ### Progress + persistence
 
 - Persist answer text and any assigned vocabulary family in `localStorage`.
 - A normal vocabulary-in-question item is complete when its response is non-empty.
-- An item requiring an added lesson word is complete only when both a vocabulary family and response text are present.
+- An item requiring an added lesson word is complete only when response text and a vocabulary choice are present. The independent “Choose a different word…” choice counts as the chooser response, but does not imply that the written text was automatically checked for a particular vocabulary word.
 - Progress represents response completion, never correctness.
 - Provide the standard double-tap clear action and Export / Print.
 - Give separately delivered variants distinct persistence keys.
 
-**Reference implementation:** `docs/worksheets/2026-10-08-wordly-wise-lesson-3e-vocabulary-in-context.html`
+**Reference implementations:** `docs/worksheets/2026-10-08-wordly-wise-lesson-3e-vocabulary-in-context.html` and `worksheets/christina/2026-10-19-wordly-wise-lesson-5e-vocabulary-in-context.html` (collapsible bank and independent word choice).
+
+---
+
+## Type 7: Vocabulary Making Connections — Multi-Select Word Associations
+
+*Wordly Wise “Making Connections” style: each prompt asks which of four words relate in meaning to a named concept; more than one choice may fit.*
+
+**Use case:** Word association exercises where recognizing semantic connections, including related lesson and non-lesson words, is the academic task.
+
+### Answer control
+
+- Show the original prompt and all four lettered choices, without removing distractors or limiting the number of selections.
+- Use an independent checkbox-style selection control for each answer. Make the word itself a separate TTS/definition target; tapping a word must not change the selected response.
+- Speak non-lesson answer words aloud without inventing definitions. For lesson words or source-specified related forms, open the standard definition modal and speak the tapped word.
+- Make printed directions and question prompts independently readable.
+
+### Feedback
+
+- Use the default **three whole-worksheet checks** and the publisher/teacher answer key when available, as in Lesson 4B. Only the bottom check action evaluates all ten questions.
+- Mark exactly matched answer sets **correct**; nonempty mismatched sets **needs review**; no selection **unanswered**. Keep multiple selections editable between checks and after the third.
+- Never infer a definitive key from a vague semantic association if a more authoritative key can be found; use adult review only as an explicit fallback when validation cannot be supported.
+
+### Progress + persistence
+
+- Persist selected answer indices for every question, separately from other lesson parts.
+- Show neutral response-completion progress, plus the standard double-tap clear and Export / Print actions.
+- Include the lesson word bank and source-defined definition/example modal.
+
+**Reference implementation:** `docs/worksheets/2026-10-13-wordly-wise-lesson-4b-making-connections.html`
+
+---
+
+## Type 8: Vocabulary Determining Meanings — Multi-Select Sentence Completions
+
+*Wordly Wise “Determining Meanings” style: a sentence stem includes a lesson vocabulary word, followed by four possible continuations; more than one can complete it meaningfully.*
+
+**Use case:** Vocabulary questions where the student identifies all printed continuations that make meaningful sentences using the target lesson word.
+
+### Answer control
+
+- Display the exact sentence stem and all four lettered continuations.
+- Provide separate checkbox-style controls for selecting responses and controls for reading each complete stem-plus-continuation aloud; listening must never toggle selection.
+- Allow one or more options per question. Do not force a single choice or reveal the answer from the selection control.
+- Make the stem and instructions tappable for TTS; offer the source vocabulary definition through the shared word bank/modal.
+
+### Feedback
+
+- Use the default **three whole-worksheet checks** against a verified teacher/publisher key, as in Lesson 4C. A check validates every completed sentence set together, not one sentence at a time.
+- Show **correct**, **answered but needs review**, and **unanswered** distinctly; never give feedback just by tapping answer choices. Use adult review only as an explicit exception if no reliable answer key exists.
+
+### Progress + persistence
+
+- Count a question as response-complete when at least one continuation is selected.
+- Persist the selected option indices and provide progress pips, double-tap clear, and Export / Print.
+
+**Reference implementation:** `docs/worksheets/2026-10-13-wordly-wise-lesson-4c-determining-meanings.html`
+
+---
+
+## Type 9: Vocabulary Completing Sentences — Open-Ended Continuations
+
+*Wordly Wise “Completing Sentences” style: each printed sentence starts with a lesson word or related form, and the student supplies a meaningful continuation demonstrating understanding.*
+
+**Use case:** Open-response sentence stems requiring the student to use vocabulary meaning accurately without substituting a multiple-choice task.
+
+### Answer control
+
+- Preserve each printed sentence stem and highlighted vocabulary word exactly.
+- Provide a large free-text area for the student's continuation, with a green `▶ Read my answer` control; include an optional microphone only if requested or supported by the child's profile.
+- Never replace the creative completion with a list of prewritten responses. Typing, dictation, read-back, autosave, and printing remain independent of speech-recognition availability.
+- Make directions and stems tappable for read-aloud. Keep the full lesson word bank and standard definition modal available throughout.
+- Do not rebuild cards on every keystroke, so the cursor and dictation remain focus-safe.
+
+### Feedback
+
+- A nonempty continuation counts as a response; this authentic open-ended composition is an **explicit adult-review exception** to automated three-chance checking. Evaluate meaning by adult review rather than exact-string matching.
+- Do not show a correctness score or fabricate a reference answer.
+
+### Progress + persistence
+
+- Persist each text response in a part-specific `localStorage` key.
+- Show neutral completion progress and include double-tap Clear all responses and Export / Print using the child's print name.
+
+**Reference implementation:** `docs/worksheets/2026-10-13-wordly-wise-lesson-4d-completing-sentences.html`

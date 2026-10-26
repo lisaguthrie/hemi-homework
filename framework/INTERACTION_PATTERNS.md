@@ -289,6 +289,133 @@ const prepHtml = selectedPrep ? doubleUnderline(selectedPrep) : '___';
 
 Keep these markings in the print/export HTML only; on-screen worksheet controls keep the standard interactive styling.
 
+### Print / Export — Applying Meanings In-Place Selection
+
+Use for Wordly Wise **Applying Meanings** (Type 4), where each question has four lettered choices and the student may select any subset. Keep the wording and options exactly as printed, bold the source vocabulary word inside each question, and show **only the student's chosen answers** with **bold + underline** on their letter and phrase. Never include a separate `Selected:` line, grading badges, or answers inferred from the publisher key. Incomplete and incorrect student selections print exactly as chosen.
+
+For the original two-column layout, keep choices in DOM/reading order `a, b, c, d`; use CSS grid column flow to show `a`/`b` down the left and `c`/`d` down the right. Use print-only classes; leave the on-screen accessibility controls unchanged. Match the **printed** vocabulary form through the word-family map (`evolved` for `evolve`, `inscription` for `inscribe`) rather than bolding a base word that does not occur in the source question.
+
+```javascript
+// escHtml() is the escaping helper documented earlier in this section.
+// q: { question: string, vocab: string, choices: [string,string,string,string] }
+// selected: student's selected letter IDs, e.g. ['a','d']; NOT q.answer.
+function printApplyingMeaningsPrompt(q, vocabForms) {
+  const forms = Object.keys(vocabForms).filter(form => vocabForms[form] === q.vocab)
+    .sort((a,b) => b.length - a.length);
+  for (const form of forms) {
+    const safe = form.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = new RegExp('\\b' + safe + '\\b', 'i').exec(q.question);
+    if (!match) continue;
+    const start = match.index;
+    return escHtml(q.question.slice(0,start)) +
+      '<strong class="print-c-vocab">' + escHtml(match[0]) + '</strong>' +
+      escHtml(q.question.slice(start + match[0].length));
+  }
+  return escHtml(q.question);
+}
+
+function printApplyingMeaningsChoices(q, selected) {
+  const letters = ['a','b','c','d'];
+  return '<div class="print-c-choices">' + q.choices.map((choice, index) => {
+    const letter = letters[index];
+    const text = '(' + letter + ') ' + escHtml(choice);
+    return '<div class="print-c-choice">' +
+      (selected.includes(letter) ? '<strong class="print-c-selected">' + text + '</strong>' : text) +
+      '</div>';
+  }).join('') + '</div>';
+}
+```
+
+```css
+.print-c-q { break-inside: avoid; margin: 13px 0; }
+.print-c-prompt { margin: 0 0 3px; }
+.print-c-vocab { font-weight: 800; }
+.print-c-choices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr));
+  grid-template-rows: repeat(2,auto); grid-auto-flow: column;
+  column-gap: 18px; row-gap: 1px; padding-left: 18px;
+  font-size: 14px; line-height: 1.45; }
+.print-c-selected { font-weight: 800; text-decoration: underline;
+  text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+```
+
+**Reference:** `worksheets/christina/2026-10-19-wordly-wise-lesson-5c-applying-meanings.html` (print output only).
+
+---
+
+### Word Study — Checkbox Speaks / Word Opens Definition
+
+For **Type 2 Word Study** (`synonyms` / `antonyms`), do not make the checkbox and word trigger the same speech behavior. A student can hear a printed word while committing to a selection, or examine the meaning independently without selecting it.
+
+- **Checkbox** (44px minimum): toggle the saved selected pair and call `speak(word)` with **only the tapped word**, never a sentence or definition. Maintain the two-choice cap; when already at two, let another checkbox speak without selecting it rather than natively disabling speech access. Preserve the student's existing selections, three-check review state, and export behavior.
+- **Word** (44px minimum): open the existing reusable source-labeled definition dialog for both lesson and nonlesson words. Do **not** call `speak(word)` automatically on that tap; the modal's green `▶` reads the definition and example on demand. The word tap must never select or deselect the checkbox.
+- **Weekly packet word or listed related form:** use the packet's exact definition/example text, including multiple senses and source part of speech, and apply the yellow vocabulary button treatment from `framework/DESIGN_SYSTEM.md`. Check membership by exact headword/form lookup, not by substring matching or a potentially misleading partial stem.
+- **Nonweekly word:** leave the word text plain. Look up a dictionary definition and example from a credible external source, preserving the meaning relevant to the printed exercise. Embed the entry in the worksheet's HTML for offline use; label and link the source in the modal. Do not invent outside source attributions or write a made-up dictionary quotation. Avoid overriding supplied packet content with external definitions.
+
+```javascript
+// Type 2 example; `state.answers[i].pair` is the student's selection indices.
+const selected = state.answers[i].pair.includes(j);
+const atLimit = state.answers[i].pair.length === 2 && !selected;
+const box = document.createElement('button');
+box.type = 'button'; box.textContent = selected ? '☑' : '☐';
+box.setAttribute('aria-pressed', String(selected));
+box.onclick = () => {
+  speak(word);                       // exactly one word, even when an answer changes
+  if (atLimit) return;              // listen only: do not add a third choice
+  const pair = selected
+    ? state.answers[i].pair.filter(index => index !== j)
+    : [...state.answers[i].pair, j];
+  setAnswer(i, { pair, relation: state.answers[i].relation });
+};
+const wordButton = document.createElement('button');
+wordButton.type = 'button'; wordButton.textContent = word;
+wordButton.className = 'word-definition' + (isLessonForm(word) ? ' lesson-vocab' : '');
+wordButton.setAttribute('aria-haspopup', 'dialog');
+wordButton.onclick = () => openDefinition(word); // sourced modal; no auto-speech
+```
+
+**Reference:** `worksheets/christina/2026-10-19-wordly-wise-lesson-5d-word-study-synonyms-antonyms.html`; packet Word List 5 plus separately sourced Cambridge Dictionary entries for nonlesson words.
+
+---
+
+### Print / Export — Four-Word Pair with S/A
+
+Use for Wordly Wise mixed synonym/antonym exercises (Type 2). The export represents the student's markings **in place**, in the same compact row as the paper exercise, not in a new `Selected` or `Type` answer line. Preserve source word order and show `S` and `A` as separate printed choices. A wrong or incomplete student choice is still printed as selected; never replace it with the answer key.
+
+**Layout:** item number + four evenly spaced words + a noticeable gap + `S` and `A` with modest separation, **all on one line**. Render the student's selected words and selected `S`/`A` as **bold and underlined**, while all other terms remain plain. This affects only the print/export document, not the accessible on-screen selection controls.
+
+```javascript
+// q.words: four strings in original order
+// answer: { pair: [0, 2], relation: 'S' } — student's choices, NOT q.pair / q.relation answer key
+function printWordRelationshipRow(q, answer, questionNumber) {
+  const mark = (value, chosen) => chosen
+    ? '<strong class="print-d-marked">' + escHtml(value) + '</strong>'
+    : escHtml(value);
+  return '<div class="print-d-row">' +
+    '<span class="print-d-number">' + questionNumber + '.</span>' +
+    '<span class="print-d-words">' + q.words.map((word, index) =>
+      '<span class="print-d-word">' + mark(word, answer.pair.includes(index)) + '</span>'
+    ).join('') + '</span>' +
+    '<span class="print-d-sa"><span>' + mark('S', answer.relation === 'S') + '</span>' +
+    '<span>' + mark('A', answer.relation === 'A') + '</span></span>' +
+    '</div>';
+}
+```
+
+```css
+.print-d-row{display:flex;align-items:baseline;white-space:nowrap;font-size:14px;line-height:1.6}
+.print-d-number{flex:0 0 30px;font-weight:bold}
+.print-d-words{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:8px;flex:1;min-width:0}
+.print-d-word{white-space:nowrap}
+.print-d-sa{display:flex;gap:20px;margin-left:28px;flex:0 0 auto;padding-right:10px}
+.print-d-marked{font-weight:800;text-decoration-line:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
+```
+
+Place each row in a `break-inside: avoid` print section. Do not use an answer status or correctness color in the export. This is an **in-place marking** pattern: printed students' choices, including incomplete and incorrect choices, are authoritative for the markings.
+
+**Reference implementation:** `worksheets/christina/2026-10-19-wordly-wise-lesson-5d-word-study-synonyms-antonyms.html`.
+
+---
+
 ### Gap-Fill Tappable Segments (Type: `__` delimiter)
 
 Used when a prompt is stored with `__` markers for inline gap dropdowns (e.g. dialogue punctuation worksheets). Split the prompt on `__` and render each text segment as a tappable span; each `__` position becomes a `<select>`.
@@ -561,6 +688,67 @@ Always pair a free-text area with both a mic button (STT) and a read-back button
 
 ## Answer Selection → Feedback
 
+### Whole-Worksheet Three-Chance Review (Default)
+
+**Use this instead of automatic feedback, per-card Check buttons, or unrestricted Check Answers** whenever a worksheet has a trustworthy fixed answer key. A worksheet file (or a single-file combined worksheet) has **three total check actions**. Place the check panel below the full question list and progress indicator, never inside a question card.
+
+**User flow:** Students select all the responses they wish, without correctness feedback. On **Check all responses**, first count unanswered/incomplete items. If any exist, show an inline warning with their numbers, and two explicit choices: **Keep working** and **Check anyway · use 1 check**. The warning alone never spends a check. A completed submission validates immediately. Each confirmed check spends one chance and grades *every* problem at once, including blanks. Display three visually and verbally distinct states:
+
+- **✅ Correct** — green border/badge for the full answer set.
+- **💡 Needs another look** — orange border/badge for nonempty but incorrect responses. Give a concept clue without identifying which exact choice to select or deselect.
+- **○ Unanswered** — neutral gray, preferably a dashed border, for blank/incomplete responses. Never report an unanswered problem as a wrong attempt.
+
+For multi-select, require exact set equality rather than merely checking whether any chosen option is correct. Keep choice text/definition TTS independent of selection and feedback. Changing an answer removes stale checked feedback **for that card only** and shows a neutral “Changed since your last check” marker. No choice change, or reopening the page, ever grants more checks. After three checks, leave answers editable and printable but disable checking; a double-tap Clear all responses explicitly resets everything. If all cards match on an earlier check, disable checking as complete.
+
+**Reference implementation:** `docs/worksheets/2026-10-13-wordly-wise-lesson-4b-making-connections.html` and `...-4c-determining-meanings.html`.
+
+**Reusable state and check logic** (adapt `answers`, `isAnswered`, `isCorrect`, and UI functions to the worksheet type):
+
+```javascript
+const MAX_CHECKS = 3;
+const review = {
+  checksUsed: 0,
+  statuses: questions.map(() => ''),  // '', 'correct', 'attention', 'unanswered'
+  revised: questions.map(() => false)
+};
+
+function onAnswerChanged(i) {
+  // First update the student's saved answer and the neutral answered progress.
+  if (review.checksUsed > 0) {
+    review.statuses[i] = ''; // Never leave an obsolete green/orange badge on an edited response.
+    review.revised[i] = true;
+  }
+  hideIncompleteWarning();
+  saveProgress();
+  paintQuestionStatus(i);
+}
+
+function requestCheckAll() {
+  if (review.checksUsed >= MAX_CHECKS || review.statuses.every(s => s === 'correct')) return;
+  const missing = questions.map((_, i) => i).filter(i => !isAnswered(i));
+  if (missing.length) {
+    showIncompleteWarning(missing); // Show Keep working / Check anyway; do not spend a chance.
+    return;
+  }
+  checkAllNow();
+}
+
+function checkAllNow() { // Only from Check all (fully answered) or Check anyway confirmation.
+  if (review.checksUsed >= MAX_CHECKS) return;
+  review.checksUsed++;
+  review.statuses = questions.map((_, i) =>
+    !isAnswered(i) ? 'unanswered' : isCorrect(i) ? 'correct' : 'attention'
+  );
+  review.revised.fill(false);
+  hideIncompleteWarning();
+  saveProgress();
+  questions.forEach((_, i) => paintQuestionStatus(i));
+  paintCheckPanel(); // Remaining count; disable when all correct or three checks used.
+}
+```
+
+Make the footer warning and results accessible using `role="status"` / `aria-live="polite"`, at least 44px touch targets, and non-color labels as well as borders. For open responses without a dependable objective rubric/key, use an explicitly documented adult-review exception instead of pretending to grade. The book's teacher/publisher answer key is preferred over informal semantic guesses.
+
 **Feedback badges never auto-speak.** Text appears immediately; a small 🔊 button lets her hear it on demand. Store feedback text in a module-level object keyed by element ID — **never pass dynamic text through `JSON.stringify()` into an inline `onclick` attribute**, as apostrophes and quotes will break HTML parsing.
 
 ```javascript
@@ -590,7 +778,7 @@ function showFeedback(fbId, pass, text) {
 .fb-play-btn:hover { opacity: 1; transform: scale(1.2); }
 ```
 
-For simple fill-in-the-blank worksheets with a fixed answer key, the generic handler below is sufficient. For more complex worksheets (e.g. Type 3 Guess and Check), use `showFeedback()` directly.
+The generic immediate-feedback handler below is **legacy / explicit-override only**. For new fixed-answer worksheets, use the whole-worksheet three-chance review above; changing a choice must not reveal correctness. For explicitly requested immediate-feedback tasks, the handler remains available.
 
 ```javascript
 // Generic dropdown handler
@@ -617,7 +805,45 @@ function updateFeedback(i, val) {
 }
 ```
 
-### Deferred Answer Review (`Check Answers`)
+### Publisher-Keyed Multi-Select Review (Vocabulary Applying Meanings)
+
+Use this variation of **Whole-Worksheet Three-Chance Review** for Wordly Wise Applying Meanings and other questions that may have **one to four correct choices**. Keep letter-selection buttons independent of word/audio buttons. Obtain a matching publisher/teacher answer key and verify the exact student-book edition, exercise, question text, and option order before enabling scoring. A missing key in a student worksheet is not, by itself, a reason to skip a key lookup or default to adult review.
+
+Store the verified key and a concept-specific, non-answer-revealing hint with each question:
+
+```javascript
+const questions = [
+  {
+    question: 'Which animals graze?',
+    choices: ['crocodiles', 'sheep', 'horses', 'cats'],
+    answer: ['b', 'c'], // from an edition-matched teacher/publisher key
+    hint: 'Graze means to feed on growing grass.'
+  }
+];
+
+function isAnswered(i) {
+  return state.answers[i].length > 0; // never require an assumed number of picks
+}
+
+function isCorrect(i) {
+  const selected = state.answers[i]; // e.g. ['c', 'b']
+  const expected = questions[i].answer;
+  return selected.length === expected.length &&
+    new Set(selected).size === selected.length &&
+    expected.every(letter => selected.includes(letter));
+}
+```
+
+- Do not restrict selection to an assumed count; some questions correctly select all four choices.
+- On **Check all responses**, evaluate each entire selected set, treating no picks as **Unanswered** and nonempty mismatches as **Needs another look**. An incorrect selection never gets positive feedback just because one option happens to match.
+- Provide hints after checking, not when making or changing a selection. Hints name the vocabulary concept but do not enumerate the correct choices.
+- Use the ordinary three-check warning/confirmation flow and `localStorage` review state. Preserve existing response state when enabling checking on a previously adult-reviewed worksheet; do not reset a student's selections merely because the scoring feature changed.
+
+**Reference:** `docs/worksheets/2026-10-19-wordly-wise-lesson-5c-applying-meanings.html` (Wordly Wise Book 6, Lesson 5C, source-verified eight-item key).
+
+### Legacy Deferred Answer Review (`Check Answers` Without Attempt Limit)
+
+**Explicit override / maintenance only:** The three-chance whole-worksheet pattern above is the default for new worksheets. This older snippet does not enforce a review limit and must not be copied unchanged into a new build.
 
 Use this pattern for fixed-answer dropdown sections when immediate correctness feedback causes the student to click through options without committing to a choice first. Instead of marking each answer on `change`, wait until the whole section is answered and require an explicit `Check Answers` tap.
 
@@ -674,7 +900,9 @@ function updateProgress() {
 }
 ```
 
-### Per-Card Deferred Feedback (Single Check Button)
+### Legacy Per-Card Deferred Feedback (Single Check Button)
+
+**Explicit override / maintenance only:** Per-question checking is not the default; use three whole-worksheet chances unless otherwise specified.
 
 Use this for card-based two-choice dropdown tasks where immediate hinting on selection causes guessing behavior. The card should show no hint/correct badge until its check button is tapped.
 
@@ -730,7 +958,9 @@ const pass = q.accepted
 
 If this pattern is used, avoid rendering a visible target line below the input unless explicitly requested.
 
-### Retry-Until-Correct Pattern
+### Retry-Until-Correct Pattern (Explicit Override Only)
+
+This unlimited-attempt behavior is superseded by the three-chance whole-worksheet default for new objectively checked worksheets. Use it only when specifically requested or required by a standalone tool.
 
 For worksheet types where a correct answer requires multiple selections (e.g. word chip + mark type), do NOT finalize the card on a wrong attempt. Show feedback and keep all controls live:
 
@@ -1197,7 +1427,7 @@ function exportPrint() {
 }
 ```
 
-The print HTML should: reproduce the original worksheet layout (problem text, clues, any work including guess tables), include `@media print { button { display: none } }`, provide an explicit Print button for non-Ctrl+P users, pre-fill the student's name on the name line, and include a footer with source attribution if known. Name/date header lines must use `align-items: flex-end` on their flex container so label text sits at the baseline of the underline, not floating in the middle.
+The print HTML should: reproduce the original worksheet layout (problem text, clues, any work including guess tables), include `@media print { button { display: none } }`, provide an explicit Print button for non-Ctrl+P users, pre-fill the student's name on the name line **if the original has one**, and include a footer with source attribution if known. **Preserve only the source worksheet's header fields**: add a `Date:` line only when one exists on the original worksheet; never generate an extra date line or auto-fill today's date just because an export is being created. Use `align-items: flex-end` for retained header fields so label text aligns to any underline.
 
 **Type-specific print styling override (Type 7 Proofreading):**
 - Do not default to plain black-and-white score tables for proofreading/error-correction worksheets.
@@ -1206,7 +1436,7 @@ The print HTML should: reproduce the original worksheet layout (problem text, cl
 - Include the corrected/annotated passage and comprehension answers; avoid replacing this with a sentence-status-only report.
 
 ```css
-/* Name/date header — used in every print page */
+/* Source-matched header — name, with date only when the original includes one */
 .name-line { display: flex; gap: 20px; margin: 12px 0 18px; font-size: 0.95rem; }
 .name-line span { display: flex; align-items: flex-end; gap: 6px; }  /* flex-end keeps label at baseline */
 .name-line .line { display: inline-block; width: 180px; border-bottom: 1.5px solid #333; }
@@ -1259,7 +1489,7 @@ const wordEntries = [
 ### Interaction rules
 
 - Keep the visible word bank separate from answer controls.
-- For long card-based vocabulary exercises where the student repeatedly refers back to the word list, keep the bank visible with the reusable sticky-bank component from `framework/DESIGN_SYSTEM.md`.
+- For long card-based vocabulary exercises where the student repeatedly refers back to the word list, keep the bank visible with the reusable sticky-bank component from `framework/DESIGN_SYSTEM.md`. **Exception:** Type 6 reading-plus-writing uses the collapsed-by-default disclosure component below to keep the right pane focused on answers.
 - Use a compact responsive grid so the persistent reference does not consume excessive vertical space: default to five columns on wider layouts and three columns on narrower/tablet layouts, while preserving the 44px tap-target floor where practical.
 - Keep the bank label task-focused and minimal. Use wording such as `Word List 3 · tap a word for its definition`. Do **not** add explanatory copy such as “stays here while you scroll”; the sticky behavior should explain itself without adding reading load.
 - Each bank word is a minimum-44px button that opens the definition modal.
@@ -1271,6 +1501,33 @@ const wordEntries = [
 - Leave unrelated discussion/partner prompts out of the modal unless the user asks for them.
 - Provide a 44px close button; allow Escape and backdrop-tap to close.
 - Cancel ongoing speech when opening another modal or definition so clips do not overlap.
+
+### Collapsible Reading-Pane Word Bank
+
+For two-pane `Vocabulary in Context` worksheets, place the lesson word bank in a native `<details>` element **without** the `open` attribute. The right pane shows only the `Show / hide Word List` summary until the student expands it. Use the same word button and source-definition modal as the expanded bank on other worksheet types.
+
+- Toggling the bank must not alter selections, answers, progress, or scroll position in the passage pane.
+- Vocabulary words in the passage and the questions continue to open their definitions when the bank is collapsed.
+- On reopening, default to collapsed rather than restoring a full expanded bank into the constrained right pane.
+
+### Unique Vocabulary-Family Allocation — Optional Independent Word
+
+When a Wordly Wise comprehension question **does not already contain** a lesson vocabulary word, show an unused-word dropdown immediately above the free-text response. Track named selections by **word family** rather than by inflected form. A word family selected for one question is absent from other questions' suggested choices; do not auto-insert or grammar-rewrite the written response.
+
+Always append a final menu item labeled **`Choose a different word…`**. It is a reminder that the student can use another lesson word if none of the suggestions appeal. Treat it as a sentinel, not a vocabulary family:
+
+```javascript
+const INDEPENDENT_WORD = '__different__';
+select.add(new Option('Choose a different word…', INDEPENDENT_WORD));
+// Do not auto-fill an answer or claim a particular family was used.
+```
+
+- The student still writes a complete sentence in the normal focus-safe textarea and may choose a related form.
+- A named selected family is unavailable in other dropdowns. The independent option remains selectable everywhere and makes no guesses about the student's choice.
+- A nonempty response plus either an assigned family or the sentinel counts as *response-complete*, not correct; adult review checks the word is actually used and the printed “use each word only once” requirement is honored.
+- Save the choice and text separately; when exporting, label the sentinel `Chosen in written response` rather than printing it as though it were a vocabulary word.
+
+**Reference implementation:** `worksheets/christina/2026-10-19-wordly-wise-lesson-5e-vocabulary-in-context.html`.
 
 ### Part-of-Speech tags in vocabulary banks
 
