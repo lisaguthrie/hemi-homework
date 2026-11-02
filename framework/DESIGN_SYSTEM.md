@@ -39,7 +39,9 @@ Base font size: `1rem`. Floor for question text: `0.95rem`. Large-text profile o
   --feedback-hint-bg:  #ffeedd;
   --feedback-hint-txt: #c05000;
   --pip-empty:         #dde0e8;
+  --pip-answered:      #8fc7ec;
   --pip-done:          #5dca7e;
+  --pip-incorrect:     #d94f58;
 }
 ```
 
@@ -391,6 +393,40 @@ On vocabulary phrase-replacement cards, an optional icon-only `💡` button may 
 - Transitions to green (`.done`) after a correct submission — keeps it visually distinct from unchecked state.
 - Do not reuse the play button's green color here; use the gradient yellow → green pattern above.
 
+**Adult-only extra-check controls:** Keep the unlock button hidden until all available checks are used, and the code field hidden until an adult opens it. The code entry is masked, labeled, and keyboard/touch accessible; never print the code in visible copy.
+
+```css
+.adult-unlock-btn, .adult-code-action {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 2px solid #b6c9d9;
+  border-radius: 11px;
+  background: #f7fbff;
+  color: var(--accent-blue-dk);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.adult-unlock-panel {
+  margin-top: 10px;
+  padding: 12px;
+  border: 2px solid #cfe2ef;
+  border-radius: 12px;
+  background: #fbfdff;
+}
+.adult-unlock-panel[hidden], .adult-unlock-btn[hidden] { display: none; }
+.adult-code-input {
+  display: block;
+  min-height: 44px;
+  width: min(100%, 220px);
+  margin: 6px 0 10px;
+  padding: 8px 10px;
+  border: 2px solid var(--accent-blue);
+  border-radius: 9px;
+  font: inherit;
+}
+```
+
 ---
 
 ## In-Question Vocabulary Word Highlight (Word Study)
@@ -608,10 +644,15 @@ Correct: `✅` + short affirmation. Incorrect: `💡 Hint:` + specific concept n
   border-radius: 50%; background: var(--pip-empty);
   transition: background 0.3s;
 }
-.pip.done { background: var(--pip-done); }
+.pip.answered  { background: var(--pip-answered); }
+.pip.correct   { background: var(--pip-done); }
+.pip.attention { background: var(--pip-incorrect); }
+.pip.done      { background: var(--pip-done); } /* Adult-reviewed completion only */
 ```
 
-Show `answered / total` as text. Do not show a score until all questions answered.
+For automatically graded worksheets, give each question's pip **one** state: gray for unanswered/incomplete, blue for answered but not yet checked (or edited since its last check), green for verified correct, and **red for checked but incorrect** (`attention`). Do not make every answered pip green. Retain orange, concept-specific **Needs another look** card feedback; the red pip is only the compact progress indicator. Changing a checked response clears that question's stale graded pip until the next check, without affecting other questions. Reloaded pips must reflect persisted review results.
+
+Open-ended, adult-reviewed work without automatic grading may keep green `.done` pips for completed responses. Always show `answered / total` independently of correctness. Provide per-pip `aria-label`/`title` text and visible question-card feedback so color is never the sole status indicator; do not show a score until all questions are answered.
 
 ---
 
