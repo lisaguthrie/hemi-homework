@@ -727,7 +727,7 @@ Always pair a free-text area with both a mic button (STT) and a read-back button
 - **💡 Needs another look** — orange border/badge for nonempty but incorrect responses. Give a concept clue without identifying which exact choice to select or deselect.
 - **○ Unanswered** — neutral gray, preferably a dashed border, for blank/incomplete responses. Never report an unanswered problem as a wrong attempt.
 
-For multi-select, require exact set equality rather than merely checking whether any chosen option is correct. Keep choice text/definition TTS independent of selection and feedback. Changing an answer removes stale checked feedback **for that card only** and shows a neutral “Changed since your last check” marker. No choice change, or reopening the page, ever grants more checks. After three checks, leave answers editable and printable but disable checking; a double-tap Clear all responses explicitly resets everything. If all cards match on an earlier check, disable checking as complete.
+For multi-select, require exact set equality rather than merely checking whether any chosen option is correct. Keep choice text/definition TTS independent of selection and feedback. Changing an answer removes stale checked feedback **for that card only** and shows a neutral “Changed since your last check” marker. No choice change or page reload ever grants more checks. After the three initial checks (or any subsequently granted check), leave answers editable and printable but disable checking until an adult uses the code-gated unlock below. Each successful code entry grants **one additional check**, not a new set of three. A double-tap Clear all responses remains a separate complete reset of answers, review history, and adult grants. If all cards match on an earlier check, disable checking as complete. For checked auto-graded questions, progress pips must turn **green for correct** and **red for incorrect**; unanswered pips remain gray, while unchecked or edited responses remain neutral blue. Do not use the answered/completed count as a proxy for correctness.
 
 **Reference implementation:** `docs/worksheets/2026-10-13-wordly-wise-lesson-4b-making-connections.html` and `...-4c-determining-meanings.html`.
 
@@ -735,35 +735,49 @@ For multi-select, require exact set equality rather than merely checking whether
 
 ```javascript
 const MAX_CHECKS = 3;
+const ADULT_UNLOCK_CODE = '17931793'; // Public in source; not visible in the normal UI.
 const review = {
   checksUsed: 0,
+  extraChecksGranted: 0,
   statuses: questions.map(() => ''),  // '', 'correct', 'attention', 'unanswered'
   revised: questions.map(() => false)
 };
 
+function allowedChecks() {
+  return MAX_CHECKS + review.extraChecksGranted;
+}
+
+function allVerifiedCorrect() {
+  return review.statuses.length === questions.length &&
+    review.statuses.every(s => s === 'correct') &&
+    review.revised.every(r => !r);
+}
+
 function onAnswerChanged(i) {
-  // First update the student's saved answer and the neutral answered progress.
+  // Save the student's answer before calling this handler.
   if (review.checksUsed > 0) {
-    review.statuses[i] = ''; // Never leave an obsolete green/orange badge on an edited response.
+    review.statuses[i] = ''; // Clear only stale grading for this question.
     review.revised[i] = true;
   }
   hideIncompleteWarning();
   saveProgress();
   paintQuestionStatus(i);
+  updateProgress(); // Reviewed pips must reflect the cleared status.
+  paintCheckPanel();
 }
 
 function requestCheckAll() {
-  if (review.checksUsed >= MAX_CHECKS || review.statuses.every(s => s === 'correct')) return;
+  if (review.checksUsed >= allowedChecks() || allVerifiedCorrect()) return;
   const missing = questions.map((_, i) => i).filter(i => !isAnswered(i));
   if (missing.length) {
-    showIncompleteWarning(missing); // Show Keep working / Check anyway; do not spend a chance.
+    showIncompleteWarning(missing); // No check spent until explicit confirmation.
     return;
   }
   checkAllNow();
 }
 
-function checkAllNow() { // Only from Check all (fully answered) or Check anyway confirmation.
-  if (review.checksUsed >= MAX_CHECKS) return;
+function checkAllNow() { // From Check all (complete) or Check anyway confirmation.
+  if (review.checksUsed >= allowedChecks() || allVerifiedCorrect()) return;
   review.checksUsed++;
   review.statuses = questions.map((_, i) =>
     !isAnswered(i) ? 'unanswered' : isCorrect(i) ? 'correct' : 'attention'
@@ -772,9 +786,87 @@ function checkAllNow() { // Only from Check all (fully answered) or Check anyway
   hideIncompleteWarning();
   saveProgress();
   questions.forEach((_, i) => paintQuestionStatus(i));
-  paintCheckPanel(); // Remaining count; disable when all correct or three checks used.
+  updateProgress(); // Changes all checked pips to green, red, or gray.
+  paintCheckPanel();
+}
+
+function openAdultUnlock() {
+  if (review.checksUsed < allowedChecks() || allVerifiedCorrect()) return;
+  const panel = document.getElementById('adultUnlockPanel');
+  const input = document.getElementById('adultCheckCode');
+  document.getElementById('adultUnlockMessage').textContent = '';
+  input.value = '';
+  panel.hidden = false;
+  document.getElementById('adultUnlockButton').setAttribute('aria-expanded', 'true');
+  input.focus();
+}
+
+function cancelAdultUnlock() {
+  document.getElementById('adultUnlockPanel').hidden = true;
+  document.getElementById('adultCheckCode').value = '';
+  document.getElementById('adultUnlockMessage').textContent = '';
+  document.getElementById('adultUnlockButton').setAttribute('aria-expanded', 'false');
+}
+
+function grantOneMoreCheck() {
+  if (review.checksUsed < allowedChecks() || allVerifiedCorrect()) return;
+  const input = document.getElementById('adultCheckCode');
+  if (input.value !== ADULT_UNLOCK_CODE) {
+    document.getElementById('adultUnlockMessage').textContent = 'Code not recognized.';
+    input.value = '';
+    input.focus();
+    return; // No review state changed.
+  }
+  review.extraChecksGranted++; // Exactly one more check, never reset checksUsed.
+  cancelAdultUnlock(); // Clears the masked input after success.
+  saveProgress();
+  paintCheckPanel();
+}
+
+function paintCheckPanel() {
+  const finished = allVerifiedCorrect();
+  const exhausted = review.checksUsed >= allowedChecks();
+  const remaining = Math.max(0, allowedChecks() - review.checksUsed);
+  document.getElementById('checkAllBtn').disabled = finished || exhausted;
+  document.getElementById('adultUnlockButton').hidden = finished || !exhausted;
+  document.getElementById('checksRemaining').textContent = finished
+    ? 'All responses verified. ✅'
+    : exhausted
+      ? 'All checks used. You may still edit and export.'
+      : remaining + ' check' + (remaining === 1 ? '' : 's') + ' remaining';
+  if (finished || !exhausted) cancelAdultUnlock();
+}
+
+// On loading saved review data, treat absent extraChecksGranted as 0.
+// Do not clamp restored checksUsed to MAX_CHECKS after adult unlocks exist.
+function restoreReviewCounts(savedReview) {
+  const valid = n => Number.isSafeInteger(n) && n >= 0 ? n : 0;
+  review.extraChecksGranted = valid(savedReview?.extraChecksGranted);
+  review.checksUsed = Math.min(
+    valid(savedReview?.checksUsed), allowedChecks()
+  );
 }
 ```
+
+**Adult unlock controls** (add below the normal Check all panel; all buttons and inputs must be at least 44px tall):
+
+```html
+<button id="checkAllBtn" type="button" onclick="requestCheckAll()">Check all responses</button>
+<span id="checksRemaining" role="status" aria-live="polite"></span>
+<button id="adultUnlockButton" class="adult-unlock-btn" type="button" hidden
+        aria-expanded="false" aria-controls="adultUnlockPanel"
+        onclick="openAdultUnlock()">🔒 Adult: add one check</button>
+<div id="adultUnlockPanel" class="adult-unlock-panel" hidden>
+  <label for="adultCheckCode">Adult code</label>
+  <input id="adultCheckCode" class="adult-code-input" type="password"
+         inputmode="numeric" autocomplete="off" aria-describedby="adultUnlockMessage">
+  <button class="adult-code-action" type="button" onclick="grantOneMoreCheck()">Unlock one check</button>
+  <button class="adult-code-action" type="button" onclick="cancelAdultUnlock()">Cancel</button>
+  <p id="adultUnlockMessage" role="status" aria-live="polite"></p>
+</div>
+```
+
+Keep the code in script only; never prefill the input or display the digits in student-facing text. Wire Enter on the code field to `grantOneMoreCheck()` as well as the button, and never wrap these controls in a `<form>`. Use the design-system adult-unlock styles, including the explicit `[hidden]` rule. The normal incomplete-warning flow must still run for a newly unlocked check; displaying the warning does not consume it. `saveProgress()` must persist `extraChecksGranted`, `checksUsed`, `statuses`, and `revised`; restore those fields without erasing saved answers or granting checks on page load.
 
 Make the footer warning and results accessible using `role="status"` / `aria-live="polite"`, at least 44px touch targets, and non-color labels as well as borders. For open responses without a dependable objective rubric/key, use an explicitly documented adult-review exception instead of pretending to grade. The book's teacher/publisher answer key is preferred over informal semantic guesses.
 
@@ -1122,15 +1214,37 @@ if (st.step === 0 && isSubject) {
 
 ## Progress Tracking
 
+On **automatically graded** worksheets, completion and correctness are different: progress text counts answered questions, while the pips use the **latest persisted check status**. On a new or revised response, the pip is blue until the next check. After a check, correct = green, answered but incorrect = red, unanswered = gray. This applies even to a partially correct multi-select response; only an exact answer-set match is green. Use the matching `.pip` classes in `framework/DESIGN_SYSTEM.md`.
+
 ```javascript
+// For auto-graded worksheets using the Whole-Worksheet Review state.
 function updateProgress() {
-  const done  = userAnswers.filter(a => a !== '' && a != null).length;
-  const total = userAnswers.length;
+  const total = questions.length;
+  const answered = questions.filter((_, i) => isAnswered(i)).length;
+  const labels = {
+    unanswered: 'unanswered',
+    answered: 'answered, not currently checked',
+    correct: 'checked correct',
+    attention: 'checked, needs another look'
+  };
   document.getElementById('progressPips').innerHTML =
-    userAnswers.map(a => `<span class="pip ${a ? 'done' : ''}"></span>`).join('');
-  document.getElementById('progressCount').textContent = `${done} / ${total} answered`;
+    questions.map((_, i) => {
+      let kind = 'unanswered';
+      if (isAnswered(i)) {
+        kind = 'answered';
+        if (!review.revised[i] && review.statuses[i] === 'correct') kind = 'correct';
+        if (!review.revised[i] && review.statuses[i] === 'attention') kind = 'attention';
+      }
+      const label = 'Question ' + (i + 1) + ': ' + labels[kind];
+      return '<span class="pip ' + kind + '" role="img" aria-label="' +
+        label + '" title="' + label + '"></span>';
+    }).join('');
+  document.getElementById('progressCount').textContent =
+    answered + ' / ' + total + ' answered';
 }
 ```
+
+For **adult-reviewed/open-ended** worksheets with no objective key, retain neutral completion tracking (or green `.pip.done` for answered), but never show a red/green correctness judgment without grading. Repaint pips on response change, checking, and page restore. Keep question-card status text and accessible pip labels so a student does not need to distinguish colors alone.
 
 ---
 
