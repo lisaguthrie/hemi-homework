@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Using Words in Context</title>
+<style>
+:root{--ink:#203246;--blue:#176da5;--blue-soft:#eaf5fc;--green:#247a45;--green-soft:#e9f8ee;--amber:#9a5700;--amber-soft:#fff4e5;--line:#d8e2ec;--muted:#607487}
+*{box-sizing:border-box}
+body{margin:0;padding:18px 14px 44px;background:#f2f7fb;color:var(--ink);font:600 17px/1.5 "Nunito",Arial,sans-serif}
+main{max-width:760px;margin:auto;display:grid;gap:14px}
+h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
+.subtitle{text-align:center;color:var(--muted);margin-top:-10px}
+.instructions,.panel,.word-card{background:white;border-radius:16px;padding:16px;box-shadow:0 2px 10px #20324612}
+.instructions{background:var(--blue);color:white;text-align:center;border:0;width:100%;font:inherit;cursor:pointer}
+.progress{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.pips{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.pip{width:13px;height:13px;border-radius:50%;background:#d8e0e8}
+.pip.done{background:#56ad75}.pip.active{background:#398ec4}
+#progressText{font-size:.9rem;color:var(--blue)}
+.word-card{display:grid;gap:12px}
+.word-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.word-name{font-size:1.2rem;color:var(--blue);border:0;background:var(--blue-soft);padding:5px 12px;border-radius:10px;font:inherit;cursor:pointer}
+.definition{color:var(--muted);font-size:.95rem;flex:1;min-width:180px}
+.sentence{margin:0;font-size:1.08rem;line-height:1.65;padding:8px 2px;cursor:pointer;border-radius:8px}
+.sentence:focus{outline:3px solid #e4c44a}
+.sentence-row{border-top:1px solid var(--line);padding-top:12px;display:grid;gap:10px}
+.row-top{display:flex;align-items:flex-start;gap:10px}
+.letter{color:var(--muted);min-width:28px}
+.sentence{flex:1}
+.choices{display:flex;gap:10px}
+.choice{flex:1;min-height:48px;border:2px solid var(--line);border-radius:12px;background:white;color:var(--ink);font:inherit;font-size:1rem;cursor:pointer}
+.choice[aria-pressed=true][data-answer=C]{background:var(--green-soft);border-color:#56ad75;color:var(--green)}
+.choice[aria-pressed=true][data-answer=I]{background:var(--amber-soft);border-color:#e6a04c;color:var(--amber)}
+.status{min-height:1.5em;font-size:.9rem;color:var(--muted)}
+.status.good{color:var(--green)}.status.hint{color:var(--amber)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.action{border:0;border-radius:12px;padding:12px 16px;min-height:46px;background:var(--blue);color:white;font:inherit;cursor:pointer}
+.action.secondary{background:#e8eef4;color:var(--ink)}
+.action:disabled{opacity:.45;cursor:not-allowed}
+.note{font-size:.9rem;color:var(--muted)}
+.hidden{display:none!important}
+#complete{background:var(--green-soft);color:var(--green);padding:16px;border-radius:14px;text-align:center}
+@media print{body{background:white;padding:0}.instructions,.actions,.choices,.progress,.note{display:none!important}.word-card,.panel{box-shadow:none;border:1px solid #ccc;break-inside:avoid}.sentence{cursor:default}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="pageTitle">Using Words in Context</h1>
+    <p class="subtitle" id="pageSubtitle"></p>
+  </header>
+  <button class="instructions" id="instructions" type="button">🔊 Listen to the directions</button>
+  <section class="panel progress" aria-label="Activity progress">
+    <div class="pips" id="pips"></div>
+    <span id="progressText" aria-live="polite">0 answered</span>
+  </section>
+  <div id="activity"></div>
+  <section class="panel actions">
+    <button class="action" id="checkButton" type="button">Check answers</button>
+    <button class="action secondary" id="resetButton" type="button">Clear answers</button>
+    <button class="action secondary" id="printButton" type="button">Print</button>
+  </section>
+  <p class="note">Choose C if the vocabulary word is used correctly. Choose I if it is not. You can change an answer before checking.</p>
+  <div id="complete" class="hidden" role="status" aria-live="polite"></div>
+</main>
+<script id="activityConfig" type="application/json">
+{
+  "meta": {
+    "title": "Using Words in Context",
+    "subtitle": "Wordly Wise · Lesson 6A",
+    "instructions": "Listen to each sentence. Choose C if the vocabulary word is used correctly. Choose I if it is used incorrectly. You can listen to a sentence again by tapping it.",
+    "storageKey": "using_words_in_context_lesson_6a_v1",
+    "speechRate": 0.88,
+    "speechPitch": 1.05,
+    "maxChecks": 3
+  },
+  "words": [
+    /*
+      CONTENT CONFIGURATION
+      Add one object per vocabulary word.
+      Add as many sentence objects as needed under each word.
+      correctUse is true when the word is used correctly and false when it is used incorrectly.
+      hint should explain the relevant meaning without saying "wrong".
+      Example:
+      {
+        "word": "sample",
+        "definition": "A small part that represents a larger whole.",
+        "sentences": [
+          { "text": "The scientist tested a sample of the water.", "correctUse": true, "hint": "A sample is a small amount taken for testing." },
+          { "text": "She used a sample to mean the entire ocean.", "correctUse": false, "hint": "A sample is only a small part, not the whole." }
+        ]
+      }
+    */
+  ]
+}
+</script>
+<script>
+(() => {
+  "use strict";
+  const config = JSON.parse(document.getElementById("activityConfig").textContent.replace(/\/\*[\s\S]*?\*\//g, ""));
+  const meta = config.meta || {};
+  const words = Array.isArray(config.words) ? config.words : [];
+  const total = words.reduce((n, w) => n + (Array.isArray(w.sentences) ? w.sentences.length : 0), 0);
+  const key = meta.storageKey || "using_words_in_context_v1";
+  const maxChecks = Number(meta.maxChecks || 3);
+  let checks = 0;
+  let answers = {};
+  let checked = false;
+
+  const $ = id => document.getElementById(id);
+  const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(String(text));
+    utterance.rate = Number(meta.speechRate || 0.88);
+    utterance.pitch = Number(meta.speechPitch || 1.05);
+    window.speechSynthesis.speak(utterance);
+  }
+  function flatItems() {
+    const items = [];
+    words.forEach((word, wi) => (word.sentences || []).forEach((sentence, si) => {
+      items.push({id:`${wi}-${si}`, word, sentence, wordIndex:wi, sentenceIndex:si});
+    }));
+    return items;
+  }
+  const items = flatItems();
+
+  function save() {
+    try { localStorage.setItem(key, JSON.stringify({answers, checks})); } catch (_) {}
+  }
+  function restore() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || "{}");
+      answers = saved.answers && typeof saved.answers === "object" ? saved.answers : {};
+      checks = Number(saved.checks || 0);
+    } catch (_) { answers = {}; checks = 0; }
+  }
+  function render() {
+    $("pageTitle").textContent = meta.title || "Using Words in Context";
+    $("pageSubtitle").textContent = meta.subtitle || "";
+    $("instructions").textContent = "🔊 " + (meta.instructions || "Listen to the directions.");
+    const activity = $("activity");
+    if (!items.length) {
+      activity.innerHTML = '<section class="panel"><strong>Ready for content.</strong><p>Add vocabulary words, definitions, and sentences in the configuration block at the top of this file.</p></section>';
+    } else {
+      activity.innerHTML = words.map((word, wi) => {
+        const rows = (word.sentences || []).map((sentence, si) => {
+          const id = `${wi}-${si}`;
+          const selected = answers[id] || "";
+          const status = checked ? feedbackFor(id) : "";
+          return `<div class="sentence-row">
+            <div class="row-top">
+              <span class="letter">(${String.fromCharCode(97 + si)})</span>
+              <p class="sentence" role="button" tabindex="0" data-sentence="${escapeHTML(id)}">${escapeHTML(sentence.text)}</p>
+            </div>
+            <div class="choices" role="group" aria-label="Choose whether sentence ${si+1} uses ${escapeHTML(word.word)} correctly">
+              <button class="choice" type="button" data-id="${escapeHTML(id)}" data-answer="C" aria-pressed="${selected==="C"}">C · Correct</button>
+              <button class="choice" type="button" data-id="${escapeHTML(id)}" data-answer="I" aria-pressed="${selected==="I"}">I · Incorrect</button>
+            </div>
+            <div class="status ${status ? (isCorrect(id) ? "good" : "hint") : ""}" id="status-${escapeHTML(id)}" aria-live="polite">${escapeHTML(status)}</div>
+          </div>`;
+        }).join("");
+        return `<section class="word-card">
+          <div class="word-head">
+            <button class="word-name" type="button" data-definition="${wi}" aria-label="Hear the definition of ${escapeHTML(word.word)}">${escapeHTML(word.word)} 🔊</button>
+            <span class="definition">${escapeHTML(word.definition || "")}</span>
+          </div>${rows}</section>`;
+      }).join("");
+    }
+    updateProgress();
+    $("checkButton").disabled = checks >= maxChecks || checked;
+    $("checkButton").textContent = checked ? "Answers checked" : `Check answers · ${Math.max(0,maxChecks-checks)} checks left`;
+  }
+  function isCorrect(id) {
+    const item = items.find(x => x.id === id);
+    if (!item || !answers[id]) return false;
+    return (answers[id] === "C") === (item.sentence.correctUse === true);
+  }
+  function feedbackFor(id) {
+    const item = items.find(x => x.id === id);
+    if (!item || !answers[id]) return "Choose C or I.";
+    if (isCorrect(id)) return "✅ Yes! You identified how the word is used.";
+    return "💡 Hint: " + (item.sentence.hint || `Think about the meaning of “${item.word.word}” in this sentence.`);
+  }
+  function updateProgress() {
+    const count = Object.keys(answers).filter(k => answers[k] === "C" || answers[k] === "I").length;
+    $("pips").innerHTML = items.map((item, i) => `<span class="pip ${answers[item.id] ? "done" : ""}" title="Sentence ${i+1}"></span>`).join("");
+    $("progressText").textContent = `${count} / ${total} answered`;
+  }
+  $("instructions").addEventListener("click", () => speak(meta.instructions || ""));
+  $("activity").addEventListener("click", event => {
+    const def = event.target.closest("[data-definition]");
+    if (def) { const word = words[Number(def.dataset.definition)]; speak(`${word.word}. ${word.definition || ""}`); return; }
+    const sentence = event.target.closest("[data-sentence]");
+    if (sentence) { const item = items.find(x => x.id === sentence.dataset.sentence); if (item) speak(item.sentence.text); return; }
+    const choice = event.target.closest("[data-id][data-answer]");
+    if (choice && checks < maxChecks) {
+      const id = choice.dataset.id;
+      answers[id] = choice.dataset.answer;
+      checked = false;
+      save();
+      render();
+      const item = items.find(x => x.id === id);
+      if (item) setTimeout(() => speak(item.sentence.text), 300);
+    }
+  });
+  $("activity").addEventListener("keydown", event => {
+    if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-sentence]")) {
+      event.preventDefault();
+      const item = items.find(x => x.id === event.target.dataset.sentence);
+      if (item) speak(item.sentence.text);
+    }
+  });
+  $("checkButton").addEventListener("click", () => {
+    if (checks >= maxChecks) return;
+    const missing = items.filter(x => !answers[x.id]);
+    if (missing.length) {
+      $("complete").classList.remove("hidden");
+      $("complete").textContent = `There are ${missing.length} sentence${missing.length===1?"":"s"} still to answer. You can check now or keep working.`;
+      return;
+    }
+    checks++;
+    checked = true;
+    save();
+    render();
+    const correct = items.filter(x => isCorrect(x.id)).length;
+    $("complete").classList.remove("hidden");
+    $("complete").textContent = `${correct} of ${total} correct. Review the hints, then ask an adult to reset the activity if you want another attempt.`;
+    speak(`${correct} of ${total} correct.`);
+  });
+  $("resetButton").addEventListener("click", () => {
+    if (!window.confirm("Clear all answers and checks for this activity?")) return;
+    answers = {}; checks = 0; checked = false;
+    try { localStorage.removeItem(key); } catch (_) {}
+    $("complete").classList.add("hidden");
+    render();
+  });
+  $("printButton").addEventListener("click", () => window.print());
+  restore();
+  render();
+})();
+</script>
+</body>
+</html>

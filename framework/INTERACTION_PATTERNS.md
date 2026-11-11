@@ -371,6 +371,43 @@ function printApplyingMeaningsChoices(q, selected) {
 
 ---
 
+### Print / Export — Selected Multiple-Choice Answers In Place (Types 7 and 8)
+
+**Use for active Wordly Wise Type 7 (Making Connections) and Type 8 (Determining Meanings).** The student makes one or more selections from the four printed lettered answers. Screen controls may look like checkboxes, but the printed response should resemble the original workbook, **not a form with checkboxes**.
+
+- Preserve the original question wording, sentence stem (Type 8), original letter order, and all four printed choice texts.
+- For each selected answer, wrap **the letter AND its complete choice text** in `<strong><u>…</u></strong>`. Leave all unselected choices unadorned; no checked squares, drawn checkmarks, circles, colors, or status badges in print.
+- Print precisely the **student's current selected set**, including incomplete or incorrect selections. Do not use the publisher key, review statuses, or check counter to decide what to emphasize.
+- Do not add a redundant `Selected:` line or duplicate answer summary; keep the marking *in place* alongside the printed options.
+- Implement this in the print-only document or print-only rendering, without altering the separate on-screen text-to-speech and answer-selection controls.
+
+```javascript
+function printOptions(options, selectedLetters) {
+  const selected = new Set(selectedLetters || []);
+  return options.map((text, index) => {
+    const letter = 'abcd'[index];
+    const content = `(${letter}) ${escapeHtml(text)}`;
+    return `<div class="print-option">${selected.has(letter)
+      ? `<strong><u>${content}</u></strong>` : content}</div>`;
+  }).join('');
+}
+```
+
+**Reference:** `worksheets/christina/2026-10-26-wordly-wise-lesson-6b-making-connections.html` and `...-6c-determining-meanings.html`.
+
+### Vocabulary Using Words in Context — Headword + Four C/I Sentences (Type 10)
+
+Use for an exercise that prints a numbered vocabulary word followed by four full sentences; each sentence independently requires a **Correct (`C`)** or **Incorrect (`I`)** judgment about the bold word's use.
+
+- Put an independently tappable **lesson headword button at the start of each group**. Use the established yellow vocabulary styling and source-definition modal. The group button precedes `(a)`–`(d)` and is not itself an answer control.
+- Bold the exact vocabulary form as printed in each sentence (`shed`, `sheds`, `dissolved`, `emerged`, `functions`, `inhibited`, etc.). Do not drop the word emphasis when building audio or printable views.
+- Provide independent C/I pairs for all four sentences: `aria-pressed` indicates the student's current exclusive choice; both unpressed means unanswered. Do not turn each four-sentence group into a single selected-answer question.
+- A tap on the sentence (separate from the definition or judgment targets) reads that entire sentence. A definition tap must never select `C`/`I`, grade the sentence, or consume a check.
+- Use **three whole-exercise checks** over all individual judgments, with verified answer keys and per-sentence feedback; retain the usual incompleteness warning and immutable check-count semantics.
+- Count neutral progress by sentence (`/ 40` for ten four-sentence groups); print all the original sentences and the student's chosen C/I labels, not the correct labels from the key.
+
+**Reference:** `worksheets/christina/2026-10-26-wordly-wise-lesson-6a-using-words-in-context.html`.
+
 ### Word Study — Checkbox Speaks / Word Opens Definition
 
 For **Type 2 Word Study** (`synonyms` / `antonyms`), do not make the checkbox and word trigger the same speech behavior. A student can hear a printed word while committing to a selection, or examine the meaning independently without selecting it.
@@ -1700,3 +1737,38 @@ function addReadableWords(container, text) {
 ```
 
 *Trigger:* Confirmed while refining the first active Wordly Wise Type 1 worksheet; visible per-word button styling made sentences look fragmented and impaired normal reading.
+
+---
+
+### Shared Previous-Lesson Word Bank — Latin-Root Completion (Type 11)
+
+**Separate the read-only reference bank from the answer picker.** Both may display the same full alphabetized list, but they have different behaviors and handlers. Reusing the answer-picker handler in the reference list is a regression: it silently fills a question when the student only wanted to review a definition.
+
+- **Top reference bank:** use a native `<details>` disclosure, collapsed by default on first render, with yellow `.word-btn` targets and optional POS tags matching the weekly word bank. Its word buttons have `data-vocab` and open the standard **Definition / Example** modal (with per-sense green ▶). No answer-selection handler may run from those buttons; opening the reference never changes progress, responses, active blank, or checking state.
+- **Numbered blank:** give it a 44px-minimum, focusable answer button. Its `data-action="chooseD"` handler records that blank index and opens a **separate** scrollable picker dialog containing all 30 candidate words. Only the picker uses `data-action="selectD"` to fill the active blank.
+- Use previous-lesson source definitions/examples and related forms when available. When a past packet entry is unavailable, include an attributed supplementary dictionary meaning and an explicitly authored example, not a fabricated publisher definition.
+- Keep the picker identical for every blank. Allow previously used choices to remain selectable unless the original instructions prohibit reuse; a neutral `used` marker in the picker is fine.
+- When picker selection is made, close only the answer picker, preserve the top disclosure state during re-render if feasible, save and refresh the active answer, clear that question's stale review state, and read the completed sentence after 300ms.
+- Tapping a definition word or a Latin clue never triggers the picker, never saves an answer, and never consumes a check. Persist existing answers and check attempts using the **same storage key** during behavior-only revisions.
+
+```javascript
+function renderReferenceBank() {
+  return `<details class="previous-word-bank">
+    <summary>📖 Show / hide previous-lesson word bank</summary>
+    ${previousWords.map(w => `<button type="button" data-vocab="${escapeHtml(w.word)}">${escapeHtml(w.word)}</button>`).join('')}
+  </details>`;
+}
+
+// Event delegation: reference words only open definitions.
+if (target.closest('[data-vocab]')) {
+  openDefinition(target.closest('[data-vocab]').dataset.vocab);
+  return;
+}
+// A blank is the only entry point to selection.
+if (action === 'chooseD') openWordPicker(Number(button.dataset.i));
+if (action === 'selectD') assignWordToActiveBlank(button.dataset.w);
+```
+
+**Test:** In Lesson 7D, verify all 30 reference buttons open a definition/example without modifying any answer, then verify an in-sentence blank opens a separate 30-choice picker and a selected word fills only that blank. Verify an answer remains unchanged after further reference lookups, and ensure the disclosure defaults closed after reload. Keep keyboard, mobile, and persistence checks.
+
+**Reference implementation:** `worksheets/christina/2026-11-02-wordly-wise-lesson-7d-word-study-word-parts.html`.

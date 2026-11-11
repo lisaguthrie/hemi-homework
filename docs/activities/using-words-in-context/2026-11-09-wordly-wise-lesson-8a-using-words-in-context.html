@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Using Words in Context</title>
+<style>
+:root{--ink:#203246;--blue:#176da5;--blue-soft:#eaf5fc;--green:#247a45;--green-soft:#e9f8ee;--amber:#9a5700;--amber-soft:#fff4e5;--line:#d8e2ec;--muted:#607487}
+*{box-sizing:border-box}
+body{margin:0;padding:18px 14px 44px;background:#f2f7fb;color:var(--ink);font:600 17px/1.5 "Nunito",Arial,sans-serif}
+main{max-width:760px;margin:auto;display:grid;gap:14px}
+h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
+.subtitle{text-align:center;color:var(--muted);margin-top:-10px}
+.instructions,.panel,.word-card{background:white;border-radius:16px;padding:16px;box-shadow:0 2px 10px #20324612}
+.instructions{background:var(--blue);color:white;text-align:center;border:0;width:100%;font:inherit;cursor:pointer}
+.progress{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.pips{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.pip{width:13px;height:13px;border-radius:50%;background:#d8e0e8}
+.pip.done{background:#56ad75}.pip.active{background:#398ec4}
+#progressText{font-size:.9rem;color:var(--blue)}
+.word-card{display:grid;gap:12px}
+.word-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.word-name{font-size:1.2rem;color:var(--blue);border:0;background:var(--blue-soft);padding:5px 12px;border-radius:10px;font:inherit;cursor:pointer}
+.definition{color:var(--muted);font-size:.95rem;flex:1;min-width:180px}
+.sentence{margin:0;font-size:1.08rem;line-height:1.65;padding:8px 2px;cursor:pointer;border-radius:8px}
+.sentence:focus{outline:3px solid #e4c44a}
+.sentence-row{border-top:1px solid var(--line);padding-top:12px;display:grid;gap:10px}
+.row-top{display:flex;align-items:flex-start;gap:10px}
+.letter{color:var(--muted);min-width:28px}
+.sentence{flex:1}
+.choices{display:flex;gap:10px}
+.choice{flex:1;min-height:48px;border:2px solid var(--line);border-radius:12px;background:white;color:var(--ink);font:inherit;font-size:1rem;cursor:pointer}
+.choice[aria-pressed=true][data-answer=C]{background:var(--green-soft);border-color:#56ad75;color:var(--green)}
+.choice[aria-pressed=true][data-answer=I]{background:var(--amber-soft);border-color:#e6a04c;color:var(--amber)}
+.status{min-height:1.5em;font-size:.9rem;color:var(--muted)}
+.status.good{color:var(--green)}.status.hint{color:var(--amber)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.action{border:0;border-radius:12px;padding:12px 16px;min-height:46px;background:var(--blue);color:white;font:inherit;cursor:pointer}
+.action.secondary{background:#e8eef4;color:var(--ink)}
+.action:disabled{opacity:.45;cursor:not-allowed}
+.note{font-size:.9rem;color:var(--muted)}
+.hidden{display:none!important}
+#complete{background:var(--green-soft);color:var(--green);padding:16px;border-radius:14px;text-align:center}
+@media print{body{background:white;padding:0}.instructions,.actions,.choices,.progress,.note{display:none!important}.word-card,.panel{box-shadow:none;border:1px solid #ccc;break-inside:avoid}.sentence{cursor:default}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 id="pageTitle">Using Words in Context</h1>
+    <p class="subtitle" id="pageSubtitle"></p>
+  </header>
+  <button class="instructions" id="instructions" type="button">🔊 Listen to the directions</button>
+  <section class="panel progress" aria-label="Activity progress">
+    <div class="pips" id="pips"></div>
+    <span id="progressText" aria-live="polite">0 answered</span>
+  </section>
+  <div id="activity"></div>
+  <section class="panel actions">
+    <button class="action" id="checkButton" type="button">Check answers</button>
+    <button class="action secondary" id="resetButton" type="button">Clear answers</button>
+    <button class="action secondary" id="printButton" type="button">Print</button>
+  </section>
+  <p class="note">Choose C if the vocabulary word is used correctly. Choose I if it is not. You can change an answer before checking.</p>
+  <div id="complete" class="hidden" role="status" aria-live="polite"></div>
+</main>
+<script id="activityConfig" type="application/json">
+{
+  "meta": {
+    "title": "Using Words in Context",
+    "subtitle": "Wordly Wise Book 6 · Lesson 8A",
+    "instructions": "Listen to each sentence. Choose C if the vocabulary word is used correctly. Choose I if it is used incorrectly. You can listen to a sentence again by tapping it.",
+    "storageKey": "ww6_lesson_8a_using_words_in_context_christina_2026_11_09_v1",
+    "speechRate": 0.88,
+    "speechPitch": 1.05,
+    "maxChecks": 3
+  },
+  "words": [
+    {
+      "word": "interpret",
+      "definition": "To translate or explain something, or to understand it in a particular way.",
+      "sentences": [
+        { "text": "The guide interpreted the ancient inscription for visitors who could not read its language.", "correctUse": true, "hint": "Interpret can mean to translate words or explain their meaning." },
+        { "text": "I interpreted her quiet smile as a sign that she agreed with the plan.", "correctUse": true, "hint": "Interpret can mean to understand something in a particular way." },
+        { "text": "The bus driver interpreted the passengers to the train station before noon.", "correctUse": false, "hint": "Interpret does not mean to escort someone to a place." },
+        { "text": "We interpreted the soup with a wooden spoon before serving it.", "correctUse": false, "hint": "Interpret means to translate, explain, or understand—not to stir food." }
+      ]
+    },
+    {
+      "word": "supplement",
+      "definition": "Something extra that fills a need, or to add something extra.",
+      "sentences": [
+        { "text": "Rina took an evening class to supplement the lessons she had missed.", "correctUse": true, "hint": "Supplement means to add something extra to improve or complete what is already there." },
+        { "text": "The booklet included a map as a supplement to the written directions.", "correctUse": true, "hint": "A supplement is an extra item added to support something else." },
+        { "text": "We supplemented the muddy trail by wearing clean shoes.", "correctUse": false, "hint": "Supplement means to add to something, not to walk along or change it." },
+        { "text": "The student supplemented the soccer ball into the net.", "correctUse": false, "hint": "Supplement does not mean to kick or send something somewhere." }
+      ]
+    },
+    {
+      "word": "inept",
+      "definition": "Unskilled, awkwardly expressed, or poorly suited to a situation.",
+      "sentences": [
+        { "text": "The inept attempt to fix the clock left its hands pointing in opposite directions.", "correctUse": true, "hint": "Inept describes an unskillful or unsuccessful effort." },
+        { "text": "His inept comment made the celebration feel uncomfortable.", "correctUse": true, "hint": "Inept can describe words that are awkward or unsuitable for the moment." },
+        { "text": "We ate an inept sandwich after the game.", "correctUse": false, "hint": "Inept describes a lack of skill or an awkward expression, not a kind of food." },
+        { "text": "The skilled pilot made an inept landing, guiding the plane smoothly onto the runway.", "correctUse": false, "hint": "Inept means unskillful; the sentence describes a smooth, skillful landing." }
+      ]
+    },
+    {
+      "word": "accompany",
+      "definition": "To go along with someone, or to provide music together with a performer.",
+      "sentences": [
+        { "text": "A piano accompanied the singer during the school recital.", "correctUse": true, "hint": "Accompany can mean to provide music along with a singer or performer." },
+        { "text": "The trail guide accompanied us to the campsite before dark.", "correctUse": true, "hint": "Accompany can mean to go somewhere with another person." },
+        { "text": "The singer accompanied the piano by explaining the song's words to the audience.", "correctUse": false, "hint": "In music, accompany means to perform music along with another musician." },
+        { "text": "The recipe accompanied the baker to the kitchen by showing her the way.", "correctUse": false, "hint": "Accompany means to go with someone or add music, not to guide someone." }
+      ]
+    },
+    {
+      "word": "retrieve",
+      "definition": "To recover something or to find it and bring it back.",
+      "sentences": [
+        { "text": "Talia retrieved her library card from the lost-and-found box.", "correctUse": true, "hint": "Retrieve means to get something back." },
+        { "text": "The dog retrieved the ball from the tall grass and brought it to its owner.", "correctUse": true, "hint": "Retrieve can mean to find something and bring it back." },
+        { "text": "We retrieved our seats by standing in line for the concert.", "correctUse": false, "hint": "Retrieve means to recover an object or bring it back, not to wait for a seat." },
+        { "text": "The evening schedule retrieved a free hour for everyone.", "correctUse": false, "hint": "Retrieve is about getting something back, not creating time in a schedule." }
+      ]
+    },
+    {
+      "word": "invaluable",
+      "definition": "So useful or precious that its worth is difficult to measure.",
+      "sentences": [
+        { "text": "The handwritten recipe was invaluable to our family, and we would not trade it for anything.", "correctUse": true, "hint": "Invaluable describes something extremely precious or important." },
+        { "text": "Her careful notes were invaluable when the class prepared for the science fair.", "correctUse": true, "hint": "Invaluable can describe help or information that is exceptionally useful." },
+        { "text": "The broken ruler was invaluable for measuring the poster accurately.", "correctUse": false, "hint": "Invaluable means exceptionally useful or precious; this ruler cannot measure accurately." },
+        { "text": "He called the disposable cup invaluable because it was easy to replace and had no special use.", "correctUse": false, "hint": "Invaluable describes something very useful or precious, not something easily replaced and unimportant." }
+      ]
+    },
+    {
+      "word": "territory",
+      "definition": "An area of land, including a region controlled or governed by a group.",
+      "sentences": [
+        { "text": "The deer stayed within the territory where its herd found food.", "correctUse": true, "hint": "Territory can mean an area of land used or defended by animals." },
+        { "text": "The island became a territory governed by a council across the sea.", "correctUse": true, "hint": "Territory can mean a region under the control of a government or group." },
+        { "text": "We cut the territory into four slices and served it with cheese.", "correctUse": false, "hint": "Territory means an area of land, not a food that can be sliced." },
+        { "text": "After class, he territory his name on the board.", "correctUse": false, "hint": "Territory is a noun for a place or region; it is not an action word meaning to write." }
+      ]
+    },
+    {
+      "word": "expedition",
+      "definition": "An organized journey, often made to explore or accomplish a challenging task.",
+      "sentences": [
+        { "text": "The scientists organized an expedition to study caves in the mountains.", "correctUse": true, "hint": "An expedition is an organized journey for exploration or another demanding purpose." },
+        { "text": "Our expedition traveled by boat to map the remote coastline.", "correctUse": true, "hint": "A group making an exploration journey can be called an expedition." },
+        { "text": "She packed an expedition of pencils into her backpack.", "correctUse": false, "hint": "An expedition is a journey or a group on a journey, not a collection of supplies." },
+        { "text": "The expedition was a quick note written on a sticky pad.", "correctUse": false, "hint": "Expedition means a journey or the group making it, not a written message." }
+      ]
+    },
+    {
+      "word": "skirmish",
+      "definition": "A short, minor fight, or to take part in such a fight.",
+      "sentences": [
+        { "text": "A brief skirmish broke out when the two teams argued over the ball.", "correctUse": true, "hint": "A skirmish is a small, short fight." },
+        { "text": "The guards skirmished with a small band near the old bridge.", "correctUse": true, "hint": "Skirmish can be a verb meaning to take part in a minor fight." },
+        { "text": "The students skirmished a birthday cake for the celebration.", "correctUse": false, "hint": "Skirmish means to fight briefly; it does not mean to prepare or serve a cake." },
+        { "text": "The gardener skirmished the flowers into a vase.", "correctUse": false, "hint": "Skirmish means to take part in a small fight, not to arrange flowers." }
+      ]
+    },
+    {
+      "word": "expanse",
+      "definition": "A broad, open area or surface.",
+      "sentences": [
+        { "text": "A wide expanse of grass stretched between the barn and the river.", "correctUse": true, "hint": "An expanse is a broad, open area or surface." },
+        { "text": "From the hill, the children saw an expanse of water glittering in the sunlight.", "correctUse": true, "hint": "A large open stretch of water can be called an expanse." },
+        { "text": "A single grain of sand was an expanse of the beach.", "correctUse": false, "hint": "Expanse means a broad area, not one tiny piece." },
+        { "text": "She expanse across the room to greet her friend.", "correctUse": false, "hint": "Expanse is a noun for a broad area or surface, not a verb for moving." }
+      ]
+    }
+  ]
+}
+</script>
+<script>
+(() => {
+  "use strict";
+  const config = JSON.parse(document.getElementById("activityConfig").textContent.replace(/\/\*[\s\S]*?\*\//g, ""));
+  const meta = config.meta || {};
+  const words = Array.isArray(config.words) ? config.words : [];
+  const total = words.reduce((n, w) => n + (Array.isArray(w.sentences) ? w.sentences.length : 0), 0);
+  const key = meta.storageKey || "using_words_in_context_v1";
+  const maxChecks = Number(meta.maxChecks || 3);
+  let checks = 0;
+  let answers = {};
+  let checked = false;
+
+  const $ = id => document.getElementById(id);
+  const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  function speak(text) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(String(text));
+    utterance.rate = Number(meta.speechRate || 0.88);
+    utterance.pitch = Number(meta.speechPitch || 1.05);
+    window.speechSynthesis.speak(utterance);
+  }
+  function flatItems() {
+    const items = [];
+    words.forEach((word, wi) => (word.sentences || []).forEach((sentence, si) => {
+      items.push({id:`${wi}-${si}`, word, sentence, wordIndex:wi, sentenceIndex:si});
+    }));
+    return items;
+  }
+  const items = flatItems();
+
+  function save() {
+    try { localStorage.setItem(key, JSON.stringify({answers, checks})); } catch (_) {}
+  }
+  function restore() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || "{}");
+      answers = saved.answers && typeof saved.answers === "object" ? saved.answers : {};
+      checks = Number(saved.checks || 0);
+    } catch (_) { answers = {}; checks = 0; }
+  }
+  function render() {
+    $("pageTitle").textContent = meta.title || "Using Words in Context";
+    $("pageSubtitle").textContent = meta.subtitle || "";
+    $("instructions").textContent = "🔊 " + (meta.instructions || "Listen to the directions.");
+    const activity = $("activity");
+    if (!items.length) {
+      activity.innerHTML = '<section class="panel"><strong>Ready for content.</strong><p>Add vocabulary words, definitions, and sentences in the configuration block at the top of this file.</p></section>';
+    } else {
+      activity.innerHTML = words.map((word, wi) => {
+        const rows = (word.sentences || []).map((sentence, si) => {
+          const id = `${wi}-${si}`;
+          const selected = answers[id] || "";
+          const status = checked ? feedbackFor(id) : "";
+          return `<div class="sentence-row">
+            <div class="row-top">
+              <span class="letter">(${String.fromCharCode(97 + si)})</span>
+              <p class="sentence" role="button" tabindex="0" data-sentence="${escapeHTML(id)}">${escapeHTML(sentence.text)}</p>
+            </div>
+            <div class="choices" role="group" aria-label="Choose whether sentence ${si+1} uses ${escapeHTML(word.word)} correctly">
+              <button class="choice" type="button" data-id="${escapeHTML(id)}" data-answer="C" aria-pressed="${selected==="C"}">C · Correct</button>
+              <button class="choice" type="button" data-id="${escapeHTML(id)}" data-answer="I" aria-pressed="${selected==="I"}">I · Incorrect</button>
+            </div>
+            <div class="status ${status ? (isCorrect(id) ? "good" : "hint") : ""}" id="status-${escapeHTML(id)}" aria-live="polite">${escapeHTML(status)}</div>
+          </div>`;
+        }).join("");
+        return `<section class="word-card">
+          <div class="word-head">
+            <button class="word-name" type="button" data-definition="${wi}" aria-label="Hear the definition of ${escapeHTML(word.word)}">${escapeHTML(word.word)} 🔊</button>
+            <span class="definition">${escapeHTML(word.definition || "")}</span>
+          </div>${rows}</section>`;
+      }).join("");
+    }
+    updateProgress();
+    $("checkButton").disabled = checks >= maxChecks || checked;
+    $("checkButton").textContent = checked ? "Answers checked" : `Check answers · ${Math.max(0,maxChecks-checks)} checks left`;
+  }
+  function isCorrect(id) {
+    const item = items.find(x => x.id === id);
+    if (!item || !answers[id]) return false;
+    return (answers[id] === "C") === (item.sentence.correctUse === true);
+  }
+  function feedbackFor(id) {
+    const item = items.find(x => x.id === id);
+    if (!item || !answers[id]) return "Choose C or I.";
+    if (isCorrect(id)) return "✅ Yes! You identified how the word is used.";
+    return "💡 Hint: " + (item.sentence.hint || `Think about the meaning of “${item.word.word}” in this sentence.`);
+  }
+  function updateProgress() {
+    const count = Object.keys(answers).filter(k => answers[k] === "C" || answers[k] === "I").length;
+    $("pips").innerHTML = items.map((item, i) => `<span class="pip ${answers[item.id] ? "done" : ""}" title="Sentence ${i+1}"></span>`).join("");
+    $("progressText").textContent = `${count} / ${total} answered`;
+  }
+  $("instructions").addEventListener("click", () => speak(meta.instructions || ""));
+  $("activity").addEventListener("click", event => {
+    const def = event.target.closest("[data-definition]");
+    if (def) { const word = words[Number(def.dataset.definition)]; speak(`${word.word}. ${word.definition || ""}`); return; }
+    const sentence = event.target.closest("[data-sentence]");
+    if (sentence) { const item = items.find(x => x.id === sentence.dataset.sentence); if (item) speak(item.sentence.text); return; }
+    const choice = event.target.closest("[data-id][data-answer]");
+    if (choice && checks < maxChecks) {
+      const id = choice.dataset.id;
+      answers[id] = choice.dataset.answer;
+      checked = false;
+      save();
+      render();
+      const item = items.find(x => x.id === id);
+      if (item) setTimeout(() => speak(item.sentence.text), 300);
+    }
+  });
+  $("activity").addEventListener("keydown", event => {
+    if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-sentence]")) {
+      event.preventDefault();
+      const item = items.find(x => x.id === event.target.dataset.sentence);
+      if (item) speak(item.sentence.text);
+    }
+  });
+  $("checkButton").addEventListener("click", () => {
+    if (checks >= maxChecks) return;
+    const missing = items.filter(x => !answers[x.id]);
+    if (missing.length) {
+      $("complete").classList.remove("hidden");
+      $("complete").textContent = `There are ${missing.length} sentence${missing.length===1?"":"s"} still to answer. You can check now or keep working.`;
+      return;
+    }
+    checks++;
+    checked = true;
+    save();
+    render();
+    const correct = items.filter(x => isCorrect(x.id)).length;
+    $("complete").classList.remove("hidden");
+    $("complete").textContent = `${correct} of ${total} correct. Review the hints, then ask an adult to reset the activity if you want another attempt.`;
+    speak(`${correct} of ${total} correct.`);
+  });
+  $("resetButton").addEventListener("click", () => {
+    if (!window.confirm("Clear all answers and checks for this activity?")) return;
+    answers = {}; checks = 0; checked = false;
+    try { localStorage.removeItem(key); } catch (_) {}
+    $("complete").classList.add("hidden");
+    render();
+  });
+  $("printButton").addEventListener("click", () => window.print());
+  restore();
+  render();
+})();
+</script>
+</body>
+</html>

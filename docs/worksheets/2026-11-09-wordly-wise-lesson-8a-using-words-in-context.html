@@ -1,0 +1,975 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wordly Wise · Lesson 8A · Using Words in Context</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-start: #e0f4ff;
+      --bg-end: #f0e8ff;
+      --card-bg: #fff;
+      --text: #1a2a3a;
+      --muted: #526b80;
+      --blue: #1a6fa8;
+      --border: #d9e8f3;
+      --gold: #fff3c4;
+      --gold-border: #e6c800;
+      --green: #5dca7e;
+      --hint: #ffeedd;
+    }
+
+    * { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 17px 15px 60px;
+      color: var(--text);
+      background: linear-gradient(160deg, var(--bg-start), var(--bg-end));
+      font: 600 1rem/1.45 'Nunito', Arial, sans-serif;
+    }
+    button { font: inherit; cursor: pointer; }
+    button:disabled { opacity: .48; cursor: not-allowed; }
+    button:focus-visible, [role="button"]:focus-visible, summary:focus-visible {
+      outline: 3px solid #8051b0;
+      outline-offset: 3px;
+    }
+    h1, h2, h3 { font-family: 'Fredoka One', 'Arial Rounded MT Bold', Arial, sans-serif; font-weight: 400; }
+    h1 { margin: 4px 0 3px; font-size: 1.9rem; line-height: 1.18; }
+    h2 { margin: 0; font-size: 1.2rem; }
+    p { margin: .35rem 0; }
+    .app { max-width: 900px; margin: 0 auto; }
+    .eyebrow {
+      margin: 0;
+      color: var(--blue);
+      font-size: .83rem;
+      font-weight: 900;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+    .subtitle { margin: 5px 0 15px; color: var(--muted); font-weight: 700; }
+    .instructions {
+      display: block;
+      width: 100%;
+      min-height: 52px;
+      margin: 12px 0;
+      padding: 12px 14px;
+      border: 2px solid #b7dafa;
+      border-radius: 15px;
+      background: #e8f4ff;
+      color: #17496d;
+      text-align: left;
+      font-weight: 900;
+      line-height: 1.5;
+    }
+    .bank-panel, .question-card, .progress, .check-panel {
+      border: 2px solid var(--border);
+      border-radius: 17px;
+      background: var(--card-bg);
+      box-shadow: 0 4px 17px #20365615;
+    }
+    .bank-panel {
+      position: sticky;
+      top: 5px;
+      z-index: 15;
+      margin: 10px 0 15px;
+      padding: 9px 10px;
+      background: rgba(255,255,255,.98);
+      backdrop-filter: blur(8px);
+    }
+    .bank-title { margin-bottom: 7px; color: var(--blue); font-size: .86rem; font-weight: 900; }
+    .word-bank { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
+    .bank-word {
+      display: flex;
+      min-width: 0;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 6px 3px;
+      border: 2px solid var(--gold-border);
+      border-radius: 10px;
+      background: var(--gold);
+      color: #5a3a00;
+      font-size: .88rem;
+      font-weight: 900;
+      line-height: 1.08;
+    }
+    .bank-word:hover, .headword:hover { background: #ffe791; }
+    .pos {
+      display: inline-block;
+      min-width: 24px;
+      padding: 2px 5px;
+      border: 1.5px solid;
+      border-radius: 999px;
+      font-size: .7rem;
+      font-weight: 900;
+      line-height: 1.05;
+      text-align: center;
+    }
+    .pos-n { border-color: #b9cdf4; background: #e8f0ff; color: #2457a7; }
+    .pos-v { border-color: #b8dfc5; background: #e7f7ed; color: #257044; }
+    .pos-adj { border-color: #f0c79b; background: #fff0df; color: #9a4c00; }
+    .question-card { margin: 0 0 13px; padding: 15px; overflow: hidden; }
+    .card-heading { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; margin-bottom: 8px; }
+    .qnum {
+      display: inline-flex;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: #e8f4ff;
+      color: var(--blue);
+      font-weight: 900;
+    }
+    .headword {
+      min-height: 44px;
+      padding: 7px 13px;
+      border: 2px solid var(--gold-border);
+      border-radius: 11px;
+      background: var(--gold);
+      color: #5a3a00;
+      font-size: 1.06rem;
+      font-weight: 900;
+    }
+    .group-play {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--green);
+      color: #123d20;
+      font-size: 1.1rem;
+      font-weight: 900;
+      box-shadow: 0 2px 8px #5dca7e55;
+    }
+    .group-play:hover { background: #3aaa5a; color: white; }
+    .spacer { flex: 1; }
+    .sentence-row { padding: 9px 0; border-top: 1px solid #edf1f5; }
+    .sentence-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+    }
+    .sentence-text {
+      display: flex;
+      min-width: 0;
+      min-height: 44px;
+      align-items: center;
+      padding: 3px 1px;
+      border-radius: 9px;
+      line-height: 1.63;
+      cursor: pointer;
+    }
+    .sentence-text:hover { background: #f4faff; }
+    .sentence-text .letter { flex: 0 0 auto; margin-right: 7px; color: var(--muted); font-weight: 900; }
+    .sentence-text strong { font-weight: 900; }
+    .binary-controls { display: flex; align-items: center; gap: 5px; }
+    .binary-btn {
+      min-width: 91px;
+      min-height: 44px;
+      padding: 5px 9px;
+      border: 2px solid #b8d0e4;
+      border-radius: 11px;
+      background: #f7fbff;
+      color: #1e557b;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .binary-btn[aria-pressed="true"] {
+      border-color: #2aaa56;
+      background: #d0f5e0;
+      color: #145b30;
+      box-shadow: 0 0 0 2px #a6e4bb inset;
+    }
+    .binary-btn small { font-weight: 750; }
+    .row-status {
+      min-height: 0;
+      margin: 3px 0 0 30px;
+      padding: 5px 8px;
+      border-radius: 9px;
+      font-size: .86rem;
+      font-weight: 900;
+    }
+    .row-status[hidden] { display: none; }
+    .row-status.correct { background: #d0f5e0; color: #1d7a40; }
+    .row-status.attention { background: var(--hint); color: #92420d; }
+    .row-status.unanswered, .row-status.revised {
+      border: 1px dashed #adb6c2;
+      background: #f0f2f5;
+      color: #5b6470;
+    }
+    .status-speak {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 3px 6px;
+      border: 0;
+      background: transparent;
+    }
+    .progress {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 9px;
+      flex-wrap: wrap;
+      margin: 14px 0;
+      padding: 11px 15px;
+      font-weight: 900;
+    }
+    .pips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pip { width: 15px; height: 15px; border: 1px solid #c4ced6; border-radius: 50%; background: #dce0e8; }
+    .pip.done { border-color: #2da65a; background: var(--green); }
+    .check-panel { margin: 12px 0; padding: 15px; }
+    .check-panel p { margin: 3px 0 8px; color: var(--muted); font-weight: 800; }
+    .action-btn, .export-btn, .clear-btn, .warning-btn {
+      min-height: 44px;
+      padding: 9px 14px;
+      border-radius: 11px;
+      font-weight: 900;
+    }
+    .action-btn {
+      border: 2px solid #c5ae67;
+      background: linear-gradient(180deg, #ffedb2, #ffd86a);
+      color: #604900;
+    }
+    .export-btn { border: 2px solid #9dccee; background: #e8f4ff; color: var(--blue); }
+    .clear-btn { border: 2px solid #b7c4d0; background: white; color: var(--muted); }
+    .warning {
+      margin-top: 10px;
+      padding: 12px;
+      border: 2px solid #e8ad5e;
+      border-radius: 11px;
+      background: #fff4df;
+      color: #784216;
+    }
+    .warning-actions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 9px; }
+    .warning-btn { border: 2px solid #b88a4d; background: white; color: #654217; }
+    .check-actions, .footer-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .footer-actions { margin: 14px 0; }
+    .speaking-toast {
+      position: fixed;
+      z-index: 100;
+      bottom: 20px;
+      left: 50%;
+      padding: 10px 24px;
+      border-radius: 30px;
+      background: var(--blue);
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 4px 20px #0003;
+      transform: translate(-50%, 80px);
+      transition: transform .3s ease;
+      pointer-events: none;
+      cursor: pointer;
+      user-select: none;
+    }
+    .speaking-toast.visible { transform: translate(-50%, 0); pointer-events: auto; }
+    .definition-dialog {
+      width: min(94vw, 700px);
+      max-height: 86vh;
+      padding: 15px;
+      border: 3px solid #bdd7e9;
+      border-radius: 18px;
+      background: white;
+      color: var(--text);
+    }
+    .definition-dialog::backdrop { background: #18304788; }
+    .dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .modal-close {
+      min-width: 44px;
+      min-height: 44px;
+      padding: 7px 12px;
+      border: 2px solid #b7c4d0;
+      border-radius: 11px;
+      background: white;
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .def-card {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      align-items: start;
+      gap: 10px;
+      margin: 10px 0;
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: 13px;
+      background: #fbfdff;
+      line-height: 1.45;
+    }
+    .def-play {
+      display: inline-flex;
+      width: 44px;
+      height: 44px;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 50%;
+      background: var(--green);
+      color: #153b20;
+      font-size: 1rem;
+      font-weight: 900;
+      box-shadow: 0 2px 8px #5dca7e55;
+    }
+    .def-word { margin-bottom: 8px; color: #173e58; font-size: 1.02rem; font-weight: 900; }
+    .def-part { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: start; gap: 8px; margin: 7px 0; }
+    .def-label { padding: 4px 7px; border-radius: 8px; background: #e8f4ff; color: var(--blue); font-weight: 900; text-align: center; }
+    .def-copy { padding: 4px 0; font-weight: 750; }
+    .def-example .def-label { background: #e9f8ee; color: #376944; }
+    .def-example .def-copy { color: #405464; font-style: italic; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .print-answer { display: none; }
+    @media (max-width: 760px) {
+      .word-bank { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      body { padding: 12px 9px 50px; }
+      .bank-panel { top: 4px; padding: 8px; }
+      .word-bank { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+      .bank-word { font-size: .84rem; }
+      .question-card { padding: 12px; }
+      .sentence-line { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+      .binary-controls { padding-left: 29px; }
+      .binary-btn { flex: 1; }
+      .row-status { margin-left: 29px; }
+      .def-part { grid-template-columns: 78px minmax(0, 1fr); }
+    }
+    @media print {
+      @page { margin: 14mm; }
+      body { padding: 0; background: white; color: #111; font-size: 11pt; }
+      .app { max-width: none; }
+      .screen-only, .bank-panel, .progress, .check-panel, .footer-actions,
+      .binary-controls, .row-status, .group-play, .speaking-toast, dialog { display: none !important; }
+      .instructions { min-height: 0; margin: 4px 0 8px; padding: 0; border: 0; background: transparent; color: #111; font-weight: 700; }
+      .listen-icon { display: none; }
+      .question-card { margin: 0 0 10px; padding: 8px 0; border: 0; border-bottom: 1px solid #bbb; border-radius: 0; box-shadow: none; break-inside: avoid; }
+      .card-heading { margin-bottom: 2px; }
+      .headword { padding: 0; border: 0; background: transparent; color: #111; font-size: 1rem; }
+      .sentence-row { padding: 3px 0; border: 0; }
+      .sentence-text { min-height: 0; padding: 0; cursor: default; }
+      .sentence-text:hover { background: transparent; }
+      .print-answer { display: inline; grid-column: 2; grid-row: 1; min-width: 35px; margin-left: 10px; text-align: center; }
+      .print-answer strong { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+      .bank-panel { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <p class="eyebrow">Wordly Wise 3000 · Book 6</p>
+      <p class="eyebrow">Lesson 8A</p>
+      <h1>Using Words in Context</h1>
+      <p class="subtitle">Tap a sentence to hear it. Tap a word in the list for its definition.</p>
+    </header>
+
+    <button class="instructions" id="instructions" type="button">
+      <span class="listen-icon" aria-hidden="true">🔊 </span>Read the following sentences. If the word in bold is used correctly, write C on the line. If the word is used incorrectly, write I on the line.
+    </button>
+
+    <aside class="bank-panel" aria-label="Lesson word list">
+      <div class="bank-title">Word List 8 · tap a word for its definition</div>
+      <div class="word-bank" id="wordBank"></div>
+    </aside>
+
+    <section class="progress" aria-label="Worksheet progress">
+      <div class="pips" id="pips" aria-hidden="true"></div>
+      <span id="progressText" aria-live="polite">0 / 40 answered</span>
+    </section>
+
+    <div id="questions"></div>
+
+    <section class="check-panel screen-only" aria-label="Check all responses">
+      <h2>Check your responses</h2>
+      <p id="checksRemaining">3 checks left</p>
+      <div class="check-actions">
+        <button class="action-btn" id="checkButton" type="button">Check all responses</button>
+        <button class="export-btn" id="printButton" type="button">🖨️ Export / Print</button>
+      </div>
+      <div class="warning" id="incompleteWarning" role="status" aria-live="polite" hidden>
+        <div id="missingText"></div>
+        <div class="warning-actions">
+          <button class="warning-btn" id="keepWorking" type="button">Keep working</button>
+          <button class="warning-btn" id="checkAnyway" type="button">Check anyway · use 1 check</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer-actions screen-only">
+      <button class="clear-btn" id="clearButton" type="button">🗑️ Clear all responses</button>
+    </div>
+    <div class="sr-only" id="liveStatus" role="status" aria-live="polite"></div>
+  </main>
+
+  <dialog class="definition-dialog" id="definitionDialog" aria-labelledby="dialogTitle">
+    <div class="dialog-header">
+      <h2 id="dialogTitle"></h2>
+      <button class="modal-close" id="closeDialog" type="button">✕ Close</button>
+    </div>
+    <div id="definitionCards"></div>
+  </dialog>
+  <div class="speaking-toast" id="speakingToast" role="status" aria-live="polite" title="Tap to stop">🔊 <span>Reading aloud…</span></div>
+
+  <script>
+    const STORAGE_KEY = 'worksheet_wordly_wise_lesson_8a_christina_2026_11_09_v1';
+    const MAX_CHECKS = 3;
+    const SPEECH_RATE = 0.88;
+    const SPEECH_PITCH = 1.05;
+
+    const WORDS = [
+      { word: 'accompany', senses: [
+        { form: 'accompany', pos: 'v', number: '1', definition: 'To go along with; to be together.', example: 'Thunder often accompanies lightning.' },
+        { form: 'accompany', pos: 'v', number: '2', definition: 'To play a musical instrument for or with.', example: 'The pianist offered to accompany the singer.' }
+      ] },
+      { word: 'beneficial', senses: [
+        { form: 'beneficial', pos: 'adj', definition: 'Being of use; helpful; favorable.', example: 'A balanced diet is beneficial to one’s health.' }
+      ] },
+      { word: 'captive', senses: [
+        { form: 'captive', pos: 'n', definition: 'One that is held prisoner.', example: 'The captives were closely guarded.' },
+        { form: 'captive', pos: 'adj', definition: 'Unable to escape or get away.', example: 'The hospital patients provided a captive audience for the comedian.' },
+        { form: 'captivity', pos: 'n', definition: 'The state of being held against one’s will; loss of freedom.', example: 'The giant panda is thriving in captivity.' }
+      ] },
+      { word: 'convenient', senses: [
+        { form: 'convenient', pos: 'adj', definition: 'Suitable for one’s needs; making life easier or more comfortable.', example: 'The bus stop is convenient because it’s close to my house.' },
+        { form: 'convenience', pos: 'n', definition: 'Anything that makes life easier or more comfortable.', example: 'We appreciated the central air-conditioning and other conveniences of the apartment.' }
+      ] },
+      { word: 'ecstasy', senses: [
+        { form: 'ecstasy', pos: 'n', definition: 'A strong feeling of emotion, especially joy.', example: 'Fans screamed in ecstasy when their idol appeared on stage.' },
+        { form: 'ecstatic', pos: 'adj', definition: 'Full of or causing ecstasy.', example: 'The winners were ecstatic when the judges read the names.' }
+      ] },
+      { word: 'expanse', senses: [
+        { form: 'expanse', pos: 'n', definition: 'A wide, open area or surface; a stretch.', example: 'Wheat grows on the broad expanse of the Kansas prairie.' }
+      ] },
+      { word: 'expedition', senses: [
+        { form: 'expedition', pos: 'n', number: '1', definition: 'A long journey by a group to explore or do battle.', example: 'The expedition into the Brazilian rain forest lasted nearly a year.' },
+        { form: 'expedition', pos: 'n', number: '2', definition: 'A group that makes such a journey.', example: 'The expedition was attempting to find the origin of the Nile.' }
+      ] },
+      { word: 'inept', senses: [
+        { form: 'inept', pos: 'adj', number: '1', definition: 'Clumsily or awkwardly expressed; not suitable for the occasion.', example: 'That inept remark you made upset those who overheard it.' },
+        { form: 'inept', pos: 'adj', number: '2', definition: 'Lacking in skill or ability.', example: 'An inept handler damaged the contents of the crate.' }
+      ] },
+      { word: 'interpret', senses: [
+        { form: 'interpret', pos: 'v', number: '1', definition: 'To translate into another language.', example: 'A native Parisian was hired to interpret the French minister’s remarks for the audience.' },
+        { form: 'interpret', pos: 'v', number: '2', definition: 'To explain the meaning of.', example: 'Josef offered to interpret the dream.' },
+        { form: 'interpret', pos: 'v', number: '3', definition: 'To understand in one’s own way.', example: 'The coach interpreted my absence from the team meeting as a lack of commitment to the team.' }
+      ] },
+      { word: 'invaluable', senses: [
+        { form: 'invaluable', pos: 'adj', definition: 'Too valuable to measure; priceless.', example: 'The students’ help in organizing the boycott was invaluable.' }
+      ] },
+      { word: 'linger', senses: [
+        { form: 'linger', pos: 'v', definition: 'To be slow in leaving or going away.', example: 'The students lingered in the hall, reluctant to go out into the cold.' }
+      ] },
+      { word: 'retrieve', senses: [
+        { form: 'retrieve', pos: 'v', number: '1', definition: 'To get back; to recover.', example: 'Campers can retrieve their lost items from the lost and found.' },
+        { form: 'retrieve', pos: 'v', number: '2', definition: 'To find and bring back.', example: 'The puppy retrieves sticks the children throw in the pond.' }
+      ] },
+      { word: 'skirmish', senses: [
+        { form: 'skirmish', pos: 'n', definition: 'A minor fight or battle.', example: 'Apart from a few skirmishes, both sides kept the cease-fire that had been agreed to.' },
+        { form: 'skirmish', pos: 'v', definition: 'To take part in such a fight.', example: 'The two sides began to skirmish before the major battle.' }
+      ] },
+      { word: 'supplement', senses: [
+        { form: 'supplement', pos: 'n', definition: 'Something added to make up for something missing.', example: 'Those who eat a well-balanced diet probably do not need vitamin supplements.' },
+        { form: 'supplement', pos: 'v', definition: 'To add to.', example: 'I supplement my allowance with earnings from a paper route.' }
+      ] },
+      { word: 'territory', senses: [
+        { form: 'territory', pos: 'n', number: '1', definition: 'A particular area of land.', example: 'A dog will defend its territory.' },
+        { form: 'territory', pos: 'n', number: '2', definition: 'A land area under the control of a particular group or government.', example: 'The island of Guam is a territory of the United States.' }
+      ] }
+    ];
+
+    // The C/I labels use the Lesson 8 word-list meanings, per the user's selected checking approach.
+    const GROUPS = [
+      { word: 'interpret', hint: 'Interpret means to translate, explain meaning, or understand something in one’s own way.', sentences: [
+        { text: 'Aseem apologized for barging in and said he didn’t mean to interpret me.', target: 'interpret', answer: 'I' },
+        { text: 'The teacher’s remarks were interpreted as being friendly.', target: 'interpreted', answer: 'C' },
+        { text: 'Ming-na’s silence was interpreted as anger.', target: 'interpreted', answer: 'C' },
+        { text: 'She spoke Arabic, so she was able to interpret for the travelers.', target: 'interpret', answer: 'C' }
+      ] },
+      { word: 'supplement', hint: 'Supplement means something added to make up for what is missing, or to add to something.', sentences: [
+        { text: 'The Sunday comics supplement comes with the local newspaper.', target: 'supplement', answer: 'C' },
+        { text: 'Supplement will be served at five.', target: 'Supplement', answer: 'I' },
+        { text: 'Yong’s mom supplemented his lunch with a bag of nuts and raisins.', target: 'supplemented', answer: 'C' },
+        { text: 'We supplemented the time by reading and playing games.', target: 'supplemented', answer: 'I' }
+      ] },
+      { word: 'inept', hint: 'Inept describes something clumsy, awkwardly expressed, unsuitable, or lacking skill.', sentences: [
+        { text: 'I once made an inept attempt to learn juggling.', target: 'inept', answer: 'C' },
+        { text: 'An inept runner should probably not try out for track.', target: 'inept', answer: 'C' },
+        { text: 'Grab the inept tomatoes off the table.', target: 'inept', answer: 'I' },
+        { text: 'The team played an inept game because they were out of practice.', target: 'inept', answer: 'C' }
+      ] },
+      { word: 'accompany', hint: 'Accompany means to go along with someone or something, or to provide music for a performer.', sentences: [
+        { text: 'The family has been accompanying bread for two hundred years.', target: 'accompanying', answer: 'I' },
+        { text: 'The violinist accompanied the singer in her recital.', target: 'accompanied', answer: 'C' },
+        { text: 'A young child needs to be accompanied by an adult when traveling.', target: 'accompanied', answer: 'C' },
+        { text: 'The fish was accompanied by a fresh salad.', target: 'accompanied', answer: 'C' }
+      ] },
+      { word: 'retrieve', hint: 'Retrieve means to get something back, recover it, or find it and bring it back.', sentences: [
+        { text: 'Nakala is retrieved that she found her favorite shirt.', target: 'retrieved', answer: 'I' },
+        { text: 'We tried to retrieve the kite that got stuck in a tree.', target: 'retrieve', answer: 'C' },
+        { text: 'You can’t retrieve the message after it has been sent.', target: 'retrieve', answer: 'C' },
+        { text: 'We were retrieved to hear that the package had arrived safely.', target: 'retrieved', answer: 'I' }
+      ] },
+      { word: 'invaluable', hint: 'Invaluable means too valuable to measure or priceless.', sentences: [
+        { text: 'We were told to keep our backpacks with us at all invaluable times.', target: 'invaluable', answer: 'I' },
+        { text: 'A rare book is an invaluable addition to the library.', target: 'invaluable', answer: 'C' },
+        { text: 'Santos won the Most Invaluable Player award.', target: 'Invaluable', answer: 'C' },
+        { text: 'The support given to the team by the fans was invaluable.', target: 'invaluable', answer: 'C' }
+      ] },
+      { word: 'territory', hint: 'Territory means a particular area of land, including land controlled by a group or government.', sentences: [
+        { text: 'Arizona was a territory until it became a state in 1912.', target: 'territory', answer: 'C' },
+        { text: 'The cat walked slowly around its territory and stared at the dog.', target: 'territory', answer: 'C' },
+        { text: 'Pamela pressed the soft territory to her face.', target: 'territory', answer: 'I' },
+        { text: 'Much United States territory was stolen from Native Americans.', target: 'territory', answer: 'C' }
+      ] },
+      { word: 'expedition', hint: 'An expedition is a long journey, often for exploration, or a group making such a journey.', sentences: [
+        { text: 'An astronaut expedition to Mars is still many years in the future.', target: 'expedition', answer: 'C' },
+        { text: 'The expedition reached the South Pole in 1911.', target: 'expedition', answer: 'C' },
+        { text: 'This baseball card could be worth a lot of expeditions.', target: 'expeditions', answer: 'I' },
+        { text: 'My expedition is that we won’t win the football game.', target: 'expedition', answer: 'I' }
+      ] },
+      { word: 'skirmish', hint: 'A skirmish is a minor fight or battle; to skirmish is to take part in such a fight.', sentences: [
+        { text: 'My mom always has skirmishes with my brother about how late he can stay out.', target: 'skirmishes', answer: 'C' },
+        { text: 'The two sides skirmished all night.', target: 'skirmished', answer: 'I' },
+        { text: 'We were skirmished after the long drive.', target: 'skirmished', answer: 'I' },
+        { text: 'I skirmished with the idea of going but then decided to stay.', target: 'skirmished', answer: 'I' }
+      ] },
+      { word: 'expanse', hint: 'An expanse is a wide, open area or surface; a stretch.', sentences: [
+        { text: 'I kept a list of all our expanses, including movies and snacks.', target: 'expanses', answer: 'I' },
+        { text: 'An expanse of grass stretched for miles over the hills.', target: 'expanse', answer: 'C' },
+        { text: 'The vast expanse of the universe is filled with planets and stars.', target: 'expanse', answer: 'C' },
+        { text: 'I expanse that we will need to wear winter coats tomorrow.', target: 'expanse', answer: 'I' }
+      ] }
+    ];
+
+    const ITEM_COUNT = GROUPS.reduce((count, group) => count + group.sentences.length, 0);
+    const POS_NAMES = { n: 'noun', v: 'verb', adj: 'adjective' };
+    const POS_CLASS = { n: 'pos-n', v: 'pos-v', adj: 'pos-adj' };
+    let speechSerial = 0;
+    let state = createState();
+    let storageIssue = '';
+
+    function createState() {
+      return {
+        answers: Array.from({ length: ITEM_COUNT }, () => ''),
+        checksUsed: 0,
+        statuses: Array.from({ length: ITEM_COUNT }, () => ''),
+        revised: Array.from({ length: ITEM_COUNT }, () => false)
+      };
+    }
+
+    function escapeHTML(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[char]);
+    }
+
+    function escapeAttribute(value) {
+      return escapeHTML(value).replace(/\n/g, '&#10;');
+    }
+
+    function flatItems() {
+      return GROUPS.flatMap((group, groupIndex) =>
+        group.sentences.map((sentence, sentenceIndex) => ({
+          group,
+          groupIndex,
+          sentence,
+          sentenceIndex,
+          index: groupIndex * 4 + sentenceIndex
+        }))
+      );
+    }
+
+    function validateData() {
+      if (ITEM_COUNT !== 40 || GROUPS.length !== 10) {
+        throw new Error('Lesson 8A must contain ten groups and forty sentences.');
+      }
+      GROUPS.forEach((group, groupIndex) => {
+        if (group.sentences.length !== 4 || !WORDS.some(entry => entry.word === group.word)) {
+          throw new Error(`Invalid Lesson 8A data in question ${groupIndex + 1}.`);
+        }
+        group.sentences.forEach((sentence, sentenceIndex) => {
+          const first = sentence.text.indexOf(sentence.target);
+          if (first < 0 || sentence.text.indexOf(sentence.target, first + sentence.target.length) >= 0) {
+            throw new Error(`Question ${groupIndex + 1}${'abcd'[sentenceIndex]} has an invalid bold target.`);
+          }
+          if (!['C', 'I'].includes(sentence.answer)) {
+            throw new Error(`Question ${groupIndex + 1}${'abcd'[sentenceIndex]} has no valid answer key.`);
+          }
+        });
+      });
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createState();
+        const saved = JSON.parse(raw);
+        const valid = saved &&
+          Array.isArray(saved.answers) && saved.answers.length === ITEM_COUNT &&
+          saved.answers.every(answer => ['', 'C', 'I'].includes(answer)) &&
+          Number.isInteger(saved.checksUsed) && saved.checksUsed >= 0 && saved.checksUsed <= MAX_CHECKS &&
+          Array.isArray(saved.statuses) && saved.statuses.length === ITEM_COUNT &&
+          saved.statuses.every(status => ['', 'correct', 'attention', 'unanswered'].includes(status)) &&
+          Array.isArray(saved.revised) && saved.revised.length === ITEM_COUNT &&
+          saved.revised.every(value => typeof value === 'boolean');
+        if (!valid) throw new Error('Saved answers do not match this worksheet version.');
+        return saved;
+      } catch (error) {
+        storageIssue = `Saved responses could not be loaded: ${error.message}`;
+        return createState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (error) {
+        setLive(`Responses could not be saved in this browser: ${error.message}`);
+      }
+    }
+
+    function setLive(message) {
+      const live = document.getElementById('liveStatus');
+      if (live) live.textContent = message;
+    }
+
+    function speak(text) {
+      const value = String(text || '').trim();
+      if (!value) return;
+      if (!('speechSynthesis' in window)) {
+        setLive('Read-aloud is not available in this browser.');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const serial = ++speechSerial;
+      const utterance = new SpeechSynthesisUtterance(value);
+      utterance.lang = 'en-US';
+      utterance.rate = SPEECH_RATE;
+      utterance.pitch = SPEECH_PITCH;
+      const toast = document.getElementById('speakingToast');
+      utterance.onstart = () => {
+        if (serial === speechSerial) toast.classList.add('visible');
+      };
+      utterance.onend = utterance.onerror = () => {
+        if (serial === speechSerial) toast.classList.remove('visible');
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function cancelSpeak() {
+      speechSerial++;
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      document.getElementById('speakingToast').classList.remove('visible');
+    }
+
+    function renderWordBank() {
+      const bank = document.getElementById('wordBank');
+      bank.innerHTML = WORDS.map(entry => {
+        const tags = [...new Set(entry.senses.map(sense => sense.pos))];
+        const pos = tags.map(tag => `<span class="pos ${POS_CLASS[tag]}">${tag}</span>`).join('');
+        return `<button class="bank-word" type="button" data-definition="${escapeAttribute(entry.word)}" aria-label="Definition of ${escapeAttribute(entry.word)}">${escapeHTML(entry.word)} ${pos}</button>`;
+      }).join('');
+    }
+
+    function renderQuestions() {
+      const questions = document.getElementById('questions');
+      questions.innerHTML = GROUPS.map((group, groupIndex) => {
+        const rows = group.sentences.map((sentence, sentenceIndex) => {
+          const index = groupIndex * 4 + sentenceIndex;
+          const targetIndex = sentence.text.indexOf(sentence.target);
+          const before = sentence.text.slice(0, targetIndex);
+          const after = sentence.text.slice(targetIndex + sentence.target.length);
+          const value = state.answers[index];
+          return `<div class="sentence-row" data-row="${index}">
+            <div class="sentence-line">
+              <div class="sentence-text" role="button" tabindex="0" data-sentence="${index}" aria-label="Read sentence ${groupIndex + 1}${'abcd'[sentenceIndex]} aloud">
+                <span class="letter">(${String.fromCharCode(97 + sentenceIndex)})</span>
+                <span>${escapeHTML(before)}<strong>${escapeHTML(sentence.target)}</strong>${escapeHTML(after)}</span>
+              </div>
+              <div class="binary-controls" role="group" aria-label="Sentence ${groupIndex + 1}${'abcd'[sentenceIndex]} judgment">
+                <button class="binary-btn" type="button" data-answer="${index}:C" aria-pressed="${value === 'C'}" aria-label="C: Used correctly">C <small>Correct</small></button>
+                <button class="binary-btn" type="button" data-answer="${index}:I" aria-pressed="${value === 'I'}" aria-label="I: Used incorrectly">I <small>Incorrect</small></button>
+              </div>
+              <span class="print-answer" aria-hidden="true" data-print-answer="${index}">${value ? `<strong>${value}</strong>` : '____'}</span>
+            </div>
+            <div class="row-status" data-status="${index}" role="status" aria-live="polite" hidden></div>
+          </div>`;
+        }).join('');
+        return `<article class="question-card">
+          <div class="card-heading">
+            <span class="qnum" aria-hidden="true">${groupIndex + 1}</span>
+            <button class="headword" type="button" data-definition="${escapeAttribute(group.word)}" aria-label="Definition of ${escapeAttribute(group.word)}">${escapeHTML(group.word)} <span class="screen-only" aria-hidden="true">📖</span></button>
+            <button class="group-play" type="button" data-read-group="${groupIndex}" aria-label="Read all four sentences for ${escapeAttribute(group.word)}">▶</button>
+            <span class="spacer"></span>
+          </div>
+          ${rows}
+        </article>`;
+      }).join('');
+      updateAllStatuses();
+      updateProgress();
+    }
+
+    function buildDefinitionSpeech(sense) {
+      const number = sense.number ? `, meaning ${sense.number}` : '';
+      return `${sense.form}. ${POS_NAMES[sense.pos]}${number}. Definition: ${sense.definition} Example: ${sense.example}`;
+    }
+
+    function openDefinition(word) {
+      const entry = WORDS.find(item => item.word === word);
+      if (!entry) {
+        setLive('That word definition is not available.');
+        return;
+      }
+      cancelSpeak();
+      document.getElementById('dialogTitle').textContent = entry.word;
+      document.getElementById('definitionCards').innerHTML = entry.senses.map(sense => {
+        const number = sense.number ? `<span class="pos" aria-label="Sense ${sense.number}">${sense.number}</span>` : '';
+        return `<section class="def-card">
+          <button class="def-play" type="button" data-speak="${escapeAttribute(buildDefinitionSpeech(sense))}" aria-label="Read definition and example aloud">▶</button>
+          <div>
+            <div class="def-word">${escapeHTML(sense.form)} <span class="pos ${POS_CLASS[sense.pos]}">${sense.pos}</span> ${number}</div>
+            <div class="def-part"><span class="def-label">Definition</span><span class="def-copy">${escapeHTML(sense.definition)}</span></div>
+            <div class="def-part def-example"><span class="def-label">Example</span><span class="def-copy">${escapeHTML(sense.example)}</span></div>
+          </div>
+        </section>`;
+      }).join('');
+      document.getElementById('definitionDialog').showModal();
+    }
+
+    function statusText(index) {
+      if (state.revised[index]) return { className: 'revised', text: 'Changed since your last check' };
+      const status = state.statuses[index];
+      if (!status) return null;
+      if (status === 'correct') return { className: 'correct', text: '✅ Correct' };
+      if (status === 'unanswered') return { className: 'unanswered', text: '○ Unanswered' };
+      const item = flatItems()[index];
+      return { className: 'attention', text: `💡 Hint: ${item.group.hint}` };
+    }
+
+    function paintStatus(index) {
+      const element = document.querySelector(`[data-status="${index}"]`);
+      if (!element) return;
+      const status = statusText(index);
+      if (!status) {
+        element.hidden = true;
+        element.className = 'row-status';
+        element.textContent = '';
+        return;
+      }
+      element.hidden = false;
+      element.className = `row-status ${status.className}`;
+      element.replaceChildren(document.createTextNode(status.text));
+      if (status.className === 'attention') {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'status-speak';
+        button.textContent = '🔊';
+        button.setAttribute('aria-label', 'Read hint aloud');
+        button.dataset.speak = status.text;
+        element.append(' ', button);
+      }
+    }
+
+    function updateAllStatuses() {
+      for (let index = 0; index < ITEM_COUNT; index++) paintStatus(index);
+      updateCheckPanel();
+    }
+
+    function updateProgress() {
+      const answered = state.answers.filter(Boolean).length;
+      document.getElementById('progressText').textContent = `${answered} / ${ITEM_COUNT} answered`;
+      document.getElementById('pips').innerHTML = GROUPS.map((group, groupIndex) => {
+        const complete = group.sentences.every((_, sentenceIndex) => state.answers[groupIndex * 4 + sentenceIndex]);
+        return `<span class="pip ${complete ? 'done' : ''}" title="Question ${groupIndex + 1}"></span>`;
+      }).join('');
+      for (let index = 0; index < ITEM_COUNT; index++) {
+        const answer = state.answers[index];
+        const print = document.querySelector(`[data-print-answer="${index}"]`);
+        if (print) print.innerHTML = answer ? `<strong>${answer}</strong>` : '____';
+      }
+    }
+
+    function allCorrect() {
+      return state.statuses.length === ITEM_COUNT &&
+        state.statuses.every(status => status === 'correct') &&
+        state.revised.every(value => !value);
+    }
+
+    function updateCheckPanel() {
+      const button = document.getElementById('checkButton');
+      button.disabled = state.checksUsed >= MAX_CHECKS || allCorrect();
+      button.textContent = allCorrect() ? '✅ All responses correct' : 'Check all responses';
+      const remaining = MAX_CHECKS - state.checksUsed;
+      document.getElementById('checksRemaining').textContent = `${remaining} ${remaining === 1 ? 'check' : 'checks'} left`;
+    }
+
+    function setAnswer(index, value) {
+      if (state.answers[index] === value) return;
+      state.answers[index] = value;
+      if (state.checksUsed > 0) {
+        state.statuses[index] = '';
+        state.revised[index] = true;
+      }
+      document.querySelectorAll(`[data-answer^="${index}:"]`).forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.answer.endsWith(`:${value}`)));
+      });
+      paintStatus(index);
+      updateProgress();
+      updateCheckPanel();
+      document.getElementById('incompleteWarning').hidden = true;
+      saveState();
+      const item = flatItems()[index];
+      window.setTimeout(() => speak(item.sentence.text), 300);
+    }
+
+    function incompleteIndices() {
+      return state.answers.map((answer, index) => answer ? -1 : index).filter(index => index >= 0);
+    }
+
+    function showIncompleteWarning(indices) {
+      const labels = indices.map(index => {
+        const item = flatItems()[index];
+        return `${item.groupIndex + 1}(${String.fromCharCode(97 + item.sentenceIndex)})`;
+      });
+      document.getElementById('missingText').textContent =
+        `Unanswered sentences: ${labels.join(', ')}. Keep working or use one check to review every response.`;
+      document.getElementById('incompleteWarning').hidden = false;
+      document.getElementById('incompleteWarning').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function checkAll() {
+      if (state.checksUsed >= MAX_CHECKS || allCorrect()) return;
+      state.checksUsed++;
+      state.statuses = flatItems().map((item, index) => {
+        if (!state.answers[index]) return 'unanswered';
+        return state.answers[index] === item.sentence.answer ? 'correct' : 'attention';
+      });
+      state.revised.fill(false);
+      document.getElementById('incompleteWarning').hidden = true;
+      saveState();
+      updateAllStatuses();
+      const correct = state.statuses.filter(status => status === 'correct').length;
+      setLive(`${correct} of ${ITEM_COUNT} responses are correct. ${MAX_CHECKS - state.checksUsed} checks left.`);
+    }
+
+    function clearAllResponses() {
+      const button = document.getElementById('clearButton');
+      if (button.dataset.confirming === 'true') {
+        state = createState();
+        let clearFailed = false;
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch (error) {
+          clearFailed = true;
+          setLive(`Saved responses could not be cleared: ${error.message}`);
+        }
+        document.querySelectorAll('.binary-btn').forEach(answer => answer.setAttribute('aria-pressed', 'false'));
+        document.getElementById('incompleteWarning').hidden = true;
+        button.dataset.confirming = 'false';
+        button.textContent = '🗑️ Clear all responses';
+        updateAllStatuses();
+        updateProgress();
+        if (!clearFailed) setLive('All responses and checks were cleared.');
+        return;
+      }
+      button.dataset.confirming = 'true';
+      button.textContent = '⚠️ Tap again to confirm';
+      window.setTimeout(() => {
+        if (button.dataset.confirming === 'true') {
+          button.dataset.confirming = 'false';
+          button.textContent = '🗑️ Clear all responses';
+        }
+      }, 3000);
+    }
+
+    function wireEvents() {
+      document.getElementById('instructions').addEventListener('click', event => speak(event.currentTarget.textContent.replace(/^🔊\s*/, '')));
+      document.getElementById('wordBank').addEventListener('click', event => {
+        const button = event.target.closest('[data-definition]');
+        if (button) openDefinition(button.dataset.definition);
+      });
+      document.getElementById('questions').addEventListener('click', event => {
+        const definition = event.target.closest('[data-definition]');
+        if (definition) {
+          openDefinition(definition.dataset.definition);
+          return;
+        }
+        const speechButton = event.target.closest('[data-speak]');
+        if (speechButton) {
+          speak(speechButton.dataset.speak);
+          return;
+        }
+        const answer = event.target.closest('[data-answer]');
+        if (answer) {
+          const [index, value] = answer.dataset.answer.split(':');
+          setAnswer(Number(index), value);
+          return;
+        }
+        const groupButton = event.target.closest('[data-read-group]');
+        if (groupButton) {
+          speak(GROUPS[Number(groupButton.dataset.readGroup)].sentences.map(sentence => sentence.text).join(' '));
+          return;
+        }
+        const sentence = event.target.closest('[data-sentence]');
+        if (sentence) speak(flatItems()[Number(sentence.dataset.sentence)].sentence.text);
+      });
+      document.getElementById('questions').addEventListener('keydown', event => {
+        const sentence = event.target.closest('[data-sentence]');
+        if (sentence && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault();
+          speak(flatItems()[Number(sentence.dataset.sentence)].sentence.text);
+        }
+      });
+      document.getElementById('checkButton').addEventListener('click', () => {
+        if (state.checksUsed >= MAX_CHECKS || allCorrect()) return;
+        const missing = incompleteIndices();
+        if (missing.length) {
+          showIncompleteWarning(missing);
+          return;
+        }
+        checkAll();
+      });
+      document.getElementById('keepWorking').addEventListener('click', () => {
+        document.getElementById('incompleteWarning').hidden = true;
+        setLive('Keep working on the unanswered sentences.');
+      });
+      document.getElementById('checkAnyway').addEventListener('click', checkAll);
+      document.getElementById('clearButton').addEventListener('click', clearAllResponses);
+      document.getElementById('printButton').addEventListener('click', () => window.print());
+      document.getElementById('closeDialog').addEventListener('click', () => document.getElementById('definitionDialog').close());
+      document.getElementById('definitionDialog').addEventListener('click', event => {
+        if (event.target === event.currentTarget) event.currentTarget.close();
+        const button = event.target.closest('[data-speak]');
+        if (button) speak(button.dataset.speak);
+      });
+      document.getElementById('definitionDialog').addEventListener('close', cancelSpeak);
+      document.getElementById('speakingToast').addEventListener('click', cancelSpeak);
+    }
+
+    validateData();
+    state = loadState();
+    renderWordBank();
+    renderQuestions();
+    wireEvents();
+    updateCheckPanel();
+    if (storageIssue) setLive(storageIssue);
+  </script>
+</body>
+</html>

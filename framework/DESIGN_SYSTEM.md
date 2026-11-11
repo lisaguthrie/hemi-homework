@@ -270,6 +270,29 @@ For Type 6 passage-plus-response worksheets, **do not show the full word grid in
 
 ---
 
+## Shared Previous-Lesson Word Bank Reference + Blank Picker (Type 11)
+
+Use **two visually and behaviorally separate surfaces** instead of a single top-level answer-selection bank.
+
+- The **top reference word bank** is a compact `<details>` disclosure, **closed by default** on a fresh open. Its yellow word buttons match the weekly lesson word bank: each opens a definition/example card, never inserts an answer. Use the standard POS tags and 44px-minimum targets. The reference grid can use five columns on larger screens, three on tablets, and two on narrow phones.
+- An **in-sentence blank** is a clearly outlined, focusable answer target (44px minimum). Only this blank opens the blue **answer picker** dialog; this picker may mark previously chosen words in a non-answer-revealing way.
+- Keep the answer picker scrollable (`max-height: 83vh`) with a visible close button and a three-column grid on wide screens / two on narrow screens. Picker cells are at least 50px tall. Every blank uses the entire candidate list, not a narrowed selection.
+- Use the existing Vocabulary Definition Modal Cards for the reference bank; do not make the reference bank and answer picker share a click handler or dialog. Opening a reference definition must not activate the blank picker.
+
+```css
+.previous-word-bank{border:2px solid #cfe2ef;background:#f9fcff;border-radius:12px;margin-bottom:14px}
+.previous-word-bank summary{min-height:44px;padding:10px 12px;font-weight:900;cursor:pointer}
+.previous-word-bank .word-bank{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;padding:9px}
+.previous-word-bank .bank-word{min-height:44px}
+.answer-word-dialog{width:min(94vw,750px);max-height:83vh;overflow-y:auto;border:3px solid #bdd7e9;border-radius:18px;padding:15px}
+.answer-word-dialog .choice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.answer-word-dialog .choice-grid button{min-height:51px;border:2px solid #c7dff2;border-radius:11px;background:#f1f9ff;color:#195f8e;font-weight:900}
+@media(max-width:760px){.previous-word-bank .word-bank{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:430px){.previous-word-bank .word-bank,.answer-word-dialog .choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+```
+
+---
+
 ## Vocabulary Part-of-Speech Tags
 
 Use compact, color-coded part-of-speech tags in vocabulary word banks and definition cards. Keep the abbreviation visible so color is reinforcement rather than the only cue.

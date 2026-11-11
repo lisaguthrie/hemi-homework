@@ -463,6 +463,13 @@ Use the standard Word List bank and definition modal.
 - Show neutral response-completion progress, plus the standard double-tap clear and Export / Print actions.
 - Include the lesson word bank and source-defined definition/example modal.
 
+### Export / Print
+
+- Reproduce the printed prompt and all four lettered options without interactive checkboxes or checkbox outlines.
+- Show **only the student's selected answers** in place using **bold + underline on both the answer letter and choice text**. Unselected choices remain plain, including if the selected set is incomplete or not correct.
+- Do not replace the original option list with a detached `Selected:` summary, the teacher key, or checking-status badges. The interactive screen retains independent checkbox-style selection and word-read/definition controls.
+- Use **Print / Export — Selected Multiple-Choice Answers In Place (Types 7 and 8)** from `framework/INTERACTION_PATTERNS.md`.
+
 **Reference implementation:** `docs/worksheets/2026-10-13-wordly-wise-lesson-4b-making-connections.html`
 
 ---
@@ -489,6 +496,13 @@ Use the standard Word List bank and definition modal.
 
 - Count a question as response-complete when at least one continuation is selected.
 - Persist the selected option indices and provide progress pips, double-tap clear, and Export / Print.
+
+### Export / Print
+
+- Preserve the exact printed stem and four lettered completions for every question, including all unselected options.
+- Do **not** print checkboxes. Print selected letter-plus-continuation text in **bold + underline**, with unselected choices in plain type; never derive which options are emphasized from the answer key or grading outcome.
+- Keep a student's partial or incorrect selected set visible as selected, and omit review badges, answer-key indicators, and redundant selection-summary lines.
+- Use **Print / Export — Selected Multiple-Choice Answers In Place (Types 7 and 8)** from `framework/INTERACTION_PATTERNS.md`.
 
 **Reference implementation:** `docs/worksheets/2026-10-13-wordly-wise-lesson-4c-determining-meanings.html`
 
@@ -519,3 +533,74 @@ Use the standard Word List bank and definition modal.
 - Show neutral completion progress and include double-tap Clear all responses and Export / Print using the child's print name.
 
 **Reference implementation:** `docs/worksheets/2026-10-13-wordly-wise-lesson-4d-completing-sentences.html`
+
+---
+
+## Type 10: Vocabulary Using Words in Context — Correct / Incorrect Judgments
+
+*Wordly Wise “Using Words in Context” style: each numbered group names one vocabulary word and prints four lettered sentences; the student judges whether the bold word or related form is used correctly in each sentence.*
+
+**Use case:** Vocabulary usage discrimination across several separate sentences for each lesson word. A student records `C` for correctly used or `I` for incorrectly used; this is not a four-choice single-answer or multi-select exercise.
+
+### Answer control
+
+- **Begin every numbered question group with a prominent, independently tappable lesson headword**, before its four `(a)`–`(d)` sentences (e.g., **shed** for Lesson 6A #1). Tapping the headword opens the standard source-definition modal without selecting or checking anything.
+- Preserve the source's complete sentence wording, letters, ordering, and **bold treatment of the vocabulary word or exact related form within every sentence**, whether that sentence uses the word correctly or incorrectly. Match explicit forms rather than guessing based on substrings.
+- Each of the four sentences gets its own pair of large, mutually exclusive `C · Correct` / `I · Incorrect` answer buttons. A selection affects **only that sentence**, not its siblings; the absence of either choice means unanswered.
+- Make each entire sentence independently tappable for read-aloud, with an optional per-group play button to read the four sentences. The bold vocabulary target may independently open its definition, but must not change the C/I response. Hearing a sentence never selects a letter.
+- If an answer selection triggers a read-back, speak the sentence in either case without announcing correctness. The app does not assess or reveal correctness until the deliberate whole-exercise Check action.
+- Retain the ordinary tappable directions, word bank, POS tags, and source definition/example cards. Use the original academic task, not a simplified multiple-choice paraphrase.
+
+### Feedback
+
+- Use the default **three whole-worksheet checks** against an **edition-matched and verified publisher/teacher answer key**. Check all forty sentence judgments in one action for a ten-group exercise; a group is not an indivisible question for scoring.
+- On a check, distinguish **correct**, **answered but needs review**, and **unanswered** for **each individual sentence**. An untouched sentence remains unanswered even if another sentence in that group has an answer.
+- Display a concept-specific hint about the vocabulary word's meaning for a needs-review judgment, without revealing the correct C/I label. Do not mark an answer correct immediately upon selection.
+- Do not infer an answer key from a sentence's apparent plausibility if source verification is available. Use adult review only as an explicit, documented fallback when a reliable key cannot be established.
+
+### Progress + persistence
+
+- Count completion per individual sentence judgment (e.g., `14 / 40 answered`); optionally show ten group-level progress pips that fill when all four answers in the group have been selected.
+- Persist all letter responses, remaining-check count, reviewed states, and revision flags in a part-specific `localStorage` key. Editing a reviewed sentence clears its stale status only, and does not reset review chances.
+- Include double-tap Clear all responses and Export / Print.
+
+### Export / Print
+
+- Recreate all numbered groups and their four complete printed sentences, with the vocabulary word **bold** in each sentence and the headword before the group.
+- Show each student's chosen `C` or `I` on that sentence's answer line using bold + underline. Leave unanswered lines blank. Omit interactive button outlines, review statuses, and publisher-key markings.
+
+**Reference implementation:** `worksheets/christina/2026-10-26-wordly-wise-lesson-6a-using-words-in-context.html`.
+
+---
+
+## Type 11: Vocabulary Word Study — Latin Roots with Shared Previous-Lesson Bank
+
+*Wordly Wise “Word Study: Word Parts” style: the student completes printed sentences by identifying vocabulary from earlier lessons using a parenthetical Latin prefix/root explanation.*
+
+**Use case:** Sentence completion requires understanding and retrieval of prior vocabulary. A shared word reference reduces the recall and transcription barrier while preserving the need to apply root clues, word meaning, and sentence grammar. This is not question-by-question multiple choice.
+
+### Layout + source fidelity
+
+- Preserve all printed sentence stems, blanks, question numbers, and parenthetical root explanations. Do not reduce or rewrite the original Latin evidence or academic demand.
+- Make the directions, full sentence, and root explanation separately tappable for read-aloud; the per-card green `▶` reads the full current sentence, with the selected word inserted.
+- Place an alphabetized **previous-lesson reference bank at the top, collapsed by default**. Use the same yellow vocabulary word buttons, POS tags, source-definition modal cards, Definition/Example labeling, and card-level read-aloud as the weekly lesson word banks.
+- Tapping a word in this top bank opens **only its definition and example**; it must never fill a blank, change the active question, mark a word used, update progress, or consume a check. Keep the reference word bank independent of the answer picker even if both show the same words.
+- Include the needed answer forms and enough verified previous-lesson distractors to require meaningful comparison (Lesson 7D uses 30 shared choices: ten answers and 20 distractors from earlier lessons). Use previous-lesson source definitions and examples where available; if absent, clearly identify any supplementary outside-dictionary reference rather than presenting it as publisher wording.
+- Do not replace the common bank with four targeted choices per question, filter to a handful of candidates based on the clue, or display a per-question answer hint in the bank.
+
+### Answer control
+
+- **Only tapping a missing-word blank within a numbered exercise opens the answer-selection dialog.** Its words are actual selectable choices; those in the top reference bank are not.
+- The blank's dialog shows the full shared set of choices every time; retain used words unless the printed source requires unique usage. A subtle `used` marker is permitted in this answer picker, but never in a way that reveals correctness.
+- Selecting a word in the **blank's dialog** fills that blank, closes the dialog, preserves source capitalization, and automatically reads the completed sentence after approximately 300ms. The student can reopen the same blank to revise.
+- Keep root-clue read-aloud independent of word selection. Listening, opening the top reference, or viewing any definition never fills a blank or consumes a check.
+- Retain the reference disclosure's expanded state during same-page answer updates where practical; always default closed on a fresh page load. Keep the worksheet's existing `localStorage` key and responses when making this UI-only correction.
+
+### Feedback + progress
+
+- Use a source-verified teacher/publisher key for three whole-worksheet checks. Compare the student's selected word/form to the corresponding printed answer, ignoring capitalization only where appropriate.
+- An incorrect selection receives a conceptual reminder to review the prefix or Latin root **after checking**; never expose the target word as the hint or show instant correctness upon selection.
+- Persist all selections, check attempts, and per-question review states in a part-specific `localStorage` key. Use neutral completion pips until checking; editing one answer clears only its own stale status.
+- Provide double-tap Clear all responses and Export / Print. Print each original sentence and root explanation, showing only the student's selected word in the blank as bold + underline, without revealing a teacher key.
+
+**Reference implementation:** `worksheets/christina/2026-11-02-wordly-wise-lesson-7d-word-study-word-parts.html` with matching published mirror `docs/worksheets/2026-11-02-wordly-wise-lesson-7d-word-study-word-parts.html`.
