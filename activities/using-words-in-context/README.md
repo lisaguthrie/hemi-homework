@@ -16,6 +16,13 @@ Open `template.html` and edit only the JSON in the `activityConfig` block near t
 
 The activity automatically lays out every sentence, updates progress, provides tap-to-speak, checks answers, and stores progress locally in the browser.
 
+## Checking, pips, and adult unlock
+
+- One progress pip per vocabulary word: gray = not started or incomplete, blue = answered but unchecked (or changed since the last check), green = all sentences checked and correct, red = checked with at least one incorrect. Each pip has a text label for screen readers and hover.
+- `meta.maxChecks` (default 3) checks are allowed. After that, answers stay editable but checking is disabled until an adult uses the **🔒 Adult: add one check** button and enters the code. Each correct code grants exactly one more check; the used-check count is never reset.
+- Checking with unanswered sentences shows a **Keep working / Check anyway** warning; the warning alone never spends a check.
+- **Clear answers** uses double-tap confirmation and also clears any adult-granted checks.
+
 ## Christina accessibility choices
 
 - Tappable vocabulary word reads the word and definition.

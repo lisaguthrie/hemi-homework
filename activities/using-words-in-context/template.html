@@ -16,7 +16,13 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
 .progress{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
 .pips{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
 .pip{width:13px;height:13px;border-radius:50%;background:#d8e0e8}
-.pip.done{background:#56ad75}.pip.active{background:#398ec4}
+.pip.answered{background:#8cc3ec;border:1px solid #5a9fd0}.pip.correct{background:#56ad75;border:1px solid #2da65a}.pip.attention{background:#e85d4f;border:1px solid #c0392b}
+.adult-unlock-btn,.adult-code-action{min-height:44px;padding:8px 14px;border:2px solid #b6c9d9;border-radius:11px;background:#f7fbff;color:var(--blue);font:inherit;font-weight:800;cursor:pointer}
+.adult-unlock-panel{padding:12px;border:2px solid #cfe2ef;border-radius:12px;background:#fbfdff}
+.adult-unlock-panel[hidden],.adult-unlock-btn[hidden]{display:none}
+.adult-code-input{display:block;min-height:44px;width:min(100%,220px);margin:6px 0 10px;padding:8px 10px;border:2px solid var(--blue);border-radius:9px;font:inherit}
+.warning{padding:12px;border:2px solid #e8ad5e;border-radius:11px;background:#fff4df;color:#784216}
+.warning[hidden]{display:none}
 #progressText{font-size:.9rem;color:var(--blue)}
 .word-card{display:grid;gap:12px}
 .word-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -61,6 +67,21 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
     <button class="action secondary" id="resetButton" type="button">Clear answers</button>
     <button class="action secondary" id="printButton" type="button">Print</button>
   </section>
+  <section class="warning" id="incompleteWarning" role="status" aria-live="polite" hidden>
+    <div id="missingText"></div>
+    <div class="actions" style="margin-top:9px">
+      <button class="action secondary" id="keepWorking" type="button">Keep working</button>
+      <button class="action secondary" id="checkAnyway" type="button">Check anyway · use 1 check</button>
+    </div>
+  </section>
+  <button id="adultUnlockButton" class="adult-unlock-btn" type="button" hidden aria-expanded="false" aria-controls="adultUnlockPanel">🔒 Adult: add one check</button>
+  <div id="adultUnlockPanel" class="adult-unlock-panel" hidden>
+    <label for="adultCheckCode">Adult code</label>
+    <input id="adultCheckCode" class="adult-code-input" type="password" inputmode="numeric" autocomplete="off" aria-describedby="adultUnlockMessage">
+    <button class="adult-code-action" id="adultUnlockSubmit" type="button">Unlock one check</button>
+    <button class="adult-code-action" id="adultUnlockCancel" type="button">Cancel</button>
+    <p id="adultUnlockMessage" role="status" aria-live="polite"></p>
+  </div>
   <p class="note">Choose C if the vocabulary word is used correctly. Choose I if it is not. You can change an answer before checking.</p>
   <div id="complete" class="hidden" role="status" aria-live="polite"></div>
 </main>
@@ -104,9 +125,12 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
   const total = words.reduce((n, w) => n + (Array.isArray(w.sentences) ? w.sentences.length : 0), 0);
   const key = meta.storageKey || "using_words_in_context_v1";
   const maxChecks = Number(meta.maxChecks || 3);
+  const ADULT_UNLOCK_CODE = "17931793"; // Public in source; not visible in the normal UI.
   let checks = 0;
+  let extraChecks = 0;
   let answers = {};
-  let checked = false;
+  let statuses = {};  // id -> "correct" | "attention" | "unanswered" (absent = unchecked)
+  let revised = {};   // id -> true when changed since the last check
 
   const $ = id => document.getElementById(id);
   const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -128,14 +152,17 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
   const items = flatItems();
 
   function save() {
-    try { localStorage.setItem(key, JSON.stringify({answers, checks})); } catch (_) {}
+    try { localStorage.setItem(key, JSON.stringify({answers, checks, extraChecks, statuses, revised})); } catch (_) {}
   }
   function restore() {
     try {
       const saved = JSON.parse(localStorage.getItem(key) || "{}");
       answers = saved.answers && typeof saved.answers === "object" ? saved.answers : {};
       checks = Number(saved.checks || 0);
-    } catch (_) { answers = {}; checks = 0; }
+      extraChecks = Number.isSafeInteger(saved.extraChecks) && saved.extraChecks > 0 ? saved.extraChecks : 0;
+      statuses = saved.statuses && typeof saved.statuses === "object" ? saved.statuses : {};
+      revised = saved.revised && typeof saved.revised === "object" ? saved.revised : {};
+    } catch (_) { answers = {}; checks = 0; extraChecks = 0; statuses = {}; revised = {}; }
   }
   function render() {
     $("pageTitle").textContent = meta.title || "Using Words in Context";
@@ -149,7 +176,7 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
         const rows = (word.sentences || []).map((sentence, si) => {
           const id = `${wi}-${si}`;
           const selected = answers[id] || "";
-          const status = checked ? feedbackFor(id) : "";
+          const status = statuses[id] && !revised[id] ? feedbackFor(id) : (revised[id] ? "Changed since your last check" : "");
           return `<div class="sentence-row">
             <div class="row-top">
               <span class="letter">(${String.fromCharCode(97 + si)})</span>
@@ -159,7 +186,7 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
               <button class="choice" type="button" data-id="${escapeHTML(id)}" data-answer="C" aria-pressed="${selected==="C"}">C · Correct</button>
               <button class="choice" type="button" data-id="${escapeHTML(id)}" data-answer="I" aria-pressed="${selected==="I"}">I · Incorrect</button>
             </div>
-            <div class="status ${status ? (isCorrect(id) ? "good" : "hint") : ""}" id="status-${escapeHTML(id)}" aria-live="polite">${escapeHTML(status)}</div>
+            <div class="status ${statuses[id] === "correct" && !revised[id] ? "good" : (statuses[id] === "attention" && !revised[id] ? "hint" : "")}" id="status-${escapeHTML(id)}" aria-live="polite">${escapeHTML(status)}</div>
           </div>`;
         }).join("");
         return `<section class="word-card">
@@ -170,8 +197,57 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
       }).join("");
     }
     updateProgress();
-    $("checkButton").disabled = checks >= maxChecks || checked;
-    $("checkButton").textContent = checked ? "Answers checked" : `Check answers · ${Math.max(0,maxChecks-checks)} checks left`;
+    const finished = allVerified();
+    const exhausted = checks >= allowedChecks();
+    const left = Math.max(0, allowedChecks() - checks);
+    $("checkButton").disabled = exhausted || finished;
+    $("checkButton").textContent = finished ? "✅ All answers correct" : `Check answers · ${left} ${left === 1 ? "check" : "checks"} left`;
+    $("adultUnlockButton").hidden = finished || !exhausted;
+    if (finished || !exhausted) cancelAdultUnlock();
+  }
+  function allowedChecks() { return maxChecks + extraChecks; }
+  function allVerified() {
+    return items.length > 0 && items.every(x => statuses[x.id] === "correct" && !revised[x.id]);
+  }
+  function openAdultUnlock() {
+    if (checks < allowedChecks() || allVerified()) return;
+    $("adultUnlockMessage").textContent = "";
+    $("adultCheckCode").value = "";
+    $("adultUnlockPanel").hidden = false;
+    $("adultUnlockButton").setAttribute("aria-expanded", "true");
+    $("adultCheckCode").focus();
+  }
+  function cancelAdultUnlock() {
+    $("adultUnlockPanel").hidden = true;
+    $("adultCheckCode").value = "";
+    $("adultUnlockMessage").textContent = "";
+    $("adultUnlockButton").setAttribute("aria-expanded", "false");
+  }
+  function grantOneMoreCheck() {
+    if (checks < allowedChecks() || allVerified()) return;
+    if ($("adultCheckCode").value !== ADULT_UNLOCK_CODE) {
+      $("adultUnlockMessage").textContent = "Code not recognized.";
+      $("adultCheckCode").value = "";
+      $("adultCheckCode").focus();
+      return;
+    }
+    extraChecks++; // Exactly one more check; checks is never reset.
+    save();
+    cancelAdultUnlock();
+    render();
+  }
+  function runCheck() {
+    if (checks >= allowedChecks() || allVerified()) return;
+    checks++;
+    items.forEach(x => { statuses[x.id] = !answers[x.id] ? "unanswered" : (isCorrect(x.id) ? "correct" : "attention"); });
+    revised = {};
+    $("incompleteWarning").hidden = true;
+    save();
+    render();
+    const correct = items.filter(x => isCorrect(x.id)).length;
+    $("complete").classList.remove("hidden");
+    $("complete").textContent = `${correct} of ${total} correct. Review the hints, then change any answer you want to reconsider.`;
+    speak(`${correct} of ${total} correct.`);
   }
   function isCorrect(id) {
     const item = items.find(x => x.id === id);
@@ -186,7 +262,19 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
   }
   function updateProgress() {
     const count = Object.keys(answers).filter(k => answers[k] === "C" || answers[k] === "I").length;
-    $("pips").innerHTML = items.map((item, i) => `<span class="pip ${answers[item.id] ? "done" : ""}" title="Sentence ${i+1}"></span>`).join("");
+    // One pip per vocabulary word: gray = not started/unanswered, blue = answered but unchecked or changed,
+    // green = all checked and correct, red = checked with at least one incorrect.
+    $("pips").innerHTML = words.map((word, wi) => {
+      const group = items.filter(x => x.wordIndex === wi);
+      const st = group.map(x => (revised[x.id] ? "" : statuses[x.id] || ""));
+      let cls = "", label = "not started";
+      if (group.length && st.every(v => v !== "")) {
+        if (st.every(v => v === "correct")) { cls = "correct"; label = "correct"; }
+        else if (st.includes("attention")) { cls = "attention"; label = "incorrect, needs another look"; }
+        else { label = "unanswered or incomplete"; }
+      } else if (group.some(x => answers[x.id])) { cls = "answered"; label = "answered, not yet checked"; }
+      return `<span class="pip ${cls}" title="${escapeHTML(word.word)}: ${label}" aria-label="${escapeHTML(word.word)}: ${label}"></span>`;
+    }).join("");
     $("progressText").textContent = `${count} / ${total} answered`;
   }
   $("instructions").addEventListener("click", () => speak(meta.instructions || ""));
@@ -196,10 +284,13 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
     const sentence = event.target.closest("[data-sentence]");
     if (sentence) { const item = items.find(x => x.id === sentence.dataset.sentence); if (item) speak(item.sentence.text); return; }
     const choice = event.target.closest("[data-id][data-answer]");
-    if (choice && checks < maxChecks) {
+    if (choice) {
       const id = choice.dataset.id;
+      if (answers[id] === choice.dataset.answer) return;
       answers[id] = choice.dataset.answer;
-      checked = false;
+      if (checks > 0) { delete statuses[id]; revised[id] = true; }
+      $("incompleteWarning").hidden = true;
+      $("complete").classList.add("hidden");
       save();
       render();
       const item = items.find(x => x.id === id);
@@ -214,27 +305,37 @@ h1{margin:0;text-align:center;color:var(--blue);font-size:1.8rem}
     }
   });
   $("checkButton").addEventListener("click", () => {
-    if (checks >= maxChecks) return;
+    if (checks >= allowedChecks() || allVerified()) return;
     const missing = items.filter(x => !answers[x.id]);
     if (missing.length) {
-      $("complete").classList.remove("hidden");
-      $("complete").textContent = `There are ${missing.length} sentence${missing.length===1?"":"s"} still to answer. You can check now or keep working.`;
+      $("missingText").textContent = `${missing.length} sentence${missing.length===1?"":"s"} still to answer. Keep working or use one check to review every answer.`;
+      $("incompleteWarning").hidden = false;
       return;
     }
-    checks++;
-    checked = true;
-    save();
-    render();
-    const correct = items.filter(x => isCorrect(x.id)).length;
-    $("complete").classList.remove("hidden");
-    $("complete").textContent = `${correct} of ${total} correct. Review the hints, then ask an adult to reset the activity if you want another attempt.`;
-    speak(`${correct} of ${total} correct.`);
+    runCheck();
+  });
+  $("keepWorking").addEventListener("click", () => { $("incompleteWarning").hidden = true; });
+  $("checkAnyway").addEventListener("click", runCheck);
+  $("adultUnlockButton").addEventListener("click", openAdultUnlock);
+  $("adultUnlockSubmit").addEventListener("click", grantOneMoreCheck);
+  $("adultUnlockCancel").addEventListener("click", cancelAdultUnlock);
+  $("adultCheckCode").addEventListener("keydown", event => {
+    if (event.key === "Enter") { event.preventDefault(); grantOneMoreCheck(); }
   });
   $("resetButton").addEventListener("click", () => {
-    if (!window.confirm("Clear all answers and checks for this activity?")) return;
-    answers = {}; checks = 0; checked = false;
+    const btn = $("resetButton");
+    if (btn.dataset.confirming !== "true") { // Double-tap confirmation, never confirm().
+      btn.dataset.confirming = "true";
+      btn.textContent = "⚠️ Tap again to confirm";
+      setTimeout(() => { btn.dataset.confirming = "false"; btn.textContent = "Clear answers"; }, 3000);
+      return;
+    }
+    btn.dataset.confirming = "false";
+    btn.textContent = "Clear answers";
+    answers = {}; checks = 0; extraChecks = 0; statuses = {}; revised = {};
     try { localStorage.removeItem(key); } catch (_) {}
     $("complete").classList.add("hidden");
+    $("incompleteWarning").hidden = true;
     render();
   });
   $("printButton").addEventListener("click", () => window.print());

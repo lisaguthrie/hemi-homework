@@ -1707,7 +1707,7 @@ select.add(new Option('Choose a different word…', INDEPENDENT_WORD));
 - A nonempty response plus either an assigned family or the sentinel counts as *response-complete*, not correct; adult review checks the word is actually used and the printed “use each word only once” requirement is honored.
 - Save the choice and text separately; when exporting, label the sentinel `Chosen in written response` rather than printing it as though it were a vocabulary word.
 
-**Reference implementation:** `worksheets/christina/2026-10-19-wordly-wise-lesson-5e-vocabulary-in-context.html`.
+**Reference implementation:** `worksheets/christina/archive/2026-10-19-wordly-wise-lesson-5e-vocabulary-in-context.html`.
 
 ### Part-of-Speech tags in vocabulary banks
 
@@ -1763,6 +1763,46 @@ readButton.onclick = () => {
   speak(buildDefinitionSpeech(paragraph.label, parts.definition, parts.example));
 };
 ```
+
+#### Tap-to-read individual parts
+
+In addition to the ▶ button (which reads the whole card), each **Definition** row and each **Example** row is itself a tap target that reads only that part. The tappable area includes the visible `Definition` / `Example` label plus its text, but the spoken string is **only the text** — never the label word.
+
+```javascript
+// Each row is a <button> (or role="button" tabindex="0" element) so it is keyboard- and touch-accessible.
+function makePartRow(labelText, partText, className) {
+  const row = document.createElement('button');
+  row.type = 'button';
+  row.className = 'definition-part ' + className;   // min-height: 44px
+  row.setAttribute('aria-label', 'Read ' + labelText.toLowerCase() + ' aloud');
+  row.innerHTML =
+    '<span class="definition-part-label"></span><span class="definition-part-text"></span>';
+  row.querySelector('.definition-part-label').textContent = labelText;
+  row.querySelector('.definition-part-text').textContent = partText;
+  row.onclick = () => speak(partText);               // text only — no "Definition"/"Example" prefix
+  return row;
+}
+
+card.append(
+  makePartRow('Definition', parts.definition, 'definition-part-def'),
+  parts.example ? makePartRow('Example', parts.example, 'definition-part-example') : ''
+);
+```
+
+```css
+.definition-part {
+  display: flex; gap: 10px; align-items: baseline;
+  width: 100%; min-height: 44px; padding: 6px 8px;
+  background: none; border: none; border-radius: 8px;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.definition-part:hover, .definition-part:focus-visible { background: rgba(124,92,191,0.10); }
+.definition-part-label { font-weight: 700; flex: 0 0 auto; }
+```
+
+- The whole-card ▶ still speaks label, `Definition:` and `Example:` as above; the per-part taps speak the bare text only.
+- `speak()` must cancel any in-progress speech first so taps never overlap.
+- Do not change the displayed wording; row buttons only add tap-to-read behavior.
 
 Keep the source wording unchanged; this pattern changes only presentation and speech punctuation.
 

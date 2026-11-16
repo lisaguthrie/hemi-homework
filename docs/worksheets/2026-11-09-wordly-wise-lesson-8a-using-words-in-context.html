@@ -225,7 +225,9 @@
     }
     .pips { display: flex; gap: 6px; flex-wrap: wrap; }
     .pip { width: 15px; height: 15px; border: 1px solid #c4ced6; border-radius: 50%; background: #dce0e8; }
-    .pip.done { border-color: #2da65a; background: var(--green); }
+    .pip.answered { border-color: #5a9fd0; background: #8cc3ec; }
+    .pip.correct { border-color: #2da65a; background: var(--green); }
+    .pip.attention { border-color: #c0392b; background: #e85d4f; }
     .check-panel { margin: 12px 0; padding: 15px; }
     .check-panel p { margin: 3px 0 8px; color: var(--muted); font-weight: 800; }
     .action-btn, .export-btn, .clear-btn, .warning-btn {
@@ -251,6 +253,36 @@
     }
     .warning-actions { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 9px; }
     .warning-btn { border: 2px solid #b88a4d; background: white; color: #654217; }
+    .adult-unlock-btn, .adult-code-action {
+      min-height: 44px;
+      padding: 8px 14px;
+      border: 2px solid #b6c9d9;
+      border-radius: 11px;
+      background: #f7fbff;
+      color: var(--blue);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .adult-unlock-btn { margin-top: 10px; }
+    .adult-unlock-panel {
+      margin-top: 10px;
+      padding: 12px;
+      border: 2px solid #cfe2ef;
+      border-radius: 12px;
+      background: #fbfdff;
+    }
+    .adult-unlock-panel[hidden], .adult-unlock-btn[hidden] { display: none; }
+    .adult-code-input {
+      display: block;
+      min-height: 44px;
+      width: min(100%, 220px);
+      margin: 6px 0 10px;
+      padding: 8px 10px;
+      border: 2px solid var(--blue);
+      border-radius: 9px;
+      font: inherit;
+    }
     .check-actions, .footer-actions { display: flex; gap: 10px; flex-wrap: wrap; }
     .footer-actions { margin: 14px 0; }
     .speaking-toast {
@@ -410,6 +442,16 @@
           <button class="warning-btn" id="checkAnyway" type="button">Check anyway · use 1 check</button>
         </div>
       </div>
+      <button id="adultUnlockButton" class="adult-unlock-btn" type="button" hidden
+              aria-expanded="false" aria-controls="adultUnlockPanel">🔒 Adult: add one check</button>
+      <div id="adultUnlockPanel" class="adult-unlock-panel" hidden>
+        <label for="adultCheckCode">Adult code</label>
+        <input id="adultCheckCode" class="adult-code-input" type="password"
+               inputmode="numeric" autocomplete="off" aria-describedby="adultUnlockMessage">
+        <button class="adult-code-action" id="adultUnlockSubmit" type="button">Unlock one check</button>
+        <button class="adult-code-action" id="adultUnlockCancel" type="button">Cancel</button>
+        <p id="adultUnlockMessage" role="status" aria-live="polite"></p>
+      </div>
     </section>
 
     <div class="footer-actions screen-only">
@@ -430,6 +472,7 @@
   <script>
     const STORAGE_KEY = 'worksheet_wordly_wise_lesson_8a_christina_2026_11_09_v1';
     const MAX_CHECKS = 3;
+    const ADULT_UNLOCK_CODE = '17931793'; // Public in source; not visible in the normal UI.
     const SPEECH_RATE = 0.88;
     const SPEECH_PITCH = 1.05;
 
@@ -546,7 +589,7 @@
       ] },
       { word: 'skirmish', hint: 'A skirmish is a minor fight or battle; to skirmish is to take part in such a fight.', sentences: [
         { text: 'My mom always has skirmishes with my brother about how late he can stay out.', target: 'skirmishes', answer: 'C' },
-        { text: 'The two sides skirmished all night.', target: 'skirmished', answer: 'I' },
+        { text: 'The two sides skirmished all night.', target: 'skirmished', answer: 'C' },
         { text: 'We were skirmished after the long drive.', target: 'skirmished', answer: 'I' },
         { text: 'I skirmished with the idea of going but then decided to stay.', target: 'skirmished', answer: 'I' }
       ] },
@@ -569,6 +612,7 @@
       return {
         answers: Array.from({ length: ITEM_COUNT }, () => ''),
         checksUsed: 0,
+        extraChecksGranted: 0,
         statuses: Array.from({ length: ITEM_COUNT }, () => ''),
         revised: Array.from({ length: ITEM_COUNT }, () => false)
       };
@@ -624,12 +668,16 @@
         const valid = saved &&
           Array.isArray(saved.answers) && saved.answers.length === ITEM_COUNT &&
           saved.answers.every(answer => ['', 'C', 'I'].includes(answer)) &&
-          Number.isInteger(saved.checksUsed) && saved.checksUsed >= 0 && saved.checksUsed <= MAX_CHECKS &&
+          Number.isInteger(saved.checksUsed) && saved.checksUsed >= 0 &&
+          (saved.extraChecksGranted === undefined ||
+            (Number.isInteger(saved.extraChecksGranted) && saved.extraChecksGranted >= 0)) &&
+          saved.checksUsed <= MAX_CHECKS + (saved.extraChecksGranted || 0) &&
           Array.isArray(saved.statuses) && saved.statuses.length === ITEM_COUNT &&
           saved.statuses.every(status => ['', 'correct', 'attention', 'unanswered'].includes(status)) &&
           Array.isArray(saved.revised) && saved.revised.length === ITEM_COUNT &&
           saved.revised.every(value => typeof value === 'boolean');
         if (!valid) throw new Error('Saved answers do not match this worksheet version.');
+        saved.extraChecksGranted = saved.extraChecksGranted || 0;
         return saved;
       } catch (error) {
         storageIssue = `Saved responses could not be loaded: ${error.message}`;
@@ -789,6 +837,7 @@
 
     function updateAllStatuses() {
       for (let index = 0; index < ITEM_COUNT; index++) paintStatus(index);
+      updateProgress();
       updateCheckPanel();
     }
 
@@ -796,8 +845,19 @@
       const answered = state.answers.filter(Boolean).length;
       document.getElementById('progressText').textContent = `${answered} / ${ITEM_COUNT} answered`;
       document.getElementById('pips').innerHTML = GROUPS.map((group, groupIndex) => {
-        const complete = group.sentences.every((_, sentenceIndex) => state.answers[groupIndex * 4 + sentenceIndex]);
-        return `<span class="pip ${complete ? 'done' : ''}" title="Question ${groupIndex + 1}"></span>`;
+        const indices = group.sentences.map((_, sentenceIndex) => groupIndex * 4 + sentenceIndex);
+        const statuses = indices.map(index => state.statuses[index]);
+        let pipClass = '';
+        let label = 'not started';
+        if (statuses.every(status => status !== '')) { // Checked and not edited since.
+          if (statuses.every(status => status === 'correct')) { pipClass = 'correct'; label = 'correct'; }
+          else if (statuses.includes('attention')) { pipClass = 'attention'; label = 'incorrect, needs another look'; }
+          else { label = 'unanswered or incomplete'; }
+        } else if (indices.some(index => state.answers[index])) {
+          pipClass = 'answered';
+          label = 'answered, not yet checked';
+        }
+        return `<span class="pip ${pipClass}" title="Question ${groupIndex + 1}: ${label}" aria-label="Question ${groupIndex + 1}: ${label}"></span>`;
       }).join('');
       for (let index = 0; index < ITEM_COUNT; index++) {
         const answer = state.answers[index];
@@ -812,12 +872,53 @@
         state.revised.every(value => !value);
     }
 
+    function allowedChecks() {
+      return MAX_CHECKS + state.extraChecksGranted;
+    }
+
     function updateCheckPanel() {
       const button = document.getElementById('checkButton');
-      button.disabled = state.checksUsed >= MAX_CHECKS || allCorrect();
-      button.textContent = allCorrect() ? '✅ All responses correct' : 'Check all responses';
-      const remaining = MAX_CHECKS - state.checksUsed;
+      const finished = allCorrect();
+      const exhausted = state.checksUsed >= allowedChecks();
+      button.disabled = exhausted || finished;
+      button.textContent = finished ? '✅ All responses correct' : 'Check all responses';
+      const remaining = Math.max(0, allowedChecks() - state.checksUsed);
       document.getElementById('checksRemaining').textContent = `${remaining} ${remaining === 1 ? 'check' : 'checks'} left`;
+      document.getElementById('adultUnlockButton').hidden = finished || !exhausted;
+      if (finished || !exhausted) cancelAdultUnlock();
+    }
+
+    function openAdultUnlock() {
+      if (state.checksUsed < allowedChecks() || allCorrect()) return;
+      const input = document.getElementById('adultCheckCode');
+      document.getElementById('adultUnlockMessage').textContent = '';
+      input.value = '';
+      document.getElementById('adultUnlockPanel').hidden = false;
+      document.getElementById('adultUnlockButton').setAttribute('aria-expanded', 'true');
+      input.focus();
+    }
+
+    function cancelAdultUnlock() {
+      document.getElementById('adultUnlockPanel').hidden = true;
+      document.getElementById('adultCheckCode').value = '';
+      document.getElementById('adultUnlockMessage').textContent = '';
+      document.getElementById('adultUnlockButton').setAttribute('aria-expanded', 'false');
+    }
+
+    function grantOneMoreCheck() {
+      if (state.checksUsed < allowedChecks() || allCorrect()) return;
+      const input = document.getElementById('adultCheckCode');
+      if (input.value !== ADULT_UNLOCK_CODE) {
+        document.getElementById('adultUnlockMessage').textContent = 'Code not recognized.';
+        input.value = '';
+        input.focus();
+        return;
+      }
+      state.extraChecksGranted++; // Exactly one more check; checksUsed is never reset.
+      saveState();
+      cancelAdultUnlock();
+      updateCheckPanel();
+      setLive('One more check unlocked.');
     }
 
     function setAnswer(index, value) {
@@ -855,7 +956,7 @@
     }
 
     function checkAll() {
-      if (state.checksUsed >= MAX_CHECKS || allCorrect()) return;
+      if (state.checksUsed >= allowedChecks() || allCorrect()) return;
       state.checksUsed++;
       state.statuses = flatItems().map((item, index) => {
         if (!state.answers[index]) return 'unanswered';
@@ -866,7 +967,7 @@
       saveState();
       updateAllStatuses();
       const correct = state.statuses.filter(status => status === 'correct').length;
-      setLive(`${correct} of ${ITEM_COUNT} responses are correct. ${MAX_CHECKS - state.checksUsed} checks left.`);
+      setLive(`${correct} of ${ITEM_COUNT} responses are correct. ${allowedChecks() - state.checksUsed} checks left.`);
     }
 
     function clearAllResponses() {
@@ -938,7 +1039,7 @@
         }
       });
       document.getElementById('checkButton').addEventListener('click', () => {
-        if (state.checksUsed >= MAX_CHECKS || allCorrect()) return;
+        if (state.checksUsed >= allowedChecks() || allCorrect()) return;
         const missing = incompleteIndices();
         if (missing.length) {
           showIncompleteWarning(missing);
@@ -951,6 +1052,12 @@
         setLive('Keep working on the unanswered sentences.');
       });
       document.getElementById('checkAnyway').addEventListener('click', checkAll);
+      document.getElementById('adultUnlockButton').addEventListener('click', openAdultUnlock);
+      document.getElementById('adultUnlockSubmit').addEventListener('click', grantOneMoreCheck);
+      document.getElementById('adultUnlockCancel').addEventListener('click', cancelAdultUnlock);
+      document.getElementById('adultCheckCode').addEventListener('keydown', event => {
+        if (event.key === 'Enter') { event.preventDefault(); grantOneMoreCheck(); }
+      });
       document.getElementById('clearButton').addEventListener('click', clearAllResponses);
       document.getElementById('printButton').addEventListener('click', () => window.print());
       document.getElementById('closeDialog').addEventListener('click', () => document.getElementById('definitionDialog').close());
