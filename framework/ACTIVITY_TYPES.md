@@ -144,9 +144,9 @@ Example: `activities/proofreading/christina/2026-04-20-polar-bears.html`
 
 ---
 
-## Wordly Wise activities (Activities 2–4)
+## Wordly Wise activities (Activities 2–9)
 
-Activities 2–4 share one pattern: a Wordly Wise lesson section (8A, 8B, 8C, …) delivered as a **template-driven activity** instead of a rebuilt worksheet. Each has `template.html` plus a `README.md` in `activities/{type}/`. The rules are the same as for proofreading:
+Activities 2–9 share one pattern: a Wordly Wise lesson section (8A, 8B, 8C, …) delivered as a **template-driven activity** instead of a rebuilt worksheet. Each has `template.html` plus a `README.md` in `activities/{type}/`. The rules are the same as for proofreading:
 
 - Copy `template.html` as-is — never a prior instance — and edit **only the JSON in the `<script type="application/json" id="activityConfig">` block**. Do not change HTML, CSS, or JS.
 - `meta.storageKey` must be unique per instance (progress autosaves under it). Pattern: `ww{book}_lesson_{N}{letter}_{type}_{child}_{YYYY_MM_DD}_v1`.
@@ -236,7 +236,62 @@ Output path: `activities/vocabulary-in-context/{child}/YYYY-MM-DD-wordly-wise-le
 
 Reference instance: none yet; the template ships with Lesson 7E content (from `worksheets/christina/archive/2026-11-02-wordly-wise-lesson-7e-vocabulary-in-context.html`).
 
-### Shared built-in behaviour (Activities 3 and 4)
+### Activity 7: Finding Meanings
+
+**Template:** `activities/finding-meanings/template.html` (see its `README.md`)
+
+Shape: the "A" section of a Wordly Wise lesson. Each item offers four phrases; the student picks the **two** that join into a sentence correctly using a lesson word.
+
+Config:
+- `meta` — `lessonLabel`, `title`, `instructions`, `wordListLabel`, `storageKey`, `backHref`, `backLabel`, `bookLabel`, `printTitle`, `studentName`
+- `words[]` — `word` + `senses[]` (`form`, `pos` of `n`/`v`/`adj`, `num`, `definition`, `example`); powers the word bank and tap-for-definition. Include every word in the lesson's word bank.
+- `formPairs` — word → inflected forms that should be tappable
+- `questions[]` — `[[4 phrases in printed order], "two answer letters", hint]`, e.g. `"ba"` (order irrelevant)
+
+Behaviour: pick exactly two phrases; the assembled sentence previews and is read aloud; 3 checks, progress pips, adult-unlockable extra check, autosave, double-tap Clear, Export / Print (shared behaviour below).
+
+Output path: `activities/finding-meanings/{child}/YYYY-MM-DD-wordly-wise-lesson-{N}a-finding-meanings.html`.
+
+Reference instance: none yet; the template ships with Lesson 7A content (from `worksheets/christina/archive/2026-11-02-wordly-wise-lesson-7a-finding-meanings.html`).
+
+### Activity 8: Just the Right Word
+
+**Template:** `activities/just-the-right-word/template.html` (see its `README.md`)
+
+Shape: the "B" section of a Wordly Wise lesson. Each sentence contains a bold phrase; the student replaces it with a single lesson word (or a form of one) chosen from a drop-down menu.
+
+Config:
+- `meta` — `lessonLabel`, `title`, `instructions`, `wordListLabel`, `storageKey`, `backHref`, `backLabel`, `bookLabel`, `printTitle`, `studentName`
+- `words[]` — `word` + `senses[]` (`form`, `pos` of `n`/`v`/`adj`/`adv`, `num`, `definition`, `example`); powers the word bank and tap-for-definition. Include every word in the lesson's word bank.
+- `formPairs` — word → inflected forms that should be tappable
+- `answerOptions[]` — the drop-down menu as `[form, pos, family]` rows: every sense form of every lesson word, **plus** each inflected form an answer needs (`exhausted`, `originated`, `punctuated`, …). Same menu for every question.
+- `questions[]` — `[before, phrase, after, answer]` with an optional 5th element for a custom hint. `answer` is lower-case and must appear in `answerOptions`.
+
+Behaviour: the bold phrase is colour-coded by its answer's part of speech; choosing a word swaps it into the sentence, shows the original phrase below, and reads the sentence aloud; 💡 filters the menu to the answer's part of speech; 3 checks, progress pips, adult-unlockable extra check, autosave, double-tap Clear, Export / Print (shared behaviour below).
+
+Output path: `activities/just-the-right-word/{child}/YYYY-MM-DD-wordly-wise-lesson-{N}b-just-the-right-word.html`.
+
+Reference instance: none yet; the template ships with Lesson 7B content (from `worksheets/christina/archive/2026-11-02-wordly-wise-lesson-7b-just-the-right-word.html`).
+
+### Activity 9: Applying Meanings
+
+**Template:** `activities/applying-meanings/template.html` (see its `README.md`)
+
+Shape: the "C" section of a Wordly Wise lesson (Worksheet Type 4). Each question has four lettered choices and **one to four** may be correct; the student taps the letter of every correct answer.
+
+Config:
+- `meta` — `lessonLabel`, `title`, `instructions`, `wordListLabel`, `storageKey`, `backHref`, `backLabel`, `bookLabel`, `printTitle`, `studentName`
+- `words[]` — `word` + `senses[]` (`form`, `pos` of `n`/`v`/`adj`/`adv`, `num`, `definition`, `example`); powers the word bank and tap-for-definition. Include every word in the lesson's word bank.
+- `formPairs` — word → inflected forms that should be tappable; the lesson word in each question must be listed
+- `questions[]` — `[question, [4 choices in printed order], "correct letters", hint]`, e.g. `"bcd"` (order irrelevant). The correct letters come from the edition-matched publisher key, never inferred.
+
+Behaviour: letters toggle independently of the 🔊 buttons; a question is answered once any letter is selected and correct only on an exact set match; lesson words in questions and choices are tappable for definitions; 3 checks, progress pips, adult-unlockable extra check, autosave, double-tap Clear (shared behaviour below). Export / Print follows `Print / Export — Applying Meanings In-Place Selection` in `framework/INTERACTION_PATTERNS.md` (bold lesson word, two-column choices, chosen answers bold + underlined, no key).
+
+Output path: `activities/applying-meanings/{child}/YYYY-MM-DD-wordly-wise-lesson-{N}c-applying-meanings.html`.
+
+Reference instance: none yet; the template ships with Lesson 7C content (from `worksheets/christina/archive/2026-11-02-wordly-wise-lesson-7c-applying-meanings.html`).
+
+### Shared built-in behaviour (Activities 3, 4, 7, 8 and 9)
 
 - Whole-worksheet review with 3 checks; a warning (no check spent) for unanswered items
 - Progress pips: gray unanswered, blue answered/edited, green correct, red needs another look

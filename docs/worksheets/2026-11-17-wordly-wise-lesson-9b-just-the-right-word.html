@@ -1,0 +1,713 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Just the Right Word</title><link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"><style>
+:root{--bg:#e0f4ff;--bg2:#f0e8ff;--ink:#1a2a3a;--muted:#61768b;--blue:#1a6fa8;--line:#d9e8f3;--yellow:#fff3c4;--yellow-line:#e6c800;--green:#5dca7e}
+*{box-sizing:border-box}html{font-size:16px}body{margin:0;min-height:100vh;padding:16px 15px 70px;background:linear-gradient(160deg,var(--bg),var(--bg2));color:var(--ink);font-family:Nunito,Arial,sans-serif;line-height:1.5}
+button,select,textarea,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible,summary:focus-visible,[role=button]:focus-visible{outline:3px solid #7950b6;outline-offset:2px}
+header{max-width:1050px;margin:0 auto 14px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}body.mode-e header{max-width:1320px}
+h1,h2,h3{font-family:'Fredoka One','Arial Rounded MT Bold',Arial,sans-serif;font-weight:400}h1{font-size:1.8rem;margin:2px 0 1px;line-height:1.2}h2{font-size:1.15rem;margin:0}.eyebrow{color:var(--blue);font-weight:900;letter-spacing:.05em;margin:0;font-size:.86rem}.back{background:white;border:2px solid #b9d6e9;border-radius:12px;color:var(--blue);padding:9px 14px;min-height:44px;text-decoration:none;font-weight:900}
+.main{max-width:1050px;margin:auto}body.mode-e .main{max-width:1320px}.instructions{border:2px solid #b8d6f6;background:#e6f3ff;border-radius:13px;color:#174e77;font-weight:850;text-align:left;display:block;width:100%;padding:11px 14px;min-height:48px;margin-bottom:14px}.instructions:hover{background:#d5edff}
+.bank{position:sticky;top:6px;z-index:20;background:rgba(255,255,255,.97);border:2px solid #cfe2ef;border-radius:16px;padding:10px 12px;margin:0 0 14px;box-shadow:0 7px 24px #283f5b20}.bank-title{font-weight:900;color:var(--blue);margin:0 0 9px}.word-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.word-btn{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;min-height:44px;border-radius:10px;border:2px solid var(--yellow-line);background:var(--yellow);font-weight:900;color:#604500;padding:6px 5px;line-height:1.1;font-size:.9rem}.word-btn:hover{background:#ffe58e}.pos{display:inline-flex;min-width:22px;min-height:19px;align-items:center;justify-content:center;padding:1px 4px;border-radius:10px;font-size:.7rem;font-weight:900;border:1px solid #a4acc0}.pos-n{background:#e8f0ff;color:#2457a7;border-color:#b9cdf4}.pos-v{background:#e7f7ed;color:#257044;border-color:#b8dfc5}.pos-adv{background:#f3e8ff;color:#6b3fa0;border-color:#d4b8f0}.pos-adj{background:#fff0df;color:#9a4c00;border-color:#f0c79b}
+.question{border:2px solid var(--line);background:#fff;border-radius:17px;padding:15px 16px;margin:0 0 13px;box-shadow:0 4px 14px #22365515}.question.good{border-color:#66c78a;background:#f8fff9}.question.review{border-color:#e09a7d}.card-top{display:flex;align-items:flex-start;gap:10px}.qnum{font-family:'Fredoka One',Arial,sans-serif;background:#e4f2fd;color:var(--blue);height:42px;min-width:42px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-size:1.15rem}.qbody{flex:1;min-width:0}.q-title{font-weight:850;font-size:1.06rem;line-height:1.52;margin:3px 0 9px}.tools{display:flex;flex-direction:column;gap:7px}.play{border:0;background:var(--green);border-radius:50%;width:44px;height:44px;min-width:44px;color:#0d3a20;font-weight:900;font-size:1.15rem}.play:hover{background:#42b966}.hint-tool{border:2px solid #c8b8e0;background:#f6f0ff;color:#6b4095;width:44px;height:44px;border-radius:11px}.tap{cursor:pointer}.tap:hover{background:#f0f8ff;border-radius:5px}.phrase{font-weight:900;background:#fff0df;border:2px solid #e9ba85;padding:3px 6px;border-radius:7px;color:#68420f}.inline-vocab{display:inline;background:var(--yellow);border:1.6px solid var(--yellow-line);color:#674700;border-radius:7px;padding:0 4px;line-height:inherit;font-size:inherit;font-weight:900;white-space:normal;min-height:34px;vertical-align:baseline}
+.options{display:grid;gap:5px}.opt{display:flex;align-items:center;gap:10px;min-height:48px}.pick{min-height:44px;min-width:50px;border:2px solid #a5c5da;background:#f6fbff;border-radius:10px;font-weight:900;color:#1a6fa8}.pick[aria-pressed=true]{background:#d0f5e0;color:#135c36;border-color:#4db974}.opt-read{min-height:44px;flex:1;text-align:left;background:#f7faff;border:1px solid transparent;border-radius:9px;padding:8px 11px;font-weight:780;color:var(--ink)}.opt-read:hover{border-color:#c5dcf4}.answer-preview{margin:11px 0 0;background:#f3f8fd;padding:9px 12px;border-radius:10px;min-height:40px;font-weight:800}.answer-preview.empty{color:var(--muted);font-weight:650}
+.replacement{margin:10px 0 0;padding:8px 12px;border:2px solid #dee8ef;border-radius:10px;background:#f9fcff}.replacement select{min-height:46px;min-width:min(100%,260px);max-width:100%;border:2px solid #3b9ede;border-radius:10px;padding:8px;background:#e7f4ff;color:var(--blue);font-weight:900}.replaced{font-weight:800;margin-top:10px;padding:9px;background:#f4faff;border-radius:10px}.brief-help{font-size:.85rem;color:var(--muted);margin:8px 0 3px}.status{font-weight:800;border-radius:10px;line-height:1.4;margin:10px 0 0;padding:9px 11px}.status.ok{background:#d0f5e0;color:#1d7a40}.status.needs{background:#ffeedd;color:#9b4c0e}.status.revised{background:#f3f7fa;color:#5a7287}.status.none{display:none}
+.reading-workspace{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:16px}.pane{min-width:0;min-height:0;background:#fff;border:2px solid var(--line);border-radius:17px;box-shadow:0 4px 14px #22365515}.pane-head{display:flex;position:sticky;top:0;z-index:10;background:#fff;justify-content:space-between;align-items:center;gap:9px;padding:13px 15px;border-radius:15px 15px 0 0;border-bottom:1px solid var(--line)}.pane-content{padding:10px 14px 15px}.passage-card{background:#f8fbfe;border:1px solid #dce8f2;padding:11px 12px 10px;border-radius:13px;margin:0 0 13px;display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px}.passage-text{font-size:1.03rem;line-height:1.72}.sentence{cursor:pointer;display:inline}.sentence:hover{background:#eff8ff;border-radius:3px}.sentence:focus-visible{outline:2px solid #7950b6}.reading-bank{border:2px solid #cfe2ef;border-radius:12px;margin:0 0 12px;background:#f9fcff}.reading-bank summary{padding:10px 12px;min-height:44px;font-weight:900;color:var(--blue);cursor:pointer}.reading-bank .word-grid{padding:5px 9px 12px;grid-template-columns:repeat(3,minmax(0,1fr))}.mode-e .question{box-shadow:none}
+textarea{width:100%;min-height:125px;resize:vertical;border:2px solid #b7ccdf;border-radius:11px;padding:12px;font-size:1.03rem;background:#fff;line-height:1.5}textarea:focus{border-color:#3b9ede}.write-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:7px}.secondary{min-height:44px;background:#e6f4ff;border:2px solid #b8d6ed;border-radius:10px;color:var(--blue);font-weight:900;padding:7px 12px}.mic{min-height:44px;background:#3b9ede;border:2px solid #1a6fa8;border-radius:11px;color:white;font-weight:900;padding:7px 11px}.mic.listening{background:#ec6b87;border-color:#d44562}.mic:disabled{opacity:.48}.extra-word{margin:4px 0 9px;font-weight:800;color:#325774}.extra-word select{display:block;margin-top:4px;max-width:100%;min-height:45px;border:2px solid #74b5df;background:#eaf6ff;color:var(--blue);padding:8px;border-radius:11px;font-weight:800}.adult-note{font-size:.88rem;color:#60788a;margin-top:6px}
+.large-bank-open{display:flex;align-items:center;gap:8px;justify-content:center;width:100%;padding:11px 14px;border:2px solid var(--yellow-line);border-radius:13px;background:var(--yellow);font-weight:900;color:#634800;margin-bottom:15px;min-height:49px}.slot{min-height:48px;min-width:140px;max-width:100%;padding:7px 12px;border:2px solid #3b9ede;border-radius:10px;background:#e7f4ff;color:var(--blue);font-weight:900;margin:1px 3px}.slot.filled{background:#fff3c4;border-color:#e6c800;color:#6a4e13}.root-clue{margin-top:11px;padding:11px;background:#f5faff;border:1px solid #d4e7f3;border-radius:11px;font-size:.94rem}.root-title{font-weight:900;font-size:.8rem;color:var(--blue);margin-bottom:3px}.full-sentence{line-height:2.3;font-weight:760;font-size:1.04rem}
+#definitionDlg{border:3px solid #bdd7e9;border-radius:18px;padding:15px;max-width:min(94vw,750px);width:100%;max-height:min(83vh,840px);overflow:auto;box-shadow:0 14px 60px #152d4970}dialog::backdrop{background:#20334bcc}.dialog-heading{display:flex;justify-content:space-between;align-items:center;gap:11px;position:sticky;top:-15px;background:#fff;padding:6px 2px 12px;z-index:2}.close{min-width:85px;min-height:44px;background:#f5faff;border:2px solid #aacadc;border-radius:10px;font-weight:900;color:var(--blue)}.definition-card{border:2px solid #d9e8f3;border-radius:13px;padding:12px;margin:0 0 10px;display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px}.definition-word{font-size:1.04rem;font-weight:900;color:#173d61}.definition-row{display:grid;grid-template-columns:84px 1fr;gap:10px;margin-top:7px}.definition-label{color:#205e94;font-weight:900;background:#e8f4ff;border-radius:6px;padding:3px 5px;align-self:start;font-size:.78rem}.definition-row.example .definition-label{color:#257044;background:#e7f7ed}.definition-row.example .definition-copy{font-style:italic;color:#4f6576}.bank-dialog-note{margin:2px 0 10px;font-weight:850;color:#596f83}.large-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.large-grid button{min-height:51px;border:2px solid #c7dff2;background:#f1f9ff;border-radius:11px;font-weight:900;color:#195f8e;padding:9px 5px}.large-grid button:hover{background:#dcedff}.large-grid button.chosen{background:#d0f5e0;border-color:#69bf86}.chosen-marker{font-size:.73rem;color:#416b56;margin-left:4px}
+.progress-box{border:2px solid var(--line);border-radius:15px;background:white;padding:13px 15px;margin:16px 0}.pips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.pip{height:15px;min-width:15px;border-radius:50%;background:#dae1e9}.pip.answered{background:#8fc7ec}.pip.ok{background:#5dca7e}.pip.review{background:#d94f58}.progress-label{font-weight:900;color:var(--blue)}.check-panel{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;padding:11px}.check-button{border:2px solid #d9a800;min-height:46px;border-radius:11px;background:#ffe28a;color:#624b02;font-weight:900;padding:9px 20px}.check-button:disabled{opacity:.5}.check-complete{color:#177340;font-weight:900}.check-message{flex-basis:100%;text-align:center;font-weight:800;color:#81521e}.adult-panel{flex-basis:100%;text-align:center}.adult-panel input{min-height:44px;border:2px solid #93badd;border-radius:11px;padding:9px}.footer-buttons{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:9px}.clear{background:#f7fafc;border:2px solid #b7cbd9;border-radius:11px;color:#44627b;min-height:44px;padding:8px 12px;font-weight:850}.print{background:#7c5cbf;border:2px solid #6b48af;border-radius:11px;color:white;min-height:44px;padding:8px 12px;font-weight:900}.speak-toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:250;border:0;background:#e55b71;color:white;padding:12px 18px;min-height:44px;border-radius:14px;box-shadow:0 6px 30px #1234;font-weight:900}.speak-toast[hidden]{display:none}.sr-only{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+@media(min-width:1280px){.mode-e .reading-workspace{height:calc(100vh - 170px);min-height:560px}.mode-e .pane{overflow-y:auto;overscroll-behavior:contain}}
+@media(max-width:1279px){.reading-workspace{grid-template-columns:1fr}}
+@media(max-width:730px){.word-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.reading-bank .word-grid{grid-template-columns:repeat(3,minmax(0,1fr))}h1{font-size:1.48rem}.question{padding:11px}.large-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.passage-text{font-size:1rem}.definition-row{grid-template-columns:1fr;gap:3px}}
+@media(max-width:420px){body{padding:10px 8px 60px}.card-top{gap:6px}.qnum{height:38px;min-width:38px}.word-grid,.reading-bank .word-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.word-btn{font-size:.8rem}.slot{min-width:100px}}
+@media print{body{padding:0;background:#fff}.speak-toast,dialog,header,.instructions,.bank,.footer-buttons,.check-panel{display:none!important}.question{break-inside:avoid;box-shadow:none}}
+</style></head><body class="mode-b"><header><div><p class="eyebrow" id="hdrBook"></p><h1 id="hdrTitle"></h1></div><a class="back" id="hdrBack" href="#"></a></header><main class="main" id="main"></main><dialog id="definitionDlg" aria-label="Vocabulary definition"></dialog><button type="button" id="speakingToast" class="speak-toast" hidden>🔊 Reading aloud · tap to stop</button><div class="sr-only" id="liveStatus" role="status" aria-live="polite"></div><script type="application/json" id="activityConfig">
+{
+ "meta": {
+  "lessonLabel": "9B",
+  "title": "Just the Right Word",
+  "instructions": "Replace each phrase in bold with a single word (or form of the word) from the word list.",
+  "storageKey": "ww6_lesson_9b_just_the_right_word_christina_2026_11_17_v1",
+  "backHref": "index.html",
+  "backLabel": "← All exercises",
+  "bookLabel": "WORDLY WISE 3000 · BOOK 6",
+  "wordListLabel": "Word List 9",
+  "printTitle": "Wordly Wise 3000 · Book 6 · Lesson 9B",
+  "studentName": ""
+ },
+ "words": [
+  {
+   "word": "accumulate",
+   "senses": [
+    {
+     "form": "accumulate",
+     "pos": "v",
+     "definition": "To increase in number or amount; to pile up, collect, or gather.",
+     "example": "An inch of snow accumulated overnight.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "aggravate",
+   "senses": [
+    {
+     "form": "aggravate",
+     "pos": "v",
+     "definition": "To make worse.",
+     "example": "The skater aggravated an old knee injury when she fell.",
+     "num": "1"
+    },
+    {
+     "form": "aggravate",
+     "pos": "v",
+     "definition": "To anger or annoy.",
+     "example": "That loud rock music from the club aggravates the neighbors.",
+     "num": "2"
+    },
+    {
+     "form": "aggravation",
+     "pos": "n",
+     "definition": "Annoyance; exasperation.",
+     "example": "My aggravation increased as the noisy construction continued outside my window.",
+     "num": "1"
+    },
+    {
+     "form": "aggravation",
+     "pos": "n",
+     "definition": "A source of annoyance or exasperation.",
+     "example": "Deer and rabbits are a continuous aggravation to rural gardeners.",
+     "num": "2"
+    }
+   ]
+  },
+  {
+   "word": "conserve",
+   "senses": [
+    {
+     "form": "conserve",
+     "pos": "v",
+     "definition": "To save by using carefully.",
+     "example": "Lower speed limits help conserve gasoline.",
+     "num": ""
+    },
+    {
+     "form": "conservation",
+     "pos": "n",
+     "definition": "The saving or protection of something through careful use.",
+     "example": "A plan for the conservation of water during the drought was unveiled at the town meeting.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "contaminate",
+   "senses": [
+    {
+     "form": "contaminate",
+     "pos": "v",
+     "definition": "To harm by contact with something undesirable.",
+     "example": "Chemicals spilled last year continue to contaminate the lake.",
+     "num": ""
+    },
+    {
+     "form": "contamination",
+     "pos": "n",
+     "definition": "The act of or result of contaminating.",
+     "example": "Salt used on the roads in winter could lead to the contamination of the river.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "diminish",
+   "senses": [
+    {
+     "form": "diminish",
+     "pos": "v",
+     "definition": "To make or become smaller or less; to reduce.",
+     "example": "The popcorn we ate after school diminished our hunger.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "drastic",
+   "senses": [
+    {
+     "form": "drastic",
+     "pos": "adj",
+     "definition": "Severe; extreme.",
+     "example": "Criminals receive drastic punishment in this new novel.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "extravagant",
+   "senses": [
+    {
+     "form": "extravagant",
+     "pos": "adj",
+     "definition": "Spending, costing, or using more than is required.",
+     "example": "Shawn’s buying lunch for everyone was an extravagant thing to do.",
+     "num": ""
+    },
+    {
+     "form": "extravagance",
+     "pos": "n",
+     "definition": "The quality of being wasteful or spending more than is necessary.",
+     "example": "Emma’s extravagance in early adulthood led to poverty later.",
+     "num": "1"
+    },
+    {
+     "form": "extravagance",
+     "pos": "n",
+     "definition": "A thing that costs more than one can afford.",
+     "example": "I admit the team jacket was an extravagance, but I couldn’t resist buying it.",
+     "num": "2"
+    }
+   ]
+  },
+  {
+   "word": "frugal",
+   "senses": [
+    {
+     "form": "frugal",
+     "pos": "adj",
+     "definition": "Careful in spending or using something.",
+     "example": "The bill for the splendid wedding ceremony shocked my frugal relatives.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "impurity",
+   "senses": [
+    {
+     "form": "impurity",
+     "pos": "n",
+     "definition": "Something that is harmful or dirty.",
+     "example": "Filtering removes the impurities from water.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "peril",
+   "senses": [
+    {
+     "form": "peril",
+     "pos": "n",
+     "definition": "Danger; something that is dangerous.",
+     "example": "The sailor understood the peril involved in a solo crossing of the Atlantic Ocean.",
+     "num": ""
+    },
+    {
+     "form": "imperil",
+     "pos": "v",
+     "definition": "To place in danger.",
+     "example": "A bad driver’s ineptness imperils the passengers.",
+     "num": ""
+    },
+    {
+     "form": "perilous",
+     "pos": "adj",
+     "definition": "Dangerous.",
+     "example": "An expedition into enemy territory could be perilous.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "perpetual",
+   "senses": [
+    {
+     "form": "perpetual",
+     "pos": "adj",
+     "definition": "Lasting or seeming to last forever or for a long time; continuous.",
+     "example": "A perpetual rain has been falling for nine days.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "resource",
+   "senses": [
+    {
+     "form": "resource",
+     "pos": "n",
+     "definition": "A supply that can be used when there is a need.",
+     "example": "Coal and lumber are natural resources.",
+     "num": "1"
+    },
+    {
+     "form": "resource",
+     "pos": "n",
+     "definition": "Skill in dealing with difficult situations.",
+     "example": "The teacher trusted us to be left to our own resources when she stepped outside to take a phone call.",
+     "num": "2"
+    },
+    {
+     "form": "resourceful",
+     "pos": "adj",
+     "definition": "Able to deal with difficult problems.",
+     "example": "A resourceful person will triumph over difficulties.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "substitute",
+   "senses": [
+    {
+     "form": "substitute",
+     "pos": "v",
+     "definition": "To replace one thing or person for another.",
+     "example": "Cooks sometimes substitute lemon for vinegar in salad dressing.",
+     "num": ""
+    },
+    {
+     "form": "substitute",
+     "pos": "n",
+     "definition": "Something or someone that replaces another.",
+     "example": "Luis will be the substitute in case another player is injured in the soccer match.",
+     "num": ""
+    },
+    {
+     "form": "substitute",
+     "pos": "adj",
+     "definition": "Acting in place of someone or something else.",
+     "example": "The substitute teacher tolerated the class’s antics.",
+     "num": ""
+    }
+   ]
+  },
+  {
+   "word": "sustain",
+   "senses": [
+    {
+     "form": "sustain",
+     "pos": "v",
+     "definition": "To keep up; to support.",
+     "example": "Their firm belief that they would be rescued sustained them.",
+     "num": "1"
+    },
+    {
+     "form": "sustain",
+     "pos": "v",
+     "definition": "To suffer; to undergo.",
+     "example": "The driver of the wrecked car sustained serious injuries.",
+     "num": "2"
+    }
+   ]
+  },
+  {
+   "word": "vital",
+   "senses": [
+    {
+     "form": "vital",
+     "pos": "adj",
+     "definition": "Necessary for continued life or prosperity.",
+     "example": "Clean water is vital for our health.",
+     "num": "1"
+    },
+    {
+     "form": "vital",
+     "pos": "adj",
+     "definition": "Full of lively spirit.",
+     "example": "Nelson Mandela’s vital personality enabled him to survive years of imprisonment without bitterness.",
+     "num": "2"
+    },
+    {
+     "form": "vital",
+     "pos": "adj",
+     "definition": "Of the greatest importance.",
+     "example": "It is vital that you make a decision immediately.",
+     "num": "3"
+    }
+   ]
+  }
+ ],
+ "formPairs": {
+  "accumulate": [
+   "accumulate",
+   "accumulated",
+   "accumulates",
+   "accumulating"
+  ],
+  "aggravate": [
+   "aggravate",
+   "aggravated",
+   "aggravates",
+   "aggravating",
+   "aggravation",
+   "aggravations"
+  ],
+  "conserve": [
+   "conserve",
+   "conserved",
+   "conserves",
+   "conserving",
+   "conservation"
+  ],
+  "contaminate": [
+   "contaminate",
+   "contaminated",
+   "contaminates",
+   "contaminating",
+   "contamination"
+  ],
+  "diminish": [
+   "diminish",
+   "diminished",
+   "diminishes",
+   "diminishing"
+  ],
+  "drastic": [
+   "drastic",
+   "drastically"
+  ],
+  "extravagant": [
+   "extravagant",
+   "extravagance",
+   "extravagances"
+  ],
+  "frugal": [
+   "frugal"
+  ],
+  "impurity": [
+   "impurity",
+   "impurities"
+  ],
+  "peril": [
+   "peril",
+   "perils",
+   "imperil",
+   "imperiled",
+   "imperils",
+   "perilous"
+  ],
+  "perpetual": [
+   "perpetual",
+   "perpetually"
+  ],
+  "resource": [
+   "resource",
+   "resources",
+   "resourceful"
+  ],
+  "substitute": [
+   "substitute",
+   "substituted",
+   "substitutes",
+   "substituting"
+  ],
+  "sustain": [
+   "sustain",
+   "sustained",
+   "sustains",
+   "sustaining"
+  ],
+  "vital": [
+   "vital"
+  ]
+ },
+ "answerOptions": [
+  [
+   "accumulate",
+   "v",
+   "accumulate"
+  ],
+  [
+   "accumulated",
+   "v",
+   "accumulate"
+  ],
+  [
+   "aggravate",
+   "v",
+   "aggravate"
+  ],
+  [
+   "aggravated",
+   "v",
+   "aggravate"
+  ],
+  [
+   "aggravation",
+   "n",
+   "aggravate"
+  ],
+  [
+   "aggravations",
+   "n",
+   "aggravate"
+  ],
+  [
+   "conserve",
+   "v",
+   "conserve"
+  ],
+  [
+   "conserved",
+   "v",
+   "conserve"
+  ],
+  [
+   "conservation",
+   "n",
+   "conserve"
+  ],
+  [
+   "contaminate",
+   "v",
+   "contaminate"
+  ],
+  [
+   "contaminated",
+   "v",
+   "contaminate"
+  ],
+  [
+   "contamination",
+   "n",
+   "contaminate"
+  ],
+  [
+   "diminish",
+   "v",
+   "diminish"
+  ],
+  [
+   "diminished",
+   "v",
+   "diminish"
+  ],
+  [
+   "drastic",
+   "adj",
+   "drastic"
+  ],
+  [
+   "extravagant",
+   "adj",
+   "extravagant"
+  ],
+  [
+   "extravagance",
+   "n",
+   "extravagant"
+  ],
+  [
+   "frugal",
+   "adj",
+   "frugal"
+  ],
+  [
+   "impurity",
+   "n",
+   "impurity"
+  ],
+  [
+   "impurities",
+   "n",
+   "impurity"
+  ],
+  [
+   "peril",
+   "n",
+   "peril"
+  ],
+  [
+   "imperil",
+   "v",
+   "peril"
+  ],
+  [
+   "imperiled",
+   "v",
+   "peril"
+  ],
+  [
+   "perilous",
+   "adj",
+   "peril"
+  ],
+  [
+   "perpetual",
+   "adj",
+   "perpetual"
+  ],
+  [
+   "resource",
+   "n",
+   "resource"
+  ],
+  [
+   "resources",
+   "n",
+   "resource"
+  ],
+  [
+   "resourceful",
+   "adj",
+   "resource"
+  ],
+  [
+   "substitute",
+   "v",
+   "substitute"
+  ],
+  [
+   "sustain",
+   "v",
+   "sustain"
+  ],
+  [
+   "sustained",
+   "v",
+   "sustain"
+  ],
+  [
+   "vital",
+   "adj",
+   "vital"
+  ]
+ ],
+ "questions": [
+  [
+   "Many students ",
+   "had to suffer through",
+   " heat exhaustion after the race.",
+   "sustained"
+  ],
+  [
+   "Carmella’s mother did not approve of Carmella’s ",
+   "wasteful spending of large amounts of money",
+   ".",
+   "extravagance"
+  ],
+  [
+   "The new bottled water was recalled because it contained many ",
+   "dirty and harmful substances",
+   ".",
+   "impurities"
+  ],
+  [
+   "A thick layer of dust had ",
+   "gathered little by little",
+   " on top of the piano.",
+   "accumulated"
+  ],
+  [
+   "A cook who is ",
+   "careful not to waste anything",
+   " can make interesting dishes from leftovers.",
+   "frugal"
+  ],
+  [
+   "The pain started to ",
+   "become less severe",
+   " after a few days.",
+   "diminish"
+  ],
+  [
+   "Our ",
+   "abilities to deal with difficult situations",
+   " were tested to the maximum when our raft was propelled into dangerous rapids.",
+   "resources"
+  ],
+  [
+   "She seems so ",
+   "full of lively spirit",
+   " that one forgets she is sick.",
+   "vital"
+  ],
+  [
+   "The stage manager faced many ",
+   "things that bothered or annoyed her",
+   " in trying to be ready for opening night.",
+   "aggravations"
+  ],
+  [
+   "By driving recklessly, you ",
+   "placed in real danger",
+   " the lives of your passengers.",
+   "imperiled"
+  ],
+  [
+   "",
+   "Very severe",
+   " changes are needed to make sure the lunchroom serves healthy food.",
+   "drastic"
+  ],
+  [
+   "Unwashed hands can easily ",
+   "bring dirt into contact with",
+   " food products.",
+   "contaminate"
+  ],
+  [
+   "The ",
+   "careful use and saving",
+   " of water is extremely important on a long expedition.",
+   "conservation"
+  ]
+ ]
+}
+</script><script>
+const CFG=JSON.parse(document.getElementById('activityConfig').textContent);
+const WORDS=CFG.words,FORMS=CFG.formPairs,B_OPTIONS=CFG.answerOptions;
+const DATA={mode:'b',directions:CFG.meta.instructions,questions:CFG.questions.map(([before,phrase,after,answer,hint])=>({before,phrase,after,answer,hint:hint||''}))};
+const KEY=CFG.meta.storageKey;
+const POS_NAMES={n:'noun',v:'verb',adj:'adjective',adv:'adverb'};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const attr=esc;
+const initState=()=>({answers:DATA.questions.map(()=>''),hinted:DATA.questions.map(()=>false),review:DATA.questions.map(()=>null),attempts:0,grants:0});
+function load(){try{let old=JSON.parse(localStorage.getItem(KEY));if(!old||!Array.isArray(old.answers)||old.answers.length!==DATA.questions.length)return initState();const x=initState();for(const k of ['answers','hinted','review','attempts','grants'])if(old[k]!==undefined)x[k]=old[k];if(!Array.isArray(x.review)||x.review.length!==DATA.questions.length)x.review=DATA.questions.map(()=>null);if(!Array.isArray(x.hinted)||x.hinted.length!==DATA.questions.length)x.hinted=DATA.questions.map(()=>false);else x.hinted=x.hinted.map(Boolean);return x}catch(e){return initState()}}
+let state=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function status(msg){$('liveStatus').textContent=msg;}
+let spoken=null;
+function cancelSpeak(){if('speechSynthesis'in window)window.speechSynthesis.cancel();spoken=null;$('speakingToast').hidden=true}
+function speak(raw){const text=String(raw??'').trim();if(!text)return;cancelSpeak();if(!('speechSynthesis' in window)){status('Read-aloud is not available in this browser.');return;}const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=.88;u.pitch=1.05;spoken=u;u.onend=()=>{if(spoken===u){spoken=null;$('speakingToast').hidden=true}};u.onerror=u.onend;$('speakingToast').hidden=false;window.speechSynthesis.speak(u)}
+function posBadge(p){return '<span class="pos pos-'+attr(p)+'">'+esc(p)+'</span>'}
+function renderWordBank(){return '<div class="word-grid">'+WORDS.map(w=>'<button type="button" class="word-btn" data-vocab="'+attr(w.word)+'">'+esc(w.word)+' '+[...new Set(w.senses.map(s=>s.pos))].map(posBadge).join('')+'</button>').join('')+'</div>'}
+function openDefinition(word){const w=WORDS.find(x=>x.word===word);if(!w)return;cancelSpeak();const cards=w.senses.map(s=>{const spoken=s.form+'. '+POS_NAMES[s.pos]+'. '+(s.num?'Meaning '+s.num+'. ':'')+'Definition: '+s.definition+' Example: '+s.example;return '<div class="definition-card"><button type="button" class="play" data-say="'+attr(spoken)+'" aria-label="Read definition and example">▶</button><div><div class="definition-word">'+esc(s.form)+' '+posBadge(s.pos)+(s.num?' · Sense '+esc(s.num):'')+'</div><div class="definition-row"><span class="definition-label">Definition</span><span class="definition-copy">'+esc(s.definition)+'</span></div><div class="definition-row example"><span class="definition-label">Example</span><span class="definition-copy">'+esc(s.example)+'</span></div></div></div>'}).join('');$('definitionDlg').innerHTML='<div class="dialog-heading"><h2>'+esc(w.word)+'</h2><button type="button" class="close" data-action="closeDef">✕ Close</button></div>'+cards;$('definitionDlg').showModal()}
+const B_ANSWER_POS=Object.fromEntries(B_OPTIONS.map(([form,pos])=>[form,pos]));
+DATA.questions.forEach((q,i)=>{if(!(q.answer in B_ANSWER_POS))console.warn('Question '+(i+1)+': answer "'+q.answer+'" is missing from answerOptions')});
+const POS_HINT_STYLES={n:'background:#e8f0ff;border-color:#7fa5e8;color:#2457a7',v:'background:#e7f7ed;border-color:#83c79b;color:#257044',adj:'background:#fff0df;border-color:#e9ae6c;color:#9a4c00',adv:'background:#f3e8ff;border-color:#c9a8ec;color:#6b3fa0'};
+const posOf=q=>B_ANSWER_POS[q.answer]||'';
+/* A replacement word that opens the sentence is shown capitalized (stored answer stays as chosen) */
+const startsSentence=q=>!String(q.before).trim()||/[.!?]["”’']?\s*$/.test(q.before);
+const shown=(q,w)=>w&&startsSentence(q)?w.charAt(0).toUpperCase()+w.slice(1):w;
+function sentenceB(q,answer){return q.before+(shown(q,answer)||q.phrase)+q.after}
+function isCorrect(i){return String(state.answers[i]||'').toLowerCase()===String(DATA.questions[i].answer||'').toLowerCase()}
+function qComplete(i){return Boolean(String(state.answers[i]||'').trim())}
+function markChanged(i){state.review[i]=null;save();refreshProgress();refreshCheck();const s=$('status-'+i);if(s){s.className='status none';s.textContent=''}const c=$('card-'+i);if(c)c.classList.remove('good','review');}
+function setAnswer(i,value){state.answers[i]=value;markChanged(i)}
+function answerHint(q){return q.hint||'Compare the bold phrase with the definitions in '+CFG.meta.wordListLabel+', including the form of the word.'}
+function cardStatus(i){const r=state.review[i];if(!r)return '';const hint=answerHint(DATA.questions[i]);return '<div id="status-'+i+'" class="status '+(r==='ok'?'ok':'needs')+'">'+(r==='ok'?'✅ Meaning matched.':'💡 Hint: '+esc(hint))+'</div>'}
+function cardClass(i){return state.review[i]==='ok'?'good':state.review[i]==='review'?'review':''}
+function targetHtml(q,v){return v?'<span class="selected-target" style="font-weight:900;color:#1a6fa8;background:#e8f4ff;border-radius:6px;padding:2px 6px">'+esc(shown(q,v))+'</span>':'<span class="phrase" style="'+(POS_HINT_STYLES[posOf(q)]||'')+'">'+esc(q.phrase)+'</span>'}
+function BCard(q,i){const v=state.answers[i],hinted=state.hinted[i],pos=posOf(q),full=sentenceB(q,v);const options=B_OPTIONS.filter(([form,optionPos])=>!hinted||optionPos===pos||form===v).map(([form,optionPos])=>'<option value="'+attr(form)+'" '+(v===form?'selected':'')+'>'+esc(form)+' · '+optionPos+'</option>').join('');return '<section class="question '+cardClass(i)+'" id="card-'+i+'"><div class="card-top"><span class="qnum">'+(i+1)+'</span><div class="qbody"><div id="b-preview-'+i+'" class="q-title tap" role="button" tabindex="0" aria-label="Read current sentence" data-say="'+attr(full)+'">'+esc(q.before)+targetHtml(q,v)+esc(q.after)+'</div><div class="replacement"><label for="replace-'+i+'">Replace the bold phrase </label><select id="replace-'+i+'" data-b="'+i+'"><option value="">— choose a word —</option>'+options+'</select></div>'+(hinted&&pos?'<p class="brief-help">💡 Part of speech: '+POS_NAMES[pos]+'</p>':'')+'<p id="b-original-'+i+'" class="brief-help" '+(v?'':'hidden')+'>Original bold phrase: '+esc(q.phrase)+'</p>'+cardStatus(i)+'</div><div class="tools"><button type="button" class="play" data-say="'+attr(full)+'" aria-label="Read full sentence">▶</button><button type="button" class="hint-tool'+(hinted?' active':'')+'" style="'+(hinted?'background:#ebdefa;border-color:#8e75b8':'')+'" data-action="hintB" data-i="'+i+'" aria-pressed="'+hinted+'" aria-label="Show part-of-speech hint">💡</button></div></div></section>'}
+function renderFooter(){const total=DATA.questions.length;return '<div class="progress-box"><div class="progress-label" id="progressText">0 of '+total+' answered</div><div class="pips" id="progressPips" aria-label="Question progress"></div><div class="check-panel" id="checkPanel"></div><div class="footer-buttons"><button class="clear" type="button" id="clearBtn" data-action="clear">🗑️ Clear all responses</button><button class="print" type="button" data-action="print">🖨️ Export / Print</button></div><div id="printNotice" role="status" class="adult-note"></div></div>'}
+function render(){$('main').innerHTML='<button type="button" class="instructions" data-say="'+attr(DATA.directions)+'">🔊 '+esc(DATA.directions)+'</button><section class="bank"><p class="bank-title">'+esc(CFG.meta.wordListLabel)+' · tap any word for its definition</p>'+renderWordBank()+'</section>'+DATA.questions.map(BCard).join('')+renderFooter();refreshProgress();refreshCheck()}
+function refreshProgress(){if(!$('progressPips'))return;const n=DATA.questions.filter((_,i)=>qComplete(i)).length,tot=DATA.questions.length;$('progressText').textContent=n+' of '+tot+' answered';$('progressPips').innerHTML=DATA.questions.map((q,i)=>{const r=state.review[i],st=r==='ok'?'ok':r==='review'?'review':qComplete(i)?'answered':'';return '<span class="pip '+st+'" title="Question '+(i+1)+': '+(r==='ok'?'checked':r==='review'?'needs review':qComplete(i)?'answered':'unanswered')+'"></span>'}).join('')}
+function refreshCheck(){const panel=$('checkPanel');if(!panel)return;const allCorrect=state.review.every(x=>x==='ok'),remaining=3+state.grants-state.attempts;panel.innerHTML=allCorrect?'<span class="check-complete">✅ All answers checked!</span>':('<button class="check-button" type="button" data-action="check" '+(remaining<=0?'disabled':'')+'>📝 Check all answers</button><span class="adult-note">'+remaining+' check'+(remaining===1?'':'s')+' left</span><div class="check-message" id="checkMessage"></div>'+(remaining<=0?'<div class="adult-panel"><button class="secondary" type="button" data-action="unlock">🔒 Adult: unlock another check</button><div id="adultEntry" hidden><label for="adultCode">Adult code</label><input type="password" autocomplete="off" id="adultCode" inputmode="numeric"><button class="secondary" data-action="grant" type="button">Unlock one check</button></div></div>':''))}
+function checkAll(){const missing=DATA.questions.map((q,i)=>!qComplete(i)?i+1:null).filter(Boolean);if(missing.length){const m=$('checkMessage');if(m)m.textContent='Finish question'+(missing.length>1?'s':'')+' '+missing.join(', ')+' before checking.';return;}if(state.attempts>=3+state.grants){status('An adult can unlock another check.');return;}state.attempts++;DATA.questions.forEach((_,i)=>state.review[i]=isCorrect(i)?'ok':'review');save();render();const missed=state.review.filter(x=>x!=='ok').length;status(missed?'Checked. '+missed+' question'+(missed>1?'s':'')+' need another look.':'All meanings matched.');}
+let clearArmed=false,clearTimer=null;
+function clearTwice(){if(!clearArmed){clearArmed=true;const b=$('clearBtn');b.textContent='Tap again to clear every answer';b.style.borderColor='#d94f58';status('Tap Clear again to remove all answers.');if(clearTimer)clearTimeout(clearTimer);clearTimer=setTimeout(()=>{clearArmed=false;const current=$('clearBtn');if(current){current.textContent='🗑️ Clear all responses';current.style.borderColor=''}},4000);return;}if(clearTimer)clearTimeout(clearTimer);clearTimer=null;cancelSpeak();clearArmed=false;state=initState();try{localStorage.removeItem(KEY)}catch(e){}render();status('All answers cleared.');}
+function printable(){const heading='<h1>'+esc(CFG.meta.printTitle)+'</h1><h2>'+esc(CFG.meta.title)+'</h2>'+(CFG.meta.studentName?'<p>Name: '+esc(CFG.meta.studentName)+'</p>':'')+'<p>'+esc(DATA.directions)+'</p>';const h=txt=>esc(txt);const body=DATA.questions.map((q,i)=>{const w=state.answers[i];return '<article><strong>'+(i+1)+'.</strong> '+h(q.before)+'<strong>'+h(q.phrase)+'</strong>'+h(q.after)+'<div>Replacement: '+h(w||'________')+'</div><div>'+h(q.before)+(w?'<b><u>'+h(shown(q,w))+'</u></b>':'_______')+h(q.after)+'</div></article>'}).join('');
+const source=esc(CFG.meta.bookLabel)+' · Student responses only; no answer key included.';return '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>'+esc(CFG.meta.printTitle)+' · completed worksheet</title><style>body{font:15px/1.48 Arial,sans-serif;color:#111;max-width:850px;margin:25px auto;padding:0 20px}h1{font-size:22px}h2{font-size:17px}article{break-inside:avoid;border-bottom:1px solid #ddd;padding:9px 0}.foot{margin-top:30px;color:#666;font-size:12px}button{padding:8px 15px;border:1px solid #888;border-radius:5px}@media print{button{display:none}}</style></head><body><button onclick="window.print()">Print</button>'+heading+body+'<p class="foot">'+source+'</p></body></html>'}
+function exportPrint(){cancelSpeak();const blob=new Blob([printable()],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob);const tab=window.open(url,'_blank');if(!tab){const link=document.createElement('a');link.href=url;link.download='wordly-wise-lesson-'+CFG.meta.lessonLabel.toLowerCase()+'-just-the-right-word-completed.html';document.body.appendChild(link);link.click();link.remove();const notice=$('printNotice');if(notice)notice.textContent='A printable HTML copy was saved. Open it and print.'}else{const notice=$('printNotice');if(notice)notice.textContent='Printable worksheet opened in a new tab. Use Print there.'}setTimeout(()=>URL.revokeObjectURL(url),60000)}
+$('speakingToast').addEventListener('click',cancelSpeak);
+$('definitionDlg').addEventListener('click',e=>{if(e.target===$('definitionDlg'))$('definitionDlg').close()});
+$('definitionDlg').addEventListener('close',cancelSpeak);
+document.addEventListener('click',e=>{const vocab=e.target.closest('[data-vocab]');if(vocab){openDefinition(vocab.dataset.vocab);return}const btn=e.target.closest('[data-action]');if(btn){const act=btn.dataset.action,i=Number(btn.dataset.i);if(act==='closeDef'){$('definitionDlg').close();return}if(act==='hintB'){if(!state.hinted[i]){state.hinted[i]=true;save();const card=$('card-'+i);const keepFocus=card.contains(document.activeElement);card.outerHTML=BCard(DATA.questions[i],i);if(keepFocus){const hint=$('card-'+i).querySelector('[data-action="hintB"]');if(hint)hint.focus({preventScroll:true});}}return}if(act==='check'){checkAll();return}if(act==='unlock'){const el=$('adultEntry');if(el)el.hidden=false;return}if(act==='grant'){if($('adultCode')?.value==='17931793'){state.grants++;save();render();status('One additional check unlocked.')}else status('Code not accepted.');return}if(act==='clear'){clearTwice();return}if(act==='print'){exportPrint();return}}
+const voice=e.target.closest('[data-say]');if(voice){speak(voice.dataset.say);return}});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const el=e.target;if((el.hasAttribute('role')&&el.getAttribute('role')==='button')&&el.dataset.say&&!el.matches('button')){e.preventDefault();speak(el.dataset.say)}});
+document.addEventListener('change',e=>{const b=e.target.dataset.b;if(b===undefined)return;const i=Number(b),val=e.target.value;setAnswer(i,val);const q=DATA.questions[i],full=sentenceB(q,val),preview=$('b-preview-'+i),card=$('card-'+i);preview.innerHTML=esc(q.before)+targetHtml(q,val)+esc(q.after);preview.dataset.say=full;$('b-original-'+i).hidden=!val;card.querySelector('.play').dataset.say=full;if(val)setTimeout(()=>speak(full),300)});
+$('hdrBook').textContent=CFG.meta.bookLabel;$('hdrTitle').textContent=CFG.meta.lessonLabel+' · '+CFG.meta.title;$('hdrBack').textContent=CFG.meta.backLabel;$('hdrBack').href=CFG.meta.backHref;document.title=CFG.meta.title;
+render();
+</script></body></html>
